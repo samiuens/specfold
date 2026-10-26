@@ -10,16 +10,17 @@ A gate nobody is forced through is advice. The template ships the workflow that 
 - `template/.github/workflows/specfold-gate-comment.yml`: on `workflow_run`, posts or updates one summary comment, which also works for fork PRs.
 - `template/.claude/settings.json`: the three Claude Code hooks (`claude-session-start`, `claude-post-tool-use` on Edit and Write, `claude-stop`).
 - `template/.github/CODEOWNERS` (`knowledge/decisions/`, `openspec/specs/`) and `template/.github/pull_request_template.md` (`Change:`, `Knowledge:`, `No-spec reason:`).
-- `template/.gitignore`: `.specfold/local.yaml`, `.claude/worktrees/`.
-- The kit: the same gate workflow (adapted to its own paths), `specfold hooks install` replacing `.githooks/`, test PRs, then `specfold-gate` added to the required checks of ruleset 25866688.
+- `template/.gitignore`: `.specfold/local.yaml` (since `add-specfold-verify`), plus `.claude/worktrees/`.
+- `specfold gate --summary <file>` writes the Markdown summary.
+- The kit: the same gate workflow (adapted to its own paths), the comment workflow, `.claude/settings.json`, CODEOWNERS and the PR template, test PRs, then `specfold-gate` added to the required checks of ruleset 25866688. (`specfold hooks install` already replaced `.githooks/` in `add-specfold-hooks`.)
 
 ## Capabilities
 
 ### New Capabilities
-- none (`skip_specs: true`: workflow and repository files; the behavior is specified by `specfold-gate` and `specfold-hooks`)
+- none
 
 ### Modified Capabilities
-- none
+- `specfold-gate`: adds `--summary <file>`, the Markdown summary the workflow posts (decided when implementation started, instead of an untested script inside the workflow).
 
 ## Out of scope
 
@@ -34,7 +35,10 @@ A gate nobody is forced through is advice. The template ships the workflow that 
    - one clean PR (expected to pass).
 
    Each is a draft and is closed after its check result is recorded in the change's PR.
-3. **Required check:** `specfold-gate` joins `commit-convention`, `cli (20)` and `cli (24)` in the ruleset, after the test PRs behave as expected. This changes the repository settings, so I ask before doing it.
+3. **Merge queue:** in `merge_group` runs there is no PR, so the job runs `gate --local`: G4 and G7 warn, every other rule still blocks; the PR's own run already enforced G4 and G7 (decided when implementation started).
+4. **The kit dogfoods** `.claude/settings.json`, the PR template and the workflows; the sample app gets the settings too, and CI keeps the copies equal (decided when implementation started).
+5. **CODEOWNERS** in the template holds commented examples for `/knowledge/decisions/` and `/openspec/specs/`; the kit's file names @samiuens (decided when implementation started).
+6. **Required check:** `specfold-gate` joins `commit-convention`, `cli (20)` and `cli (24)` in the ruleset, after the test PRs behave as expected. This changes the repository settings, so I ask before doing it.
 
 ## Impact
 
