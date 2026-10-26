@@ -23,7 +23,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 2.1 Write `sf-sync`
+- [x] 2.1 Write `sf-sync`
   - Done when: `node scripts/check-skills.mjs template/.agents/skills` reports no problem for `sf-sync`
 - [ ] 2.2 Write `sf-audit`
   - Done when: `node scripts/check-skills.mjs template/.agents/skills` reports no problem for `sf-audit`
