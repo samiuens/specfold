@@ -33,7 +33,7 @@ scenarios: [specfold-agents-sync#links-created, specfold-agents-sync#missing-lin
 agent: implementer
 ```
 
-- [ ] 3.1 Add `specfold agents sync [--check] [--json]` with output and exit codes
+- [x] 3.1 Add `specfold agents sync [--check] [--json]` with output and exit codes
   - Done when: the five scenarios of this group pass in `agents-command.test.ts`
 
 ## 4. Bundle
