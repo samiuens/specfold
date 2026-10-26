@@ -56,16 +56,28 @@ agent: planner
 - [x] 4.2 Run the opencode check from the runbook
   - Done when: the maintainer reports that opencode lists the sf skills and answers a lookup through `sf-lookup`
 
-## 5. Knowledge
+## 5. Login rule
+
+```yaml
+files: [template/.claude/agents/**, template/.agents/skills/sf-interview/**, template/.agents/skills/sf-plan/**, .claude/agents/**, .agents/skills/sf-interview/**, .agents/skills/sf-plan/**, examples/sample-app/.claude/agents/**, examples/sample-app/.agents/skills/sf-interview/**, examples/sample-app/.agents/skills/sf-plan/**]
+depends: [4]
+scenarios: []
+agent: implementer
+```
+
+- [ ] 5.1 Make the planner, `sf-interview` and `sf-plan` ask the user to state their login when approving, never take it from earlier files (found in the Claude Code run)
+  - Done when: the three files say so in the template, and the kit and sample copies match it
+
+## 6. Knowledge
 
 ```yaml
 files: [knowledge/**]
-depends: [4]
+depends: [5]
 scenarios: []
 agent: knowledge-curator
 ```
 
-- [ ] 5.1 Write the concepts listed in `knowledge.md`
+- [ ] 6.1 Write the concepts listed in `knowledge.md`
   - Done when: `node scripts/specfold.mjs validate` and `audit` exit 0
 
 ## Workflow follow-up
