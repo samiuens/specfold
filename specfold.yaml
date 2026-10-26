@@ -74,6 +74,10 @@ tasks:
   max_files_per_task: 5
   max_tasks_per_group: 8
 
+# Kit tests only: fixture repositories and the sample app have their own references.
+trace:
+  test_globs: ["tools/specfold/test/**/*.test.ts"]
+
 # Kit repo only: `specfold hook commit-msg` runs these after its own checks (installed by npm run setup).
 hooks:
   extra:
