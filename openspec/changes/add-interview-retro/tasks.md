@@ -25,7 +25,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 2.1 Add the backlog item "Rename an item" and promote it to `add-rename`
+- [x] 2.1 Add the backlog item "Rename an item" and promote it to `add-rename`
   - Done when: the item has `state: promoted` and `change: add-rename`, and the change folder exists without a brief
 - [ ] 2.2 Run the interview with the user and write the confirmed brief
   - Done when: `specfold change check add-rename` reports no brief errors
