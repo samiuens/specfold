@@ -5,3 +5,4 @@ import "./log/command.ts";
 import "./lookup/command.ts";
 import "./new/command.ts";
 import "./validate/index.ts";
+import "./tasks/command.ts";

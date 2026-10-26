@@ -63,7 +63,7 @@ scenarios: [specfold-tasks#clean-breakdown, specfold-tasks#unknown-change, specf
 agent: implementer
 ```
 
-- [ ] 5.1 Add `specfold tasks check <change> [--base <ref>] [--json]` with T0, output and exit codes
+- [x] 5.1 Add `specfold tasks check <change> [--base <ref>] [--json]` with T0, output and exit codes
   - Done when: the four scenarios of this group pass in `tasks-check.test.ts`
 
 ## 6. Status and resume
