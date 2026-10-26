@@ -21,7 +21,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 2.1 Rebuild the bundled CLI and its template and sample copies
+- [x] 2.1 Rebuild the bundled CLI and its template and sample copies
   - Done when: `npm run build -w specfold` leaves no diff and the copies equal it
 
 ## 3. Template
