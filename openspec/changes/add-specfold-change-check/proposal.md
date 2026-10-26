@@ -29,7 +29,9 @@ OpenSpec treats artifact dependencies as advisory and never validates custom art
 
 Confirmed by the maintainer on 2026-10-26: `change check` validates `brief.md` structurally with its own rule ids; G13 reuses that result, and the `confirmed_by` identity check stays in the gate (G7).
 
-## Open points for review
+## Confirmed in review
+
+Confirmed by the maintainer on 2026-10-26, point by point:
 
 1. **One change per call.** `<change>` is required, like `tasks check`; the gate loops over the changes in a PR.
 2. **Open questions format:** each list item ends with `(owner: <actor>)` followed by a reason why it does not block the spec, for example `- Retention period? (owner: human:samiuens) Does not change any requirement.` An empty section, or one holding only `none`, passes.
