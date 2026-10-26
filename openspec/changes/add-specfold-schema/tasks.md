@@ -23,7 +23,7 @@ scenarios: [specfold-schema#config-loads-cleanly]
 agent: implementer
 ```
 
-- [ ] 2.1 Add `template/openspec/config.yaml` with schema, context, rules and operations
+- [x] 2.1 Add `template/openspec/config.yaml` with schema, context, rules and operations
   - Done when: scenario config-loads-cleanly passes in `schema-config.test.ts`
 
 ## 3. Kit copy
