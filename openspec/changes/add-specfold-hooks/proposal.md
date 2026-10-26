@@ -32,7 +32,7 @@ The merge gate runs in CI, but feedback arrives late there. Git hooks catch the 
 
 - Registering the Claude Code hooks in `.claude/settings.json` (`add-gate-workflow`, together with the rest of the repo setup).
 
-## Open points for review
+## Confirmed in review
 
 1. **An existing `core.hooksPath`** that is not `.specfold/hooks` and belongs to no known manager makes `hooks install` stop with an environment error that names the path; it never overwrites another setup. The kit unsets its `.githooks` path as part of the switch.
 2. **Manager detection order:** lefthook (`lefthook.yml`, `lefthook.yaml`, `.lefthook.yml`), husky (`.husky/`), pre-commit/prek (`.pre-commit-config.yaml`). The first one found gets the entries.

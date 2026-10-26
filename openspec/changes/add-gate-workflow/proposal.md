@@ -25,7 +25,7 @@ A gate nobody is forced through is advice. The template ships the workflow that 
 
 - G11 and G15-G17.
 
-## Open points for review
+## Confirmed in review
 
 1. **Summary format:** one Markdown table, with rule, effect, path, message and fix, plus a line per warning count. The same text goes into the job summary and the comment.
 2. **Test PRs on the kit:**

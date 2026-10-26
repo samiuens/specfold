@@ -24,7 +24,7 @@ The rules that keep knowledge and specs honest exist as separate commands (`vali
 - G11 (M7) and G15-G17 (M5), each added by its milestone.
 - The workflow, its summary comment and branch protection (`add-gate-workflow`).
 
-## Open points for review
+## Confirmed in review
 
 1. **Changes in the PR** are the active change folders with any changed file under `openspec/changes/<name>/`; **archived in the PR** are the folders under `openspec/changes/archive/` that the diff adds.
 2. **G1 and G10 split `validate`:** G1 reports every validate error except the link rules; G10 reports L1 and L2, blocking only when `gate.block_on_broken_links` is true (default) and warning otherwise.
@@ -33,6 +33,7 @@ The rules that keep knowledge and specs honest exist as separate commands (`vali
 5. **G8 and G9 look at changed concepts only;** G9 blocks unless `gate.block_on_stale_touched` is false, then it warns.
 6. **G12 is bundle-wide** and reuses audit rules A1 and A2 as warnings.
 7. **Rule order in the output** is by rule number, then path and line.
+8. **JSON `counts`** holds `block`, `warn` and `rules` (findings per rule id).
 
 ## Impact
 

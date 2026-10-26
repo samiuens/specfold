@@ -22,7 +22,7 @@ Agents write `status: draft` and only humans verify (`/decisions/humans-verify-o
 
 - Workflow wiring and fork handling (`add-gate-workflow`).
 
-## Open points for review
+## Confirmed in review
 
 1. **"Added" claims** are those present in the head version of a changed file but not in its merge-base version, compared per concept (`verified` entries) and per brief (`confirmed_by`).
 2. **API errors** (missing token, 404, rate limit) are environment errors (exit 2), never a pass.
