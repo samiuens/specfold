@@ -1,5 +1,6 @@
 # Capability
 
+* [specfold doctor](specfold-doctor.md) - Why setup problems are checked in one command, and where the contract for specfold doctor lives.
 * [specfold index](specfold-index.md) - Why bundle indexes are generated instead of written, and where the contract for specfold index lives.
 * [specfold log](specfold-log.md) - Why log entries are written by a command, and where the contract for specfold log add lives.
 * [specfold lookup](specfold-lookup.md) - Why agents search knowledge by frontmatter first, and where the contract for specfold lookup lives.
