@@ -37,7 +37,7 @@ agent: implementer
 
 - [x] 3.1 Copy the instruction files, bundle, skills and planner into the sample and link the skills
   - Done when: `node scripts/specfold.mjs agents sync --check` and `audit` exit 0 in `examples/sample-app`
-- [ ] 3.2 Extend the CI copy checks to every kit-owned file in the template and the sample
+- [x] 3.2 Extend the CI copy checks to every kit-owned file in the template and the sample
   - Done when: the `cli` workflow passes on the PR
 - [ ] 3.3 Write the runbook for the Claude Code and opencode checks in the sample's README
   - Done when: every command in it runs as written up to the interactive step

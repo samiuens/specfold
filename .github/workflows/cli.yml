@@ -49,16 +49,20 @@ jobs:
       - name: Skill links are up to date
         run: |
           node scripts/specfold.mjs agents sync --check
-          cd template && node ../scripts/specfold.mjs agents sync --check
+          (cd template && node scripts/specfold.mjs agents sync --check)
+          (cd examples/sample-app && node scripts/specfold.mjs agents sync --check)
       - name: Template bundle is valid with its own settings
         working-directory: template
         run: |
           node ../scripts/specfold.mjs validate
           node ../scripts/specfold.mjs index --check
+      - name: Template bundle matches the kit's CLI
+        run: diff scripts/specfold.mjs template/scripts/specfold.mjs || { echo "::error::template/scripts/specfold.mjs is stale; copy scripts/specfold.mjs over"; exit 1; }
       - name: Sample app copies match the template
         run: |
-          diff -r template/openspec/schemas/specfold examples/sample-app/openspec/schemas/specfold
-          diff template/knowledge/conventions/code-comments.md examples/sample-app/knowledge/conventions/code-comments.md
+          for path in AGENTS.md CLAUDE.md scripts/specfold.mjs openspec/schemas/specfold .agents/skills .claude/skills .claude/agents knowledge/conventions/code-comments.md; do
+            diff -r "template/$path" "examples/sample-app/$path" || { echo "::error::examples/sample-app/$path differs from template/$path"; exit 1; }
+          done
       - name: Sample app passes the workflow checks
         working-directory: examples/sample-app
         run: |
