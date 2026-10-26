@@ -60,7 +60,12 @@ function keyLines(doc: Document, counter: LineCounter): Map<string, number> {
 
 /** Splits a Markdown file into YAML frontmatter and body, keeping line numbers. */
 export function parseFile(bundleRoot: string, rel: string): ParsedFile {
-  const text = readFileSync(join(bundleRoot, rel), "utf8").replace(/\r\n/g, "\n");
+  return parseText(rel, readFileSync(join(bundleRoot, rel), "utf8"));
+}
+
+/** Like `parseFile`, for content that is already read, such as an older version from git. */
+export function parseText(rel: string, raw: string): ParsedFile {
+  const text = raw.replace(/\r\n/g, "\n");
   const lines = text.split("\n");
   if (lines[0] !== "---") return { rel, hasFrontmatter: false, body: text, bodyStartLine: 1 };
 
