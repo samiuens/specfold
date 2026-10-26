@@ -46,11 +46,15 @@ For each `deprecate` op, the command SHALL set `status: deprecated` in the named
 - **THEN** the file afterwards has `status: deprecated` and an unchanged body
 
 ### Requirement: Capability keys
-For each op with `type: Capability` and path `capabilities/<cap>.md`, the command SHALL set `spec` to `openspec/specs/<cap>/spec.md`, `resource` to the relative path from the card to that spec, `change` to the archived change id, and add a source with id `proposal` (and `design` when the archived change has `design.md`) pointing to the archived file, unless a source with that id exists.
+For each op with `type: Capability` and path `capabilities/<cap>.md`, the command SHALL set `spec` to `openspec/specs/<cap>/spec.md`, `resource` to the relative path from the card to that spec and `change` to the archived change id, replacing differing values. It SHALL add a source `proposal-<archived-id>` (and `design-<archived-id>` when the archived change has `design.md`) pointing to the archived file, unless a source with that resource exists.
 
 #### Scenario: Card linked to the archived change
 - **WHEN** `2026-10-26-add-guest-checkout` is synced and its delta creates `capabilities/guest-checkout.md`
-- **THEN** the card has `spec: openspec/specs/guest-checkout/spec.md`, `resource: ../../openspec/specs/guest-checkout/spec.md`, `change: 2026-10-26-add-guest-checkout` and a `proposal` source pointing to `../../openspec/changes/archive/2026-10-26-add-guest-checkout/proposal.md`
+- **THEN** the card has `spec: openspec/specs/guest-checkout/spec.md`, `resource: ../../openspec/specs/guest-checkout/spec.md`, `change: 2026-10-26-add-guest-checkout` and a source `proposal-2026-10-26-add-guest-checkout` pointing to `../../openspec/changes/archive/2026-10-26-add-guest-checkout/proposal.md`
+
+#### Scenario: Modified capability keeps its history
+- **WHEN** a card created by `2026-10-26-add-guest-checkout` is updated by the synced change `2026-11-02-update-guest-checkout`
+- **THEN** `change` is `2026-11-02-update-guest-checkout`, and the card lists the proposal sources of both changes
 
 ### Requirement: Decision keys
 For each `create` op with `type: Decision`, the command SHALL set `change` to the archived change id.
