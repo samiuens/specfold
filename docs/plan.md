@@ -272,7 +272,7 @@ rules:
     - Break the change into task groups (`## <n>. <name>` plus a yaml block with files, depends, scenarios, agent) and tasks (`- [ ] <n>.<m>` plus a `Done when:` line); see Task breakdown.
     - Every group owns its files; groups that may run in parallel never share files.
     - Order groups by dependency; tests or scenarios come before or alongside the code they cover.
-    - Last task group is always "Knowledge": apply knowledge.md with sf-sync after archive.
+    - Last task group is always "Knowledge": write the concepts listed in knowledge.md before archive; `specfold sync <change>` goes into `## Workflow follow-up` and runs after archive (see /decisions/write-knowledge-before-sync-after.md).
 
 operations:
   apply:
@@ -283,7 +283,7 @@ operations:
       - After archiving, run the sf-sync skill for this change and include its output in the same PR.
 ```
 
-**Schema `specfold`**: create with `openspec schema fork spec-driven specfold`, then add one artifact and one dependency:
+**Schema `specfold`**: create with `openspec schema fork spec-driven specfold`, then add one artifact and one dependency. It ships in `template/openspec/schemas/specfold/`; the kit repo uses a copy in `openspec/schemas/specfold/` that CI keeps byte-identical (decided 2026-10-26):
 
 ```yaml
   - id: knowledge
