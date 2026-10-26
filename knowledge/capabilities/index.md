@@ -5,6 +5,7 @@
 * [specfold change check](specfold-change-check.md) - Why change check is the enforcement of brief.md and knowledge.md, and where its contract lives.
 * [specfold doctor](specfold-doctor.md) - Why setup problems are checked in one command, and where the contract for specfold doctor lives.
 * [specfold gate](specfold-gate.md) - Why specfold gate gives one merge verdict, and where the contract for its rules lives.
+* [specfold hooks](specfold-hooks.md) - Why Specfold ships its own git and Claude Code hook entry points, and where their contract lives.
 * [specfold index](specfold-index.md) - Why bundle indexes are generated instead of written, and where the contract for specfold index lives.
 * [specfold log](specfold-log.md) - Why log entries are written by a command, and where the contract for specfold log add lives.
 * [specfold lookup](specfold-lookup.md) - Why agents search knowledge by frontmatter first, and where the contract for specfold lookup lives.

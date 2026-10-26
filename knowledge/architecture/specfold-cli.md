@@ -3,7 +3,7 @@ type: Component
 title: specfold CLI
 description: How the specfold CLI is structured, built and shipped as one bundled file.
 status: draft
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T16:52:58+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:11:42+01:00 }
 sources:
   - id: source
     resource: ../../tools/specfold/src/cli.ts
@@ -34,6 +34,7 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/glob.ts` | dependency-free glob matching (`**` also matches zero folders) and the repository file walk |
 | `src/verify/` | the `verify` command: agent guard, login from `gh` or `.specfold/local.yaml`, path checks, line-level `verified` entries |
 | `src/validate/` | the `validate` command and its rule sets (OKF, profile, links) |
+| `src/hooks/` | the `hooks install` and `hook` commands: built-in hooks or hook-manager entries (lefthook, husky, pre-commit), the pre-commit, pre-push and graph checks, `hooks.extra`, and the Claude Code session, edit and stop hooks |
 | `src/indexes/` | the `index` command: index generation, `see knowledge:` scan, write and check modes |
 | `src/log/` | the `log add` command and the insertion of entries into date sections |
 | `src/lookup/` | the `lookup` command: frontmatter search, weighted ranking, trust flags |
@@ -58,6 +59,7 @@ Under Node, `yaml` resolves to its CommonJS build, so the bundle banner provides
 - [specfold change check](/capabilities/specfold-change-check.md)
 - [specfold doctor](/capabilities/specfold-doctor.md)
 - [specfold gate](/capabilities/specfold-gate.md)
+- [specfold hooks](/capabilities/specfold-hooks.md)
 - [specfold index](/capabilities/specfold-index.md)
 - [specfold log](/capabilities/specfold-log.md)
 - [specfold lookup](/capabilities/specfold-lookup.md)
