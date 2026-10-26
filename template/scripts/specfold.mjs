@@ -4001,10 +4001,10 @@ var require_resolve_block_map = __commonJS({
       let offset = bm.offset;
       let commentEnd = null;
       for (const collItem of bm.items) {
-        const { start, key, sep: sep15, value } = collItem;
+        const { start, key, sep: sep17, value } = collItem;
         const keyProps = resolveProps.resolveProps(start, {
           indicator: "explicit-key-ind",
-          next: key ?? sep15?.[0],
+          next: key ?? sep17?.[0],
           offset,
           onError,
           parentIndent: bm.indent,
@@ -4018,7 +4018,7 @@ var require_resolve_block_map = __commonJS({
             else if ("indent" in key && key.indent !== bm.indent)
               onError(offset, "BAD_INDENT", startColMsg);
           }
-          if (!keyProps.anchor && !keyProps.tag && !sep15) {
+          if (!keyProps.anchor && !keyProps.tag && !sep17) {
             commentEnd = keyProps.end;
             if (keyProps.comment) {
               if (map.comment)
@@ -4042,7 +4042,7 @@ var require_resolve_block_map = __commonJS({
         ctx.atKey = false;
         if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
           onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
-        const valueProps = resolveProps.resolveProps(sep15 ?? [], {
+        const valueProps = resolveProps.resolveProps(sep17 ?? [], {
           indicator: "map-value-ind",
           next: value,
           offset: keyNode.range[2],
@@ -4058,7 +4058,7 @@ var require_resolve_block_map = __commonJS({
             if (ctx.options.strict && keyProps.start < valueProps.found.offset - 1024)
               onError(keyNode.range, "KEY_OVER_1024_CHARS", "The : indicator must be at most 1024 chars after the start of an implicit block mapping key");
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep15, null, valueProps, onError);
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep17, null, valueProps, onError);
           if (ctx.schema.compat)
             utilFlowIndentCheck.flowIndentCheck(bm.indent, value, onError);
           offset = valueNode.range[2];
@@ -4149,7 +4149,7 @@ var require_resolve_end = __commonJS({
       let comment = "";
       if (end) {
         let hasSpace = false;
-        let sep15 = "";
+        let sep17 = "";
         for (const token of end) {
           const { source, type } = token;
           switch (type) {
@@ -4163,13 +4163,13 @@ var require_resolve_end = __commonJS({
               if (!comment)
                 comment = cb;
               else
-                comment += sep15 + cb;
-              sep15 = "";
+                comment += sep17 + cb;
+              sep17 = "";
               break;
             }
             case "newline":
               if (comment)
-                sep15 += source;
+                sep17 += source;
               hasSpace = true;
               break;
             default:
@@ -4212,18 +4212,18 @@ var require_resolve_flow_collection = __commonJS({
       let offset = fc.offset + fc.start.source.length;
       for (let i = 0; i < fc.items.length; ++i) {
         const collItem = fc.items[i];
-        const { start, key, sep: sep15, value } = collItem;
+        const { start, key, sep: sep17, value } = collItem;
         const props = resolveProps.resolveProps(start, {
           flow: fcName,
           indicator: "explicit-key-ind",
-          next: key ?? sep15?.[0],
+          next: key ?? sep17?.[0],
           offset,
           onError,
           parentIndent: fc.indent,
           startOnNewline: false
         });
         if (!props.found) {
-          if (!props.anchor && !props.tag && !sep15 && !value) {
+          if (!props.anchor && !props.tag && !sep17 && !value) {
             if (i === 0 && props.comma)
               onError(props.comma, "UNEXPECTED_TOKEN", `Unexpected , in ${fcName}`);
             else if (i < fc.items.length - 1)
@@ -4277,8 +4277,8 @@ var require_resolve_flow_collection = __commonJS({
             }
           }
         }
-        if (!isMap3 && !sep15 && !props.found) {
-          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep15, null, props, onError);
+        if (!isMap3 && !sep17 && !props.found) {
+          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep17, null, props, onError);
           coll.items.push(valueNode);
           offset = valueNode.range[2];
           if (isBlock(value))
@@ -4290,7 +4290,7 @@ var require_resolve_flow_collection = __commonJS({
           if (isBlock(key))
             onError(keyNode.range, "BLOCK_IN_FLOW", blockMsg);
           ctx.atKey = false;
-          const valueProps = resolveProps.resolveProps(sep15 ?? [], {
+          const valueProps = resolveProps.resolveProps(sep17 ?? [], {
             flow: fcName,
             indicator: "map-value-ind",
             next: value,
@@ -4301,8 +4301,8 @@ var require_resolve_flow_collection = __commonJS({
           });
           if (valueProps.found) {
             if (!isMap3 && !props.found && ctx.options.strict) {
-              if (sep15)
-                for (const st of sep15) {
+              if (sep17)
+                for (const st of sep17) {
                   if (st === valueProps.found)
                     break;
                   if (st.type === "newline") {
@@ -4319,7 +4319,7 @@ var require_resolve_flow_collection = __commonJS({
             else
               onError(valueProps.start, "MISSING_CHAR", `Missing , or : between ${fcName} items`);
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep15, null, valueProps, onError) : null;
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep17, null, valueProps, onError) : null;
           if (valueNode) {
             if (isBlock(value))
               onError(valueNode.range, "BLOCK_IN_FLOW", blockMsg);
@@ -4499,7 +4499,7 @@ var require_resolve_block_scalar = __commonJS({
           chompStart = i + 1;
       }
       let value = "";
-      let sep15 = "";
+      let sep17 = "";
       let prevMoreIndented = false;
       for (let i = 0; i < contentStart; ++i)
         value += lines3[i][0].slice(trimIndent) + "\n";
@@ -4516,24 +4516,24 @@ var require_resolve_block_scalar = __commonJS({
           indent = "";
         }
         if (type === Scalar.Scalar.BLOCK_LITERAL) {
-          value += sep15 + indent.slice(trimIndent) + content;
-          sep15 = "\n";
+          value += sep17 + indent.slice(trimIndent) + content;
+          sep17 = "\n";
         } else if (indent.length > trimIndent || content[0] === "	") {
-          if (sep15 === " ")
-            sep15 = "\n";
-          else if (!prevMoreIndented && sep15 === "\n")
-            sep15 = "\n\n";
-          value += sep15 + indent.slice(trimIndent) + content;
-          sep15 = "\n";
+          if (sep17 === " ")
+            sep17 = "\n";
+          else if (!prevMoreIndented && sep17 === "\n")
+            sep17 = "\n\n";
+          value += sep17 + indent.slice(trimIndent) + content;
+          sep17 = "\n";
           prevMoreIndented = true;
         } else if (content === "") {
-          if (sep15 === "\n")
+          if (sep17 === "\n")
             value += "\n";
           else
-            sep15 = "\n";
+            sep17 = "\n";
         } else {
-          value += sep15 + content;
-          sep15 = " ";
+          value += sep17 + content;
+          sep17 = " ";
           prevMoreIndented = false;
         }
       }
@@ -4716,25 +4716,25 @@ var require_resolve_flow_scalar = __commonJS({
         trimBoth = /^[ \t]+|[ \t]+$/g;
       }
       let res = match[1].replace(trimEnd, "");
-      let sep15 = " ";
+      let sep17 = " ";
       let pos = line.lastIndex;
       while (match = line.exec(source)) {
         const lm = match[1].replace(trimBoth, "");
         if (lm === "") {
-          if (sep15 === "\n")
-            res += sep15;
+          if (sep17 === "\n")
+            res += sep17;
           else
-            sep15 = "\n";
+            sep17 = "\n";
         } else {
-          res += sep15 + lm;
-          sep15 = " ";
+          res += sep17 + lm;
+          sep17 = " ";
         }
         pos = line.lastIndex;
       }
       const last = /[ \t]*(.*)/sy;
       last.lastIndex = pos;
       match = last.exec(source);
-      return res + sep15 + (match?.[1] ?? "");
+      return res + sep17 + (match?.[1] ?? "");
     }
     function doubleQuotedValue(source, onError) {
       let res = "";
@@ -5544,14 +5544,14 @@ var require_cst_stringify = __commonJS({
         }
       }
     }
-    function stringifyItem({ start, key, sep: sep15, value }) {
+    function stringifyItem({ start, key, sep: sep17, value }) {
       let res = "";
       for (const st of start)
         res += st.source;
       if (key)
         res += stringifyToken(key);
-      if (sep15)
-        for (const st of sep15)
+      if (sep17)
+        for (const st of sep17)
           res += st.source;
       if (value)
         res += stringifyToken(value);
@@ -6718,18 +6718,18 @@ var require_parser = __commonJS({
         if (this.type === "map-value-ind") {
           const prev = getPrevProps(this.peek(2));
           const start = getFirstKeyStartProps(prev);
-          let sep15;
+          let sep17;
           if (scalar2.end) {
-            sep15 = scalar2.end;
-            sep15.push(this.sourceToken);
+            sep17 = scalar2.end;
+            sep17.push(this.sourceToken);
             delete scalar2.end;
           } else
-            sep15 = [this.sourceToken];
+            sep17 = [this.sourceToken];
           const map = {
             type: "block-map",
             offset: scalar2.offset,
             indent: scalar2.indent,
-            items: [{ start, key: scalar2, sep: sep15 }]
+            items: [{ start, key: scalar2, sep: sep17 }]
           };
           this.onKeyLine = true;
           this.stack[this.stack.length - 1] = map;
@@ -6882,15 +6882,15 @@ var require_parser = __commonJS({
                 } else if (isFlowToken(it.key) && !includesToken(it.sep, "newline")) {
                   const start2 = getFirstKeyStartProps(it.start);
                   const key = it.key;
-                  const sep15 = it.sep;
-                  sep15.push(this.sourceToken);
+                  const sep17 = it.sep;
+                  sep17.push(this.sourceToken);
                   delete it.key;
                   delete it.sep;
                   this.stack.push({
                     type: "block-map",
                     offset: this.offset,
                     indent: this.indent,
-                    items: [{ start: start2, key, sep: sep15 }]
+                    items: [{ start: start2, key, sep: sep17 }]
                   });
                 } else if (start.length > 0) {
                   it.sep = it.sep.concat(start, this.sourceToken);
@@ -7084,13 +7084,13 @@ var require_parser = __commonJS({
             const prev = getPrevProps(parent);
             const start = getFirstKeyStartProps(prev);
             fixFlowSeqItems(fc);
-            const sep15 = fc.end.splice(1, fc.end.length);
-            sep15.push(this.sourceToken);
+            const sep17 = fc.end.splice(1, fc.end.length);
+            sep17.push(this.sourceToken);
             const map = {
               type: "block-map",
               offset: fc.offset,
               indent: fc.indent,
-              items: [{ start, key: fc, sep: sep15 }]
+              items: [{ start, key: fc, sep: sep17 }]
             };
             this.onKeyLine = true;
             this.stack[this.stack.length - 1] = map;
@@ -7567,7 +7567,8 @@ function loadConfig(root) {
     gate: {
       requireChangeForSourceChanges: gate.require_change_for_source_changes !== false,
       escapeLabel: typeof gate.escape_label === "string" && gate.escape_label !== "" ? gate.escape_label : "no-spec",
-      blockOnStaleTouched: gate.block_on_stale_touched !== false
+      blockOnStaleTouched: gate.block_on_stale_touched !== false,
+      blockOnDrift: gate.block_on_drift === true
     },
     hooksExtra,
     traceTestGlobs: trace.test_globs === void 0 ? DEFAULT_TEST_GLOBS : stringList(trace.test_globs, "trace.test_globs")
@@ -9700,17 +9701,143 @@ register({
   }
 });
 
+// src/drift/command.ts
+import { existsSync as existsSync15, statSync as statSync6 } from "node:fs";
+import { join as join18, relative as relative5, resolve as resolve3, sep as sep4 } from "node:path";
+
+// src/drift/deps.ts
+import { existsSync as existsSync14 } from "node:fs";
+import { dirname as dirname4, join as join17, relative as relative4, sep as sep3 } from "node:path";
+var toRepo = (repoRoot, abs) => {
+  const rel = relative4(repoRoot, abs).split(sep3).join("/");
+  return rel === "" || rel.startsWith("../") || rel === ".." ? void 0 : rel;
+};
+function resourcePaths(repoRoot, bundleRoot, rel, data) {
+  const values = [data.resource];
+  if (Array.isArray(data.sources)) {
+    for (const s of data.sources) if (isRecord2(s)) values.push(s.resource);
+  }
+  return values.flatMap((value) => {
+    if (typeof value !== "string" || value.trim() === "" || SCHEME.test(value)) return [];
+    const path = value.split("#")[0] ?? "";
+    const abs = path.startsWith("/") ? join17(bundleRoot, path) : join17(bundleRoot, dirname4(rel), path);
+    const inRepo2 = existsSync14(abs) ? toRepo(repoRoot, abs) : void 0;
+    return inRepo2 ? [inRepo2] : [];
+  });
+}
+function conceptDependencies(repoRoot, bundleRoot, sourceGlobs) {
+  const code = /* @__PURE__ */ new Map();
+  for (const ref of scanReferences(repoRoot, sourceGlobs))
+    code.set(ref.concept, [...code.get(ref.concept) ?? [], ref.file]);
+  const out = [];
+  for (const entry of walk(bundleRoot)) {
+    const name = entry.rel.slice(entry.rel.lastIndexOf("/") + 1);
+    if (entry.isDir || !name.endsWith(".md") || RESERVED.has(name)) continue;
+    const data = parseFile(bundleRoot, entry.rel).frontmatter?.data;
+    if (!isRecord2(data)) continue;
+    const file = toRepo(repoRoot, join17(bundleRoot, entry.rel)) ?? entry.rel;
+    const paths = /* @__PURE__ */ new Set([
+      ...resourcePaths(repoRoot, bundleRoot, entry.rel, data),
+      ...code.get(entry.rel) ?? []
+    ]);
+    paths.delete(file);
+    out.push({ rel: entry.rel, file, data, paths: [...paths].sort() });
+  }
+  return out;
+}
+var coveredBy = (file, path) => file === path || file.startsWith(`${path}/`);
+
+// src/drift/drift.ts
+function trustTime(data) {
+  const verified = Array.isArray(data.verified) ? data.verified : data.verified === void 0 ? [] : [data.verified];
+  const times = verified.map((v) => isRecord2(v) && typeof v.at === "string" ? v.at : void 0).filter((t) => t !== void 0 && !Number.isNaN(Date.parse(t)));
+  if (times.length > 0) return times.reduce((a, b) => Date.parse(b) > Date.parse(a) ? b : a);
+  const at = isRecord2(data.generated) ? data.generated.at : void 0;
+  return typeof at === "string" && !Number.isNaN(Date.parse(at)) ? at : void 0;
+}
+var hasHistory = (repoRoot) => gitSucceeds(repoRoot, ["rev-parse", "--verify", "--quiet", "HEAD"]);
+function baselineOf(repoRoot, concept) {
+  const committed = git(repoRoot, ["log", "-1", "--format=%cI", "--", concept.file]).trim() || void 0;
+  const trusted = trustTime(concept.data);
+  if (!committed || !trusted) return committed ?? trusted;
+  return Date.parse(committed) > Date.parse(trusted) ? committed : trusted;
+}
+function driftOf(repoRoot, concept) {
+  if (concept.paths.length === 0) return void 0;
+  const baseline = baselineOf(repoRoot, concept);
+  if (!baseline) return void 0;
+  const after = Date.parse(baseline);
+  const log = git(repoRoot, [
+    "log",
+    "--relative",
+    "--name-only",
+    "--format=%x00%h%x09%cI%x09%s",
+    `--since=${baseline}`,
+    "--",
+    ...concept.paths
+  ]);
+  const commits = [];
+  for (const chunk of log.split("\0").slice(1)) {
+    const [head = "", ...files] = chunk.split("\n");
+    const [hash = "", date = "", ...subject] = head.split("	");
+    if (Date.parse(date) <= after) continue;
+    const paths = concept.paths.filter((p) => files.some((f) => f !== "" && coveredBy(f, p)));
+    if (paths.length > 0) commits.push({ hash, date, subject: subject.join("	"), paths });
+  }
+  return commits.length > 0 ? { path: concept.file, baseline, commits } : void 0;
+}
+
+// src/drift/command.ts
+function conceptRel(arg, root, bundleRoot, known) {
+  const rel = [resolve3(root, arg), resolve3(bundleRoot, arg)].map((abs) => relative5(bundleRoot, abs).split(sep4).join("/")).find((r) => known.has(r) && existsSync15(join18(bundleRoot, r)) && statSync6(join18(bundleRoot, r)).isFile());
+  if (!rel) throw new UsageError(`'${arg}' is not a concept in the bundle`);
+  return rel;
+}
+register({
+  name: "drift",
+  summary: "find concepts whose code or sources changed after they were last written or verified",
+  usage: "specfold drift [<path>...] [--json]",
+  options: { json: { type: "boolean" } },
+  run: ({ io, values, positionals }) => {
+    const config = requireConfig(io.cwd);
+    const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
+    const all = conceptDependencies(config.root, bundleRoot, config.sourceGlobs);
+    const known = new Set(all.map((c) => c.rel));
+    const wanted = new Set(positionals.map((arg) => conceptRel(arg, config.root, bundleRoot, known)));
+    if (!hasHistory(config.root)) throw new EnvError("specfold drift needs a git repository with commits");
+    const checked = wanted.size === 0 ? all : all.filter((c) => wanted.has(c.rel));
+    const concepts2 = checked.flatMap((c) => driftOf(config.root, c) ?? []);
+    const counts = { checked: checked.length, drifted: concepts2.length };
+    if (values.json) {
+      io.stdout(`${JSON.stringify({ ok: concepts2.length === 0, concepts: concepts2, counts }, null, 2)}
+`);
+    } else {
+      const block = (d) => [
+        `${d.path} (baseline ${d.baseline})`,
+        ...d.commits.map((c) => `  ${c.hash} ${c.date.slice(0, 10)} ${c.subject}: ${c.paths.join(", ")}`)
+      ];
+      const lines3 = [
+        ...concepts2.flatMap(block),
+        `drift: ${plural(concepts2.length, "concept")} possibly stale of ${counts.checked} checked`
+      ];
+      io.stdout(`${lines3.join("\n")}
+`);
+    }
+    return concepts2.length === 0 ? 0 : 1;
+  }
+});
+
 // src/gate/command.ts
-import { existsSync as existsSync25, readFileSync as readFileSync18, writeFileSync as writeFileSync4 } from "node:fs";
-import { resolve as resolve4 } from "node:path";
+import { existsSync as existsSync27, readFileSync as readFileSync18, writeFileSync as writeFileSync4 } from "node:fs";
+import { resolve as resolve5 } from "node:path";
 
 // src/gate/diff.ts
-import { existsSync as existsSync14, statSync as statSync6 } from "node:fs";
-import { join as join17 } from "node:path";
+import { existsSync as existsSync16, statSync as statSync7 } from "node:fs";
+import { join as join19 } from "node:path";
 var ACTIVE = /^openspec\/changes\/([^/]+)\//;
 var ARCHIVED = /^openspec\/changes\/archive\/([^/]+)\//;
 var lines = (text2) => text2.split("\n").filter((l) => l !== "");
-var isDir = (path) => existsSync14(path) && statSync6(path).isDirectory();
+var isDir = (path) => existsSync16(path) && statSync7(path).isDirectory();
 function computeDiff(root, ref, local) {
   if (!gitSucceeds(root, ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`]))
     throw new EnvError(`unknown base '${ref}': not a git ref`);
@@ -9739,9 +9866,9 @@ function computeDiff(root, ref, local) {
     ref,
     mergeBase,
     files: sorted,
-    activeChanges: [...active].filter((n) => isDir(join17(root, "openspec", "changes", n))),
+    activeChanges: [...active].filter((n) => isDir(join19(root, "openspec", "changes", n))),
     archivedChanges: [...archived].filter(
-      (id) => isDir(join17(root, "openspec", "changes", "archive", id)) && !gitSucceeds(root, ["cat-file", "-e", `${mergeBase}:./openspec/changes/archive/${id}`])
+      (id) => isDir(join19(root, "openspec", "changes", "archive", id)) && !gitSucceeds(root, ["cat-file", "-e", `${mergeBase}:./openspec/changes/archive/${id}`])
     )
   };
 }
@@ -9801,15 +9928,15 @@ async function fetchPullRequest(env, number) {
 }
 
 // src/gate/rules.ts
-import { existsSync as existsSync24 } from "node:fs";
-import { join as join27, relative as relative11, sep as sep10 } from "node:path";
+import { existsSync as existsSync26 } from "node:fs";
+import { join as join29, relative as relative13, sep as sep12 } from "node:path";
 
 // src/indexes/command.ts
-import { existsSync as existsSync15, readFileSync as readFileSync11, writeFileSync } from "node:fs";
-import { join as join18, relative as relative5, sep as sep4 } from "node:path";
+import { existsSync as existsSync17, readFileSync as readFileSync11, writeFileSync } from "node:fs";
+import { join as join20, relative as relative7, sep as sep6 } from "node:path";
 
 // src/indexes/generate.ts
-import { basename, relative as relative4, sep as sep3 } from "node:path";
+import { basename, relative as relative6, sep as sep5 } from "node:path";
 var LOG_ENTRY = "* [Log](log.md) - Dated record of changes to this bundle";
 var byCodeUnit = (a, b) => a < b ? -1 : a > b ? 1 : 0;
 var isRecord4 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -9823,7 +9950,7 @@ function folderTitle(config, folder, fallbackName) {
 function generateIndexes(bundleRoot, config, refs = /* @__PURE__ */ new Map()) {
   const entries = walk(bundleRoot);
   const folders = ["", ...entries.filter((e) => e.isDir).map((e) => e.rel)];
-  const repoRel = (rel) => relative4(config.root, `${bundleRoot}${sep3}${rel}`).split(sep3).join("/");
+  const repoRel = (rel) => relative6(config.root, `${bundleRoot}${sep5}${rel}`).split(sep5).join("/");
   const findings = [];
   const concepts2 = /* @__PURE__ */ new Set();
   const indexes = /* @__PURE__ */ new Map();
@@ -9908,10 +10035,10 @@ ${LOG_ENTRY}`);
 function syncIndexes(repoRoot, bundleRoot, generated, check2) {
   const changed = [];
   for (const [rel, content] of [...generated].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) {
-    const abs = join18(bundleRoot, rel);
-    if (existsSync15(abs) && readFileSync11(abs, "utf8") === content) continue;
+    const abs = join20(bundleRoot, rel);
+    if (existsSync17(abs) && readFileSync11(abs, "utf8") === content) continue;
     if (!check2) writeFileSync(abs, content);
-    changed.push(relative5(repoRoot, abs).split(sep4).join("/"));
+    changed.push(relative7(repoRoot, abs).split(sep6).join("/"));
   }
   return changed;
 }
@@ -9962,20 +10089,20 @@ register({
 });
 
 // src/sync/plan.ts
-import { existsSync as existsSync19, readFileSync as readFileSync14 } from "node:fs";
-import { join as join22, relative as relative8, sep as sep7 } from "node:path";
+import { existsSync as existsSync21, readFileSync as readFileSync14 } from "node:fs";
+import { join as join24, relative as relative10, sep as sep9 } from "node:path";
 
 // src/sync/apply.ts
-import { existsSync as existsSync18, mkdirSync as mkdirSync3, readFileSync as readFileSync13, writeFileSync as writeFileSync3 } from "node:fs";
-import { dirname as dirname5, join as join21, relative as relative7, sep as sep6 } from "node:path";
+import { existsSync as existsSync20, mkdirSync as mkdirSync3, readFileSync as readFileSync13, writeFileSync as writeFileSync3 } from "node:fs";
+import { dirname as dirname6, join as join23, relative as relative9, sep as sep8 } from "node:path";
 
 // src/new/command.ts
-import { existsSync as existsSync17, mkdirSync as mkdirSync2, writeFileSync as writeFileSync2 } from "node:fs";
-import { dirname as dirname4, join as join20, relative as relative6, sep as sep5 } from "node:path";
+import { existsSync as existsSync19, mkdirSync as mkdirSync2, writeFileSync as writeFileSync2 } from "node:fs";
+import { dirname as dirname5, join as join22, relative as relative8, sep as sep7 } from "node:path";
 
 // src/new/templates.ts
-import { existsSync as existsSync16, readFileSync as readFileSync12 } from "node:fs";
-import { join as join19 } from "node:path";
+import { existsSync as existsSync18, readFileSync as readFileSync12 } from "node:fs";
+import { join as join21 } from "node:path";
 var HEADINGS = {
   Term: ["Meaning", "Not to be confused with", "Related"],
   "Business Rule": ["Rule", "Why", "Related"],
@@ -9999,8 +10126,8 @@ function builtInBody(type) {
 `;
 }
 function overrideTemplate(repoRoot, type, values) {
-  const path = join19(repoRoot, TEMPLATE_DIR, `${typeSlug(type)}.md`);
-  if (!existsSync16(path)) return void 0;
+  const path = join21(repoRoot, TEMPLATE_DIR, `${typeSlug(type)}.md`);
+  if (!existsSync18(path)) return void 0;
   return readFileSync12(path, "utf8").replace(
     /\{\{(type|title|description|by|now)\}\}/g,
     (_, key) => values[key]
@@ -10080,9 +10207,9 @@ register({
     if (!ACTOR2.test(by))
       throw new UsageError(`actor '${by}' must look like '<producer>/<version>' or 'process:<id>'`);
     const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
-    const abs = join20(bundleRoot, rel);
-    const shown = relative6(config.root, abs).split(sep5).join("/");
-    if (existsSync17(abs)) {
+    const abs = join22(bundleRoot, rel);
+    const shown = relative8(config.root, abs).split(sep7).join("/");
+    if (existsSync19(abs)) {
       if (values.json) io.stdout(`${JSON.stringify({ created: null, error: `${shown} already exists` })}
 `);
       else io.stderr(`specfold: ${shown} already exists
@@ -10092,7 +10219,7 @@ register({
     const title = values.title ?? titleFromPath(rel);
     const description = values.description ?? "";
     const content = renderConcept(config.root, { type, title, description, by, now: /* @__PURE__ */ new Date() });
-    mkdirSync2(dirname4(abs), { recursive: true });
+    mkdirSync2(dirname5(abs), { recursive: true });
     writeFileSync2(abs, content);
     io.stdout(values.json ? `${JSON.stringify({ created: shown })}
 ` : `${shown}
@@ -10172,23 +10299,23 @@ function editFrontmatter(text2, edit) {
 }
 
 // src/sync/apply.ts
-var posix2 = (p) => p.split(sep6).join("/");
+var posix2 = (p) => p.split(sep8).join("/");
 var CAPABILITY = /^capabilities\/(.+)\.md$/;
 function editsFor(op, abs, ctx) {
   const set = {};
   const addSources = [];
   if (op.op === "deprecate") set.status = "deprecated";
   const cap = op.type === "Capability" ? CAPABILITY.exec(op.path)?.[1] : void 0;
-  const archive = join21(ctx.repoRoot, "openspec", "changes", "archive", ctx.archivedId);
-  const fromCard = (target) => posix2(relative7(dirname5(abs), target));
+  const archive = join23(ctx.repoRoot, "openspec", "changes", "archive", ctx.archivedId);
+  const fromCard = (target) => posix2(relative9(dirname6(abs), target));
   if (cap) {
-    const spec = join21(ctx.repoRoot, "openspec", "specs", cap, "spec.md");
-    set.spec = posix2(relative7(ctx.repoRoot, spec));
+    const spec = join23(ctx.repoRoot, "openspec", "specs", cap, "spec.md");
+    set.spec = posix2(relative9(ctx.repoRoot, spec));
     set.resource = fromCard(spec);
     set.change = ctx.archivedId;
     for (const artifact of ["proposal", "design"]) {
-      const file = join21(archive, `${artifact}.md`);
-      if (existsSync18(file))
+      const file = join23(archive, `${artifact}.md`);
+      if (existsSync20(file))
         addSources.push({ id: `${artifact}-${ctx.archivedId}`, resource: fromCard(file) });
     }
   }
@@ -10198,11 +10325,11 @@ function editsFor(op, abs, ctx) {
 function planOps(ops, ctx) {
   const plan = { actions: [], writes: /* @__PURE__ */ new Map() };
   for (const op of ops) {
-    const abs = join21(ctx.bundleRoot, op.path);
-    const shown = posix2(relative7(ctx.repoRoot, abs));
+    const abs = join23(ctx.bundleRoot, op.path);
+    const shown = posix2(relative9(ctx.repoRoot, abs));
     let original;
     let text2;
-    if (existsSync18(abs)) {
+    if (existsSync20(abs)) {
       original = readFileSync13(abs, "utf8");
       text2 = original;
     } else if (op.op === "create") {
@@ -10226,7 +10353,7 @@ function planOps(ops, ctx) {
 }
 function applyWrites(plan) {
   for (const [abs, content] of plan.writes) {
-    mkdirSync3(dirname5(abs), { recursive: true });
+    mkdirSync3(dirname6(abs), { recursive: true });
     writeFileSync3(abs, content);
   }
 }
@@ -10234,13 +10361,13 @@ function applyWrites(plan) {
 // src/sync/plan.ts
 function planSync(config, bundleRoot, id, now = /* @__PURE__ */ new Date()) {
   const relDir = `openspec/changes/archive/${id}`;
-  const { findings, ops } = checkKnowledge(config, bundleRoot, join22(config.root, relDir), {
+  const { findings, ops } = checkKnowledge(config, bundleRoot, join24(config.root, relDir), {
     relDir,
     archived: true
   });
-  const logPath = join22(bundleRoot, "log.md");
-  const logRel = relative8(config.root, logPath).split(sep7).join("/");
-  const logText = existsSync19(logPath) ? readFileSync14(logPath, "utf8") : void 0;
+  const logPath = join24(bundleRoot, "log.md");
+  const logRel = relative10(config.root, logPath).split(sep9).join("/");
+  const logText = existsSync21(logPath) ? readFileSync14(logPath, "utf8") : void 0;
   if (findings.length > 0)
     return { findings, ops, plan: void 0, logPath, logRel, logText, needsLog: false };
   const model = process.env.SPECFOLD_MODEL;
@@ -10250,8 +10377,8 @@ function planSync(config, bundleRoot, id, now = /* @__PURE__ */ new Date()) {
 }
 
 // src/trace/specs.ts
-import { existsSync as existsSync20, readFileSync as readFileSync15 } from "node:fs";
-import { join as join23 } from "node:path";
+import { existsSync as existsSync22, readFileSync as readFileSync15 } from "node:fs";
+import { join as join25 } from "node:path";
 var SECTION = /^##\s+(ADDED|MODIFIED|REMOVED|RENAMED)\s+Requirements\s*$/;
 var REQUIREMENT = /^###\s+Requirement:\s*(.+?)\s*$/;
 var SCENARIO2 = /^####\s+Scenario:\s*(.+?)\s*$/;
@@ -10286,24 +10413,24 @@ ${requirement}`);
 }
 function parseSpecs(repoRoot, specsRel, delta) {
   const parsed = { scenarios: [], removed: /* @__PURE__ */ new Set() };
-  const dir = join23(repoRoot, specsRel);
-  if (!existsSync20(dir)) return parsed;
+  const dir = join25(repoRoot, specsRel);
+  if (!existsSync22(dir)) return parsed;
   for (const rel of walkFiles(dir)) {
     if (!rel.endsWith("/spec.md")) continue;
     const capability = rel.slice(0, -"/spec.md".length);
-    parseSpec(readFileSync15(join23(dir, rel), "utf8"), capability, `${specsRel}/${rel}`, delta, parsed);
+    parseSpec(readFileSync15(join25(dir, rel), "utf8"), capability, `${specsRel}/${rel}`, delta, parsed);
   }
   return parsed;
 }
 var changedScenarios = (parsed) => parsed.scenarios.filter((s) => s.section === "ADDED" || s.section === "MODIFIED");
 
 // src/trace/trace.ts
-import { existsSync as existsSync21, readdirSync as readdirSync5 } from "node:fs";
-import { join as join25 } from "node:path";
+import { existsSync as existsSync23, readdirSync as readdirSync5 } from "node:fs";
+import { join as join27 } from "node:path";
 
 // src/trace/refs.ts
-import { readFileSync as readFileSync16, statSync as statSync7 } from "node:fs";
-import { join as join24 } from "node:path";
+import { readFileSync as readFileSync16, statSync as statSync8 } from "node:fs";
+import { join as join26 } from "node:path";
 var MAX_BYTES2 = 1024 * 1024;
 var REFERENCE2 = /(?<![\w-])spec:\s*([a-z0-9][a-z0-9/-]*#[a-z0-9-]+)/g;
 var NEVER = /^(?:knowledge|openspec)\//;
@@ -10312,8 +10439,8 @@ function scanTestReferences(repoRoot, testGlobs) {
   const refs = [];
   for (const file of walkFiles(repoRoot)) {
     if (NEVER.test(file) || !patterns.some((p) => p.test(file))) continue;
-    const abs = join24(repoRoot, file);
-    if (statSync7(abs).size > MAX_BYTES2) continue;
+    const abs = join26(repoRoot, file);
+    if (statSync8(abs).size > MAX_BYTES2) continue;
     const text2 = readFileSync16(abs, "utf8");
     if (text2.includes("\0")) continue;
     text2.split("\n").forEach((content, i) => {
@@ -10325,8 +10452,8 @@ function scanTestReferences(repoRoot, testGlobs) {
 }
 
 // src/trace/trace.ts
-var CHANGES = join25("openspec", "changes");
-var activeChangeNames = (root) => existsSync21(join25(root, CHANGES)) ? readdirSync5(join25(root, CHANGES), { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort() : [];
+var CHANGES = join27("openspec", "changes");
+var activeChangeNames = (root) => existsSync23(join27(root, CHANGES)) ? readdirSync5(join27(root, CHANGES), { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort() : [];
 var changeSpecs = (root, changeRel) => parseSpecs(root, `${changeRel}/specs`, true);
 function buildTraceIndex(config) {
   const root = config.root;
@@ -10356,12 +10483,12 @@ function traceReport(index, scope) {
 }
 
 // src/validate/index.ts
-import { existsSync as existsSync22 } from "node:fs";
-import { relative as relative9, resolve as resolve3, sep as sep8 } from "node:path";
+import { existsSync as existsSync24 } from "node:fs";
+import { relative as relative11, resolve as resolve4, sep as sep10 } from "node:path";
 var okfRules = [okf1, okf2, okf3Index, okf3Log];
 var profileRules = [p1, p2, p3, p4, p5, p6, p7, p9, p10, p11, l1, l2];
 var profileBundleRules = [p8];
-var toRel = (root, abs) => relative9(root, abs).split(sep8).join("/");
+var toRel = (root, abs) => relative11(root, abs).split(sep10).join("/");
 function validate(input) {
   const entries = walk(input.bundleRoot);
   const roots = input.paths.map((abs) => toRel(input.bundleRoot, abs));
@@ -10393,12 +10520,12 @@ register({
     const config = okfOnly ? void 0 : requireConfig(io.cwd);
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, config);
     const paths = positionals.map((p) => {
-      const abs = resolve3(io.cwd, p);
-      const rel = relative9(bundleRoot, abs);
-      if (rel.startsWith("..") || resolve3(bundleRoot, rel) !== abs) {
+      const abs = resolve4(io.cwd, p);
+      const rel = relative11(bundleRoot, abs);
+      if (rel.startsWith("..") || resolve4(bundleRoot, rel) !== abs) {
         throw new UsageError(`path is outside the bundle ${bundleRoot}: ${p}`);
       }
-      if (!existsSync22(abs)) throw new UsageError(`path not found: ${p}`);
+      if (!existsSync24(abs)) throw new UsageError(`path not found: ${p}`);
       return abs;
     });
     const { findings, checked } = validate({ bundleRoot, paths, okfOnly, ...config ? { config } : {} });
@@ -10408,8 +10535,8 @@ register({
 });
 
 // src/gate/claims.ts
-import { existsSync as existsSync23, readFileSync as readFileSync17 } from "node:fs";
-import { join as join26, relative as relative10, sep as sep9 } from "node:path";
+import { existsSync as existsSync25, readFileSync as readFileSync17 } from "node:fs";
+import { join as join28, relative as relative12, sep as sep11 } from "node:path";
 var BRIEF = /^openspec\/changes\/(?:archive\/)?[^/]+\/brief\.md$/;
 var ARCHIVED_BRIEF = /^openspec\/changes\/archive\/\d{4}-\d{2}-\d{2}-([^/]+)\/brief\.md$/;
 var CONFIRMED_BY = /^confirmed_by:[ \t]*(\S+)/;
@@ -10437,11 +10564,11 @@ function baseVersion(root, mergeBase, file) {
   }
 }
 function addedClaims(root, bundleRoot, diff) {
-  const bundlePrefix = `${relative10(root, bundleRoot).split(sep9).join("/")}/`;
+  const bundlePrefix = `${relative12(root, bundleRoot).split(sep11).join("/")}/`;
   const out = [];
   for (const file of diff.files) {
-    const abs = join26(root, file);
-    if (!existsSync23(abs)) continue;
+    const abs = join28(root, file);
+    if (!existsSync25(abs)) continue;
     let extract;
     if (BRIEF.test(file)) extract = briefClaims;
     else if (file.startsWith(bundlePrefix) && file.endsWith(".md") && isConcept(file.slice(bundlePrefix.length)))
@@ -10503,12 +10630,12 @@ ${result.stdout}`.trim().split("\n")[0] || `exit code ${result.status}`;
 var LINK_RULES = /* @__PURE__ */ new Set(["L1", "L2"]);
 var NO_SPEC_REASON = /^No-spec reason:[ \t]*\S/m;
 function inRepo(ctx, bundleRel) {
-  const prefix = relative11(ctx.config.root, ctx.bundleRoot).split(sep10).join("/");
+  const prefix = relative13(ctx.config.root, ctx.bundleRoot).split(sep12).join("/");
   return prefix ? `${prefix}/${bundleRel}` : bundleRel;
 }
 function changedConcepts(ctx) {
-  const prefix = `${relative11(ctx.config.root, ctx.bundleRoot).split(sep10).join("/")}/`;
-  return ctx.diff.files.filter((f) => f.startsWith(prefix) && f.endsWith(".md")).map((f) => f.slice(prefix.length)).filter((rel) => isConcept(rel) && existsSync24(join27(ctx.bundleRoot, rel)));
+  const prefix = `${relative13(ctx.config.root, ctx.bundleRoot).split(sep12).join("/")}/`;
+  return ctx.diff.files.filter((f) => f.startsWith(prefix) && f.endsWith(".md")).map((f) => f.slice(prefix.length)).filter((rel) => isConcept(rel) && existsSync26(join29(ctx.bundleRoot, rel)));
 }
 var fromBundle = (ctx, rule, effect, f) => ({
   rule,
@@ -10600,7 +10727,7 @@ var g4 = (ctx) => {
   ];
 };
 var plannedChanges = (ctx) => ctx.diff.activeChanges.filter(
-  (change) => existsSync24(join27(ctx.config.root, "openspec", "changes", change, "tasks.md"))
+  (change) => existsSync26(join29(ctx.config.root, "openspec", "changes", change, "tasks.md"))
 );
 var touchedChanges = (ctx, changes = ctx.diff.activeChanges) => changes.map((change) => checkChange(ctx.config, ctx.bundleRoot, change));
 var g5 = (ctx) => touchedChanges(ctx, plannedChanges(ctx)).flatMap(
@@ -10618,7 +10745,7 @@ var g15 = (ctx) => {
   const covered = new Set(index.refs.map((r) => r.id));
   const checked = /* @__PURE__ */ new Set();
   const findings = [];
-  const archived = ctx.diff.archivedChanges.map((id) => `openspec/changes/archive/${id}`).filter((rel) => existsSync24(join27(root, rel, "tasks.md")));
+  const archived = ctx.diff.archivedChanges.map((id) => `openspec/changes/archive/${id}`).filter((rel) => existsSync26(join29(root, rel, "tasks.md")));
   const changes = [
     ...plannedChanges(ctx).map(
       (name) => index.active.get(name) ?? changeSpecs(root, `openspec/changes/${name}`)
@@ -10660,6 +10787,20 @@ var g15 = (ctx) => {
       fix: "run specfold trace and add tests for them over time"
     });
   return findings;
+};
+var g16 = (ctx) => {
+  const changed = new Set(ctx.diff.files);
+  const effect = ctx.config.gate.blockOnDrift ? "block" : "warn";
+  return conceptDependencies(ctx.config.root, ctx.bundleRoot, ctx.config.sourceGlobs).filter((c) => !changed.has(c.file)).flatMap(
+    (c) => ctx.diff.files.filter((f) => c.paths.some((p) => coveredBy(f, p))).map((f) => ({
+      rule: "G16",
+      effect,
+      path: f,
+      line: null,
+      message: `changed file is described by /${c.rel}, which this branch does not update`,
+      fix: `check /${c.rel} against the change and update it, or re-verify it with specfold verify`
+    }))
+  );
 };
 var g6 = (ctx) => ctx.diff.archivedChanges.flatMap((id) => {
   const sync = planSync(ctx.config, ctx.bundleRoot, id, ctx.now);
@@ -10742,8 +10883,8 @@ var g12 = (ctx) => auditBundle(ctx.config, ctx.bundleRoot, ctx.now).filter((f) =
 var g14 = (ctx) => {
   const changed = new Set(ctx.diff.files);
   return scanReferences(ctx.config.root, ctx.config.sourceGlobs).flatMap((ref) => {
-    const abs = join27(ctx.bundleRoot, ref.concept);
-    if (!existsSync24(abs))
+    const abs = join29(ctx.bundleRoot, ref.concept);
+    if (!existsSync26(abs))
       return [
         {
           rule: "G14",
@@ -10769,7 +10910,7 @@ var g14 = (ctx) => {
     return [];
   });
 };
-var RULES = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g15, g18];
+var RULES = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g15, g16, g18];
 var compare3 = (a, b) => a < b ? -1 : a > b ? 1 : 0;
 var ruleNumber = (rule) => Number.parseInt(rule.slice(1), 10);
 function sortGateFindings(findings) {
@@ -10852,7 +10993,7 @@ register({
     const base = values.base;
     if (!base) throw new UsageError("missing --base <ref>");
     const bodyFile = values["pr-body"];
-    if (bodyFile !== void 0 && !existsSync25(resolve4(io.cwd, bodyFile)))
+    if (bodyFile !== void 0 && !existsSync27(resolve5(io.cwd, bodyFile)))
       throw new UsageError(`PR body file not found: ${bodyFile}`);
     const prArg = values.pr;
     if (prArg !== void 0 && !/^[1-9]\d*$/.test(prArg))
@@ -10864,13 +11005,13 @@ register({
       gateContext(config, io.cwd, base, {
         local,
         labels: values.label ?? [],
-        prBody: bodyFile === void 0 ? void 0 : readFileSync18(resolve4(io.cwd, bodyFile), "utf8"),
+        prBody: bodyFile === void 0 ? void 0 : readFileSync18(resolve5(io.cwd, bodyFile), "utf8"),
         pr
       })
     );
     const summary = values.summary;
     if (summary !== void 0)
-      writeFileSync4(resolve4(io.cwd, summary), renderSummary(findings, verdict(findings)));
+      writeFileSync4(resolve5(io.cwd, summary), renderSummary(findings, verdict(findings)));
     const counts = countFindings(findings);
     const ok2 = counts.block === 0;
     if (values.json) {
@@ -10885,8 +11026,8 @@ register({
 
 // src/hooks/install.ts
 var import_yaml7 = __toESM(require_dist(), 1);
-import { chmodSync, existsSync as existsSync26, mkdirSync as mkdirSync4, readFileSync as readFileSync19, realpathSync, writeFileSync as writeFileSync5 } from "node:fs";
-import { join as join28 } from "node:path";
+import { chmodSync, existsSync as existsSync28, mkdirSync as mkdirSync4, readFileSync as readFileSync19, realpathSync, writeFileSync as writeFileSync5 } from "node:fs";
+import { join as join30 } from "node:path";
 var HOOKS_PATH = ".specfold/hooks";
 var OWN_HOOKS = ["pre-commit", "pre-push", "post-checkout", "post-merge"];
 var hookNames = (config) => [.../* @__PURE__ */ new Set([...OWN_HOOKS, ...Object.keys(config.hooksExtra)])];
@@ -10899,8 +11040,8 @@ function gitConfig(root, key) {
   }
 }
 function writeIfChanged(path, text2, mode) {
-  if (existsSync26(path) && readFileSync19(path, "utf8") === text2) return false;
-  mkdirSync4(join28(path, ".."), { recursive: true });
+  if (existsSync28(path) && readFileSync19(path, "utf8") === text2) return false;
+  mkdirSync4(join30(path, ".."), { recursive: true });
   writeFileSync5(path, text2);
   if (mode !== void 0) chmodSync(path, mode);
   return true;
@@ -10930,7 +11071,7 @@ function installBuiltIn(config) {
 # Installed by specfold hooks install; project commands go into hooks.extra in specfold.yaml.
 exec ${hookCommand(hook)} "$@"
 `;
-    if (writeIfChanged(join28(config.root, path), script, 493)) actions.push({ path, action: "write" });
+    if (writeIfChanged(join30(config.root, path), script, 493)) actions.push({ path, action: "write" });
   }
   if (current === void 0) {
     git(config.root, ["config", "core.hooksPath", HOOKS_PATH]);
@@ -10941,19 +11082,19 @@ exec ${hookCommand(hook)} "$@"
 var LEFTHOOK_FILES = ["lefthook.yml", "lefthook.yaml", ".lefthook.yml"];
 var PRE_COMMIT_FILE = ".pre-commit-config.yaml";
 function detectManager(root) {
-  const lefthook = LEFTHOOK_FILES.find((f) => existsSync26(join28(root, f)));
+  const lefthook = LEFTHOOK_FILES.find((f) => existsSync28(join30(root, f)));
   if (lefthook) return { name: "lefthook", path: lefthook };
-  if (existsSync26(join28(root, ".husky"))) return { name: "husky", path: ".husky" };
-  if (existsSync26(join28(root, PRE_COMMIT_FILE))) return { name: "pre-commit", path: PRE_COMMIT_FILE };
+  if (existsSync28(join30(root, ".husky"))) return { name: "husky", path: ".husky" };
+  if (existsSync28(join30(root, PRE_COMMIT_FILE))) return { name: "pre-commit", path: PRE_COMMIT_FILE };
   return void 0;
 }
 function readDocument(path) {
-  const doc = (0, import_yaml7.parseDocument)(existsSync26(path) ? readFileSync19(path, "utf8") : "");
+  const doc = (0, import_yaml7.parseDocument)(existsSync28(path) ? readFileSync19(path, "utf8") : "");
   if (doc.errors[0]) throw new EnvError(`${path}: ${doc.errors[0].message.split("\n")[0]}`);
   return (0, import_yaml7.isMap)(doc.contents) ? doc : new import_yaml7.Document({});
 }
 function lefthookEntries(config, file) {
-  const path = join28(config.root, file);
+  const path = join30(config.root, file);
   const doc = readDocument(path);
   const actions = [];
   for (const hook of hookNames(config)) {
@@ -10975,9 +11116,9 @@ function huskyEntries(config) {
   const actions = [];
   for (const hook of hookNames(config)) {
     const path = `.husky/${hook}`;
-    const abs = join28(config.root, path);
+    const abs = join30(config.root, path);
     const line = `${hookCommand(hook)} "$@"`;
-    const text2 = existsSync26(abs) ? readFileSync19(abs, "utf8") : "";
+    const text2 = existsSync28(abs) ? readFileSync19(abs, "utf8") : "";
     if (text2.split("\n").some((l) => l.trim() === line)) continue;
     writeIfChanged(abs, `${text2}${text2 === "" || text2.endsWith("\n") ? "" : "\n"}${line}
 `, 493);
@@ -10987,7 +11128,7 @@ function huskyEntries(config) {
 }
 var idOf = (hook) => (0, import_yaml7.isMap)(hook) ? String(hook.get("id")) : "";
 function preCommitEntries(config) {
-  const path = join28(config.root, PRE_COMMIT_FILE);
+  const path = join30(config.root, PRE_COMMIT_FILE);
   const doc = readDocument(path);
   if (!(0, import_yaml7.isSeq)(doc.get("repos"))) doc.set("repos", doc.createNode([]));
   const repos = doc.get("repos");
@@ -11050,8 +11191,8 @@ function installHooks(config) {
 
 // src/hooks/run.ts
 import { spawnSync as spawnSync2 } from "node:child_process";
-import { existsSync as existsSync28, statSync as statSync9 } from "node:fs";
-import { join as join30, relative as relative13, sep as sep12 } from "node:path";
+import { existsSync as existsSync30, statSync as statSync10 } from "node:fs";
+import { join as join32, relative as relative15, sep as sep14 } from "node:path";
 
 // src/hooks/base.ts
 function localBase(root) {
@@ -11064,19 +11205,19 @@ function localBase(root) {
 }
 
 // src/hooks/claude.ts
-import { existsSync as existsSync27, readdirSync as readdirSync6, readFileSync as readFileSync20, statSync as statSync8 } from "node:fs";
-import { isAbsolute, join as join29, relative as relative12, resolve as resolve5, sep as sep11 } from "node:path";
+import { existsSync as existsSync29, readdirSync as readdirSync6, readFileSync as readFileSync20, statSync as statSync9 } from "node:fs";
+import { isAbsolute, join as join31, relative as relative14, resolve as resolve6, sep as sep13 } from "node:path";
 var MAX_LINES = 40;
 var EDIT_TOOLS = /* @__PURE__ */ new Set(["Edit", "Write"]);
 var activeChanges = (root) => {
-  const dir = join29(root, "openspec", "changes");
-  if (!existsSync27(dir)) return [];
-  return readdirSync6(dir).filter((d) => d !== "archive" && !d.startsWith(".") && statSync8(join29(dir, d)).isDirectory()).sort();
+  const dir = join31(root, "openspec", "changes");
+  if (!existsSync29(dir)) return [];
+  return readdirSync6(dir).filter((d) => d !== "archive" && !d.startsWith(".") && statSync9(join31(dir, d)).isDirectory()).sort();
 };
 function sessionStart({ config, io }) {
   const bundleRoot = resolveBundleRoot(config.root, void 0, config);
-  const index = join29(bundleRoot, "index.md");
-  const sections = existsSync27(index) ? readFileSync20(index, "utf8").split("\n").filter((l) => /^\* \[/.test(l)) : [];
+  const index = join31(bundleRoot, "index.md");
+  const sections = existsSync29(index) ? readFileSync20(index, "utf8").split("\n").filter((l) => /^\* \[/.test(l)) : [];
   const changes = activeChanges(config.root);
   const out = [
     "Knowledge sections (look up with: node scripts/specfold.mjs lookup <words>):",
@@ -11099,16 +11240,16 @@ async function postToolUse({ config, io }) {
   if (typeof event.tool_name !== "string" || !EDIT_TOOLS.has(event.tool_name) || typeof file !== "string")
     return 0;
   const base = typeof event.cwd === "string" ? event.cwd : config.root;
-  const rel = relative12(config.root, isAbsolute(file) ? file : resolve5(base, file)).split(sep11).join("/");
+  const rel = relative14(config.root, isAbsolute(file) ? file : resolve6(base, file)).split(sep13).join("/");
   const bundleRoot = resolveBundleRoot(config.root, void 0, config);
-  const prefix = relative12(config.root, bundleRoot).split(sep11).join("/");
+  const prefix = relative14(config.root, bundleRoot).split(sep13).join("/");
   let errors = [];
   if (rel.startsWith(`${prefix}/`) && rel.endsWith(".md") && isConcept(rel.slice(prefix.length + 1))) {
-    if (!existsSync27(join29(config.root, rel))) return 0;
-    errors = validate({ bundleRoot, paths: [join29(config.root, rel)], okfOnly: false, config }).findings.filter((f) => f.severity === "error").map((f) => findingLine({ ...f, path: `${prefix}/${f.path}` }));
+    if (!existsSync29(join31(config.root, rel))) return 0;
+    errors = validate({ bundleRoot, paths: [join31(config.root, rel)], okfOnly: false, config }).findings.filter((f) => f.severity === "error").map((f) => findingLine({ ...f, path: `${prefix}/${f.path}` }));
   } else {
     const change = /^openspec\/changes\/([^/]+)\//.exec(rel)?.[1];
-    if (!change || change === "archive" || !existsSync27(join29(config.root, "openspec", "changes", change)))
+    if (!change || change === "archive" || !existsSync29(join31(config.root, "openspec", "changes", change)))
       return 0;
     errors = checkPlannedChange(config, bundleRoot, change).filter((f) => f.severity === "error").map(taskFindingLine);
   }
@@ -11134,9 +11275,9 @@ function preCommit({ config, io }) {
     git(config.root, ["diff", "--cached", "--name-only", "--diff-filter=ACMR", "--relative"])
   );
   const bundleRoot = resolveBundleRoot(config.root, void 0, config);
-  const prefix = relative13(config.root, bundleRoot).split(sep12).join("/");
+  const prefix = relative15(config.root, bundleRoot).split(sep14).join("/");
   const errors = [];
-  const concepts2 = staged.filter((f) => f.startsWith(`${prefix}/`) && f.endsWith(".md") && isConcept(f.slice(prefix.length + 1))).map((f) => join30(config.root, f));
+  const concepts2 = staged.filter((f) => f.startsWith(`${prefix}/`) && f.endsWith(".md") && isConcept(f.slice(prefix.length + 1))).map((f) => join32(config.root, f));
   if (concepts2.length > 0) {
     const { findings } = validate({ bundleRoot, paths: concepts2, okfOnly: false, config });
     for (const f of findings.filter((x) => x.severity === "error"))
@@ -11145,8 +11286,8 @@ function preCommit({ config, io }) {
   const changes = new Set(
     staged.flatMap((f) => {
       const name = ACTIVE_CHANGE.exec(f)?.[1];
-      const dir = name ? join30(config.root, "openspec", "changes", name) : "";
-      return name && name !== "archive" && existsSync28(dir) && statSync9(dir).isDirectory() ? [name] : [];
+      const dir = name ? join32(config.root, "openspec", "changes", name) : "";
+      return name && name !== "archive" && existsSync30(dir) && statSync10(dir).isDirectory() ? [name] : [];
     })
   );
   for (const change of changes)
@@ -11176,7 +11317,7 @@ function prePush({ config, io }) {
   return 1;
 }
 function refreshGraph({ config }) {
-  if (!existsSync28(join30(config.root, "graphify-out", "graph.json"))) return 0;
+  if (!existsSync30(join32(config.root, "graphify-out", "graph.json"))) return 0;
   spawnSync2("graphify", ["update", "."], {
     cwd: config.root,
     env: { ...process.env, GRAPHIFY_BACKEND: "none" },
@@ -11260,8 +11401,8 @@ register({
 });
 
 // src/log/command.ts
-import { existsSync as existsSync29, readFileSync as readFileSync21, writeFileSync as writeFileSync6 } from "node:fs";
-import { join as join31 } from "node:path";
+import { existsSync as existsSync31, readFileSync as readFileSync21, writeFileSync as writeFileSync6 } from "node:fs";
+import { join as join33 } from "node:path";
 
 // src/log/insert.ts
 var DATE_HEADING = /^## (\d{4}-\d{2}-\d{2})\s*$/;
@@ -11317,9 +11458,9 @@ register({
     const date = values.date ?? localDate();
     if (!isCalendarDate2(date)) throw new UsageError(`date '${date}' is not a valid YYYY-MM-DD date`);
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, void 0);
-    const path = join31(bundleRoot, "log.md");
+    const path = join33(bundleRoot, "log.md");
     const entry = `* **${kind}**: ${message}`;
-    writeFileSync6(path, insertEntry(existsSync29(path) ? readFileSync21(path, "utf8") : void 0, date, entry));
+    writeFileSync6(path, insertEntry(existsSync31(path) ? readFileSync21(path, "utf8") : void 0, date, entry));
     io.stdout(`${entry}
 `);
     return 0;
@@ -11327,7 +11468,7 @@ register({
 });
 
 // src/lookup/command.ts
-import { relative as relative14, sep as sep13 } from "node:path";
+import { relative as relative16, sep as sep15 } from "node:path";
 
 // src/lookup/search.ts
 var WEIGHTS = { title: 3, tags: 2, description: 1, type: 1 };
@@ -11385,6 +11526,22 @@ function search(bundleRoot, query, options = {}) {
 }
 
 // src/lookup/command.ts
+function drifted(repoRoot, bundleRoot, hits) {
+  if (!repoRoot || hits.length === 0 || !hasHistory(repoRoot)) return /* @__PURE__ */ new Set();
+  let sourceGlobs = [];
+  try {
+    sourceGlobs = loadConfig(repoRoot).sourceGlobs;
+  } catch {
+  }
+  const wanted = new Set(hits.map((h) => h.rel));
+  return new Set(
+    conceptDependencies(repoRoot, bundleRoot, sourceGlobs).filter((c) => wanted.has(c.rel) && driftOf(repoRoot, c) !== void 0).map((c) => c.rel)
+  );
+}
+var withDrift = (flags) => {
+  const at = flags.indexOf("unverified");
+  return at === -1 ? [...flags, "drift"] : [...flags.slice(0, at), "drift", ...flags.slice(at)];
+};
 register({
   name: "lookup",
   summary: "find concepts by their frontmatter",
@@ -11402,16 +11559,18 @@ register({
     if (!/^[1-9]\d*$/.test(limitArg))
       throw new UsageError(`--limit must be a positive integer, got '${limitArg}'`);
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, void 0);
-    const base = findRepoRoot(io.cwd) ?? io.cwd;
+    const repoRoot = findRepoRoot(io.cwd);
+    const base = repoRoot ?? io.cwd;
     const type = values.type;
     const hits = search(bundleRoot, query, type ? { type } : {}).slice(0, Number(limitArg));
+    const stale = drifted(repoRoot, bundleRoot, hits);
     const results = hits.map((h) => ({
-      path: relative14(base, `${bundleRoot}${sep13}${h.rel}`).split(sep13).join("/"),
+      path: relative16(base, `${bundleRoot}${sep15}${h.rel}`).split(sep15).join("/"),
       title: h.title,
       description: h.description,
       type: h.type,
       score: h.score,
-      flags: h.flags
+      flags: stale.has(h.rel) ? withDrift(h.flags) : h.flags
     }));
     if (values.json) {
       io.stdout(`${JSON.stringify({ query, results }, null, 2)}
@@ -11428,19 +11587,19 @@ register({
 });
 
 // src/sync/command.ts
-import { existsSync as existsSync30, readdirSync as readdirSync7, writeFileSync as writeFileSync7 } from "node:fs";
-import { join as join32 } from "node:path";
+import { existsSync as existsSync32, readdirSync as readdirSync7, writeFileSync as writeFileSync7 } from "node:fs";
+import { join as join34 } from "node:path";
 var NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 var ARCHIVED2 = /^(\d{4}-\d{2}-\d{2})-([a-z0-9]+(?:-[a-z0-9]+)*)$/;
 function resolveArchived(config, arg) {
   if (!arg) throw new UsageError("missing change name");
-  const archive = join32(config.root, "openspec", "changes", "archive");
-  if (ARCHIVED2.test(arg) && existsSync30(join32(archive, arg))) return arg;
+  const archive = join34(config.root, "openspec", "changes", "archive");
+  if (ARCHIVED2.test(arg) && existsSync32(join34(archive, arg))) return arg;
   if (!NAME.test(arg)) throw new UsageError(`'${arg}' is not a change name or archived change id`);
-  const ids = existsSync30(archive) ? readdirSync7(archive).filter((d) => ARCHIVED2.exec(d)?.[2] === arg).sort() : [];
+  const ids = existsSync32(archive) ? readdirSync7(archive).filter((d) => ARCHIVED2.exec(d)?.[2] === arg).sort() : [];
   const newest = ids.at(-1);
   if (newest) return newest;
-  if (existsSync30(join32(config.root, "openspec", "changes", arg)))
+  if (existsSync32(join34(config.root, "openspec", "changes", arg)))
     throw new EnvError(`change '${arg}' is not archived yet: run 'openspec archive ${arg}' first`);
   throw new EnvError(`unknown change '${arg}': no archived folder openspec/changes/archive/<date>-${arg}/`);
 }
@@ -11497,8 +11656,8 @@ register({
 });
 
 // src/tasks/progress-command.ts
-import { existsSync as existsSync31, readdirSync as readdirSync8, readFileSync as readFileSync22 } from "node:fs";
-import { join as join33 } from "node:path";
+import { existsSync as existsSync33, readdirSync as readdirSync8, readFileSync as readFileSync22 } from "node:fs";
+import { join as join35 } from "node:path";
 
 // src/tasks/progress.ts
 function progressOf(tasks) {
@@ -11522,12 +11681,12 @@ function progressOf(tasks) {
 
 // src/tasks/progress-command.ts
 function readTasks(config, change) {
-  const path = join33(changeDir(config, change), "tasks.md");
-  return existsSync31(path) ? parseTasks(readFileSync22(path, "utf8")) : void 0;
+  const path = join35(changeDir(config, change), "tasks.md");
+  return existsSync33(path) ? parseTasks(readFileSync22(path, "utf8")) : void 0;
 }
 function activeChanges2(config) {
-  const dir = join33(config.root, "openspec", "changes");
-  if (!existsSync31(dir)) return [];
+  const dir = join35(config.root, "openspec", "changes");
+  if (!existsSync33(dir)) return [];
   return readdirSync8(dir, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort();
 }
 function commitsByTask(config, change) {
@@ -11732,8 +11891,8 @@ register({
 });
 
 // src/verify/command.ts
-import { existsSync as existsSync33, readFileSync as readFileSync24, statSync as statSync10, writeFileSync as writeFileSync8 } from "node:fs";
-import { join as join35, relative as relative15, resolve as resolve6, sep as sep14 } from "node:path";
+import { existsSync as existsSync35, readFileSync as readFileSync24, statSync as statSync11, writeFileSync as writeFileSync8 } from "node:fs";
+import { join as join37, relative as relative17, resolve as resolve7, sep as sep16 } from "node:path";
 
 // src/verify/apply.ts
 var flowValue = (v) => typeof v === "string" && /^[A-Za-z0-9][\w:.+/@-]*$/.test(v) ? v : JSON.stringify(v);
@@ -11755,8 +11914,8 @@ function verifyText(text2, login, at) {
 // src/verify/login.ts
 var import_yaml8 = __toESM(require_dist(), 1);
 import { execFileSync as execFileSync3 } from "node:child_process";
-import { existsSync as existsSync32, readFileSync as readFileSync23 } from "node:fs";
-import { join as join34 } from "node:path";
+import { existsSync as existsSync34, readFileSync as readFileSync23 } from "node:fs";
+import { join as join36 } from "node:path";
 var LOCAL_FILE = ".specfold/local.yaml";
 var LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$/;
 var system = {
@@ -11779,8 +11938,8 @@ var system = {
   }
 };
 function localLogin(root) {
-  const path = join34(root, LOCAL_FILE);
-  if (!existsSync32(path)) return void 0;
+  const path = join36(root, LOCAL_FILE);
+  if (!existsSync34(path)) return void 0;
   let data;
   try {
     data = (0, import_yaml8.parse)(readFileSync23(path, "utf8"));
@@ -11809,8 +11968,8 @@ function agentReason() {
   return void 0;
 }
 function check(arg, root, bundleRoot) {
-  const inBundle = [resolve6(root, arg), resolve6(bundleRoot, arg)].map((abs) => relative15(bundleRoot, abs).split(sep14).join("/")).filter((rel2) => rel2 !== "" && !rel2.startsWith("..") && !rel2.startsWith("/"));
-  const rel = inBundle.find((r) => existsSync33(join35(bundleRoot, r)) && statSync10(join35(bundleRoot, r)).isFile());
+  const inBundle = [resolve7(root, arg), resolve7(bundleRoot, arg)].map((abs) => relative17(bundleRoot, abs).split(sep16).join("/")).filter((rel2) => rel2 !== "" && !rel2.startsWith("..") && !rel2.startsWith("/"));
+  const rel = inBundle.find((r) => existsSync35(join37(bundleRoot, r)) && statSync11(join37(bundleRoot, r)).isFile());
   if (!rel)
     return { arg, reason: inBundle.length === 0 ? "outside the bundle" : "no such file in the bundle" };
   if (!rel.endsWith(".md") || !isConcept(rel))
@@ -11835,14 +11994,14 @@ register({
     const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
     const login = resolveLogin(config.root);
     const targets = positionals.map((arg) => check(arg, config.root, bundleRoot));
-    const prefix = relative15(config.root, bundleRoot).split(sep14).join("/");
+    const prefix = relative17(config.root, bundleRoot).split(sep16).join("/");
     const shown = (t) => t.rel ? `${prefix}/${t.rel}` : t.arg;
     const refused = targets.filter((t) => t.reason !== void 0);
     const verified = [];
     if (refused.length === 0) {
       const at = isoWithOffset(/* @__PURE__ */ new Date());
       const written = targets.map((t) => {
-        const abs = join35(bundleRoot, t.rel);
+        const abs = join37(bundleRoot, t.rel);
         return { abs, text: verifyText(readFileSync24(abs, "utf8"), login, at) };
       });
       for (const w of written) writeFileSync8(w.abs, w.text);
