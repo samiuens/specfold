@@ -1,28 +1,19 @@
-schema: spec-driven
+schema: spec-driven   # switches to the specfold schema in M2
 
 context: |
-  Language: English
-  All artifacts must be written in English.
-  Keep OpenSpec structural headings and SHALL/MUST keywords in English.
+  Language: English. All artifacts are written in English; keep OpenSpec headings and SHALL/MUST in English.
+  Rather ask than assume: when the request, knowledge or specs leave a decision open, ask the user (one decision per question, recommended option first).
+  This repo builds Specfold, a kit that folds OKF knowledge bundles and OpenSpec into one agent workflow. The build brief is docs/plan.md.
+  Project knowledge lives in knowledge/ (OKF v0.2). Start at knowledge/index.md.
+  Behavior contracts live in openspec/specs/. Knowledge never restates requirements.
+  Stack: TypeScript CLI on Node >= 20.19, bundled to scripts/specfold.mjs; the shipped payload lives in template/.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always state what is out of scope
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
-
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+rules:
+  proposal:
+    - Link the knowledge concepts and decisions this change relies on (bundle-absolute paths such as /decisions/x.md).
+    - Check knowledge/decisions/ for a rejected decision covering the same idea; if one exists, say why this differs.
+  specs:
+    - Observable behavior only. Rationale goes to knowledge, not into requirements.
+    - Keep each requirement text under 500 characters.
+  tasks:
+    - Last task group is always "Knowledge": record new or changed concepts in knowledge/.
