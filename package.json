@@ -1,0 +1,17 @@
+{
+  "name": "specfold-kit",
+  "private": true,
+  "description": "Kit repo tooling for Specfold. Not shipped to user repos.",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "setup": "git config core.hooksPath .githooks",
+    "prepare": "npm run setup",
+    "check:commits": "node scripts/check-commit.mjs"
+  },
+  "devDependencies": {
+    "gitmojis": "3.15.0"
+  }
+}
