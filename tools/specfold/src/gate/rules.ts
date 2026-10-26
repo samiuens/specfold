@@ -1,11 +1,12 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { auditBundle } from "../audit/rules.ts";
-import { parseFile } from "../bundle.ts";
+import { parseFile, parseText } from "../bundle.ts";
 import { checkChange } from "../change/command.ts";
 import { conceptDependencies, coveredBy } from "../drift/deps.ts";
 import { EnvError } from "../errors.ts";
 import type { Finding } from "../findings.ts";
+import { listItems } from "../future/items.ts";
 import { matchesAny } from "../glob.ts";
 import { syncIndexes } from "../indexes/command.ts";
 import { generateIndexes } from "../indexes/generate.ts";
@@ -20,7 +21,7 @@ import { buildTraceIndex, changeSpecs } from "../trace/trace.ts";
 import { validate } from "../validate/index.ts";
 import { isConcept, isRecord } from "../validate/okf.ts";
 import { isTimestamp } from "../validate/profile.ts";
-import { addedClaims } from "./claims.ts";
+import { addedClaims, baseVersion } from "./claims.ts";
 import type { GateDiff } from "./diff.ts";
 import type { PullRequest } from "./github.ts";
 import { openspecValidate } from "./openspec.ts";
@@ -282,6 +283,108 @@ export const g16: GateRule = (ctx) => {
     );
 };
 
+const COMMITMENTS_HEADING = /^##\s+Commitments\s*$/;
+const COMMITMENT_LINK = /(?:\]\(|`)(\/[^)\s`]+\.md)[)`]/;
+const VERDICT = /^\s*:\s*(kept|blocked)\b(?:\s*:\s*(.*))?/;
+
+/** List items of a design's `## Commitments` section with their lines, or undefined without the section. */
+function commitmentEntries(text: string): { line: number; text: string }[] | undefined {
+  // comments become blank lines, so line numbers stay true and the template's examples never count
+  const lines = text.replace(/<!--[\s\S]*?-->/g, (c) => c.replace(/[^\n]/g, "")).split("\n");
+  const start = lines.findIndex((l) => COMMITMENTS_HEADING.test(l));
+  if (start === -1) return undefined;
+  const entries: { line: number; text: string }[] = [];
+  for (let i = start + 1; i < lines.length && !/^##\s/.test(lines[i] as string); i++)
+    if (/^\s*[-*]\s+/.test(lines[i] as string)) entries.push({ line: i + 1, text: lines[i] as string });
+  return entries;
+}
+
+/** G17: designs of touched changes state how they treat open commitments; withdrawals carry a human verification. */
+export const g17: GateRule = (ctx) => {
+  const root = ctx.config.root;
+  const open = listItems(ctx.bundleRoot, "commitments").filter((c) => c.data.state === "open");
+  const findings: GateFinding[] = [];
+  const warn = (path: string, line: number | null, message: string, fix: string) =>
+    findings.push({ rule: "G17", effect: "warn", path, line, message, fix });
+
+  for (const change of ctx.diff.activeChanges) {
+    const rel = `openspec/changes/${change}/design.md`;
+    if (!existsSync(join(root, rel))) continue;
+    const entries = commitmentEntries(readFileSync(join(root, rel), "utf8"));
+    if (entries === undefined) {
+      if (open.length > 0)
+        warn(
+          rel,
+          null,
+          `design has no '## Commitments' section while ${open.length === 1 ? "1 open commitment exists" : `${open.length} open commitments exist`}`,
+          "add '## Commitments' listing each open commitment the change touches as kept or blocked, or 'none'",
+        );
+      continue;
+    }
+    for (const entry of entries) {
+      const link = COMMITMENT_LINK.exec(entry.text);
+      if (!link) {
+        warn(
+          rel,
+          entry.line,
+          "commitment entry links no concept",
+          "write '- [Title](/commitments/x.md): kept'",
+        );
+        continue;
+      }
+      const target = (link[1] as string).slice(1);
+      const data = existsSync(join(ctx.bundleRoot, target))
+        ? parseFile(ctx.bundleRoot, target).frontmatter?.data
+        : undefined;
+      if (!isRecord(data) || data.type !== "Deferred Commitment" || data.state !== "open")
+        warn(
+          rel,
+          entry.line,
+          `/${target} is not an open commitment`,
+          "link an open commitment (specfold commitments list) or remove the entry",
+        );
+      const verdict = VERDICT.exec(entry.text.slice((link.index ?? 0) + link[0].length));
+      if (!verdict)
+        warn(
+          rel,
+          entry.line,
+          `entry for /${target} says neither kept nor blocked`,
+          "end the entry with ': kept' or ': blocked: <reason>'",
+        );
+      else if (verdict[1] === "blocked")
+        warn(
+          rel,
+          entry.line,
+          `design blocks commitment /${target}${verdict[2] ? `: ${verdict[2].trim()}` : ""}`,
+          "change the design to keep it, or have a human withdraw the commitment",
+        );
+    }
+  }
+
+  const verified = new Set(
+    addedClaims(root, ctx.bundleRoot, ctx.diff)
+      .filter((c) => c.key === "verified")
+      .map((c) => c.file),
+  );
+  for (const { rel, data, lineOf } of changedData(ctx)) {
+    if (data.type !== "Deferred Commitment" || data.state !== "withdrawn") continue;
+    const file = inRepo(ctx, rel);
+    const base = baseVersion(root, ctx.diff.mergeBase, file);
+    const before = base === undefined ? undefined : parseText(rel, base).frontmatter?.data;
+    if (isRecord(before) && before.state === "withdrawn") continue;
+    if (!verified.has(file))
+      findings.push({
+        rule: "G17",
+        effect: "block",
+        path: file,
+        line: lineOf("state"),
+        message: "commitment is withdrawn without a human verification",
+        fix: "a human runs specfold commitments withdraw <commitment> --reason <text>, which records their verification",
+      });
+  }
+  return findings;
+};
+
 /** G6: every archived change's knowledge rules pass and its sync has nothing left to do. */
 export const g6: GateRule = (ctx) =>
   ctx.diff.archivedChanges.flatMap((id) => {
@@ -417,7 +520,7 @@ export const g14: GateRule = (ctx) => {
   });
 };
 
-export const RULES: GateRule[] = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g15, g16, g18];
+export const RULES: GateRule[] = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g15, g16, g17, g18];
 
 const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 const ruleNumber = (rule: string) => Number.parseInt(rule.slice(1), 10);

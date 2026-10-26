@@ -35,9 +35,9 @@ scenarios: [specfold-gate#blocked-commitment, specfold-gate#section-missing, spe
 agent: implementer
 ```
 
-- [ ] 3.1 Warn about designs that block, misname or skip open commitments
+- [x] 3.1 Warn about designs that block, misname or skip open commitments
   - Done when: scenarios blocked-commitment, section-missing and all-kept pass in `gate-rules.test.ts`
-- [ ] 3.2 Block a withdrawal without a human verification
+- [x] 3.2 Block a withdrawal without a human verification
   - Done when: scenarios withdrawn-by-hand and withdrawn-with-the-command pass in `gate-rules.test.ts`
 
 ## 4. Bundle
