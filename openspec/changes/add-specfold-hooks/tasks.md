@@ -11,7 +11,7 @@ agent: implementer
 
 - [x] 1.1 Give commands an optional stdin reader
   - Done when: `npm test -w specfold` passes with `run()` accepting stdin
-- [ ] 1.2 Read `hooks.extra` from the settings
+- [x] 1.2 Read `hooks.extra` from the settings
   - Done when: `repo.test.ts` covers an empty and a configured `hooks.extra`
 - [ ] 1.3 Check a change as planned: brief rules only until `tasks.md` exists
   - Done when: `change-check.test.ts` covers a change with and without `tasks.md`

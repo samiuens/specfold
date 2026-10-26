@@ -49,6 +49,7 @@ function setup(knowledge: string | undefined) {
     agentTargets: [".claude/skills"],
     unverifiedAfterDays: 30,
     gate: { requireChangeForSourceChanges: true, escapeLabel: "no-spec", blockOnStaleTouched: true },
+    hooksExtra: {},
   };
   return { root, dir, config };
 }

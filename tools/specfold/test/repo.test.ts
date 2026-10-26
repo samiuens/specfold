@@ -31,6 +31,7 @@ describe("repo", () => {
       agentTargets: [".claude/skills"],
       unverifiedAfterDays: 30,
       gate: { requireChangeForSourceChanges: true, escapeLabel: "no-spec", blockOnStaleTouched: true },
+      hooksExtra: {},
     });
   });
 
@@ -45,6 +46,19 @@ describe("repo", () => {
       escapeLabel: "skip-spec",
       blockOnStaleTouched: false,
     });
+  });
+
+  it("reads hooks.extra and rejects malformed entries", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "specfold.yaml"),
+      'types: []\nhooks:\n  extra:\n    commit-msg:\n      - check "$1"\n',
+    );
+    expect(requireConfig(root).hooksExtra).toEqual({ "commit-msg": ['check "$1"'] });
+    writeFileSync(join(root, "specfold.yaml"), "types: []\nhooks:\n  extra:\n    commit-msg: check\n");
+    expect(() => requireConfig(root)).toThrow(EnvError);
+    writeFileSync(join(root, "specfold.yaml"), "types: []\nhooks:\n  extra:\n    'pre commit': [x]\n");
+    expect(() => requireConfig(root)).toThrow(EnvError);
   });
 
   it("defaults block_on_broken_links to true", () => {
