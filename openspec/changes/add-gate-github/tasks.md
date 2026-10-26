@@ -15,13 +15,13 @@ agent: implementer
 ## 2. GitHub
 
 ```yaml
-files: [tools/specfold/src/gate/github.ts, tools/specfold/test/gate-github.test.ts]
+files: [tools/specfold/src/gate/github.ts, tools/specfold/test/gate-github.test.ts, tools/specfold/test/github-server.ts]
 depends: []
 scenarios: [specfold-gate#approval-withdrawn, specfold-gate#comment-after-approval, specfold-gate#missing-token]
 agent: implementer
 ```
 
-- [ ] 2.1 Read the PR author and approvers from the GitHub REST API with pagination
+- [x] 2.1 Read the PR author and approvers from the GitHub REST API with pagination
   - Done when: scenarios approval-withdrawn, comment-after-approval and missing-token pass in `gate-github.test.ts` against a local server
 
 ## 3. Rule and option
