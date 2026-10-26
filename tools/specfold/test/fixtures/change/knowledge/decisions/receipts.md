@@ -1,0 +1,4 @@
+---
+type: Decision
+title: Receipts
+---

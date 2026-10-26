@@ -33,7 +33,7 @@ scenarios: [specfold-change-check#clean-change, specfold-change-check#unknown-ch
 agent: implementer
 ```
 
-- [ ] 3.1 Add `specfold change check <change> [--json]` combining brief, knowledge and tasks findings
+- [x] 3.1 Add `specfold change check <change> [--json]` combining brief, knowledge and tasks findings
   - Done when: the four scenarios of this group pass in `change-check.test.ts`
 
 ## 4. Bundle
