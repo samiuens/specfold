@@ -57,7 +57,7 @@ When `core.hooksPath` is set to another folder and no known hook manager is foun
 - **THEN** the hook exits with 1 and the push stops
 
 ### Requirement: Graph refresh
-`specfold hook post-checkout` and `post-merge` SHALL run `graphify update .` with `GRAPHIFY_BACKEND=none` when graphify is on the PATH, and SHALL always exit with 0.
+`specfold hook post-checkout` and `post-merge` SHALL run `graphify update .` with `GRAPHIFY_BACKEND=none` when graphify is on the PATH and the repository already has a graph (`graphify-out/graph.json`), and SHALL always exit with 0.
 
 #### Scenario: Graphify missing
 - **WHEN** graphify is not installed and `specfold hook post-merge` runs

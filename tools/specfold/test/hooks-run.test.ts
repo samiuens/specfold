@@ -1,4 +1,4 @@
-import { chmodSync } from "node:fs";
+import { chmodSync, existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { commit, concept, demoChange, gateRepo, git, write } from "./gate-helpers.ts";
@@ -105,6 +105,18 @@ describe("hook: pre-push and graph refresh", () => {
     const result = await run(["hook", "pre-push"], gateRepo());
     expect(result.code).toBe(0);
     expect(result.stderr).toContain("skipping the gate (CI still runs it)");
+  });
+
+  it("refreshes only an existing graph", async () => {
+    const root = gateRepo();
+    write(root, "bin/graphify", '#!/bin/sh\necho "$GRAPHIFY_BACKEND $*" > graphify-called\n');
+    chmodSync(join(root, "bin/graphify"), 0o755);
+    vi.stubEnv("PATH", `${join(root, "bin")}:/usr/bin:/bin`);
+    await run(["hook", "post-merge"], root);
+    expect(existsSync(join(root, "graphify-called"))).toBe(false);
+    write(root, "graphify-out/graph.json", "{}\n");
+    await run(["hook", "post-merge"], root);
+    expect(readFileSync(join(root, "graphify-called"), "utf8")).toBe("none update .\n");
   });
 
   // spec: specfold-hooks#graphify-missing
