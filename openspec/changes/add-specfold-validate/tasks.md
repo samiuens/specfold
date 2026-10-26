@@ -27,7 +27,7 @@ agent: implementer
   - Done when: `cli.test.ts` covers unknown flags and commands exiting with 2
 - [x] 2.2 Add repository root discovery and `specfold.yaml` loading
   - Done when: `repo.test.ts` covers root discovery, a missing `specfold.yaml` and an unparseable one
-- [ ] 2.3 Add the findings model with ordering, human and JSON rendering
+- [x] 2.3 Add the findings model with ordering, human and JSON rendering
   - Done when: `findings.test.ts` covers ordering, the human summary line and the JSON shape
 - [ ] 2.4 Add the esbuild bundle script that writes `scripts/specfold.mjs`
   - Done when: `npm run build -w specfold` then `node scripts/specfold.mjs --version` prints the package version
