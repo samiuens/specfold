@@ -117,7 +117,7 @@ export function runChecks(env: DoctorEnv): Check[] {
       id: "D3",
       status: "fail",
       message: "openspec is not on the PATH",
-      fix: "npm install -g @fission-ai/openspec (or the standalone binary)",
+      fix: "install OpenSpec so that `openspec` is on the PATH: https://github.com/Fission-AI/OpenSpec",
     });
   } else if (!satisfies(openspec, range)) {
     checks.push({
