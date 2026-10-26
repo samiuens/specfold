@@ -50,6 +50,7 @@ function setup(knowledge: string | undefined) {
     unverifiedAfterDays: 30,
     gate: { requireChangeForSourceChanges: true, escapeLabel: "no-spec", blockOnStaleTouched: true },
     hooksExtra: {},
+    traceTestGlobs: [],
   };
   return { root, dir, config };
 }
