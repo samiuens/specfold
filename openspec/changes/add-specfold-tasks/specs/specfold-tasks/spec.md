@@ -135,14 +135,14 @@ The command SHALL report a warning with rule `T9` when a group has more tasks th
 - **THEN** a `T9` warning is reported suggesting a split
 
 ### Requirement: T10 task size
-With `--base`, the command SHALL report a warning with rule `T10` when the commits carrying a task's trailer change more files than `tasks.max_files_per_task`, defaulting to 5.
+With `--base`, the command SHALL report a warning with rule `T10` when the commits carrying a task's trailer change more files than `tasks.max_files_per_task`, defaulting to 5, not counting the change's own `tasks.md`.
 
 #### Scenario: Task touched too many files
 - **WHEN** the commit for task 2.1 changes 7 files and no limit is configured
 - **THEN** a `T10` warning is reported for task 2.1
 
 ### Requirement: T11 trailers match tasks
-With `--base`, the command SHALL inspect commits from the merge base to `HEAD` and report a warning with rule `T11` for a ticked task without a trailer commit, a trailer naming an unknown task, more than one commit for one task, or a task commit changing files outside its group's `files`.
+With `--base`, the command SHALL inspect commits from the merge base to `HEAD` and report a warning with rule `T11` for a ticked task without a trailer commit, a trailer naming an unknown task, more than one commit for one task, or a task commit changing files outside its group's `files`. Changes to the change's own `tasks.md` SHALL never count as outside a group.
 
 #### Scenario: Ticked without commit
 - **WHEN** task 1.2 is ticked but no commit carries `Task: <change>#1.2`
@@ -151,6 +151,10 @@ With `--base`, the command SHALL inspect commits from the merge base to `HEAD` a
 #### Scenario: Scope widened
 - **WHEN** the commit for task 2.1 changes `src/billing/x.ts` and group 2 owns only `src/checkout/**`
 - **THEN** a `T11` warning is reported naming the file
+
+#### Scenario: Ticking tasks.md is not scope widening
+- **WHEN** the commit for task 2.1 changes `src/checkout/a.ts` and ticks task 2.1 in `openspec/changes/<change>/tasks.md`
+- **THEN** no `T11` warning is reported for that commit
 
 ### Requirement: Change check runs tasks check
 `specfold change check <change>` SHALL run the tasks check for the same change and include its findings, rule ids and exit-code effect in its own result.
