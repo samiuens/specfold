@@ -50,7 +50,7 @@ describe("future items", () => {
   it("sets keys in place", () => {
     const root = repo();
     const target = findItem(root, join(root, "knowledge"), "backlog", "dark-mode");
-    setKeys(target, { state: "dropped", reason: "no demand" });
+    setKeys(target.abs, { state: "dropped", reason: "no demand" });
     expect(readFileSync(target.abs, "utf8")).toContain("state: dropped\nreason: no demand\n");
   });
 });

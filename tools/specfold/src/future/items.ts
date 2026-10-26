@@ -65,7 +65,7 @@ export function dueDate(trigger: unknown): Date | undefined {
   return Number.isNaN(ms) ? undefined : new Date(ms);
 }
 
-/** Sets frontmatter keys of an item in place, line by line. */
-export function setKeys(item: Item, keys: Record<string, string>): void {
-  writeFileSync(item.abs, editFrontmatter(readFileSync(item.abs, "utf8"), { set: keys }).text);
+/** Sets frontmatter keys of a concept file in place, line by line. */
+export function setKeys(abs: string, keys: Record<string, string>): void {
+  writeFileSync(abs, editFrontmatter(readFileSync(abs, "utf8"), { set: keys }).text);
 }

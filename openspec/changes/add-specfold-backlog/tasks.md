@@ -61,9 +61,9 @@ scenarios: [specfold-backlog#unknown-item, specfold-backlog#idea-from-an-intervi
 agent: implementer
 ```
 
-- [ ] 5.1 Add `backlog add` and `backlog list`
+- [x] 5.1 Add `backlog add` and `backlog list`
   - Done when: scenarios unknown-item, idea-from-an-interview and open-items-only pass in `backlog.test.ts`
-- [ ] 5.2 Add `backlog promote` and `backlog drop`
+- [x] 5.2 Add `backlog promote` and `backlog drop`
   - Done when: scenarios item-promoted, already-promoted and idea-dropped pass in `backlog.test.ts`
 
 ## 6. Commitments command
