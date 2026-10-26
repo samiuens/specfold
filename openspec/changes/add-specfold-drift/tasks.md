@@ -23,7 +23,7 @@ agent: implementer
 
 - [x] 2.1 Map concepts to their dependent repository paths
   - Done when: scenarios code-reference and url-source pass in `drift.test.ts`
-- [ ] 2.2 Find commits newer than a concept's baseline
+- [x] 2.2 Find commits newer than a concept's baseline
   - Done when: scenarios code-changed-after-verification and concept-edited-after-the-code pass in `drift.test.ts`
 
 ## 3. Drift command
