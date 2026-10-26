@@ -9,3 +9,4 @@
 * **Creation**: Bundle created for M0 by hand (no CLI yet): decisions from the build plan and the M0 question round, references from the pre-build verification, a draft vision, and backlog items seeded from the plan's "Later" section.
 * **Update**: `specfold log add` implemented (change `add-specfold-log`); log entries are now written with the command.
 * **Update**: `specfold new` implemented (change `add-specfold-new`); invented `generated.at` times in earlier concepts replaced with real ones.
+* **Update**: `specfold lookup` implemented (change `add-specfold-lookup`); `AGENTS.md` now starts the lookup order with it.

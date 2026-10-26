@@ -27,11 +27,10 @@ Specs are the normative behavior contract, knowledge is descriptive context, not
 
 ## 4. Lookup order
 
-1. Knowledge indexes (`knowledge/index.md`, then folder indexes) for *why and what*; read the 1-3 best concepts.
+1. `node scripts/specfold.mjs lookup <words>` (or the knowledge indexes) for *why and what*; read the 1-3 best concepts and mind the `stale`, `deprecated` and `unverified` flags.
 2. `openspec show <spec> --type spec --json --no-scenarios` for *behavior*.
 3. Raw grep and file reads last.
 
-`specfold lookup` replaces step 1 once M1 ships.
 
 ## 5. Workflow
 

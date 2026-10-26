@@ -28,6 +28,7 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/validate/` | the `validate` command and its rule sets (OKF, profile, links) |
 | `src/indexes/` | the `index` command: index generation, `see knowledge:` scan, write and check modes |
 | `src/log/` | the `log add` command and the insertion of entries into date sections |
+| `src/lookup/` | the `lookup` command: frontmatter search, weighted ranking, trust flags |
 | `src/new/` | the `new` command: per-type templates, override files, frontmatter rendering |
 
 # How commands work
@@ -43,6 +44,7 @@ Under Node, `yaml` resolves to its CommonJS build, so the bundle banner provides
 - [specfold validate](/capabilities/specfold-validate.md)
 - [specfold index](/capabilities/specfold-index.md)
 - [specfold log](/capabilities/specfold-log.md)
+- [specfold lookup](/capabilities/specfold-lookup.md)
 - [specfold new](/capabilities/specfold-new.md)
 - [Deterministic CLI](/decisions/deterministic-cli.md)
 - [TypeScript style](/conventions/typescript-style.md)
