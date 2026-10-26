@@ -19,6 +19,8 @@ export interface Config {
   folders: Record<string, FolderInfo>;
   /** `actors.agent_prefix`, prepended to the model for agent-written `generated.by`. */
   agentPrefix: string;
+  /** Supported tool ranges from `requires:`, e.g. `openspec: ">=1.15 <2"`. */
+  requires: Record<string, string>;
 }
 
 /** The nearest directory at or above `cwd` that contains specfold.yaml. */
@@ -70,6 +72,11 @@ export function loadConfig(root: string): Config {
     blockOnBrokenLinks: gate.block_on_broken_links !== false,
     folders,
     agentPrefix: typeof actors.agent_prefix === "string" ? actors.agent_prefix : "",
+    requires: Object.fromEntries(
+      Object.entries(isRecord(data.requires) ? data.requires : {}).filter(
+        (e): e is [string, string] => typeof e[1] === "string",
+      ),
+    ),
   };
 }
 

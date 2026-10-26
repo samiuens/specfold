@@ -9,7 +9,7 @@ scenarios: [specfold-doctor#supported-node, specfold-doctor#broken-configuration
 agent: implementer
 ```
 
-- [ ] 1.1 Add checks D1 to D6 over an injected environment, with version ranges
+- [x] 1.1 Add checks D1 to D6 over an injected environment, with version ranges
   - Done when: the seven scenarios of this group pass in `doctor-checks.test.ts`
 
 ## 2. Doctor command
