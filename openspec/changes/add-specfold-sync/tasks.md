@@ -21,7 +21,7 @@ scenarios: [specfold-sync#unrelated-keys-kept]
 agent: implementer
 ```
 
-- [ ] 2.1 Set keys and append sources while keeping other keys, order, comments and body
+- [x] 2.1 Set keys and append sources while keeping other keys, order, comments and body
   - Done when: scenario unrelated-keys-kept passes in `sync-frontmatter.test.ts`
 
 ## 3. Plan and apply ops
