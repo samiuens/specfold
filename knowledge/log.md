@@ -22,3 +22,4 @@
 * **Change**: 2026-10-26-add-specfold-agents-sync: created 1, updated 1, deprecated 0
 * **Change**: 2026-10-26-add-specfold-audit: created 1, updated 1, deprecated 0
 * **Change**: 2026-10-26-add-sf-skills: created 2, updated 1, deprecated 0
+* **Change**: 2026-10-26-add-agent-instructions: created 1, updated 1, deprecated 0
