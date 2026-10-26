@@ -15,6 +15,8 @@ rules:
   specs:
     - Observable behavior only. Rationale goes to the capability card via knowledge.md.
     - Keep each requirement text under 500 characters.
+  design:
+    - Look up the open deferred commitments this change touches (specfold commitments list, specfold lookup) and record each in `## Commitments` as kept or blocked; write `none` when none is touched.
   knowledge:
     - List every concept to create, update or deprecate. An empty list needs a one-line reason.
   tasks:
