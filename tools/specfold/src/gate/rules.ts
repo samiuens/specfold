@@ -3,6 +3,7 @@ import { join, relative, sep } from "node:path";
 import { auditBundle } from "../audit/rules.ts";
 import { parseFile } from "../bundle.ts";
 import { checkChange } from "../change/command.ts";
+import { conceptDependencies, coveredBy } from "../drift/deps.ts";
 import { EnvError } from "../errors.ts";
 import type { Finding } from "../findings.ts";
 import { matchesAny } from "../glob.ts";
@@ -261,6 +262,26 @@ export const g15: GateRule = (ctx) => {
   return findings;
 };
 
+/** G16: changed files that a concept depends on, while the branch leaves that concept untouched. */
+export const g16: GateRule = (ctx) => {
+  const changed = new Set(ctx.diff.files);
+  const effect: Effect = ctx.config.gate.blockOnDrift ? "block" : "warn";
+  return conceptDependencies(ctx.config.root, ctx.bundleRoot, ctx.config.sourceGlobs)
+    .filter((c) => !changed.has(c.file))
+    .flatMap((c) =>
+      ctx.diff.files
+        .filter((f) => c.paths.some((p) => coveredBy(f, p)))
+        .map((f) => ({
+          rule: "G16",
+          effect,
+          path: f,
+          line: null,
+          message: `changed file is described by /${c.rel}, which this branch does not update`,
+          fix: `check /${c.rel} against the change and update it, or re-verify it with specfold verify`,
+        })),
+    );
+};
+
 /** G6: every archived change's knowledge rules pass and its sync has nothing left to do. */
 export const g6: GateRule = (ctx) =>
   ctx.diff.archivedChanges.flatMap((id) => {
@@ -396,7 +417,7 @@ export const g14: GateRule = (ctx) => {
   });
 };
 
-export const RULES: GateRule[] = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g15, g18];
+export const RULES: GateRule[] = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g15, g16, g18];
 
 const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 const ruleNumber = (rule: string) => Number.parseInt(rule.slice(1), 10);

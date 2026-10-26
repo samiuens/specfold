@@ -22,6 +22,7 @@ import {
   g13,
   g14,
   g15,
+  g16,
   g18,
   runGate,
 } from "../src/gate/rules.ts";
@@ -58,7 +59,7 @@ const rules = (rule: GateRule, root: string, o?: Options) =>
 describe("gate: rules", () => {
   it("reports nothing but G3 setup for an unchanged clean repository", () => {
     const root = gateRepo();
-    for (const rule of [g1, g2, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g15, g18])
+    for (const rule of [g1, g2, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g15, g16, g18])
       expect(rule(ctx(root))).toEqual([]);
   });
 
@@ -270,6 +271,42 @@ describe("gate: rules", () => {
         message: "3 main-spec scenarios have no test reference",
       }),
     ]);
+  });
+
+  // spec: specfold-gate#code-changed-concept-untouched
+  it("G16: warns about a changed file whose concept the branch leaves alone", () => {
+    const root = gateRepo({
+      "src/retry.ts": "// see knowledge: /domain/a.md\n",
+    });
+    commit(root, { "src/retry.ts": "// see knowledge: /domain/a.md\nexport const tries = 3;\n" });
+    expect(g16(ctx(root))).toEqual([
+      expect.objectContaining({
+        rule: "G16",
+        effect: "warn",
+        path: "src/retry.ts",
+        message: "changed file is described by /domain/a.md, which this branch does not update",
+      }),
+    ]);
+  });
+
+  // spec: specfold-gate#concept-updated-in-the-same-pr
+  it("G16: accepts a changed file when the branch also updates its concept", () => {
+    const root = gateRepo({ "src/retry.ts": "// see knowledge: /domain/a.md\n" });
+    commit(root, {
+      "src/retry.ts": "// see knowledge: /domain/a.md\nexport const tries = 3;\n",
+      "knowledge/domain/a.md": concept("Term", "See [b](/domain/b.md). Three tries."),
+    });
+    expect(g16(ctx(root))).toEqual([]);
+  });
+
+  // spec: specfold-gate#blocking-configured
+  it("G16: blocks with gate.block_on_drift", () => {
+    const root = gateRepo({
+      "specfold.yaml": "types: [Term]\nsource_globs: ['src/**']\ngate:\n  block_on_drift: true\n",
+      "src/retry.ts": "// see knowledge: /domain/a.md\n",
+    });
+    commit(root, { "src/retry.ts": "// see knowledge: /domain/a.md\nexport const tries = 3;\n" });
+    expect(rules(g16, root)).toEqual([["G16", "block", "src/retry.ts"]]);
   });
 
   // spec: specfold-gate#overlapping-parallel-groups
