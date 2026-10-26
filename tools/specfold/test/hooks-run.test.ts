@@ -1,7 +1,7 @@
 import { chmodSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
-import { concept, demoChange, gateRepo, git, write } from "./gate-helpers.ts";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { commit, concept, demoChange, gateRepo, git, write } from "./gate-helpers.ts";
 import { run } from "./helpers.ts";
 
 const stage = (root: string, files: Record<string, string>) => {
@@ -73,5 +73,48 @@ describe("hook: pre-commit and extra commands", () => {
     const root = gateRepo();
     expect((await run(["hook", "pre-rebase"], root)).code).toBe(0);
     for (const argv of [["hook"], ["hook", "Pre_Commit"]]) expect((await run(argv, root)).code).toBe(2);
+  });
+});
+
+describe("hook: pre-push and graph refresh", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  // spec: specfold-hooks#blocking-finding
+  it("stops a push when the local gate blocks", async () => {
+    const root = gateRepo();
+    passingOpenspec(root);
+    git(root, "update-ref", "refs/remotes/origin/main", "main");
+    commit(root, { "knowledge/domain/c.md": concept("Term", "See [a](/domain/a.md).") });
+    const result = await run(["hook", "pre-push", "origin", "git@example.com:x.git"], root);
+    expect(result.code).toBe(1);
+    expect(result.stdout).toContain("block G2 knowledge/domain/index.md index is outdated\n");
+  });
+
+  it("uses origin/HEAD and lets a clean push through", async () => {
+    const root = gateRepo();
+    passingOpenspec(root);
+    git(root, "update-ref", "refs/remotes/origin/trunk", "main");
+    git(root, "symbolic-ref", "refs/remotes/origin/HEAD", "refs/remotes/origin/trunk");
+    commit(root, { "src/app.ts": "export const app = 2;\n" });
+    expect(await run(["hook", "pre-push"], root)).toMatchObject({ code: 0, stdout: "" });
+  });
+
+  it("warns and passes without a base", async () => {
+    const result = await run(["hook", "pre-push"], gateRepo());
+    expect(result.code).toBe(0);
+    expect(result.stderr).toContain("skipping the gate (CI still runs it)");
+  });
+
+  // spec: specfold-hooks#graphify-missing
+  it("exits with 0 and no output when graphify is missing", async () => {
+    vi.stubEnv("PATH", "/usr/bin:/bin");
+    for (const hook of ["post-merge", "post-checkout"])
+      expect(await run(["hook", hook, "a", "b", "1"], gateRepo())).toEqual({
+        code: 0,
+        stdout: "",
+        stderr: "",
+      });
   });
 });

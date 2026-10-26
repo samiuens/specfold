@@ -4,8 +4,9 @@ import { join, relative, sep } from "node:path";
 import { checkPlannedChange } from "../change/command.ts";
 import type { Io } from "../cli.ts";
 import { findingLine } from "../findings.ts";
+import { localGate, renderGate } from "../gate/command.ts";
 import { openspecValidate } from "../gate/openspec.ts";
-import { git } from "../git.ts";
+import { git, gitSucceeds } from "../git.ts";
 import { openspecBinary } from "../openspec.ts";
 import { type Config, resolveBundleRoot } from "../repo.ts";
 import { taskFindingLine } from "../tasks/command.ts";
@@ -64,8 +65,50 @@ function preCommit({ config, io }: HookContext): number {
   return 1;
 }
 
+/** The branch the local gate compares against: origin/HEAD, else origin/main; undefined when neither exists. */
+export function localBase(root: string): string | undefined {
+  try {
+    const head = git(root, ["symbolic-ref", "--quiet", "refs/remotes/origin/HEAD"]).trim();
+    if (head) return head.replace(/^refs\/remotes\//, "");
+  } catch {
+    // no origin/HEAD; try origin/main
+  }
+  return gitSucceeds(root, ["rev-parse", "--verify", "--quiet", "origin/main^{commit}"])
+    ? "origin/main"
+    : undefined;
+}
+
+/** The local gate against origin; without a base the push goes through, because CI still gates. */
+function prePush({ config, io }: HookContext): number {
+  const base = localBase(config.root);
+  if (!base) {
+    io.stderr(
+      "pre-push: no origin/HEAD or origin/main to compare with; skipping the gate (CI still runs it)\n",
+    );
+    return 0;
+  }
+  const findings = localGate(config, config.root, base);
+  if (findings.every((f) => f.effect !== "block")) return 0;
+  io.stdout(renderGate(findings));
+  return 1;
+}
+
+/** Refreshes an installed graphify graph; never fails and stays silent. */
+function refreshGraph({ config }: HookContext): number {
+  spawnSync("graphify", ["update", "."], {
+    cwd: config.root,
+    env: { ...process.env, GRAPHIFY_BACKEND: "none" },
+    stdio: "ignore",
+    timeout: 120_000,
+  });
+  return 0;
+}
+
 const OWN_CHECKS: Record<string, OwnHook> = {
   "pre-commit": preCommit,
+  "pre-push": prePush,
+  "post-checkout": refreshGraph,
+  "post-merge": refreshGraph,
 };
 
 /** Runs each `hooks.extra.<name>` command with `sh -c`, the hook's arguments as `$1`, `$2`, ...; stops at the first failure. */
