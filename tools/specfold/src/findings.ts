@@ -28,7 +28,8 @@ export function findingLine(f: Finding): string {
   return `${f.path}${f.line === null ? "" : `:${f.line}`} ${f.rule} ${f.message}`;
 }
 
-const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+export const plural = (n: number, word: string) =>
+  `${n} ${n === 1 ? word : word.endsWith("x") ? `${word}es` : `${word}s`}`;
 
 /** Error lines followed by one summary line; warnings only appear as a count. */
 export function renderHuman(findings: Finding[], checked: number): string {
