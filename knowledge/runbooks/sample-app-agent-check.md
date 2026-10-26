@@ -1,0 +1,39 @@
+---
+type: Runbook
+title: Sample app agent check
+description: How to check the agent layer end to end on a fresh copy of the sample app, in Claude Code and in opencode.
+status: draft
+stale_after: 2027-01-24T16:02:15+01:00
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T16:02:15+01:00 }
+sources:
+  - id: steps
+    resource: ../../examples/sample-app/README.md
+    title: "Sample app README, section 'Agent check'"
+---
+
+# When to use
+
+After a change to the skills, the planner, `AGENTS.md`, `CLAUDE.md` or the schema templates, and before a release. It is the M3 proof that the agent layer works in a clean repository in Claude Code and in a second tool. The interactive part needs a human at the keyboard.
+
+# Steps
+
+The exact commands are in the sample app's README (section "Agent check"), linked as the source, so they live in one place. In short:
+
+1. Copy `examples/sample-app` outside the kit and `git init` it. Claude Code loads `CLAUDE.md` and skills from parent folders, so a run inside the kit would mix in the kit's own instructions.
+2. Put the kit's pinned OpenSpec on `PATH`.
+3. Run `claude --agent planner --permission-mode plan`, ask for a small change, and answer its questions.
+4. Run `opencode` in the same copy, list the skills and do a lookup through `sf-lookup`.
+5. Copy the new change folder back into `examples/sample-app/openspec/changes/`.
+
+# Verify
+
+- **Before asking,** the planner looks things up (`specfold lookup`, `openspec list --specs`).
+- **Questions** arrive as native multiple-choice questions, one decision each, with the recommended option first.
+- **The plan** arrives through plan approval, and nothing is written before approval. A rejected plan starts another round.
+- **Your login:** the planner asks you to state it for `confirmed_by`; it never copies one from earlier files.
+- **The new change** passes `change check` (only the T7 warning for `knowledge-curator` until M8) and `openspec validate --strict`.
+- **opencode** lists the six sf skills and answers the lookup from the right concept.
+
+# Related
+
+- [Agent layer](/architecture/agent-layer.md)

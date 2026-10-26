@@ -77,7 +77,7 @@ scenarios: []
 agent: knowledge-curator
 ```
 
-- [ ] 6.1 Write the concepts listed in `knowledge.md`
+- [x] 6.1 Write the concepts listed in `knowledge.md`
   - Done when: `node scripts/specfold.mjs validate` and `audit` exit 0
 
 ## Workflow follow-up
