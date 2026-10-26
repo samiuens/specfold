@@ -3,7 +3,7 @@ type: Component
 title: specfold CLI
 description: How the specfold CLI is structured, built and shipped as one bundled file.
 status: draft
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T11:35:58+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T14:04:05+01:00 }
 sources:
   - id: source
     resource: ../../tools/specfold/src/cli.ts
@@ -31,6 +31,7 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/log/` | the `log add` command and the insertion of entries into date sections |
 | `src/lookup/` | the `lookup` command: frontmatter search, weighted ranking, trust flags |
 | `src/new/` | the `new` command: per-type templates, override files, frontmatter rendering |
+| `src/tasks/` | the `tasks check`, `status` and `resume` commands: the `tasks.md` parser, rules T0 to T11, file overlap between parallel groups, task commits from git trailers, group progress |
 
 # How commands work
 
@@ -48,5 +49,6 @@ Under Node, `yaml` resolves to its CommonJS build, so the bundle banner provides
 - [specfold log](/capabilities/specfold-log.md)
 - [specfold lookup](/capabilities/specfold-lookup.md)
 - [specfold new](/capabilities/specfold-new.md)
+- [specfold tasks](/capabilities/specfold-tasks.md)
 - [Deterministic CLI](/decisions/deterministic-cli.md)
 - [TypeScript style](/conventions/typescript-style.md)
