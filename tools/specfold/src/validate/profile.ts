@@ -393,7 +393,7 @@ const HUMAN = /^human:\S+$/;
 /** P12: the keys of a Backlog Item. */
 export const p12: Rule = (file) => {
   const data = conceptData(file);
-  if (!data || data.type !== "Backlog Item") return [];
+  if (data?.type !== "Backlog Item") return [];
   const findings: Finding[] = [];
   const add = (key: string | null, message: string, fix: string) =>
     findings.push(finding("P12", file, key, message, fix));
@@ -425,7 +425,7 @@ export const p12: Rule = (file) => {
 /** P13: the keys of a Deferred Commitment; a missing committed_by only warns. */
 export const p13: Rule = (file, ctx) => {
   const data = conceptData(file);
-  if (!data || data.type !== "Deferred Commitment") return [];
+  if (data?.type !== "Deferred Commitment") return [];
   const findings: Finding[] = [];
   const add = (key: string | null, message: string, fix: string) =>
     findings.push(finding("P13", file, key, message, fix));
@@ -481,8 +481,7 @@ export const p13: Rule = (file, ctx) => {
 /** P14: a Vision's horizon is a string. */
 export const p14: Rule = (file) => {
   const data = conceptData(file);
-  if (!data || data.type !== "Vision" || data.horizon === undefined || typeof data.horizon === "string")
-    return [];
+  if (data?.type !== "Vision" || data.horizon === undefined || typeof data.horizon === "string") return [];
   return [finding("P14", file, "horizon", "horizon must be a string", 'quote it, e.g. horizon: "2027"')];
 };
 
