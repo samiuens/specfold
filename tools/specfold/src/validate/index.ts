@@ -5,6 +5,7 @@ import { register } from "../cli.ts";
 import { EnvError, UsageError } from "../errors.ts";
 import { type Finding, renderHuman, renderJson } from "../findings.ts";
 import { type Config, findRepoRoot, requireConfig } from "../repo.ts";
+import { okf1, okf2 } from "./okf.ts";
 
 export interface RuleContext {
   bundleRoot: string;
@@ -15,7 +16,7 @@ export interface RuleContext {
 /** A rule inspects one Markdown file and returns findings; rules never throw. */
 export type Rule = (file: ParsedFile, ctx: RuleContext) => Finding[];
 
-const okfRules: Rule[] = [];
+const okfRules: Rule[] = [okf1, okf2];
 
 export interface ValidateInput {
   bundleRoot: string;
