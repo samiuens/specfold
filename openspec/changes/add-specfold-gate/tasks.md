@@ -49,7 +49,7 @@ agent: implementer
   - Done when: scenarios missing-knowledge-delta, archived-without-sync, unconfirmed-brief and overlapping-parallel-groups pass in `gate-rules.test.ts`
 - [x] 3.5 Add G8, G9, G12 and G14 over concepts and code references
   - Done when: scenarios agent-claims-a-human, edited-stale-reference, old-draft-elsewhere, new-dangling-reference and old-dangling-reference pass in `gate-rules.test.ts`
-- [ ] 3.6 Skip G5 and G18 for touched changes without `tasks.md`
+- [x] 3.6 Skip G5 and G18 for touched changes without `tasks.md`
   - Done when: scenario change-being-planned passes in `gate-rules.test.ts`
 
 ## 4. Gate command

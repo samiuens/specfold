@@ -170,12 +170,18 @@ export const g4: GateRule = (ctx) => {
   ];
 };
 
-const touchedChanges = (ctx: GateContext) =>
-  ctx.diff.activeChanges.map((change) => checkChange(ctx.config, ctx.bundleRoot, change));
+/** Touched active changes with a tasks.md; those without one are still being planned. */
+const plannedChanges = (ctx: GateContext) =>
+  ctx.diff.activeChanges.filter((change) =>
+    existsSync(join(ctx.config.root, "openspec", "changes", change, "tasks.md")),
+  );
 
-/** G5: knowledge rule errors of every touched active change. */
+const touchedChanges = (ctx: GateContext, changes = ctx.diff.activeChanges) =>
+  changes.map((change) => checkChange(ctx.config, ctx.bundleRoot, change));
+
+/** G5: knowledge rule errors of every touched active change with a tasks.md. */
 export const g5: GateRule = (ctx) =>
-  touchedChanges(ctx).flatMap((fs) =>
+  touchedChanges(ctx, plannedChanges(ctx)).flatMap((fs) =>
     fs.filter((f) => f.rule.startsWith("K")).map((f) => fromChange("G5", f)),
   );
 
@@ -185,9 +191,9 @@ export const g13: GateRule = (ctx) =>
     fs.filter((f) => f.rule.startsWith("B")).map((f) => fromChange("G13", f)),
   );
 
-/** G18: `specfold tasks check <change> --base <ref>` for every touched active change. */
+/** G18: `specfold tasks check <change> --base <ref>` for every touched active change with a tasks.md. */
 export const g18: GateRule = (ctx) =>
-  ctx.diff.activeChanges.flatMap((change) =>
+  plannedChanges(ctx).flatMap((change) =>
     checkChangeTasks(ctx.config, change, ctx.diff.ref).map((f) => fromChange("G18", f)),
   );
 

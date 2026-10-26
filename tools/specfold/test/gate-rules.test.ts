@@ -160,6 +160,18 @@ describe("gate: rules", () => {
     ]);
   });
 
+  // spec: specfold-gate#change-being-planned
+  it("G5 and G18: skip a touched change without tasks.md", () => {
+    const root = gateRepo();
+    const files = demoChange();
+    delete files["openspec/changes/demo/knowledge.md"];
+    delete files["openspec/changes/demo/tasks.md"];
+    commit(root, files);
+    expect(g5(ctx(root))).toEqual([]);
+    expect(g18(ctx(root))).toEqual([]);
+    expect(g13(ctx(root))).toEqual([]);
+  });
+
   // spec: specfold-gate#unconfirmed-brief
   it("G13: blocks a touched change with an unconfirmed brief", () => {
     const root = gateRepo();
