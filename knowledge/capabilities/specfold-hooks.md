@@ -3,7 +3,15 @@ type: Capability
 title: specfold hooks
 description: Why Specfold ships its own git and Claude Code hook entry points, and where their contract lives.
 status: draft
+spec: openspec/specs/specfold-hooks/spec.md
+resource: ../../openspec/specs/specfold-hooks/spec.md
+change: 2026-10-26-add-specfold-hooks
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:11:42+01:00 }
+sources:
+  - id: proposal-2026-10-26-add-specfold-hooks
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-hooks/proposal.md
+  - id: design-2026-10-26-add-specfold-hooks
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-hooks/design.md
 ---
 
 # Why
