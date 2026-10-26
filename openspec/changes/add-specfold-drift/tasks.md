@@ -15,13 +15,13 @@ agent: implementer
 ## 2. Dependent paths and baselines
 
 ```yaml
-files: [tools/specfold/src/drift/deps.ts, tools/specfold/src/drift/drift.ts, tools/specfold/test/drift.test.ts]
+files: [tools/specfold/src/drift/deps.ts, tools/specfold/src/drift/drift.ts, tools/specfold/test/drift.test.ts, tools/specfold/test/drift-helpers.ts, tools/specfold/src/validate/links.ts]
 depends: []
 scenarios: [specfold-drift#code-reference, specfold-drift#url-source, specfold-drift#code-changed-after-verification, specfold-drift#concept-edited-after-the-code]
 agent: implementer
 ```
 
-- [ ] 2.1 Map concepts to their dependent repository paths
+- [x] 2.1 Map concepts to their dependent repository paths
   - Done when: scenarios code-reference and url-source pass in `drift.test.ts`
 - [ ] 2.2 Find commits newer than a concept's baseline
   - Done when: scenarios code-changed-after-verification and concept-edited-after-the-code pass in `drift.test.ts`
