@@ -27,6 +27,7 @@ describe("repo", () => {
       folders: { decisions: { title: "Decisions", description: "Why" } },
       agentPrefix: "",
       requires: {},
+      tasks: { maxFilesPerTask: 5, maxTasksPerGroup: 8 },
     });
   });
 
@@ -50,5 +51,20 @@ describe("repo", () => {
     const root = tempDir();
     writeFileSync(join(root, "specfold.yaml"), "types: Decision\n");
     expect(() => requireConfig(root)).toThrow(/'types' must be a list/);
+  });
+
+  it("reads the task size limits", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "specfold.yaml"),
+      "tasks:\n  max_files_per_task: 3\n  max_tasks_per_group: 12\n",
+    );
+    expect(requireConfig(root).tasks).toEqual({ maxFilesPerTask: 3, maxTasksPerGroup: 12 });
+  });
+
+  it("fails with an environment error on a non-positive task limit", () => {
+    const root = tempDir();
+    writeFileSync(join(root, "specfold.yaml"), "tasks:\n  max_files_per_task: 0\n");
+    expect(() => requireConfig(root)).toThrow(EnvError);
   });
 });

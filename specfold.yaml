@@ -61,6 +61,11 @@ types:
 actors:
   agent_prefix: "claude-code/"
 
+# Size limits for task breakdowns; exceeding them only warns (specfold tasks check T9, T10).
+tasks:
+  max_files_per_task: 5
+  max_tasks_per_group: 8
+
 # Kit repo only: run by `specfold hook commit-msg` from M4 on; until then .githooks/commit-msg runs it.
 hooks:
   extra:

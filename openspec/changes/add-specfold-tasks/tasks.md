@@ -9,7 +9,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Read `tasks.max_files_per_task` and `tasks.max_tasks_per_group` from `specfold.yaml` with defaults 5 and 8
+- [x] 1.1 Read `tasks.max_files_per_task` and `tasks.max_tasks_per_group` from `specfold.yaml` with defaults 5 and 8
   - Done when: `repo.test.ts` covers defaults and configured values
 
 ## 2. Parser
