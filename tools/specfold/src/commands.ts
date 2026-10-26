@@ -3,6 +3,7 @@ import "./agents/command.ts";
 import "./audit/command.ts";
 import "./backlog/command.ts";
 import "./change/command.ts";
+import "./commitments/command.ts";
 import "./doctor/command.ts";
 import "./drift/command.ts";
 import "./gate/command.ts";
