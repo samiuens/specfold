@@ -32,3 +32,5 @@
 * **Change**: 2026-10-26-add-specfold-drift: created 1, updated 3, deprecated 0
 * **Change**: 2026-10-26-add-specfold-backlog: created 2, updated 6, deprecated 0
 * **Change**: 2026-10-26-add-commitment-gate: created 0, updated 3, deprecated 0
+* **Change**: 2026-10-26-add-interview-retro: created 1, updated 2, deprecated 0
+* **Retro**: add-interview-retro: 0 answers (nothing came too late, no guesses)
