@@ -35,7 +35,7 @@ agent: implementer
   - Done when: `npm test` passes and `specfold trace --change add-rename` reports every scenario covered
 - [x] 2.5 Archive, sync and run the retro for `add-rename`
   - Done when: `specfold sync add-rename --dry-run` reports nothing to change, `specfold validate` passes, and `log.md` has the Retro entry
-- [ ] 2.6 Check trace and drift on the sample app
+- [x] 2.6 Check trace and drift on the sample app
   - Done when: `specfold trace` reports 0 dangling and no uncovered main-spec scenario (the planned `add-priorities` change has no tests yet), and `specfold drift` runs without error
 
 ## 3. Knowledge
