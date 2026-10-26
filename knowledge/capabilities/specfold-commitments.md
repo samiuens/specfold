@@ -3,7 +3,15 @@ type: Capability
 title: specfold commitments
 description: Why anyone may fulfill a deferred commitment but only a human may withdraw one, and where the contract lives.
 status: draft
+spec: openspec/specs/specfold-commitments/spec.md
+resource: ../../openspec/specs/specfold-commitments/spec.md
+change: 2026-10-26-add-specfold-backlog
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T18:21:12+01:00 }
+sources:
+  - id: proposal-2026-10-26-add-specfold-backlog
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-backlog/proposal.md
+  - id: design-2026-10-26-add-specfold-backlog
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-backlog/design.md
 ---
 
 # Why

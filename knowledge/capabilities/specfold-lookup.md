@@ -3,7 +3,7 @@ type: Capability
 title: specfold lookup
 description: Why agents search knowledge by frontmatter first, and where the contract for specfold lookup lives.
 status: draft
-change: 2026-10-26-add-specfold-drift
+change: 2026-10-26-add-specfold-backlog
 resource: ../../openspec/specs/specfold-lookup/spec.md
 spec: openspec/specs/specfold-lookup/spec.md
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T11:43:00+01:00 }
@@ -16,6 +16,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-drift/proposal.md
   - id: design-2026-10-26-add-specfold-drift
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-drift/design.md
+  - id: proposal-2026-10-26-add-specfold-backlog
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-backlog/proposal.md
+  - id: design-2026-10-26-add-specfold-backlog
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-backlog/design.md
 ---
 
 # Why
