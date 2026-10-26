@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { dirname, join, relative } from "node:path";
 import type { ParsedFile } from "../bundle.ts";
 import type { Finding } from "../findings.ts";
 import type { BundleRule, Rule } from "./index.ts";
@@ -262,3 +264,130 @@ export const p8: BundleRule = (ctx, inSelection) =>
       message: `${e.isDir ? "folder" : "file"} name is not kebab-case${e.isDir ? "" : " Markdown"}`,
       fix: "rename it with lowercase letters, digits and single hyphens (files end in .md)",
     }));
+
+const NORMATIVE = /\b(SHALL|MUST)\b/;
+
+export const p9: Rule = (file) => {
+  if (!conceptData(file)) return [];
+  const findings: Finding[] = [];
+  let fence: string | undefined;
+  file.body.split("\n").forEach((text, i) => {
+    const marker = /^\s*(`{3,}|~{3,})/.exec(text)?.[1];
+    if (marker) {
+      if (fence === undefined) fence = marker[0];
+      else if (marker[0] === fence) fence = undefined;
+      return;
+    }
+    if (fence !== undefined) return;
+    const word = NORMATIVE.exec(text.replace(/`[^`]*`/g, ""))?.[1];
+    if (word) {
+      findings.push({
+        rule: "P9",
+        severity: "error",
+        path: file.rel,
+        line: file.bodyStartLine + i,
+        message: `normative '${word}' in knowledge`,
+        fix: "move the requirement into an OpenSpec spec and describe the context here instead",
+      });
+    }
+  });
+  return findings;
+};
+
+const MAX_BODY_LINES = 300;
+
+export const p10: Rule = (file) => {
+  if (!conceptData(file)) return [];
+  const lines = file.body.replace(/\n+$/, "").split("\n").length;
+  if (lines <= MAX_BODY_LINES) return [];
+  return [
+    {
+      rule: "P10",
+      severity: "warning",
+      path: file.rel,
+      line: null,
+      message: `body has ${lines} lines (more than ${MAX_BODY_LINES})`,
+      fix: "split the topic into a folder with its own index.md",
+    },
+  ];
+};
+
+const DECISIONS = ["accepted", "rejected", "superseded"];
+
+export const p11: Rule = (file, ctx) => {
+  const data = conceptData(file);
+  if (!data) return [];
+  const findings: Finding[] = [];
+  if (data.type === "Decision" && !DECISIONS.includes(data.decision as string)) {
+    findings.push(
+      finding(
+        "P11",
+        file,
+        data.decision === undefined ? null : "decision",
+        data.decision === undefined
+          ? "a Decision needs 'decision'"
+          : `decision '${String(data.decision)}' is not allowed`,
+        `set 'decision' to ${DECISIONS.join(", ")}`,
+      ),
+    );
+  }
+  if (data.supersedes !== undefined) {
+    const target =
+      typeof data.supersedes === "string"
+        ? resolveInBundle(ctx.bundleRoot, file.rel, data.supersedes)
+        : undefined;
+    if (!target || !existsSync(target)) {
+      findings.push(
+        finding(
+          "P11",
+          file,
+          "supersedes",
+          `superseded concept '${String(data.supersedes)}' does not exist`,
+          "point 'supersedes' at an existing concept, e.g. /decisions/old.md",
+        ),
+      );
+    }
+  }
+  if (data.spec !== undefined) {
+    const root = ctx.config?.root;
+    if (typeof data.spec !== "string" || !root || !existsSync(join(root, data.spec))) {
+      findings.push(
+        finding(
+          "P11",
+          file,
+          "spec",
+          `spec '${String(data.spec)}' does not exist`,
+          "use the repository-relative path openspec/specs/<capability>/spec.md",
+        ),
+      );
+    }
+  }
+  if (data.not !== undefined) {
+    const valid =
+      Array.isArray(data.not) &&
+      data.not.every(
+        (n) => isRecord(n) && nonEmptyString(n.term) && nonEmptyString(n.why) && nonEmptyString(n.instead),
+      );
+    if (!valid) {
+      findings.push(
+        finding(
+          "P11",
+          file,
+          "not",
+          "'not' must be a list of { term, why, instead }",
+          "write each misreading as '- { term, why, instead }'",
+        ),
+      );
+    }
+  }
+  return findings;
+};
+
+/** Resolves a bundle-absolute (`/x.md`) or file-relative link target to an absolute path inside the bundle. */
+export function resolveInBundle(bundleRoot: string, fromRel: string, target: string): string | undefined {
+  const clean = target.split("#")[0] ?? "";
+  if (clean === "") return undefined;
+  const abs = clean.startsWith("/") ? join(bundleRoot, clean) : join(bundleRoot, dirname(fromRel), clean);
+  const rel = relative(bundleRoot, abs);
+  return rel.startsWith("..") ? undefined : abs;
+}

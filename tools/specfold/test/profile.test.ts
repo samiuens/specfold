@@ -201,3 +201,101 @@ describe("validate: profile P5-P8", () => {
     expect(p8).toEqual(["Data_Flows", "runbooks/RotateKeys.md"]);
   });
 });
+
+describe("validate: profile P9-P11", () => {
+  // spec: specfold-validate#normative-sentence-in-knowledge
+  it("P9 reports SHALL or MUST in a concept body", async () => {
+    const repo = tempDir("valid");
+    edit(repo, RUNBOOK, "2. Publish it.", "2. Publish it.\n3. The service MUST retry twice.");
+    const result = await run(["validate", "--json"], repo);
+    const [f] = JSON.parse(result.stdout).findings;
+    expect(f).toMatchObject({ rule: "P9", line: 14 });
+    expect(f.fix).toContain("OpenSpec");
+  });
+
+  // spec: specfold-validate#quoted-in-code
+  it("P9 ignores the words inside inline code and fences", async () => {
+    const repo = tempDir("valid");
+    const text = readFileSync(join(repo, "knowledge/decisions/use-yaml.md"), "utf8");
+    expect(text).toContain("`MUST`");
+    expect(text).toContain("The service MUST retry.");
+    expect(await findings(repo)).toEqual([]);
+  });
+
+  // spec: specfold-validate#long-concept
+  it("P10 warns about a body over 300 lines without failing", async () => {
+    const repo = tempDir("valid");
+    edit(repo, RUNBOOK, "2. Publish it.", `2. Publish it.\n${"line\n".repeat(300)}`);
+    const result = await run(["validate", "--json"], repo);
+    expect(result.code).toBe(0);
+    expect(JSON.parse(result.stdout).findings).toEqual([
+      expect.objectContaining({ rule: "P10", severity: "warning" }),
+    ]);
+  });
+
+  // spec: specfold-validate#only-warnings
+  it("exits with 0 when only warnings are found", async () => {
+    const repo = tempDir("valid");
+    edit(repo, RUNBOOK, "2. Publish it.", `2. Publish it.\n${"line\n".repeat(300)}`);
+    const result = await run(["validate"], repo);
+    expect(result).toMatchObject({ code: 0, stdout: "8 files checked: 0 errors, 1 warning\n" });
+  });
+
+  // spec: specfold-validate#error-line-and-summary
+  it("prints error lines and a summary counting warnings", async () => {
+    const repo = tempDir("valid");
+    writeFileSync(
+      join(repo, "knowledge/decisions/a.md"),
+      "---\ntype: Decision\ndescription: A.\nstatus: draft\ndecision: accepted\ngenerated: { by: human:ada, at: 2026-10-26T10:00:00Z }\nsources: [{ resource: https://example.com }]\n---\n",
+    );
+    edit(repo, RUNBOOK, "2. Publish it.", `2. Publish it.\n${"line\n".repeat(300)}`);
+    const result = await run(["validate"], repo);
+    expect(result.code).toBe(1);
+    expect(result.stdout).toBe(
+      "decisions/a.md:1 P2 missing or empty 'title'\n9 files checked: 1 error, 1 warning\n",
+    );
+  });
+
+  // spec: specfold-validate#decision-without-decision-key
+  it("P11 reports a Decision without decision", async () => {
+    const repo = tempDir("valid");
+    edit(repo, "knowledge/decisions/use-yaml.md", "decision: accepted\n", "");
+    expect(await findings(repo)).toEqual([
+      expect.objectContaining({ rule: "P11", message: "a Decision needs 'decision'" }),
+    ]);
+  });
+
+  // spec: specfold-validate#superseded-target-missing
+  it("P11 reports a supersedes target that does not exist", async () => {
+    const repo = tempDir("valid");
+    edit(
+      repo,
+      "knowledge/decisions/use-yaml.md",
+      "decision: accepted",
+      "decision: accepted\nsupersedes: /decisions/old.md",
+    );
+    expect(await findings(repo)).toEqual([expect.objectContaining({ rule: "P11", line: 7 })]);
+  });
+
+  it("P11 accepts an existing supersedes target and checks spec and not", async () => {
+    const repo = tempDir("valid");
+    edit(
+      repo,
+      "knowledge/decisions/use-yaml.md",
+      "decision: accepted",
+      "decision: accepted\nsupersedes: ../runbooks/rotate-keys.md\nspec: docs/missing.md\nnot: [{ term: x }]",
+    );
+    expect((await findings(repo)).map((f) => f.message)).toEqual([
+      "spec 'docs/missing.md' does not exist",
+      "'not' must be a list of { term, why, instead }",
+    ]);
+  });
+
+  // spec: specfold-validate#extra-key
+  it("never reports unknown keys", async () => {
+    const repo = tempDir("valid");
+    const text = readFileSync(join(repo, "knowledge/decisions/use-yaml.md"), "utf8");
+    expect(text).toContain("owner_team: platform");
+    expect(await findings(repo)).toEqual([]);
+  });
+});
