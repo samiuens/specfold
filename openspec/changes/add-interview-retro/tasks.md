@@ -31,7 +31,7 @@ agent: implementer
   - Done when: `specfold change check add-rename` reports no brief errors
 - [x] 2.3 Write the proposal, delta spec, knowledge and tasks
   - Done when: `openspec validate add-rename --strict` and `specfold tasks check add-rename` pass
-- [ ] 2.4 Implement the change with `spec:` references in its tests
+- [x] 2.4 Implement the change with `spec:` references in its tests
   - Done when: `npm test` passes and `specfold trace --change add-rename` reports every scenario covered
 - [ ] 2.5 Archive, sync and run the retro for `add-rename`
   - Done when: `specfold sync add-rename --dry-run` reports nothing to change, `specfold validate` passes, and `log.md` has the Retro entry

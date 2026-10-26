@@ -30,6 +30,15 @@ export function createTodoList() {
       return { ...item };
     },
 
+    /** Changes an item's title with the rules of `add`; done state and due date stay. Unknown ids throw. */
+    rename(id, title) {
+      if (typeof title !== "string" || title.trim() === "") throw new TypeError("title must be a non-empty string");
+      const item = items.find((i) => i.id === id);
+      if (!item) throw new RangeError(`no item with id ${id}`);
+      item.title = title.trim();
+      return { ...item };
+    },
+
     /** All items in insertion order, optionally only open or only done ones. */
     list({ done } = {}) {
       return items.filter((i) => done === undefined || i.done === done).map((i) => ({ ...i }));
