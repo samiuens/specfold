@@ -31,6 +31,8 @@ export interface Config {
   gate: { requireChangeForSourceChanges: boolean; escapeLabel: string; blockOnStaleTouched: boolean };
   /** `hooks.extra`: shell commands per git hook name, run after Specfold's own checks. */
   hooksExtra: Record<string, string[]>;
+  /** `trace.test_globs`: files whose `spec:` references count as tests. */
+  traceTestGlobs: string[];
 }
 
 /** The nearest directory at or above `cwd` that contains specfold.yaml. */
@@ -63,6 +65,16 @@ function repoFolder(path: string, key: string): string {
   return clean;
 }
 
+/** Default `trace.test_globs`: common test file names and folders. */
+export const DEFAULT_TEST_GLOBS = [
+  "**/*.test.*",
+  "**/*.spec.*",
+  "**/*_test.*",
+  "**/test/**",
+  "**/tests/**",
+  "**/spec/**",
+];
+
 const stringList = (v: unknown, key: string): string[] => {
   if (v === undefined) return [];
   if (!Array.isArray(v) || !v.every((x) => typeof x === "string")) {
@@ -85,6 +97,7 @@ export function loadConfig(root: string): Config {
   const agents = isRecord(data.agents) ? data.agents : {};
   const audit = isRecord(data.audit) ? data.audit : {};
   const hooks = isRecord(data.hooks) ? data.hooks : {};
+  const trace = isRecord(data.trace) ? data.trace : {};
   const extra = hooks.extra === undefined ? {} : hooks.extra;
   if (!isRecord(extra))
     throw new EnvError(`${CONFIG_FILE}: 'hooks.extra' must map hook names to command lists`);
@@ -132,6 +145,8 @@ export function loadConfig(root: string): Config {
       blockOnStaleTouched: gate.block_on_stale_touched !== false,
     },
     hooksExtra,
+    traceTestGlobs:
+      trace.test_globs === undefined ? DEFAULT_TEST_GLOBS : stringList(trace.test_globs, "trace.test_globs"),
   };
 }
 

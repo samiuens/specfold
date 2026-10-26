@@ -9,7 +9,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Read `trace.test_globs` with its defaults
+- [x] 1.1 Read `trace.test_globs` with its defaults
   - Done when: `repo.test.ts` covers the defaults and a configured list
 
 ## 2. Scenarios and references

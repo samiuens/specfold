@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { EnvError } from "../src/errors.ts";
-import { findRepoRoot, requireConfig } from "../src/repo.ts";
+import { DEFAULT_TEST_GLOBS, findRepoRoot, requireConfig } from "../src/repo.ts";
 import { tempDir } from "./helpers.ts";
 
 describe("repo", () => {
@@ -32,6 +32,7 @@ describe("repo", () => {
       unverifiedAfterDays: 30,
       gate: { requireChangeForSourceChanges: true, escapeLabel: "no-spec", blockOnStaleTouched: true },
       hooksExtra: {},
+      traceTestGlobs: DEFAULT_TEST_GLOBS,
     });
   });
 
@@ -119,5 +120,15 @@ describe("repo", () => {
     const root = tempDir();
     writeFileSync(join(root, "specfold.yaml"), "audit:\n  unverified_after_days: 90\n");
     expect(requireConfig(root).unverifiedAfterDays).toBe(90);
+  });
+
+  it("reads the test globs for trace, with defaults", () => {
+    const root = tempDir();
+    writeFileSync(join(root, "specfold.yaml"), "types: []\n");
+    expect(requireConfig(root).traceTestGlobs).toContain("**/*_test.*");
+    writeFileSync(join(root, "specfold.yaml"), "trace:\n  test_globs: ['test/**/*.test.ts']\n");
+    expect(requireConfig(root).traceTestGlobs).toEqual(["test/**/*.test.ts"]);
+    writeFileSync(join(root, "specfold.yaml"), "trace:\n  test_globs: test\n");
+    expect(() => requireConfig(root)).toThrow(EnvError);
   });
 });
