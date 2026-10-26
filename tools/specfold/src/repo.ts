@@ -25,6 +25,8 @@ export interface Config {
   tasks: { maxFilesPerTask: number; maxTasksPerGroup: number };
   /** `agents.targets`: repository-relative folders that receive one symlink per skill. */
   agentTargets: string[];
+  /** `audit.unverified_after_days`: age after which a concept without `verified` is an audit finding. */
+  unverifiedAfterDays: number;
 }
 
 /** The nearest directory at or above `cwd` that contains specfold.yaml. */
@@ -77,6 +79,7 @@ export function loadConfig(root: string): Config {
   const actors = isRecord(data.actors) ? data.actors : {};
   const tasks = isRecord(data.tasks) ? data.tasks : {};
   const agents = isRecord(data.agents) ? data.agents : {};
+  const audit = isRecord(data.audit) ? data.audit : {};
   const folders: Record<string, FolderInfo> = {};
   if (isRecord(data.folders)) {
     for (const [path, info] of Object.entries(data.folders)) {
@@ -107,6 +110,7 @@ export function loadConfig(root: string): Config {
       agents.targets === undefined
         ? [".claude/skills"]
         : stringList(agents.targets, "agents.targets").map((t) => repoFolder(t, "agents.targets")),
+    unverifiedAfterDays: positiveInt(audit.unverified_after_days, "audit.unverified_after_days", 30),
   };
 }
 

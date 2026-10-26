@@ -29,6 +29,7 @@ describe("repo", () => {
       requires: {},
       tasks: { maxFilesPerTask: 5, maxTasksPerGroup: 8 },
       agentTargets: [".claude/skills"],
+      unverifiedAfterDays: 30,
     });
   });
 
@@ -84,5 +85,11 @@ describe("repo", () => {
       writeFileSync(join(root, "specfold.yaml"), `agents:\n  targets: ['${target}']\n`);
       expect(() => requireConfig(root), target).toThrow(EnvError);
     }
+  });
+
+  it("reads the audit age limit for unverified concepts", () => {
+    const root = tempDir();
+    writeFileSync(join(root, "specfold.yaml"), "audit:\n  unverified_after_days: 90\n");
+    expect(requireConfig(root).unverifiedAfterDays).toBe(90);
   });
 });
