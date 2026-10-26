@@ -49,7 +49,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 4.1 List and find backlog items and commitments, and parse due dates
+- [x] 4.1 List and find backlog items and commitments, and parse due dates
   - Done when: `future-items.test.ts` covers lookup by name and path, unknown items, and date and condition triggers
 
 ## 5. Backlog command
