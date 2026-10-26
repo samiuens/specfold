@@ -1,7 +1,8 @@
 import { chmodSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { commit, demoChange, gateRepo, write, writeIndexes } from "./gate-helpers.ts";
+import { fakeGithub, review } from "./github-server.ts";
 import { run } from "./helpers.ts";
 
 /** A repository whose local OpenSpec binary reports every item as valid. */
@@ -11,6 +12,10 @@ function repo(): string {
   chmodSync(join(root, "node_modules/.bin/openspec"), 0o755);
   return root;
 }
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 describe("gate: command", () => {
   // spec: specfold-gate#clean-branch
@@ -69,6 +74,36 @@ describe("gate: command", () => {
       root,
     );
     expect(result).toMatchObject({ code: 0, stdout: "gate: passed, 0 warnings\n" });
+  });
+
+  it("checks added claims against the PR read with --pr", async () => {
+    const root = repo();
+    commit(root, { "openspec/changes/demo/brief.md": "confirmed_by: human:carl\n" });
+    const gh = await fakeGithub({
+      "/repos/acme/shop/pulls/7": { user: { login: "ana" } },
+      "/repos/acme/shop/pulls/7/reviews?per_page=100&page=1": [review("carl", "APPROVED")],
+      "/repos/acme/shop/pulls/8": { user: { login: "ana" } },
+      "/repos/acme/shop/pulls/8/reviews?per_page=100&page=1": [],
+    });
+    vi.stubEnv("GITHUB_TOKEN", "t0k");
+    vi.stubEnv("GITHUB_REPOSITORY", "acme/shop");
+    vi.stubEnv("GITHUB_API_URL", gh.url);
+    const approved = await run(["gate", "--base", "main", "--pr", "7", "--json"], root);
+    expect(JSON.parse(approved.stdout).findings.filter((f: { rule: string }) => f.rule === "G7")).toEqual([]);
+    const stranger = await run(["gate", "--base", "main", "--pr", "8", "--json"], root);
+    expect(JSON.parse(stranger.stdout).findings).toContainEqual(
+      expect.objectContaining({ rule: "G7", effect: "block", path: "openspec/changes/demo/brief.md" }),
+    );
+  });
+
+  it("exits with 2 for --pr without a token or with a malformed number", async () => {
+    const root = repo();
+    vi.stubEnv("GITHUB_TOKEN", "");
+    const missing = await run(["gate", "--base", "main", "--pr", "7"], root);
+    expect(missing.code).toBe(2);
+    expect(missing.stderr).toContain("GITHUB_TOKEN is required for --pr");
+    for (const pr of ["0", "x", "-1"])
+      expect((await run(["gate", "--base", "main", "--pr", pr], root)).code, pr).toBe(2);
   });
 
   it("rejects a missing base, a missing body file and extra arguments", async () => {

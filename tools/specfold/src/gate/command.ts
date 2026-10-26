@@ -6,6 +6,7 @@ import { plural } from "../findings.ts";
 import { openspecBinary } from "../openspec.ts";
 import { requireConfig, resolveBundleRoot } from "../repo.ts";
 import { computeDiff } from "./diff.ts";
+import { fetchPullRequest, githubEnv } from "./github.ts";
 import { type GateFinding, runGate } from "./rules.ts";
 
 const location = (f: GateFinding) =>
@@ -22,32 +23,39 @@ export function countFindings(findings: GateFinding[]) {
 register({
   name: "gate",
   summary: "decide whether a branch may merge: run the merge-gate rules on its diff",
-  usage: "specfold gate --base <ref> [--local] [--label <name>]... [--pr-body <file>] [--json]",
+  usage:
+    "specfold gate --base <ref> [--local] [--pr <number>] [--label <name>]... [--pr-body <file>] [--json]",
   options: {
     base: { type: "string" },
     local: { type: "boolean" },
+    pr: { type: "string" },
     label: { type: "string", multiple: true },
     "pr-body": { type: "string" },
     json: { type: "boolean" },
   },
-  run: ({ io, values, positionals }) => {
+  run: async ({ io, values, positionals }) => {
     if (positionals.length > 0) throw new UsageError(`unexpected argument '${positionals[0]}'`);
     const base = values.base as string | undefined;
     if (!base) throw new UsageError("missing --base <ref>");
     const bodyFile = values["pr-body"] as string | undefined;
     if (bodyFile !== undefined && !existsSync(resolve(io.cwd, bodyFile)))
       throw new UsageError(`PR body file not found: ${bodyFile}`);
+    const prArg = values.pr as string | undefined;
+    if (prArg !== undefined && !/^[1-9]\d*$/.test(prArg))
+      throw new UsageError(`--pr must be a pull request number, got '${prArg}'`);
     const config = requireConfig(io.cwd);
     const local = values.local === true;
+    const diff = computeDiff(config.root, base, local);
+    const pr = prArg === undefined ? undefined : await fetchPullRequest(githubEnv(), Number(prArg));
     const findings = runGate({
       config,
       bundleRoot: resolveBundleRoot(io.cwd, undefined, config),
-      diff: computeDiff(config.root, base, local),
+      diff,
       local,
       labels: (values.label as unknown as string[] | undefined) ?? [],
       prBody: bodyFile === undefined ? undefined : readFileSync(resolve(io.cwd, bodyFile), "utf8"),
       openspec: openspecBinary(config.root),
-      pr: undefined,
+      pr,
       now: new Date(),
     });
     const counts = countFindings(findings);
