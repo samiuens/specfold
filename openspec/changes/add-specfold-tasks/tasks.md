@@ -21,7 +21,7 @@ scenarios: [specfold-tasks#valid-group, specfold-tasks#valid-task, specfold-task
 agent: implementer
 ```
 
-- [ ] 2.1 Parse groups, metadata blocks, tasks, done lines, the follow-up section and stray headings with line numbers
+- [x] 2.1 Parse groups, metadata blocks, tasks, done lines, the follow-up section and stray headings with line numbers
   - Done when: the three scenarios of this group pass in `tasks-parse.test.ts`
 
 ## 3. Static rules
