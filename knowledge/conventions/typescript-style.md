@@ -3,7 +3,7 @@ type: Convention
 title: TypeScript style
 description: "How the kit writes TypeScript for the CLI: strict compiler flags, Biome, small pure modules and errors as values."
 status: draft
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T11:30:00+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T10:12:57+01:00 }
 sources:
   - id: tsconfig
     resource: ../../tools/specfold/tsconfig.json
