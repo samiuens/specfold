@@ -17,18 +17,18 @@ agent: implementer
 ## 2. CLI core
 
 ```yaml
-files: [tools/specfold/src/cli.ts, tools/specfold/src/repo.ts, tools/specfold/src/findings.ts, tools/specfold/build.mjs, scripts/specfold.mjs, tools/specfold/test/cli.test.ts, tools/specfold/test/helpers.ts]
+files: [tools/specfold/src/cli.ts, tools/specfold/src/errors.ts, tools/specfold/src/repo.ts, tools/specfold/src/findings.ts, tools/specfold/vitest.config.ts, tools/specfold/build.mjs, scripts/specfold.mjs, tools/specfold/test/cli.test.ts, tools/specfold/test/helpers.ts]
 depends: [1]
-scenarios: [specfold-validate#missing-configuration, specfold-validate#path-outside-the-bundle, specfold-validate#deterministic-order, specfold-validate#error-line-and-summary, specfold-validate#machine-readable-result]
+scenarios: []
 agent: implementer
 ```
 
 - [ ] 2.1 Add argument parsing, command dispatch and exit-code mapping with `--version` and `--help`
   - Done when: `cli.test.ts` covers unknown flags and commands exiting with 2
 - [ ] 2.2 Add repository root discovery and `specfold.yaml` loading
-  - Done when: scenario missing-configuration passes
+  - Done when: `cli.test.ts` covers root discovery, a missing `specfold.yaml` and an unparseable one
 - [ ] 2.3 Add the findings model with ordering, human and JSON rendering
-  - Done when: scenarios deterministic-order, error-line-and-summary and machine-readable-result pass
+  - Done when: `cli.test.ts` covers ordering, the human summary line and the JSON shape
 - [ ] 2.4 Add the esbuild bundle script that writes `scripts/specfold.mjs`
   - Done when: `npm run build -w specfold` then `node scripts/specfold.mjs --version` prints the package version
 
@@ -37,14 +37,14 @@ agent: implementer
 ```yaml
 files: [tools/specfold/src/bundle.ts, tools/specfold/src/validate/index.ts, tools/specfold/src/validate/okf.ts, tools/specfold/test/okf.test.ts, tools/specfold/test/fixtures/valid/**]
 depends: [2]
-scenarios: [specfold-validate#whole-bundle-by-default, specfold-validate#selected-paths, specfold-validate#other-bundle-root, specfold-validate#only-warnings, specfold-validate#errors-present, specfold-validate#files-unchanged, specfold-validate#missing-frontmatter, specfold-validate#invalid-yaml, specfold-validate#empty-type, specfold-validate#frontmatter-in-a-folder-index, specfold-validate#extra-key-in-root-index, specfold-validate#log-out-of-order, specfold-validate#frontmatter-in-log, specfold-validate#plain-okf-bundle-passes]
+scenarios: [specfold-validate#whole-bundle-by-default, specfold-validate#selected-paths, specfold-validate#path-outside-the-bundle, specfold-validate#missing-configuration, specfold-validate#deterministic-order, specfold-validate#machine-readable-result, specfold-validate#other-bundle-root, specfold-validate#only-warnings, specfold-validate#errors-present, specfold-validate#files-unchanged, specfold-validate#missing-frontmatter, specfold-validate#invalid-yaml, specfold-validate#empty-type, specfold-validate#frontmatter-in-a-folder-index, specfold-validate#extra-key-in-root-index, specfold-validate#log-out-of-order, specfold-validate#frontmatter-in-log, specfold-validate#plain-okf-bundle-passes]
 agent: implementer
 ```
 
 - [ ] 3.1 Add the bundle walk and frontmatter split with body line offsets, plus the valid fixture bundle
-  - Done when: scenarios whole-bundle-by-default, selected-paths and other-bundle-root pass
+  - Done when: scenarios whole-bundle-by-default, selected-paths, path-outside-the-bundle and other-bundle-root pass
 - [ ] 3.2 Add the `validate` command with OKF-1 and OKF-2 and the read-only guarantee
-  - Done when: scenarios missing-frontmatter, invalid-yaml, empty-type and files-unchanged pass
+  - Done when: scenarios missing-configuration, missing-frontmatter, invalid-yaml, empty-type, files-unchanged, deterministic-order and machine-readable-result pass
 - [ ] 3.3 Add OKF-3 for index and log files
   - Done when: the four OKF-3 scenarios pass
 - [ ] 3.4 Add `--okf-only` mode and exit codes for warnings and errors
@@ -55,12 +55,12 @@ agent: implementer
 ```yaml
 files: [tools/specfold/src/validate/profile.ts, tools/specfold/src/validate/index.ts, tools/specfold/test/profile.test.ts]
 depends: [3]
-scenarios: [specfold-validate#unknown-type, specfold-validate#description-too-long, specfold-validate#multi-line-description, specfold-validate#missing-status, specfold-validate#neither-field, specfold-validate#bare-verified-mapping-accepted, specfold-validate#malformed-actor, specfold-validate#offset-missing, specfold-validate#z-and-numeric-offsets-accepted, specfold-validate#decision-without-sources, specfold-validate#source-without-resource, specfold-validate#runbook-without-stale-after, specfold-validate#camel-case-file-name, specfold-validate#normative-sentence-in-knowledge, specfold-validate#quoted-in-code, specfold-validate#long-concept, specfold-validate#decision-without-decision-key, specfold-validate#superseded-target-missing, specfold-validate#extra-key]
+scenarios: [specfold-validate#error-line-and-summary, specfold-validate#unknown-type, specfold-validate#description-too-long, specfold-validate#multi-line-description, specfold-validate#missing-status, specfold-validate#neither-field, specfold-validate#bare-verified-mapping-accepted, specfold-validate#malformed-actor, specfold-validate#offset-missing, specfold-validate#z-and-numeric-offsets-accepted, specfold-validate#decision-without-sources, specfold-validate#source-without-resource, specfold-validate#runbook-without-stale-after, specfold-validate#camel-case-file-name, specfold-validate#normative-sentence-in-knowledge, specfold-validate#quoted-in-code, specfold-validate#long-concept, specfold-validate#decision-without-decision-key, specfold-validate#superseded-target-missing, specfold-validate#extra-key]
 agent: implementer
 ```
 
 - [ ] 4.1 Add P1 to P4 (type, title and description, status, trust fields)
-  - Done when: their scenarios in `profile.test.ts` pass
+  - Done when: their scenarios and error-line-and-summary pass in `profile.test.ts`
 - [ ] 4.2 Add P5 to P8 (timestamps, sources, stale_after, file names)
   - Done when: their scenarios in `profile.test.ts` pass
 - [ ] 4.3 Add P9 to P11 and the unknown-key guarantee
