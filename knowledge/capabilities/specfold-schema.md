@@ -3,13 +3,17 @@ type: Capability
 title: specfold schema
 description: Why changes use the specfold OpenSpec schema with brief and knowledge artifacts, and where its contract lives.
 status: draft
-change: 2026-10-26-add-specfold-schema
+change: 2026-10-26-add-commitment-gate
 resource: ../../openspec/specs/specfold-schema/spec.md
 spec: openspec/specs/specfold-schema/spec.md
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T12:51:50+01:00 }
 sources:
   - id: proposal-2026-10-26-add-specfold-schema
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-schema/proposal.md
+  - id: proposal-2026-10-26-add-commitment-gate
+    resource: ../../openspec/changes/archive/2026-10-26-add-commitment-gate/proposal.md
+  - id: design-2026-10-26-add-commitment-gate
+    resource: ../../openspec/changes/archive/2026-10-26-add-commitment-gate/design.md
 ---
 
 # Why
