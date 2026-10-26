@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { parse } from "yaml";
 import { EnvError } from "./errors.ts";
@@ -74,4 +74,26 @@ export function requireConfig(cwd: string): Config {
   const root = findRepoRoot(cwd);
   if (!root) throw new EnvError(`no ${CONFIG_FILE} found in ${resolve(cwd)} or any parent directory`);
   return loadConfig(root);
+}
+
+/** The bundle root: `--bundle` relative to cwd, or knowledge/ under the repository root. */
+export function resolveBundleRoot(
+  cwd: string,
+  bundle: string | undefined,
+  config: Config | undefined,
+): string {
+  let root: string;
+  if (bundle) {
+    root = resolve(cwd, bundle);
+  } else {
+    const repo = config?.root ?? findRepoRoot(cwd);
+    if (!repo)
+      throw new EnvError(
+        "no bundle found: pass --bundle <dir> or run inside a repository with specfold.yaml",
+      );
+    root = join(repo, "knowledge");
+  }
+  if (!existsSync(root) || !statSync(root).isDirectory())
+    throw new EnvError(`bundle root not found: ${root}`);
+  return root;
 }
