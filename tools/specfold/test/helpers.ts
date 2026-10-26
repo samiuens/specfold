@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach } from "vitest";
 import { main } from "../src/cli.ts";
+import "../src/commands.ts";
 
 export interface RunResult {
   code: number;

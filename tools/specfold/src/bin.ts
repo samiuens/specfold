@@ -1,4 +1,5 @@
 import { main } from "./cli.ts";
+import "./commands.ts";
 
 process.exitCode = await main(process.argv.slice(2), {
   cwd: process.cwd(),
