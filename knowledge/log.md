@@ -17,3 +17,4 @@
 * **Change**: add-specfold-tasks: tasks check, status and resume (/capabilities/specfold-tasks.md)
 * **Change**: add-specfold-change-check: change check enforces brief.md and knowledge.md (/capabilities/specfold-change-check.md)
 * **Change**: 2026-10-26-add-specfold-sync: created 1, updated 1, deprecated 0
+* **Change**: 2026-10-26-add-template-settings: created 1, updated 0, deprecated 0
