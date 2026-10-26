@@ -37,3 +37,22 @@ jobs:
         run: node scripts/specfold.mjs index --check
       - name: Kit schema copy matches the template
         run: diff -r template/openspec/schemas/specfold openspec/schemas/specfold || { echo "::error::openspec/schemas/specfold differs from template/openspec/schemas/specfold; copy the template schema over"; exit 1; }
+      - name: Template bundle is valid with its own settings
+        working-directory: template
+        run: |
+          node ../scripts/specfold.mjs validate
+          node ../scripts/specfold.mjs index --check
+      - name: Sample app copies match the template
+        run: |
+          diff -r template/openspec/schemas/specfold examples/sample-app/openspec/schemas/specfold
+          diff template/knowledge/conventions/code-comments.md examples/sample-app/knowledge/conventions/code-comments.md
+      - name: Sample app passes the workflow checks
+        working-directory: examples/sample-app
+        run: |
+          npm test
+          node ../../scripts/specfold.mjs validate
+          node ../../scripts/specfold.mjs index --check
+          ../../node_modules/.bin/openspec validate --all --strict
+          for dir in openspec/changes/archive/*/; do
+            node ../../scripts/specfold.mjs sync "$(basename "$dir")" --dry-run | tee /dev/stderr | grep -q "nothing to change" || { echo "::error::$(basename "$dir") is not fully synced; run specfold sync"; exit 1; }
+          done
