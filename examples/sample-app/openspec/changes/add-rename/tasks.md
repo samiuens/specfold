@@ -21,7 +21,7 @@ scenarios: []
 agent: knowledge-curator
 ```
 
-- [ ] 2.1 Write the capability card listed in `knowledge.md`
+- [x] 2.1 Write the capability card listed in `knowledge.md`
   - Done when: `specfold validate` exits 0
 
 ## Workflow follow-up
