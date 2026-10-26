@@ -13,7 +13,7 @@ sources:
 
 # Decision
 
-Normative behavior (requirements and scenarios) lives only in `openspec/specs/`. Rationale, domain terms, architecture and history live only in `knowledge/`. Knowledge contains no SHALL/MUST sentences; capability cards link to their spec instead of restating it.
+Normative behavior (requirements and scenarios) lives only in `openspec/specs/`. Rationale, domain terms, architecture and history live only in `knowledge/`. Knowledge contains no `SHALL`/`MUST` sentences; capability cards link to their spec instead of restating it.
 
 # Why
 
