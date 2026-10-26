@@ -63,3 +63,24 @@ env PATH="<kit>/node_modules/.bin:$PATH" opencode
 ```
 
 Ask "Which skills can you load?" The six `sf-*` skills should be listed; note whether any appears twice, since opencode reads both `.agents/skills/` and `.claude/skills/`. Then ask "Use sf-lookup: why are due dates strings?" It should run `node scripts/specfold.mjs lookup` and answer from `decisions/dates-as-calendar-strings.md`.
+
+## Quality loops check (trace, drift, backlog)
+
+Run in `examples/sample-app` (or a fresh copy) after a change to the trace, drift, backlog or retro parts of the kit.
+
+```sh
+node scripts/specfold.mjs trace
+node scripts/specfold.mjs drift
+node scripts/specfold.mjs backlog list --state all
+node scripts/specfold.mjs lookup rename
+```
+
+Check that:
+
+1. `trace` shows no dangling reference, and every scenario under `openspec/specs/` has a test; the only uncovered scenarios belong to the planned `add-priorities` change;
+2. `drift` names `decisions/dates-as-calendar-strings.md`, because `src/todo.js` references it and changed in `add-rename` after the decision was written;
+3. the backlog shows `rename-an-item` as promoted to `add-rename`, and `change-a-due-date` as open (it was put out of scope in that change's interview);
+4. `log.md` has the `Retro` entry of `add-rename`.
+
+To repeat the promotion on a fresh copy: `node scripts/specfold.mjs backlog add "<title>" --origin human`, then `env PATH="<kit>/node_modules/.bin:$PATH" node scripts/specfold.mjs backlog promote <item> --name <change>`, and plan the change with the planner as above.
+

@@ -17,11 +17,11 @@ The agent layer tells agents when to call the CLI and what to write around it. I
 
 | Piece | Where | Job |
 | --- | --- | --- |
-| `sf-lookup` | skill | `specfold lookup`, read the 1-3 best concepts, report trust flags |
+| `sf-lookup` | skill | `specfold lookup`, read the 1-3 best concepts, report trust flags including `drift`, keep the vision and open commitments in view |
 | `sf-capture` | skill | `specfold new`, write the body and sources, index, log, validate; rejected proposals become Decisions |
-| `sf-sync` | skill | after archive: `specfold sync`, fill stubs, validate |
+| `sf-sync` | skill | after archive: `specfold sync`, fill stubs, validate, fulfill a delivered commitment after asking, then the retro |
 | `sf-audit` | skill | `specfold audit --json`, propose fixes; humans verify |
-| `sf-interview` | skill | the planning interview: ground, design tree, native questions, never a timeout as consent, brief only after approval ([rather ask than assume](/decisions/rather-ask-than-assume.md)) |
+| `sf-interview` | skill | the planning interview: ground, design tree plus the interview checklist, native questions, never a timeout as consent, out-of-scope items offered as backlog items or commitments, brief only after approval ([rather ask than assume](/decisions/rather-ask-than-assume.md)) |
 | `sf-plan` | skill | the planner's steps for tools without agent definitions |
 | `planner` | `.claude/agents/planner.md` | Claude Code main session in plan mode: interview, plan approval via `ExitPlanMode`, then the change artifacts |
 
@@ -47,6 +47,9 @@ The agent layer tells agents when to call the CLI and what to write around it. I
 - **Proven on 2026-10-26:**
   - **Claude Code:** on a fresh copy of the sample app, outside the kit so the kit's own instructions don't load, the planner interviewed with native questions, took a correction through plan approval, and wrote `add-priorities`, which passes `change check` ([agent check runbook](/runbooks/sample-app-agent-check.md)).
   - **opencode:** it loaded the sf skills from `.agents/skills/` and answered a lookup through `sf-lookup`.
+- **The retro improves the interview.** After every archive, `sf-sync` asks which question came too late and where the agent guessed. Answers go verbatim into `conventions/interview-checklist.md` under topic headings, created on the first real answer, and `sf-interview` adds the matching topics to its design tree. New ideas become backlog items, and every retro (answered or skipped) gets a `Retro` log entry, so a missing one shows in review. Only the user fills the checklist; a timed-out round counts as skipped.
+- **Fulfilling is confirmed, not inferred.** A design's `kept` only means a promise was not broken, so `sf-sync` fulfills a commitment only when the brief or proposal names it as delivered and the user confirms ([specfold commitments](/capabilities/specfold-commitments.md)).
+- **Proven on 2026-10-26 (M5):** in the sample app, the backlog item "Rename an item" was promoted to `add-rename` and carried through the interview (with one out-of-scope idea kept as a backlog item), propose, apply, archive, sync and the retro. Trace covers every main-spec scenario, and drift flagged the one decision whose referencing code the change touched ([agent check runbook](/runbooks/sample-app-agent-check.md)).
 - **Found in that run:** the planner first took the user's login for `confirmed_by` from an earlier brief, and Claude Code's safety check refused to write an approval the user had not stated. The planner, `sf-interview` and `sf-plan` now ask the user to state their login when approving ([rather ask than assume](/decisions/rather-ask-than-assume.md)).
 
 # Related

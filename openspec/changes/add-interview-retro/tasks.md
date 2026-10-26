@@ -41,13 +41,13 @@ agent: implementer
 ## 3. Knowledge
 
 ```yaml
-files: [knowledge/**]
+files: [knowledge/**, examples/sample-app/README.md]
 depends: [2]
 scenarios: []
 agent: knowledge-curator
 ```
 
-- [ ] 3.1 Write the concepts listed in `knowledge.md`
+- [x] 3.1 Write the concepts listed in `knowledge.md`
   - Done when: `node scripts/specfold.mjs validate` exits 0
 
 ## Workflow follow-up
