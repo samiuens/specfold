@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 import { checkPlannedChange } from "../change/command.ts";
 import { findingLine } from "../findings.ts";
+import { dueDate, listItems } from "../future/items.ts";
 import { localGate, renderGate } from "../gate/command.ts";
 import { resolveBundleRoot } from "../repo.ts";
 import { taskFindingLine } from "../tasks/command.ts";
@@ -11,6 +12,7 @@ import { localBase } from "./base.ts";
 import type { HookContext } from "./run.ts";
 
 const MAX_LINES = 40;
+const DUE_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 const EDIT_TOOLS = new Set(["Edit", "Write"]);
 
 const activeChanges = (root: string): string[] => {
@@ -21,7 +23,14 @@ const activeChanges = (root: string): string[] => {
     .sort();
 };
 
-/** The root index's section list and the active changes, at most 40 lines. */
+/** Open commitments whose trigger date is at most 30 days away, overdue ones included. */
+const dueSoon = (bundleRoot: string, now = Date.now()) =>
+  listItems(bundleRoot, "commitments").filter((c) => {
+    const due = dueDate(c.data.trigger);
+    return c.data.state === "open" && due !== undefined && due.getTime() <= now + DUE_WINDOW_MS;
+  }).length;
+
+/** The root index's section list, the active changes and the commitments due soon, at most 40 lines. */
 export function sessionStart({ config, io }: HookContext): number {
   const bundleRoot = resolveBundleRoot(config.root, undefined, config);
   const index = join(bundleRoot, "index.md");
@@ -31,10 +40,12 @@ export function sessionStart({ config, io }: HookContext): number {
         .filter((l) => /^\* \[/.test(l))
     : [];
   const changes = activeChanges(config.root);
+  const due = dueSoon(bundleRoot);
   const out = [
     "Knowledge sections (look up with: node scripts/specfold.mjs lookup <words>):",
     ...sections,
     `Active changes: ${changes.length === 0 ? "none" : changes.join(", ")}`,
+    ...(due > 0 ? [`Commitments due within 30 days: ${due} (specfold commitments list)`] : []),
   ];
   const shown =
     out.length > MAX_LINES
