@@ -31,3 +31,4 @@
 * **Change**: 2026-10-26-add-specfold-trace: created 1, updated 2, deprecated 0
 * **Change**: 2026-10-26-add-specfold-drift: created 1, updated 3, deprecated 0
 * **Change**: 2026-10-26-add-specfold-backlog: created 2, updated 6, deprecated 0
+* **Change**: 2026-10-26-add-commitment-gate: created 0, updated 3, deprecated 0
