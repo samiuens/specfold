@@ -1,0 +1,29 @@
+---
+type: Capability
+title: specfold lookup
+description: Why agents search knowledge by frontmatter first, and where the contract for specfold lookup lives.
+status: draft
+change: add-specfold-lookup
+resource: ../../openspec/changes/add-specfold-lookup/specs/specfold-lookup/spec.md
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T11:43:00+01:00 }
+sources:
+  - id: proposal
+    resource: ../../openspec/changes/add-specfold-lookup/proposal.md
+  - id: design
+    resource: ../../openspec/changes/add-specfold-lookup/design.md
+---
+
+# Why
+
+The cheapest answer to "why does this exist, what does it mean" is a path and one line from frontmatter, after which the agent reads one to three concepts. `specfold lookup` gives exactly that, ranked the same way every time, with each hit's trust tier (`deprecated`, `stale`, `unverified`) so agents read with care. It is the first step of the lookup order in `AGENTS.md` and the engine of the `sf-lookup` skill (M3).
+
+# Choices made while specifying
+
+- Only frontmatter is searched, never bodies, which keeps results short and cheap.
+- Matching is by word prefix and every query word has to match; title counts most, then tags, then description and type.
+- No hits is a valid answer (exit 0), not an error.
+
+# Related
+
+- [specfold CLI](/architecture/specfold-cli.md)
+- [specfold index](/capabilities/specfold-index.md)
