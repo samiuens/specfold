@@ -6,7 +6,7 @@ status: draft
 spec: openspec/specs/specfold-gate/spec.md
 resource: ../../openspec/specs/specfold-gate/spec.md
 change: 2026-10-26-add-specfold-gate
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T16:31:42+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T16:42:23+01:00 }
 sources:
   - id: proposal-2026-10-26-add-specfold-gate
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-gate/proposal.md
@@ -24,6 +24,7 @@ The checks that keep knowledge and specs honest exist as separate commands (`val
 - **Changes being planned pass.** G5 and G18 skip a touched change until it has `tasks.md`, so a planning PR can stop after the proposal. G13 still applies, because a brief is confirmed when the user approves it, not at the end.
 - **Skipping the spec needs a reason.** Source changes without a change pass only with the escape label (default `no-spec`) plus a `No-spec reason:` line in the PR body. Locally the label isn't known, so G4 only warns there.
 - **CI never passes silently.** Without OpenSpec installed, the gate stops with exit 2 in CI and only warns with `--local`, so hooks still work on machines without it.
+- **Human claims are checked against GitHub.** G7 compares every `human:<login>` a branch adds (to a concept's `verified` or a brief's `confirmed_by`) with the PR author and the approving reviewers ([humans verify only](/decisions/humans-verify-only.md)). Only claims missing from the merge-base version count, so existing claims never need a fresh approval. A reviewer's latest review decides, but comment reviews are skipped, as on GitHub itself ([GitHub Actions](/references/github-actions.md)). API errors stop the gate with exit 2 instead of passing; without `--pr`, G7 only warns that CI will check.
 - **Existing rules, new ids.** Validate, change, tasks and audit findings keep their own rule id at the start of the message (for example `T5 ...`) under the gate rule that runs them.
 - **What must be fixed comes first.** Blocking findings come first, then warnings, each sorted by rule number; JSON `counts` gives totals per effect and per rule for the workflow summary.
 
