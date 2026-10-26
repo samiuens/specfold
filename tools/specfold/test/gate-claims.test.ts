@@ -47,6 +47,18 @@ describe("gate: claims", () => {
     expect(claims(root)).toEqual([["verified", "carl", "knowledge/domain/a.md", 7]]);
   });
 
+  // spec: specfold-gate#commitment-claimed-for-someone-else
+  it("finds a committed_by added to a commitment", () => {
+    const root = gateRepo();
+    commit(root, {
+      "knowledge/commitments/eu.md": concept("Term", "Promise.").replace(
+        "type: Term",
+        "type: Deferred Commitment\nstate: open\ntrigger: before 1.0\ncommitted_by: human:carl",
+      ),
+    });
+    expect(claims(root)).toEqual([["committed_by", "carl", "knowledge/commitments/eu.md", 5]]);
+  });
+
   it("finds confirmed_by in active and archived briefs", () => {
     const root = gateRepo({ "openspec/changes/old/brief.md": BRIEF("human:ana") });
     commit(root, {

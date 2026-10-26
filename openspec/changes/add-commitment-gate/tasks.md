@@ -23,7 +23,7 @@ scenarios: [specfold-gate#commitment-claimed-for-someone-else]
 agent: implementer
 ```
 
-- [ ] 2.1 Count an added `committed_by: human:<login>` as a claim
+- [x] 2.1 Count an added `committed_by: human:<login>` as a claim
   - Done when: scenario commitment-claimed-for-someone-else passes in `gate-claims.test.ts`
 
 ## 3. Gate rule G17

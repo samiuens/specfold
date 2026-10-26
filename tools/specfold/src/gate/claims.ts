@@ -11,24 +11,36 @@ export interface Claim {
   /** Repository-relative file. */
   file: string;
   line: number | null;
-  key: "verified" | "confirmed_by";
+  key: "verified" | "confirmed_by" | "committed_by";
 }
 
 const BRIEF = /^openspec\/changes\/(?:archive\/)?[^/]+\/brief\.md$/;
 const ARCHIVED_BRIEF = /^openspec\/changes\/archive\/\d{4}-\d{2}-\d{2}-([^/]+)\/brief\.md$/;
 const CONFIRMED_BY = /^confirmed_by:[ \t]*(\S+)/;
 
-/** `human:` actors in a concept's `verified` (a mapping or a list of mappings), with the key's line. */
-function verifiedClaims(file: string, text: string): Claim[] {
+/**
+ * `human:` actors in a concept's `verified` (a mapping or a list of mappings) and in a commitment's
+ * `committed_by`, with the key's line.
+ */
+function conceptClaims(file: string, text: string): Claim[] {
   const fm = parseText(file, text).frontmatter;
   if (!fm || !isRecord(fm.data)) return [];
   const verified = fm.data.verified;
   const entries = Array.isArray(verified) ? verified : verified === undefined ? [] : [verified];
-  return entries.flatMap((e) =>
+  const claims: Claim[] = entries.flatMap((e) =>
     isRecord(e) && typeof e.by === "string" && e.by.startsWith("human:")
       ? [{ login: e.by.slice("human:".length), file, line: fm.lineOf("verified"), key: "verified" as const }]
       : [],
   );
+  const committed = fm.data.committed_by;
+  if (typeof committed === "string" && committed.startsWith("human:"))
+    claims.push({
+      login: committed.slice("human:".length),
+      file,
+      line: fm.lineOf("committed_by"),
+      key: "committed_by",
+    });
+  return claims;
 }
 
 /** A brief's `confirmed_by` when it names a human. */
@@ -42,7 +54,8 @@ function briefClaims(file: string, text: string): Claim[] {
   });
 }
 
-function baseVersion(root: string, mergeBase: string, file: string): string | undefined {
+/** The file's text at `mergeBase`, or undefined when it did not exist there. */
+export function baseVersion(root: string, mergeBase: string, file: string): string | undefined {
   try {
     return git(root, ["show", `${mergeBase}:./${file}`]);
   } catch {
@@ -64,7 +77,7 @@ export function addedClaims(root: string, bundleRoot: string, diff: GateDiff): C
       file.endsWith(".md") &&
       isConcept(file.slice(bundlePrefix.length))
     )
-      extract = verifiedClaims;
+      extract = conceptClaims;
     if (!extract) continue;
     // an archived brief was the active change's brief at the merge base
     const active = ARCHIVED_BRIEF.exec(file);
