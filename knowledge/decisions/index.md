@@ -15,6 +15,7 @@
 * [First specs are OpenSpec changes, not baseline specs](specs-start-as-changes.md) - Specs for not-yet-built commands are written as OpenSpec changes and only reach openspec/specs/ when implemented and archived.
 * [graphify is optional, code-only, and writes no instruction blocks](graphify-code-only.md) - The kit recommends graphify for code navigation, in code-only mode, installed as a skill plus a Claude Code guard and never as an instruction block.
 * [Kit knowledge at the root, payload in template/](dogfooding-split.md) - The kit repo keeps its own knowledge, specs and settings at the root; everything shipped to user repos lives in template/.
+* [Knowledge is written before archive and synced after](write-knowledge-before-sync-after.md) - The Knowledge task group writes concept bodies before archive; specfold sync fills keys, stubs, index and log after archive, in the same PR.
 * [Knowledge lives in its own OKF bundle](separate-knowledge-bundle.md) - Project knowledge is an OKF v0.2 bundle in knowledge/, separate from openspec/, so both stay readable by their own tools.
 * [Migration only ever happens on its own branch](migration-on-own-branch.md) - sf-migrate refuses to run on the default branch or an unrelated feature branch and works on specfold/migration.
 * [OKF sample acme_retail is tested as a patched fixture](acme-retail-patched-fixture.md) - The upstream acme_retail sample violates OKF, so the tests use a documented patched copy plus the unpatched copy as a negative fixture.
