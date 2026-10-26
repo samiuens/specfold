@@ -12,7 +12,7 @@ This plan is the build brief for Claude Code. It turns the earlier concept (an O
 | Agents | Tool-neutral first (`AGENTS.md`, `.agents/skills/`, CLI, CI); Claude Code extras on top (hooks, subagent, `.claude/skills/`) |
 | Target | New projects (template) and existing codebases (migration) |
 | Strictness | A required CI check **blocks merges**; local hooks give early feedback |
-| OpenSpec schema | Custom schema `kb-driven` with a mandatory `knowledge` artifact |
+| OpenSpec schema | Custom schema `specfold` with a mandatory `knowledge` artifact |
 | Language | English only: knowledge, specs, skills, docs |
 | Repo | None yet. This document is the plan`. The framework is named Specfold (see Naming)`. The kit repo will be private on GitHub at first, so every install, bootstrap and upgrade path must work with authentication (see Updating); M9 tests upgrades from a private source |
 
@@ -37,14 +37,15 @@ After `v0.1.0`, there is no separate maintenance process: bug reports become bac
 
 ### Naming
 
-The framework is called **Specfold**: specs and knowledge folded into one workflow. The sections below were written with working names; apply this mapping everywhere when building:
+The framework is called **Specfold**: specs and knowledge folded into one workflow. Earlier drafts used working names; this plan has been rewritten with the final names. The mapping is kept for reading older notes:
 
-| Working name in this plan | Final name |
+| Working name (earlier drafts) | Final name |
 | --- | --- |
 | `okf-openspec-kit` (repo) | `specfold` |
 | CLI `kb`, file `scripts/kb.mjs` | CLI `specfold` with short alias `sf`, file `scripts/specfold.mjs` |
 | `kb.config.yaml`, `.kb/` (manifest, local settings, reports) | `specfold.yaml`, `.specfold/` |
 | skills `kb-lookup`, `kb-capture`, `kb-sync`, `kb-audit`, `kb-migrate`, `kb-interview`, `kb-upgrade` | `sf-lookup`, `sf-capture`, `sf-sync`, `sf-audit`, `sf-migrate`, `sf-interview`, `sf-upgrade` |
+| subagent role `kb-scout` | `scout` |
 | OpenSpec schema `kb-driven` | `specfold` |
 | CI check `kb-gate`, workflow `kb-upgrade.yml` | `specfold-gate`, `specfold-upgrade.yml` |
 | managed-block markers `kb:begin` / `kb:end` | `specfold:begin` / `specfold:end` |
@@ -58,58 +59,58 @@ One repo ships everything. The template is the single source; the prompt and the
 
 | Deliverable | For | How it is used |
 | --- | --- | --- |
-| Template repo | New projects | GitHub "Use this template", then `npx kb init` (or `./scripts/kb init`) fills names and runs `openspec init` |
+| Template repo | New projects | GitHub "Use this template", then `npx specfold init` (or `./scripts/specfold init`) fills names and runs `openspec init` |
 | `BOOTSTRAP.md` prompt | Any repo, any agent, kit not installed yet | User pastes it into their agent; it downloads release `vX.Y.Z`, installs the kit files, then runs the migration skill |
-| `kb-migrate` skill | Existing projects | Analyzes existing docs and code, plans the mapping, installs the kit, converts docs into OKF concepts, opens a migration PR |
-| `kb` CLI | Agents, hooks, CI | Deterministic validation, indexing, gate checks. Agents call it; nothing that must be correct depends on an LLM |
-| Skills `kb-lookup`, `kb-capture`, `kb-sync`, `kb-audit` | Day-to-day work | Read, write, sync and audit knowledge around the OpenSpec loop |
-| CI workflow `kb-gate` | Every PR | Required status check that blocks merges |
+| `sf-migrate` skill | Existing projects | Analyzes existing docs and code, plans the mapping, installs the kit, converts docs into OKF concepts, opens a migration PR |
+| `specfold` CLI | Agents, hooks, CI | Deterministic validation, indexing, gate checks. Agents call it; nothing that must be correct depends on an LLM |
+| Skills `sf-lookup`, `sf-capture`, `sf-sync`, `sf-audit` | Day-to-day work | Read, write, sync and audit knowledge around the OpenSpec loop |
+| CI workflow `specfold-gate` | Every PR | Required status check that blocks merges |
 
-Versioning: the kit itself is semver-tagged. Installed repos record the kit version in `kb.config.yaml` (`kit_version`), so `kb upgrade` knows what to diff against. It must not go into `knowledge/index.md`, because OKF allows only `okf_version` in index frontmatter.
+Versioning: the kit itself is semver-tagged. Installed repos record the kit version in `specfold.yaml` (`kit_version`), so `specfold upgrade` knows what to diff against. It must not go into `knowledge/index.md`, because OKF allows only `okf_version` in index frontmatter.
 
 ## Template repo layout
 
 Everything a user repo receives sits at the top level; kit-only sources live in `tools/` and `examples/`. The CLI ships as one bundled file, so installed repos need no extra package install.
 
 ```text
-okf-openspec-kit/
+specfold/
 ├── README.md
 ├── BOOTSTRAP.md                  # paste-able prompt (see Migration section)
 ├── AGENTS.md                     # canonical agent instructions, tool-neutral
 ├── CLAUDE.md                     # "@AGENTS.md" + Claude Code specifics only
-├── kb.config.yaml                # kit_version, source globs, gate settings, type vocabulary
+├── specfold.yaml                # kit_version, source globs, gate settings, type vocabulary
 ├── knowledge/                    # OKF v0.2 bundle
 │   ├── index.md                  # frontmatter okf_version: "0.2" only
 │   ├── log.md
 │   └── {domain,architecture,decisions,capabilities,conventions,runbooks,references}/index.md
 ├── openspec/
 │   ├── config.yaml
-│   ├── schemas/kb-driven/
+│   ├── schemas/specfold/
 │   │   ├── schema.yaml
 │   │   └── templates/{proposal,spec,design,knowledge,tasks}.md
 │   ├── specs/
 │   └── changes/archive/
 ├── .agents/skills/               # canonical skills (vendor-neutral target)
-│   └── kb-{lookup,capture,sync,audit,migrate}/SKILL.md (+ references/, templates/)
+│   └── sf-{lookup,capture,sync,audit,migrate}/SKILL.md (+ references/, templates/)
 ├── .claude/
 │   ├── settings.json             # hooks
-│   ├── skills/                   # mirror of .agents/skills, written by `kb agents sync`
+│   ├── skills/                   # mirror of .agents/skills, written by `specfold agents sync`
 │   ├── agents/knowledge-curator.md
-│   └── hooks/*.sh                # thin wrappers around scripts/kb.mjs
+│   └── hooks/*.sh                # thin wrappers around scripts/specfold.mjs
 ├── lefthook.yml                  # git hooks for every tool (pre-commit, pre-push, post-checkout)
 ├── .github/
-│   ├── workflows/kb-gate.yml
+│   ├── workflows/specfold-gate.yml
 │   ├── pull_request_template.md  # Change: / Knowledge: fields
 │   └── CODEOWNERS                # knowledge/decisions/ -> maintainers
-├── scripts/kb.mjs                # bundled CLI (build output, committed)
-├── tools/kb/                     # CLI source, TypeScript, tests, fixtures (kit only)
+├── scripts/specfold.mjs                # bundled CLI (build output, committed)
+├── tools/specfold/                     # CLI source, TypeScript, tests, fixtures (kit only)
 ├── examples/sample-app/          # worked example with one archived change (kit only)
 └── docs/                         # kit docs: workflow, gate, migration, upgrading
 ```
 
 This tree is what a **user repo** receives. In the kit repo itself, the same files live under `template/`, and the root holds the kit's own knowledge, specs and tooling (see Dogfooding below).
 
-`kb.config.yaml` is the one place a project tunes the kit:
+`specfold.yaml` is the one place a project tunes the kit:
 
 ```yaml
 kit_version: 0.1.0
@@ -129,16 +130,16 @@ actors:
 The kit repo runs its own workflow, so building it is the first real test. That needs a split between **what the kit repo knows about itself** and **what it ships**:
 
 ```text
-okf-openspec-kit/
-├── AGENTS.md, CLAUDE.md, kb.config.yaml, lefthook.yml   # the kit's own setup
+specfold/
+├── AGENTS.md, CLAUDE.md, specfold.yaml, lefthook.yml   # the kit's own setup
 ├── knowledge/          # the kit's own OKF bundle (never shipped)
 ├── openspec/           # the kit's own specs and changes (never shipped)
 ├── template/           # the payload: everything in the layout above, with an empty bundle
-├── tools/kb/, examples/, docs/
+├── tools/specfold/, examples/, docs/
 └── .github/workflows/  # kit CI + release job that publishes template/
 ```
 
-The release job publishes `template/` as a tarball and syncs it to a separate template repo, so "Use this template" never copies the kit's own knowledge. `BOOTSTRAP.md` and `kb-migrate` install from the same tarball.
+The release job publishes `template/` as a tarball and syncs it to a separate template repo, so "Use this template" never copies the kit's own knowledge. `BOOTSTRAP.md` and `sf-migrate` install from the same tarball.
 
 **What the kit's own bundle holds from day one:**
 
@@ -146,13 +147,13 @@ The release job publishes `template/` as a tarball and syncs it to a separate te
 | --- | --- |
 | `decisions/` | the decisions in this plan as `Decision` concepts: separate bundle, specs vs knowledge, custom schema, blocking gate, lefthook, English only, graphify code-only, dogfooding split |
 | `references/` | mirrored summaries of the OKF spec, OpenSpec docs, graphify and lefthook docs, each with `sources`, `last_modified` and a short `stale_after`, because all four move fast |
-| `architecture/` | kb CLI modules, gate pipeline, release flow |
+| `architecture/` | specfold CLI modules, gate pipeline, release flow |
 | `conventions/` | TypeScript style, test fixtures, skill writing rules (short SKILL.md, details in `references/`) |
 | `capabilities/` | one card per kit spec |
 
-**The kit's own specs** (`openspec/specs/`) describe the CLI and gate behavior: `kb-validate`, `kb-index`, `kb-gate` (one requirement per rule G1-G12), `kb-migrate`, `kb-sync`. The gate rules are behavior, so they belong there and get scenarios that double as test cases.
+**The kit's own specs** (`openspec/specs/`) describe the CLI and gate behavior: `specfold-validate`, `specfold-index`, `specfold-gate` (one requirement per rule G1-G12), `sf-migrate`, `sf-sync`. The gate rules are behavior, so they belong there and get scenarios that double as test cases.
 
-`kb audit` in the kit repo flags expired `references/` concepts, which turns upstream changes in OKF or OpenSpec into a visible maintenance task.
+`specfold audit` in the kit repo flags expired `references/` concepts, which turns upstream changes in OKF or OpenSpec into a visible maintenance task.
 
 ## Knowledge bundle profile
 
@@ -162,7 +163,7 @@ The kit adds a stricter **profile** on top of OKF v0.2. Every rule below is stil
 
 | Field | Rule |
 | --- | --- |
-| `type` | one of `kb.config.yaml` `types` |
+| `type` | one of `specfold.yaml` `types` |
 | `title`, `description` | non-empty; `description` is one line, max 160 chars (it is what indexes and lookups show) |
 | `status` | `draft`, `stable` or `deprecated` |
 | `generated` or `verified` | at least one. Agents always write `generated: { by: <agent_prefix><model>, at: <ISO 8601 with offset> }` |
@@ -182,7 +183,7 @@ The kit adds a stricter **profile** on top of OKF v0.2. Every rule below is stil
 | `spec` | Capability | repo-relative path to `openspec/specs/<capability>/spec.md` (also set as `resource`) |
 | `not` | Term, Business Rule | list of `{ term, why, instead }` misreadings, as in the OKF sample bundle |
 
-**Templates** ship in `.agents/skills/kb-capture/templates/`: one per type. Example for a capability card:
+**Templates** ship in `.agents/skills/sf-capture/templates/`: one per type. Example for a capability card:
 
 ```markdown
 ---
@@ -208,7 +209,7 @@ Short rationale, constraints, rejected alternatives (link decisions).
 - [Checkout service](/architecture/checkout-service.md)
 ```
 
-`index.md` and `log.md` are **generated by `kb index`**, never written by agents by hand. Indexes list `* [Title](file.md) - description`, grouped by `type`; `log.md` gets one entry per archived change or migration.
+`index.md` and `log.md` are **generated by `specfold index`**, never written by agents by hand. Indexes list `* [Title](file.md) - description`, grouped by `type`; `log.md` gets one entry per archived change or migration.
 
 ### Convention: code comments point to knowledge
 
@@ -247,12 +248,12 @@ Install with `openspec init --tools agents,claude --language English` (add furth
 **`openspec/config.yaml`** (keep `context` short: it is injected into every artifact):
 
 ```yaml
-schema: kb-driven
+schema: specfold
 
 context: |
   Project knowledge lives in knowledge/ (OKF v0.2). Start at knowledge/index.md.
   Behavior contracts live in openspec/specs/. Knowledge never restates requirements.
-  Stack: <filled by kb init or kb-migrate>
+  Stack: <filled by specfold init or sf-migrate>
 
 rules:
   proposal:
@@ -263,7 +264,7 @@ rules:
   knowledge:
     - List every concept to create, update or deprecate. An empty list needs a one-line reason.
   tasks:
-    - Last task group is always "Knowledge": apply knowledge.md with kb-sync after archive.
+    - Last task group is always "Knowledge": apply knowledge.md with sf-sync after archive.
 
 operations:
   apply:
@@ -271,10 +272,10 @@ operations:
       - Add new findings to knowledge.md while implementing, not afterwards.
   archive:
     guidance:
-      - After archiving, run the kb-sync skill for this change and include its output in the same PR.
+      - After archiving, run the sf-sync skill for this change and include its output in the same PR.
 ```
 
-**Schema `kb-driven`**: create with `openspec schema fork spec-driven kb-driven`, then add one artifact and one dependency:
+**Schema `specfold`**: create with `openspec schema fork spec-driven specfold`, then add one artifact and one dependency:
 
 ```yaml
   - id: knowledge
@@ -314,42 +315,42 @@ empty_reason: ""          # required when ops is empty
 Free text for the reviewer.
 ````
 
-Rejected changes: `kb-capture` writes a `Decision` with `decision: rejected` and the change folder is deleted, so OpenSpec never shows it again but agents still find it.
+Rejected changes: `sf-capture` writes a `Decision` with `decision: rejected` and the change folder is deleted, so OpenSpec never shows it again but agents still find it.
 
-## kb CLI
+## specfold CLI
 
 Everything that must be correct is deterministic code, so every agent, hook and CI job gets the same answer. Skills call the CLI; they never re-implement its checks.
 
-**Tech:** TypeScript, Node ≥ 20.19 (same floor as OpenSpec), one runtime dependency (`yaml`), bundled with esbuild into `scripts/kb.mjs`. Output: human text by default, `--json` for agents and CI. Exit codes: 0 ok, 1 findings, 2 usage or environment error.
+**Tech:** TypeScript, Node ≥ 20.19 (same floor as OpenSpec), one runtime dependency (`yaml`), bundled with esbuild into `scripts/specfold.mjs`. Output: human text by default, `--json` for agents and CI. Exit codes: 0 ok, 1 findings, 2 usage or environment error.
 
 | Command | Does | Used by |
 | --- | --- | --- |
-| `kb init` | fills `kb.config.yaml`, `openspec/config.yaml` context, runs `openspec init`, `kb agents sync`, `runs lefthook install` | template users |
-| `kb validate [paths]` | OKF conformance (3 rules) + profile rules + link check, only errors printed | hooks, gate |
-| `kb index` | regenerates every `index.md` and the root `okf_version`; `--check` fails if out of date | kb-sync, gate |
-| `kb log add <msg>` | appends a dated entry to `knowledge/log.md` | kb-sync, kb-migrate |
-| `kb lookup <query>` | searches frontmatter only (title, description, tags, type) and prints path + one line per hit, flags stale/deprecated/unverified | kb-lookup |
-| `kb new <type> <path>` | creates a concept from the type template with `generated` filled | kb-capture |
-| `kb change check <name>` | parses `knowledge.md`, checks paths, types and capability coverage | gate, kb-sync |
-| `kb sync <name>` | applies the deterministic part of a knowledge delta: stubs, `deprecated` flags, capability `spec`/`change` keys, index, log | kb-sync |
-| `kb audit` | stale, unverified, deprecated-but-linked, orphans, specs without capability card, SHALL in knowledge | kb-audit, scheduled CI |
-| `kb gate --base <sha>` | runs all merge-gate rules on a diff (see next sections) | CI, pre-push |
-| `kb stats` | token estimate per file and for the always-loaded set (AGENTS.md, config context, skill descriptions) | token budget check |
-| `kb agents sync` | mirrors `.agents/skills/` to `.claude/skills/` and other tool folders listed in config | init, upgrade |
-| `kb doctor` | checks openspec version, node, lefthook installed, optional graphify, config drift | humans, bootstrap |
-| `kb upgrade --to <ver>` | three-way updates kit-owned files, never touches `knowledge/` content | humans |
+| `specfold init` | fills `specfold.yaml`, `openspec/config.yaml` context, runs `openspec init`, `specfold agents sync`, `runs lefthook install` | template users |
+| `specfold validate [paths]` | OKF conformance (3 rules) + profile rules + link check, only errors printed | hooks, gate |
+| `specfold index` | regenerates every `index.md` and the root `okf_version`; `--check` fails if out of date | sf-sync, gate |
+| `specfold log add <msg>` | appends a dated entry to `knowledge/log.md` | sf-sync, sf-migrate |
+| `specfold lookup <query>` | searches frontmatter only (title, description, tags, type) and prints path + one line per hit, flags stale/deprecated/unverified | sf-lookup |
+| `specfold new <type> <path>` | creates a concept from the type template with `generated` filled | sf-capture |
+| `specfold change check <name>` | parses `knowledge.md`, checks paths, types and capability coverage | gate, sf-sync |
+| `specfold sync <name>` | applies the deterministic part of a knowledge delta: stubs, `deprecated` flags, capability `spec`/`change` keys, index, log | sf-sync |
+| `specfold audit` | stale, unverified, deprecated-but-linked, orphans, specs without capability card, SHALL in knowledge | sf-audit, scheduled CI |
+| `specfold gate --base <sha>` | runs all merge-gate rules on a diff (see next sections) | CI, pre-push |
+| `specfold stats` | token estimate per file and for the always-loaded set (AGENTS.md, config context, skill descriptions) | token budget check |
+| `specfold agents sync` | mirrors `.agents/skills/` to `.claude/skills/` and other tool folders listed in config | init, upgrade |
+| `specfold doctor` | checks openspec version, node, lefthook installed, optional graphify, config drift | humans, bootstrap |
+| `specfold upgrade --to <ver>` | three-way updates kit-owned files, never touches `knowledge/` content | humans |
 
 Commands added by later sections (same conventions):
 
 | Command | Does | Defined in |
 | --- | --- | --- |
-| `kb verify <paths>` | adds `verified: human:<github-login>` for the current git identity and sets `status: stable`; refuses for agents | Merge gate |
-| `kb wt plan \| new \| setup \| clean` | overlap check across active changes, worktree creation and setup for any tool, cleanup | Subagents and parallel work |
-| `kb parallel set <n> \| show` | personal limit for parallel subagents and change sessions | Subagents and parallel work |
-| `kb trace [--change <name>]` | scenario-to-test coverage and dangling test references | Quality loops |
-| `kb drift` | concepts possibly stale because their source files changed after verification | Quality loops |
-| `kb backlog add \| list \| promote \| drop` | backlog items, promotion to a change | Backlog, deferred commitments and vision |
-| `kb commitments list \| fulfill \| withdraw` | deferred commitments (human actor required for withdraw) | Backlog, deferred commitments and vision |
+| `specfold verify <paths>` | adds `verified: human:<github-login>` for the current git identity and sets `status: stable`; refuses for agents | Merge gate |
+| `specfold wt plan \| new \| setup \| clean` | overlap check across active changes, worktree creation and setup for any tool, cleanup | Subagents and parallel work |
+| `specfold parallel set <n> \| show` | personal limit for parallel subagents and change sessions | Subagents and parallel work |
+| `specfold trace [--change <name>]` | scenario-to-test coverage and dangling test references | Quality loops |
+| `specfold drift` | concepts possibly stale because their source files changed after verification | Quality loops |
+| `specfold backlog add \| list \| promote \| drop` | backlog items, promotion to a change | Backlog, deferred commitments and vision |
+| `specfold commitments list \| fulfill \| withdraw` | deferred commitments (human actor required for withdraw) | Backlog, deferred commitments and vision |
 
 Still open for the build: exact flags and `--json` output shapes per command. Claude Code should write them as the kit's own OpenSpec specs in M0/M1 (one capability per command group), so the CLI contract is reviewed before it is implemented.
 
@@ -361,10 +362,10 @@ The tool-neutral base works with any agent that reads `AGENTS.md` and `.agents/s
 
 **`AGENTS.md`** (target: under 120 lines, it is loaded every session):
 
-1. Map: `knowledge/`, `openspec/`, `kb.config.yaml`, where code lives.
+1. Map: `knowledge/`, `openspec/`, `specfold.yaml`, where code lives.
 2. The core rule: contract in specs, context in knowledge, nothing twice.
-3. Lookup order: `kb lookup` / knowledge indexes for *why and what*, the code graph (graphify, if installed) for *where in code*, `openspec show --json --no-scenarios` for *behavior*, raw grep and file reads last.
-4. Workflow: explore, propose, apply, verify, archive, kb-sync, with the command names per tool.
+3. Lookup order: `specfold lookup` / knowledge indexes for *why and what*, the code graph (graphify, if installed) for *where in code*, `openspec show --json --no-scenarios` for *behavior*, raw grep and file reads last.
+4. Workflow: explore, propose, apply, verify, archive, sf-sync, with the command names per tool.
 5. When OpenSpec is not needed (no behavior change): use `skip_specs: true` or the `no-spec` label with a reason.
 6. Never write `human:` actors; never edit `index.md`/`log.md` by hand.
 
@@ -374,42 +375,42 @@ The tool-neutral base works with any agent that reads `AGENTS.md` and `.agents/s
 
 | Skill | Trigger | Steps |
 | --- | --- | --- |
-| `kb-lookup` | before explore/propose, or any "why/what is" question | `kb lookup`, read the 1-3 best concepts, report trust tier and staleness |
-| `kb-capture` | new knowledge appears, or a proposal is rejected | `kb new`, fill body, `sources`, `status: draft`, `kb validate` |
-| `kb-sync` | after `/opsx:archive` | `kb change check`, `kb sync`, write bodies for created/updated concepts, `kb index`, `kb log add`, `kb validate` |
-| `kb-audit` | on request or weekly CI issue | `kb audit --json`, propose fixes as one change or PR |
-| `kb-migrate` | existing repo without the kit | see Migration section |
+| `sf-lookup` | before explore/propose, or any "why/what is" question | `specfold lookup`, read the 1-3 best concepts, report trust tier and staleness |
+| `sf-capture` | new knowledge appears, or a proposal is rejected | `specfold new`, fill body, `sources`, `status: draft`, `specfold validate` |
+| `sf-sync` | after `/opsx:archive` | `specfold change check`, `specfold sync`, write bodies for created/updated concepts, `specfold index`, `specfold log add`, `specfold validate` |
+| `sf-audit` | on request or weekly CI issue | `specfold audit --json`, propose fixes as one change or PR |
+| `sf-migrate` | existing repo without the kit | see Migration section |
 
 **Claude Code extras:**
 
 | Extra | What it does |
 | --- | --- |
 | `SessionStart` hook | prints the root `knowledge/index.md` section list (not the whole file) and `openspec list --json` names, max \~40 lines |
-| `PostToolUse` hook on Edit/Write under `knowledge/` or `openspec/changes/` | runs `kb validate <file>` or `kb change check`; prints errors only, exit 2 so Claude fixes them immediately |
-| `Stop` hook | runs `kb gate --base origin/<default> --local`; on failure returns the findings so Claude keeps working instead of stopping |
-| Subagent `knowledge-curator` | runs `kb-sync` and `kb-audit` in its own context on a cheaper model (Sonnet or Haiku), returns only a summary |
+| `PostToolUse` hook on Edit/Write under `knowledge/` or `openspec/changes/` | runs `specfold validate <file>` or `specfold change check`; prints errors only, exit 2 so Claude fixes them immediately |
+| `Stop` hook | runs `specfold gate --base origin/<default> --local`; on failure returns the findings so Claude keeps working instead of stopping |
+| Subagent `knowledge-curator` | runs `sf-sync` and `sf-audit` in its own context on a cheaper model (Sonnet or Haiku), returns only a summary |
 | Permissions | `deny` reads of build output, lockfiles, vendored code, `graphify-out/graph.json` (query it, don't read it) |
 
-**Git hooks via lefthook.** Every tool and every human gets the same local safety net through `lefthook.yml`; `kb init` and `kb-migrate` run `lefthook install` (lefthook comes as an npm dev dependency, with brew or the standalone binary as fallback). Other hook managers (husky, a custom `core.hooksPath`, graphify's own `graphify hook install`) are replaced by entries in this file, so there is exactly one owner of `.git/hooks`.
+**Git hooks via lefthook.** Every tool and every human gets the same local safety net through `lefthook.yml`; `specfold init` and `sf-migrate` run `lefthook install` (lefthook comes as an npm dev dependency, with brew or the standalone binary as fallback). Other hook managers (husky, a custom `core.hooksPath`, graphify's own `graphify hook install`) are replaced by entries in this file, so there is exactly one owner of `.git/hooks`.
 
 ```yaml
 # lefthook.yml
 pre-commit:
   parallel: true
   commands:
-    kb-validate:
+    specfold-validate:
       glob: "knowledge/**/*.md"
-      run: node scripts/kb.mjs validate {staged_files}
-    kb-change:
+      run: node scripts/specfold.mjs validate {staged_files}
+    specfold-change:
       glob: "openspec/changes/**"
-      run: node scripts/kb.mjs change check --staged
+      run: node scripts/specfold.mjs change check --staged
     openspec-validate:
       glob: "openspec/**"
       run: openspec validate --all --strict
 pre-push:
   commands:
-    kb-gate:
-      run: node scripts/kb.mjs gate --base origin/HEAD --local
+    specfold-gate:
+      run: node scripts/specfold.mjs gate --base origin/HEAD --local
 post-checkout:
   commands:
     graph-refresh:
@@ -424,22 +425,22 @@ Hooks are a convenience; the CI gate stays the real enforcement, because local h
 
 ## Merge gate
 
-One required status check, `kb-gate`, blocks the merge when any blocking rule fails. It runs `openspec validate --all --strict` and `kb gate --base <merge-base> --json`, and posts one summary comment listing failures with the fix for each.
+One required status check, `specfold-gate`, blocks the merge when any blocking rule fails. It runs `openspec validate --all --strict` and `specfold gate --base <merge-base> --json`, and posts one summary comment listing failures with the fix for each.
 
 | # | Rule | Effect |
 | --- | --- | --- |
-| G1 | `knowledge/` is OKF-conformant and passes the profile (`kb validate`) | block |
-| G2 | `kb index --check`: indexes match the files | block |
+| G1 | `knowledge/` is OKF-conformant and passes the profile (`specfold validate`) | block |
+| G2 | `specfold index --check`: indexes match the files | block |
 | G3 | OpenSpec validates in strict mode | block |
 | G4 | PR touches `source_globs` → it must add or modify a change under `openspec/changes/`, archive one, or carry the `no-spec` label with a reason in the PR body | block |
-| G5 | Every change in the PR has a valid `knowledge.md` (`kb change check`) | block |
+| G5 | Every change in the PR has a valid `knowledge.md` (`specfold change check`) | block |
 | G6 | A change archived in this PR has its knowledge delta applied: every `ops` path exists with the right `type`/`status`, every capability has a card, `log.md` has the entry | block |
 | G7 | New `verified` entries with `human:<login>` match the PR author or an approving reviewer (checked via GitHub API) | block |
 | G8 | No agent-written file claims a `human:` actor in `generated` | block |
 | G9 | A concept touched by the PR has an expired `stale_after` | block (configurable) |
 | G10 | Broken bundle-internal links | block (configurable) |
-| G11 | Always-loaded token budget exceeded (`kb stats`, e.g. AGENTS.md > 2k tokens) | warn |
-| G12 | Bundle-wide stale or unverified concepts | warn, plus weekly `kb audit` issue |
+| G11 | Always-loaded token budget exceeded (`specfold stats`, e.g. AGENTS.md > 2k tokens) | warn |
+| G12 | Bundle-wide stale or unverified concepts | warn, plus weekly `specfold audit` issue |
 
 Rules added by later sections (same gate, same summary comment):
 
@@ -453,24 +454,24 @@ Rules added by later sections (same gate, same summary comment):
 
 Per the versioning policy, any rule added after `v1.0.0` ships as a warning first.
 
-**Setup the kit performs or documents:** branch protection with `kb-gate` required; `CODEOWNERS` for `knowledge/decisions/` and `openspec/specs/` so decisions and contracts need a maintainer review; the PR template has `Change:` and `Knowledge:` fields that G4/G6 read as hints.
+**Setup the kit performs or documents:** branch protection with `specfold-gate` required; `CODEOWNERS` for `knowledge/decisions/` and `openspec/specs/` so decisions and contracts need a maintainer review; the PR template has `Change:` and `Knowledge:` fields that G4/G6 read as hints.
 
-**Verification flow without forging trust:** agents write `status: draft`. After review, a human runs `kb verify <paths>` locally (adds `verified` with their own git identity mapped to `human:<github-login>`, flips to `stable`) or comments `/kb verify` on the PR, which a small workflow turns into a commit by the commenter's identity. G7 ensures nobody else's name appears.
+**Verification flow without forging trust:** agents write `status: draft`. After review, a human runs `specfold verify <paths>` locally (adds `verified` with their own git identity mapped to `human:<github-login>`, flips to `stable`) or comments `/specfold verify` on the PR, which a small workflow turns into a commit by the commenter's identity. G7 ensures nobody else's name appears.
 
 ## Migration assistant and bootstrap prompt
 
-`kb-migrate` brings an existing repo into the kit in one reviewable PR. It is resumable (state in `.kb-migration/state.json`), never deletes original docs, and stops for a human checkpoint after planning.
+`sf-migrate` brings an existing repo into the kit in one reviewable PR. It is resumable (state in `.specfold/migration/state.json`), never deletes original docs, and stops for a human checkpoint after planning.
 
 **Hard rule: migration only ever happens on its own branch.** Before writing anything (even `.specfold/migration/plan.md`), `sf-migrate` checks that the working tree is clean and creates `specfold/migration` from the current default branch. It refuses to run on the default branch or on any existing feature branch, and never pushes, merges or force-pushes without the user's approval. If the branch already exists from an earlier run, it resumes there. Optionally it runs in a separate worktree, so the user's main checkout stays untouched while the migration runs. Undoing a migration is deleting the branch.
 
-1. **Preflight.** Clean working tree, new branch `kb/migration`, `kb doctor`. Detect stack, package layout, CI system, default branch.
+1. **Preflight.** Clean working tree, new branch `specfold/migration`, `specfold doctor`. Detect stack, package layout, CI system, default branch.
 2. **Inventory.** Find existing knowledge sources: `README*`, `docs/`, ADR folders, `CONTRIBUTING`, wiki exports, agent rule files (`AGENTS.md`, `CLAUDE.md`, `.cursor/rules`, `.github/copilot-instructions.md`), other spec tools (`openspec/`, `.specify/`, `.kiro/specs/`). Size each in tokens.
-3. **Plan (checkpoint).** Write `.kb-migration/plan.md`: proposed capability domains, a mapping table *source → concept type and path / AGENTS.md section / keep as is / ignore*, and what the gate will enforce from when. Stop and ask the human to approve or edit the plan.
+3. **Plan (checkpoint).** Write `.specfold/migration/plan.md`: proposed capability domains, a mapping table *source → concept type and path / AGENTS.md section / keep as is / ignore*, and what the gate will enforce from when. Stop and ask the human to approve or edit the plan.
 4. **Install.** Copy kit files from the pinned release; merge, don't overwrite, an existing `AGENTS.md`/`CLAUDE.md` (old content moves into a marked section or into `Convention` concepts); `openspec init` (or keep an existing `openspec/` and add the schema); `lefthook install`; CI workflow.
 5. **Convert.** Per plan row: create OKF concepts with `sources` pointing at the original file, `status: draft`, `generated` set. ADRs become `Decision`. Agent rule files become `Convention`. Other spec tools: no bulk conversion; write capability cards that point to them and note them as migration candidates.
 6. **Seed from code (capped).** Architecture components and interfaces from the code structure, or from the graphify report if present; glossary terms from domain names. Hard cap (default 30 concepts) to avoid a bundle nobody reviews.
 7. **No retroactive specs.** OpenSpec explicitly advises against back-filling; specs grow with real changes.
-8. **Validate and report.** `kb index`, `kb validate`, `openspec validate --strict`, `kb stats`. Write `.kb-migration/report.md`: counts, items needing human verification, open questions.
+8. **Validate and report.** `specfold index`, `specfold validate`, `openspec validate --strict`, `specfold stats`. Write `.specfold/migration/report.md`: counts, items needing human verification, open questions.
 9. **PR.** Open the migration PR. G4 (change required) applies only to PRs opened after this one merges.
 
 **`BOOTSTRAP.md`** is the entry point when the kit is not installed yet. It is one paste-able prompt that works in any agent:
@@ -478,10 +479,10 @@ Per the versioning policy, any rule added after `v1.0.0` ships as a warning firs
 ```markdown
 You are installing the OKF + OpenSpec agent kit into this repository.
 1. Download release vX.Y.Z of <kit-repo-url> into a temp folder (do not run scripts from it yet).
-2. Copy .agents/skills/kb-migrate/ into this repo's .agents/skills/ (and .claude/skills/ if Claude Code is used).
-3. Read .agents/skills/kb-migrate/SKILL.md and follow it from step 1.
+2. Copy .agents/skills/sf-migrate/ into this repo's .agents/skills/ (and .claude/skills/ if Claude Code is used).
+3. Read .agents/skills/sf-migrate/SKILL.md and follow it from step 1.
 4. Stop at the plan checkpoint and wait for my approval.
-If this repo has no existing code or docs, use the template path instead: copy the kit files and run `node scripts/kb.mjs init`.
+If this repo has no existing code or docs, use the template path instead: copy the kit files and run `node scripts/specfold.mjs init`.
 ```
 
 ## Token efficiency
@@ -490,7 +491,7 @@ The kit recommends **graphify** for code navigation and builds the rest of its t
 
 | Question | Cheapest source | Instead of |
 | --- | --- | --- |
-| Why does this exist, what does it mean? | `kb lookup` (frontmatter only), then 1-3 concepts | reading `docs/` wholesale |
+| Why does this exist, what does it mean? | `specfold lookup` (frontmatter only), then 1-3 concepts | reading `docs/` wholesale |
 | Where is it in the code, what calls what? | `graphify query` / `path` / `explain` | grep plus opening many files |
 | How must it behave? | `openspec show <spec> --type spec --json --no-scenarios` | reading full spec files |
 
@@ -501,16 +502,16 @@ The kit recommends **graphify** for code navigation and builds the rest of its t
 - Exclude `knowledge/`, `openspec/`, build output and vendored code via `.graphifyignore`.
 - Refresh through lefthook (`post-checkout`, `post-merge`) instead of `graphify hook install`.
 - Do not commit `graphify-out/` by default (it reveals architecture and grows large); teams may commit `GRAPH_REPORT.md` only.
-- One instruction block only: `AGENTS.md` defines the lookup order above; graphify's installer must not add a second, competing block (its own docs warn about this). `kb-migrate` merges it.
-- Published savings vary by repo (reports range from about 70% to about 70x on large codebases); small repos gain little. `kb stats` plus a before/after task run is the honest measure.
+- One instruction block only: `AGENTS.md` defines the lookup order above; graphify's installer must not add a second, competing block (its own docs warn about this). `sf-migrate` merges it.
+- Published savings vary by repo (reports range from about 70% to about 70x on large codebases); small repos gain little. `specfold stats` plus a before/after task run is the honest measure.
 
 **Further measures built into the kit:**
 
 1. **Small always-loaded set.** `AGENTS.md` under \~2k tokens, `config.yaml` context a few lines, skill descriptions one sentence. Details live in skill `references/` and load only when used. Gate rule G11 enforces the budget.
-2. **Progressive disclosure everywhere.** OKF indexes with one-line descriptions, `kb lookup` returns paths and one line, concept bodies capped at \~300 lines.
+2. **Progressive disclosure everywhere.** OKF indexes with one-line descriptions, `specfold lookup` returns paths and one line, concept bodies capped at \~300 lines.
 3. **Deterministic work in the CLI.** Indexes, logs, link checks, stubs, gate checks cost zero model tokens and never need retries.
 4. **Quiet hooks.** Hooks print errors only, SessionStart is capped at \~40 lines, JSON output is summarized before it reaches the model.
-5. **Context isolation.** Exploration, kb-sync and audits run in subagents that return a summary, so the main session keeps a small context; cheaper models for mechanical work.
+5. **Context isolation.** Exploration, sf-sync and audits run in subagents that return a summary, so the main session keeps a small context; cheaper models for mechanical work.
 6. **Fresh context per phase.** Start apply in a new session (OpenSpec recommends this); `tasks.md` and `knowledge.md` carry the state, so nothing is re-explained.
 7. **Small changes and specs.** One capability per change where possible; requirement descriptions under 500 characters (OpenSpec strict mode warns above that).
 8. **Read barriers.** Permission `deny` rules and `.graphifyignore` for lockfiles, build output, generated code, snapshots, large fixtures.
@@ -520,16 +521,16 @@ The kit recommends **graphify** for code navigation and builds the rest of its t
 
 **Principle: rather ask than assume.** It is the first rule in `AGENTS.md`, sits in `openspec/config.yaml` `context`, and is recorded as a `Decision` in the kit's own knowledge. No spec is written until the agent can restate the user's wish and the user confirms it. The interview style follows Matt Pocock's grilling skill: a design tree worked in rounds, each question with a recommended answer.
 
-**Skill `kb-interview`** runs at the start of every change (inside `/opsx:explore` or before `/opsx:propose`):
+**Skill `sf-interview`** runs at the start of every change (inside `/opsx:explore` or before `/opsx:propose`):
 
-1. **Ground first.** `kb-scout` reads knowledge, decisions, specs and the code graph. The agent never asks what it can verify itself, and it names any rejected decision that touches the idea.
+1. **Ground first.** `scout` reads knowledge, decisions, specs and the code graph. The agent never asks what it can verify itself, and it names any rejected decision that touches the idea.
 2. **Build the design tree.** Outcome and scope first, then behavior, edge cases, constraints, then non-functional needs. Each decision branches into the ones that depend on it.
 3. **Ask in rounds through the tool's native question UI.** In Claude Code that is `AskUserQuestion`: each frontier decision becomes one multiple-choice question, the recommended option listed first and marked "(recommended)", with a one-line reason; the user picks an option or types their own answer via "Other". Questions are never written as a numbered text list for the user to answer in prose. Only tools without such a UI fall back to plain text questions, one decision per line, each with a recommendation.
 4. **Never treat a missing answer as consent.** Claude Code's `askUserQuestionTimeout` can auto-close a question when the user is away. The kit does not set it, and if an answer comes back as a timeout, `sf-interview` pauses the interview and re-asks later instead of proceeding on its own judgment.
 5. **Record, don't infer.** Answers are collected in the session as the interview runs. "Whatever you think" is recorded as a delegated decision with the agent's choice spelled out, never as a hidden assumption.
 6. **Close with a plan that needs approval.** The planner runs in plan mode (`permissionMode: plan`, read-only) for the whole interview. When no open branch would change a requirement, it presents the result through the tool's plan approval (in Claude Code `ExitPlanMode`): the wish in the user's words, every decision with its source, out of scope, the proposed change boundaries and the execution plan (task groups, parallelism). The user approves or sends it back with corrections, which start another question round. Only approval ends the interview: the session leaves plan mode, writes `brief.md` with the approved content and `confirmed_by`/`confirmed_at`, and hands over to `spec-writer`. Plan approval never auto-resolves on idle, so the timeout risk from step 4 does not apply here. Tools without a plan mode show the same plan as text and require an explicit "approve".
 
-**Schema change:** `kb-driven` gets a first artifact `brief` (`brief.md`, `requires: []`), and `proposal` requires it. Template:
+**Schema change:** `specfold` gets a first artifact `brief` (`brief.md`, `requires: []`), and `proposal` requires it. Template:
 
 ```markdown
 ## Wish
@@ -559,7 +560,7 @@ Skip rule: changes with `skip_specs: true` (pure refactors, tooling) may use a s
 
 ## Subagents and parallel work
 
-Parallelism follows OpenSpec boundaries: **one change = one worktree = one branch = one PR**, and inside a change only task groups with disjoint files run in parallel. Read-only work never needs a worktree. This part is Claude Code specific; other tools get the same structure sequentially plus `kb wt` for worktrees.
+Parallelism follows OpenSpec boundaries: **one change = one worktree = one branch = one PR**, and inside a change only task groups with disjoint files run in parallel. Read-only work never needs a worktree. This part is Claude Code specific; other tools get the same structure sequentially plus `specfold wt` for worktrees.
 
 &#91;embedded content: one change, run in parallel · 5 phases, 6 subagent roles\]
 
@@ -572,7 +573,7 @@ The orchestrator is the main session, sitting in the change worktree. Every suba
 | Aspect | Planner |
 | --- | --- |
 | Model, effort | opus, high |
-| Tools | Read, Grep, Glob, Bash (`specfold`, `openspec`, `graphify query`), Write/Edit only under `openspec/changes/**`, `Agent(kb-scout, spec-writer, plan-critic)` |
+| Tools | Read, Grep, Glob, Bash (`specfold`, `openspec`, `graphify query`), Write/Edit only under `openspec/changes/**`, `Agent(scout, spec-writer, plan-critic)` |
 | Job | runs `sf-interview` until the brief is confirmed; decides change boundaries (one or several changes); hands the brief to `spec-writer`; turns `tasks.md` into an execution plan: task groups, file ownership, dependency order, which groups may run in parallel, which pattern to use; asks the user to approve the plan |
 | Hands over to | the orchestrator role (same session or a new session per change) for apply |
 
@@ -582,18 +583,18 @@ Roles below are the subagents the planner and the orchestrator use:
 
 | Agent | Model, effort | Tools | Isolation | Job |
 | --- | --- | --- | --- | --- |
-| `kb-scout` | haiku or sonnet, low | Read, Grep, Glob, Bash(`kb lookup`, `graphify query`, `openspec show`) | none (read-only) | answers one question from knowledge, code graph and specs; returns at most \~30 lines |
-| `spec-writer` | opus, high | Read, Write, Edit, Bash(`openspec`, `kb`) | change worktree | writes proposal, delta specs, design, `knowledge.md`, `tasks.md` with file ownership per group |
+| `scout` | haiku or sonnet, low | Read, Grep, Glob, Bash(`specfold lookup`, `graphify query`, `openspec show`) | none (read-only) | answers one question from knowledge, code graph and specs; returns at most \~30 lines |
+| `spec-writer` | opus, high | Read, Write, Edit, Bash(`openspec`, `specfold`) | change worktree | writes proposal, delta specs, design, `knowledge.md`, `tasks.md` with file ownership per group |
 | `implementer` | sonnet, medium | full minus `Agent`, minus `git push` | `isolation: worktree` | implements one task group, runs its tests, commits on its own branch |
-| `verifier` | a different model than the implementer, high | Read, Grep, Bash(tests, `openspec`, `kb gate --local`) | none (read-only) | `/opsx:verify`, full tests, gate; returns pass or a findings list |
-| `knowledge-curator` | sonnet, medium | Read, Write, Edit, Bash(`kb`) | change worktree | kb-sync after archive, kb-audit on request |
+| `verifier` | a different model than the implementer, high | Read, Grep, Bash(tests, `openspec`, `specfold gate --local`) | none (read-only) | `/opsx:verify`, full tests, gate; returns pass or a findings list |
+| `knowledge-curator` | sonnet, medium | Read, Write, Edit, Bash(`specfold`) | change worktree | sf-sync after archive, sf-audit on request |
 | `integrator` (optional) | sonnet, low | Bash(git), Read | change worktree | merges implementer branches in order, resolves only generated-file conflicts, escalates real ones |
 
-All roles preload the matching kb skill via `skills:`, set `maxTurns`, and only the orchestrator may spawn agents (`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=2`, `Agent` removed from every role).
+All roles preload the matching sf skill via `skills:`, set `maxTurns`, and only the orchestrator may spawn agents (`CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH=2`, `Agent` removed from every role).
 
 ### Three patterns
 
-1. **Several changes at once** (most common, biggest speed-up): one background session per change via `claude --worktree <change-name>` or agent view (`claude agents`). Each runs the full loop and opens its own PR. Before dispatching, `kb wt plan` checks active changes for overlapping capabilities or source globs and serializes those.
+1. **Several changes at once** (most common, biggest speed-up): one background session per change via `claude --worktree <change-name>` or agent view (`claude agents`). Each runs the full loop and opens its own PR. Before dispatching, `specfold wt plan` checks active changes for overlapping capabilities or source globs and serializes those.
 2. **One change, parallel task groups:** `spec-writer` marks each group in `tasks.md` with the files it owns (`files: [src/checkout/**]`). The orchestrator spawns one `implementer` per independent group, merges their branches, then runs `verifier` and `knowledge-curator`.
 3. **Large mechanical changes** (renames, migrations across many files): Claude Code's `/batch` or a dynamic workflow, wrapped in one OpenSpec change with `skip_specs: true` if no behavior changes.
 
@@ -604,49 +605,49 @@ Agent teams stay off by default: they are experimental and do not isolate teamma
 | Concern | Setting |
 | --- | --- |
 | Base for subagent worktrees | `worktree.baseRef: "head"` in `.claude/settings.json`; the default (`fresh`, remote default branch) would not contain the change's own commits |
-| Location | default `.claude/worktrees/`, added to `.gitignore`; `kb wt` uses the same folder for other tools |
+| Location | default `.claude/worktrees/`, added to `.gitignore`; `specfold wt` uses the same folder for other tools |
 | Gitignored files | `.worktreeinclude`: `.env*`, local config, and `graphify-out/` so each worktree starts with the code graph and only updates it incrementally |
-| Dependencies | a `SessionStart` hook runs `kb wt setup` when it detects a fresh worktree: install with the shared package cache, nothing else |
+| Dependencies | a `SessionStart` hook runs `specfold wt setup` when it detects a fresh worktree: install with the shared package cache, nothing else |
 | Git hooks | lefthook lives in the shared `.git`, installed once; it applies in every worktree |
-| Parallel test runs | `kb wt setup` assigns `KB_WT_INDEX`; test config derives ports and database names from it |
-| Generated files | `knowledge/**/index.md` and `log.md` are never merged by hand: `.gitattributes` marks `log.md` as `merge=union`, and indexes are regenerated with `kb index` after each merge |
+| Parallel test runs | `specfold wt setup` assigns `SPECFOLD_WT_INDEX`; test config derives ports and database names from it |
+| Generated files | `knowledge/**/index.md` and `log.md` are never merged by hand: `.gitattributes` marks `log.md` as `merge=union`, and indexes are regenerated with `specfold index` after each merge |
 | Archive | only one change archives at a time, after rebasing on the default branch (OpenSpec warns on drift since 1.14); a GitHub merge queue enforces the order |
-| Cleanup | Claude Code removes clean subagent worktrees itself; `kb wt clean` removes merged ones for other tools |
+| Cleanup | Claude Code removes clean subagent worktrees itself; `specfold wt clean` removes merged ones for other tools |
 
 ### Limits
 
 Parallel sessions multiply token use, and what is affordable depends on each person's subscription plan. So **the user decides the limit**, not the kit:
 
-- `kb init` and `kb-migrate` ask once: "How many subagents may run at the same time?" with a short note on token cost. Pressing Enter takes 3.
-- The answer is a **personal** setting, stored in `.claude/settings.local.json` (not committed) as `env.CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`, so teammates on different plans keep their own values. Tools without that setting read `parallel.max_subagents` from `.kb/local.yaml` (also gitignored).
-- Change it any time with `kb parallel set <n>`; `kb parallel show` prints the current value and where it comes from. `kb parallel set 1` turns parallel work off: the orchestrator then runs task groups one after another.
-- The same limit caps pattern 1: `kb wt plan` never suggests more parallel change sessions than the limit allows.
-- Spawn depth stays fixed at 2 and scouts stay on cheap models; `kb stats` reports cost per change so the user can tune the number.
+- `specfold init` and `sf-migrate` ask once: "How many subagents may run at the same time?" with a short note on token cost. Pressing Enter takes 3.
+- The answer is a **personal** setting, stored in `.claude/settings.local.json` (not committed) as `env.CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS`, so teammates on different plans keep their own values. Tools without that setting read `parallel.max_subagents` from `.specfold/local.yaml` (also gitignored).
+- Change it any time with `specfold parallel set <n>`; `specfold parallel show` prints the current value and where it comes from. `specfold parallel set 1` turns parallel work off: the orchestrator then runs task groups one after another.
+- The same limit caps pattern 1: `specfold wt plan` never suggests more parallel change sessions than the limit allows.
+- Spawn depth stays fixed at 2 and scouts stay on cheap models; `specfold stats` reports cost per change so the user can tune the number.
 
 Decided: in pattern 2 the orchestrator merges implementer branches (no PR per implementer), and agent teams are not used.
 
-New CLI commands for this part: `kb wt plan` (overlap check), `kb wt new <change>` (worktree + branch + setup, for tools without built-in worktrees), `kb wt setup`, `kb wt clean`, `kb parallel set <n>` and `kb parallel show`. Milestone **M8** covers the agent definitions, settings, these commands and a test run of pattern 2 on the sample app with three parallel task groups.
+New CLI commands for this part: `specfold wt plan` (overlap check), `specfold wt new <change>` (worktree + branch + setup, for tools without built-in worktrees), `specfold wt setup`, `specfold wt clean`, `specfold parallel set <n>` and `specfold parallel show`. Milestone **M8** covers the agent definitions, settings, these commands and a test run of pattern 2 on the sample app with three parallel task groups.
 
 ## Updating the framework from user repos
 
-Any repo using the kit updates itself with one command, `kb upgrade`, or with a skill that drives it. The kit never overwrites project content, and every upgrade lands as a normal PR that passes the gate.
+Any repo using the kit updates itself with one command, `specfold upgrade`, or with a skill that drives it. The kit never overwrites project content, and every upgrade lands as a normal PR that passes the gate.
 
-**Ownership: three classes of files.** Every file the kit installs is listed in a committed manifest, `.kb/manifest.json`, with its class and the hash of the shipped version. That makes upgrades work even for repos created from the GitHub template, which have no git link to the kit.
+**Ownership: three classes of files.** Every file the kit installs is listed in a committed manifest, `.specfold/manifest.json`, with its class and the hash of the shipped version. That makes upgrades work even for repos created from the GitHub template, which have no git link to the kit.
 
 | Class | Examples | On upgrade |
 | --- | --- | --- |
-| Kit-owned | `scripts/kb.mjs`, `.agents/skills/kb-*`, `openspec/schemas/kb-driven/`, `.claude/hooks/*.sh`, `.github/workflows/kb-gate.yml`, `.claude/agents/*` | replaced if unchanged locally; if changed, three-way merge against the old shipped version, conflicts left for review |
-| Managed blocks | sections between `<!-- kb:begin -->` / `<!-- kb:end -->` in `AGENTS.md` and `CLAUDE.md`; kit keys in `openspec/config.yaml`, `.claude/settings.json`, `lefthook.yml` | only the managed part is replaced; everything outside stays |
-| Project-owned | `knowledge/` content, `openspec/specs/`, `openspec/changes/`, values in `kb.config.yaml`, `.kb/local.yaml` | never touched; content migrations only produce a report and suggested edits |
+| Kit-owned | `scripts/specfold.mjs`, `.agents/skills/sf-*`, `openspec/schemas/specfold/`, `.claude/hooks/*.sh`, `.github/workflows/specfold-gate.yml`, `.claude/agents/*` | replaced if unchanged locally; if changed, three-way merge against the old shipped version, conflicts left for review |
+| Managed blocks | sections between `<!-- specfold:begin -->` / `<!-- specfold:end -->` in `AGENTS.md` and `CLAUDE.md`; kit keys in `openspec/config.yaml`, `.claude/settings.json`, `lefthook.yml` | only the managed part is replaced; everything outside stays |
+| Project-owned | `knowledge/` content, `openspec/specs/`, `openspec/changes/`, values in `specfold.yaml`, `.specfold/local.yaml` | never touched; content migrations only produce a report and suggested edits |
 
-**`kb upgrade` flow:**
+**`specfold upgrade` flow:**
 
-1. `kb upgrade --check`: compares `kit_version` with the latest release on the chosen channel (`stable` or `next`) and prints the changelog excerpt. Cheap, no writes.
-2. `kb upgrade [--to <version>]`: creates branch `kb/upgrade-<version>`, downloads the release tarball, verifies its SHA-256 against the release, and runs **the new version's** upgrader from the tarball. This avoids the old CLI having to understand future formats.
+1. `specfold upgrade --check`: compares `kit_version` with the latest release on the chosen channel (`stable` or `next`) and prints the changelog excerpt. Cheap, no writes.
+2. `specfold upgrade [--to <version>]`: creates branch `specfold/upgrade-<version>`, downloads the release tarball, verifies its SHA-256 against the release, and runs **the new version's** upgrader from the tarball. This avoids the old CLI having to understand future formats.
 3. Dry-run plan first: files to add, replace, merge, remove, plus config migrations. `--yes` applies it.
-4. Apply: replace and merge files per class, run versioned migrations (`migrations/<version>.mjs`, idempotent) for `kb.config.yaml`, schema and profile changes, then update `.kb/manifest.json` and `kit_version`.
-5. Follow-ups: `openspec update`, `kb agents sync`, `lefthook install`, `kb index`, `kb validate`, `kb gate --local`.
-6. Report: `.kb/upgrade-report.md` with what changed, conflicts, and manual steps from the release's upgrade notes. Commit and open a PR.
+4. Apply: replace and merge files per class, run versioned migrations (`migrations/<version>.mjs`, idempotent) for `specfold.yaml`, schema and profile changes, then update `.specfold/manifest.json` and `kit_version`.
+5. Follow-ups: `openspec update`, `specfold agents sync`, `lefthook install`, `specfold index`, `specfold validate`, `specfold gate --local`.
+6. Report: `.specfold/upgrade-report.md` with what changed, conflicts, and manual steps from the release's upgrade notes. Commit and open a PR.
 
 Rollback is `git revert` of the upgrade PR, because nothing happens outside git.
 
@@ -666,9 +667,9 @@ source:
 
 **Ways to trigger it:**
 
-- **Manually:** `kb upgrade` in a terminal.
-- **From an agent:** skill `kb-upgrade` runs the CLI, resolves conflicts in managed and kit-owned files with judgment, applies the manual steps from the upgrade notes, and stops before merging.
-- **Automatically:** optional workflow `kb-upgrade.yml` (weekly) runs `kb upgrade --check --json` and, if a new version exists, opens the upgrade PR like Dependabot does. Teams opt in during `kb init`.
+- **Manually:** `specfold upgrade` in a terminal.
+- **From an agent:** skill `sf-upgrade` runs the CLI, resolves conflicts in managed and kit-owned files with judgment, applies the manual steps from the upgrade notes, and stops before merging.
+- **Automatically:** optional workflow `specfold-upgrade.yml` (weekly) runs `specfold upgrade --check --json` and, if a new version exists, opens the upgrade PR like Dependabot does. Teams opt in during `specfold init`.
 - **Reminder:** the SessionStart hook prints one line when an upgrade is available, at most once a day.
 
 **Release side (kit repo):** semver where a major version means breaking profile, schema or gate changes; every release ships the template tarball, its SHA-256, a `CHANGELOG.md` entry with an **Upgrade notes** block written for agents, and a compatibility line for OpenSpec and OKF versions. CI in the kit repo upgrades the fixture repos from the previous two releases on every release candidate.
@@ -704,7 +705,7 @@ Specfold has **one product version** (semver, tag `vX.Y.Z`) that the updater wor
 - **Release automation:** conventional commits plus release-please in the kit repo generate the changelog, the tag, the template tarball and its SHA-256. Every release candidate runs the upgrade test against fixture repos from the previous two minors and the previous major.
 - **Dogfooding:** the kit repo itself records its own `kit_version` and is upgraded with the released upgrader, like any user repo.
 
-This replaces the one-line `kb upgrade` entry in the CLI table and is milestone M9.
+This replaces the one-line `specfold upgrade` entry in the CLI table and is milestone M9.
 
 ## Quality loops
 
@@ -771,7 +772,7 @@ Optional later: two-way sync of backlog items with GitHub Issues. The kit repo i
 
 ## Milestones
 
-Build in this order; each milestone ends with its own PR and green CI in the kit repo. **M0 comes first:** create the repo skeleton with the dogfooding split, seed `knowledge/decisions/` and `knowledge/references/` from this plan by hand (no CLI yet), and write the first specs for `kb-validate` and `kb-index`. From M1 on, every milestone runs as an OpenSpec change in the kit repo itself.
+Build in this order; each milestone ends with its own PR and green CI in the kit repo. **M0 comes first:** create the repo skeleton with the dogfooding split, seed `knowledge/decisions/` and `knowledge/references/` from this plan by hand (no CLI yet), and write the first specs for `specfold-validate` and `specfold-index`. From M1 on, every milestone runs as an OpenSpec change in the kit repo itself.
 
 | # | Milestone | Done when |
 | --- | --- | --- |
@@ -809,7 +810,7 @@ These points were researched on 2026-10-25/26 but move fast. Claude Code should 
 - [ ] GitHub API access for G7 (approver check) under the default `GITHUB_TOKEN` permissions.
 
 * [ ] Claude Code's structured question tool for interviews: current name and limits; fallback to plain numbered questions in other tools.
-* [ ] OpenSpec: a custom first artifact (`brief`) before `proposal`, and whether `/opsx:explore` can be pointed at the `kb-interview` skill via `config.yaml` rules.
+* [ ] OpenSpec: a custom first artifact (`brief`) before `proposal`, and whether `/opsx:explore` can be pointed at the `sf-interview` skill via `config.yaml` rules.
 
 - [ ] Claude Code: `permissionMode: plan` on a main-session agent (`claude --agent planner`), and that `ExitPlanMode` approval switches to a write-capable mode so the planner can write `brief.md`.
 
