@@ -1,7 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import "../src/validate/index.ts";
 import { run, tempDir } from "./helpers.ts";
 
 const OKF = "knowledge/references/okf.md";

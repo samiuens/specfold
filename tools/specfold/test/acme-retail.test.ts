@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import "../src/validate/index.ts";
 import { run, tempDir } from "./helpers.ts";
 
 describe("validate: OKF sample acme_retail", () => {

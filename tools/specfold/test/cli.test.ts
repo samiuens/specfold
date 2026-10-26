@@ -24,6 +24,7 @@ describe("cli", () => {
     const result = await run(["--help"], tempDir());
     expect(result.code).toBe(0);
     expect(result.stdout).toContain("echo-test");
+    expect(result.stdout).toContain("validate");
   });
 
   it("exits with 2 without a command", async () => {
@@ -48,5 +49,11 @@ describe("cli", () => {
       stdout: "HI\n",
       stderr: "",
     });
+  });
+
+  it("registers every command through the bundle entry point", async () => {
+    const { readFileSync } = await import("node:fs");
+    const bin = readFileSync(new URL("../src/bin.ts", import.meta.url), "utf8");
+    expect(bin).toContain('import "./commands.ts";');
   });
 });

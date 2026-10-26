@@ -2,7 +2,6 @@ import { createHash } from "node:crypto";
 import { readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import "../src/validate/index.ts";
 import { run, tempDir } from "./helpers.ts";
 
 const write = (repo: string, rel: string, text: string) => writeFileSync(join(repo, "knowledge", rel), text);

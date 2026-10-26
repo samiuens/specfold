@@ -1,6 +1,5 @@
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import "../src/validate/index.ts";
 import { run, tempDir } from "./helpers.ts";
 
 describe("validate: command line", () => {
