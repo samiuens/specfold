@@ -14,6 +14,8 @@ import type { Config } from "../repo.ts";
 import { planSync } from "../sync/plan.ts";
 import { checkChangeTasks } from "../tasks/command.ts";
 import type { TaskFinding } from "../tasks/rules.ts";
+import { changedScenarios } from "../trace/specs.ts";
+import { buildTraceIndex, changeSpecs } from "../trace/trace.ts";
 import { validate } from "../validate/index.ts";
 import { isConcept, isRecord } from "../validate/okf.ts";
 import { isTimestamp } from "../validate/profile.ts";
@@ -201,6 +203,64 @@ export const g18: GateRule = (ctx) =>
     checkChangeTasks(ctx.config, change, ctx.diff.ref).map((f) => fromChange("G18", f)),
   );
 
+/**
+ * G15: scenarios added or modified by touched active and archived changes with a tasks.md need a test
+ * reference; dangling references block; old gaps in the main specs warn once.
+ */
+export const g15: GateRule = (ctx) => {
+  const root = ctx.config.root;
+  const index = buildTraceIndex(ctx.config);
+  const covered = new Set(index.refs.map((r) => r.id));
+  const checked = new Set<string>();
+  const findings: GateFinding[] = [];
+  const archived = ctx.diff.archivedChanges
+    .map((id) => `openspec/changes/archive/${id}`)
+    .filter((rel) => existsSync(join(root, rel, "tasks.md")));
+  const changes = [
+    ...plannedChanges(ctx).map(
+      (name) => index.active.get(name) ?? changeSpecs(root, `openspec/changes/${name}`),
+    ),
+    ...archived.map((rel) => changeSpecs(root, rel)),
+  ];
+  for (const s of changes.flatMap(changedScenarios)) {
+    if (checked.has(s.id)) continue;
+    checked.add(s.id);
+    if (!covered.has(s.id))
+      findings.push({
+        rule: "G15",
+        effect: "block",
+        path: s.spec,
+        line: s.line,
+        message: `scenario ${s.id} has no test reference`,
+        fix: `name it in a test with a 'spec: ${s.id}' comment`,
+      });
+  }
+  for (const r of index.refs.filter((r) => !index.known.has(r.id)))
+    findings.push({
+      rule: "G15",
+      effect: "block",
+      path: r.file,
+      line: r.line,
+      message: `reference to unknown scenario ${r.id}`,
+      fix: "point it at an existing scenario id (see specfold trace) or remove it",
+    });
+  const gaps = new Set(
+    index.main.scenarios
+      .filter((s) => index.known.has(s.id) && !covered.has(s.id) && !checked.has(s.id))
+      .map((s) => s.id),
+  );
+  if (gaps.size > 0)
+    findings.push({
+      rule: "G15",
+      effect: "warn",
+      path: null,
+      line: null,
+      message: `${gaps.size === 1 ? "1 main-spec scenario has" : `${gaps.size} main-spec scenarios have`} no test reference`,
+      fix: "run specfold trace and add tests for them over time",
+    });
+  return findings;
+};
+
 /** G6: every archived change's knowledge rules pass and its sync has nothing left to do. */
 export const g6: GateRule = (ctx) =>
   ctx.diff.archivedChanges.flatMap((id) => {
@@ -336,7 +396,7 @@ export const g14: GateRule = (ctx) => {
   });
 };
 
-export const RULES: GateRule[] = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g18];
+export const RULES: GateRule[] = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g15, g18];
 
 const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 const ruleNumber = (rule: string) => Number.parseInt(rule.slice(1), 10);

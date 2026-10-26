@@ -62,9 +62,11 @@ export function gateRepo(files: Record<string, string> = {}): string {
 const FIXTURE = new URL("./fixtures/change/", import.meta.url);
 const fixture = (rel: string) => readFileSync(new URL(rel, FIXTURE), "utf8");
 
-/** The valid `demo` change of the change check fixture, with the concept its brief cites. */
+/** The valid `demo` change of the change check fixture, with the concept its brief cites and a test for its scenario. */
 export const demoChange = (): Record<string, string> => ({
   "knowledge/decisions/receipts.md": concept("Term", "Receipts go by mail."),
+  // the marker is built from parts, so the kit's own trace never reads it as a reference
+  "test/checkout.test.ts": `// ${"spec"}: guest-checkout#guest-pays-without-account\n`,
   ...Object.fromEntries(
     ["brief.md", "knowledge.md", "tasks.md", ".openspec.yaml", "specs/guest-checkout/spec.md"].map((f) => [
       `openspec/changes/demo/${f}`,
