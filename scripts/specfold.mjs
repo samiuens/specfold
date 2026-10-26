@@ -7866,13 +7866,80 @@ register({
   }
 });
 
+// src/log/command.ts
+import { existsSync as existsSync3, readFileSync as readFileSync5, writeFileSync as writeFileSync2 } from "node:fs";
+import { join as join6 } from "node:path";
+
+// src/log/insert.ts
+var DATE_HEADING = /^## (\d{4}-\d{2}-\d{2})\s*$/;
+function insertEntry(text, date, entry) {
+  if (text === void 0 || text.trim() === "") return `# Log
+
+## ${date}
+
+${entry}
+`;
+  const lines = text.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n");
+  const headings = lines.map((line, index) => ({ index, date: DATE_HEADING.exec(line)?.[1] })).filter((h) => h.date !== void 0);
+  const same = headings.find((h) => h.date === date);
+  if (same) {
+    const next = lines.findIndex((line, i) => i > same.index && line.startsWith("## "));
+    let last = (next === -1 ? lines.length : next) - 1;
+    while (last > same.index && lines[last]?.trim() === "") last--;
+    lines.splice(last + 1, 0, ...last === same.index ? ["", entry] : [entry]);
+  } else {
+    const older = headings.find((h) => h.date < date);
+    if (older) lines.splice(older.index, 0, `## ${date}`, "", entry, "");
+    else lines.push("", `## ${date}`, "", entry);
+  }
+  return `${lines.join("\n")}
+`;
+}
+
+// src/log/command.ts
+var KIND = /^[A-Z][A-Za-z]*$/;
+function isCalendarDate(text) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return false;
+  const date = /* @__PURE__ */ new Date(`${text}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text;
+}
+function localDate(now = /* @__PURE__ */ new Date()) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+register({
+  name: "log",
+  summary: "add a dated entry to the bundle's log.md",
+  usage: "specfold log add [--kind <Kind>] [--date <YYYY-MM-DD>] [--bundle <dir>] <message...>",
+  options: { kind: { type: "string" }, date: { type: "string" }, bundle: { type: "string" } },
+  run: ({ io, values, positionals }) => {
+    const [sub, ...words] = positionals;
+    if (sub !== "add")
+      throw new UsageError(sub ? `unknown log subcommand '${sub}'` : "missing subcommand: specfold log add");
+    const message = words.join(" ").replace(/\s+/g, " ").trim();
+    if (!message) throw new UsageError("missing message");
+    const kind = values.kind ?? "Update";
+    if (!KIND.test(kind))
+      throw new UsageError(`kind '${kind}' must be one word starting with an uppercase letter`);
+    const date = values.date ?? localDate();
+    if (!isCalendarDate(date)) throw new UsageError(`date '${date}' is not a valid YYYY-MM-DD date`);
+    const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, void 0);
+    const path = join6(bundleRoot, "log.md");
+    const entry = `* **${kind}**: ${message}`;
+    writeFileSync2(path, insertEntry(existsSync3(path) ? readFileSync5(path, "utf8") : void 0, date, entry));
+    io.stdout(`${entry}
+`);
+    return 0;
+  }
+});
+
 // src/validate/index.ts
-import { existsSync as existsSync5 } from "node:fs";
+import { existsSync as existsSync6 } from "node:fs";
 import { relative as relative4, resolve as resolve2, sep as sep3 } from "node:path";
 
 // src/validate/links.ts
-import { existsSync as existsSync4 } from "node:fs";
-import { dirname as dirname3, join as join7 } from "node:path";
+import { existsSync as existsSync5 } from "node:fs";
+import { dirname as dirname3, join as join8 } from "node:path";
 
 // src/validate/okf.ts
 var isRecord3 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -7923,7 +7990,7 @@ var okf3 = (file, line, message, fix) => ({
   message,
   fix
 });
-function isCalendarDate(text) {
+function isCalendarDate2(text) {
   const date = /* @__PURE__ */ new Date(`${text}T00:00:00Z`);
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text;
 }
@@ -7973,7 +8040,7 @@ var okf3Log = (file) => {
     if (!heading) return;
     const line = file.bodyStartLine + i;
     const date = heading[1]?.trim() ?? "";
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !isCalendarDate(date)) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !isCalendarDate2(date)) {
       findings.push(
         okf3(file, line, `log heading '${date}' is not a YYYY-MM-DD date`, "use '## YYYY-MM-DD' headings")
       );
@@ -7995,8 +8062,8 @@ var okf3Log = (file) => {
 };
 
 // src/validate/profile.ts
-import { existsSync as existsSync3 } from "node:fs";
-import { dirname as dirname2, join as join6, relative as relative3 } from "node:path";
+import { existsSync as existsSync4 } from "node:fs";
+import { dirname as dirname2, join as join7, relative as relative3 } from "node:path";
 function conceptData(file) {
   const data = file.frontmatter?.data;
   if (!isConcept(file.rel) || !isRecord3(data)) return void 0;
@@ -8281,7 +8348,7 @@ var p11 = (file, ctx) => {
   }
   if (data.supersedes !== void 0) {
     const target = typeof data.supersedes === "string" ? resolveInBundle(ctx.bundleRoot, file.rel, data.supersedes) : void 0;
-    if (!target || !existsSync3(target)) {
+    if (!target || !existsSync4(target)) {
       findings.push(
         finding(
           "P11",
@@ -8295,7 +8362,7 @@ var p11 = (file, ctx) => {
   }
   if (data.spec !== void 0) {
     const root = ctx.config?.root;
-    if (typeof data.spec !== "string" || !root || !existsSync3(join6(root, data.spec))) {
+    if (typeof data.spec !== "string" || !root || !existsSync4(join7(root, data.spec))) {
       findings.push(
         finding(
           "P11",
@@ -8328,7 +8395,7 @@ var p11 = (file, ctx) => {
 function resolveInBundle(bundleRoot, fromRel, target) {
   const clean = target.split("#")[0] ?? "";
   if (clean === "") return void 0;
-  const abs = clean.startsWith("/") ? join6(bundleRoot, clean) : join6(bundleRoot, dirname2(fromRel), clean);
+  const abs = clean.startsWith("/") ? join7(bundleRoot, clean) : join7(bundleRoot, dirname2(fromRel), clean);
   const rel = relative3(bundleRoot, abs);
   return rel.startsWith("..") ? void 0 : abs;
 }
@@ -8358,7 +8425,7 @@ var l1 = (file, ctx) => {
       } catch {
       }
       const abs = resolveInBundle(ctx.bundleRoot, file.rel, decoded);
-      if (abs && existsSync4(abs)) continue;
+      if (abs && existsSync5(abs)) continue;
       findings.push({
         rule: "L1",
         severity,
@@ -8384,8 +8451,8 @@ var l2 = (file, ctx) => {
   return checks.filter(({ value }) => {
     if (SCHEME.test(value) || value.trim() === "") return false;
     const path = value.split("#")[0] ?? "";
-    const abs = path.startsWith("/") ? join7(ctx.bundleRoot, path) : join7(ctx.bundleRoot, dirname3(file.rel), path);
-    return !existsSync4(abs);
+    const abs = path.startsWith("/") ? join8(ctx.bundleRoot, path) : join8(ctx.bundleRoot, dirname3(file.rel), path);
+    return !existsSync5(abs);
   }).map(({ key, value }) => ({
     rule: "L2",
     severity: "error",
@@ -8437,7 +8504,7 @@ register({
       if (rel.startsWith("..") || resolve2(bundleRoot, rel) !== abs) {
         throw new UsageError(`path is outside the bundle ${bundleRoot}: ${p}`);
       }
-      if (!existsSync5(abs)) throw new UsageError(`path not found: ${p}`);
+      if (!existsSync6(abs)) throw new UsageError(`path not found: ${p}`);
       return abs;
     });
     const { findings, checked } = validate({ bundleRoot, paths, okfOnly, ...config ? { config } : {} });
