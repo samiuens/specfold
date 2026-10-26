@@ -33,7 +33,7 @@ scenarios: [specfold-gate#approver-verified, specfold-gate#claimed-stranger, spe
 agent: implementer
 ```
 
-- [ ] 3.1 Add rule G7 over the added claims and the PR
+- [x] 3.1 Add rule G7 over the added claims and the PR
   - Done when: scenarios approver-verified, claimed-stranger and local-verification pass in `gate-rules.test.ts`
 - [ ] 3.2 Add `--pr` to `specfold gate` and fetch the PR before the rules run
   - Done when: `gate-command.test.ts` covers `--pr` against a local server and a malformed number

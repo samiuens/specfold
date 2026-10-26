@@ -17,7 +17,9 @@ import type { TaskFinding } from "../tasks/rules.ts";
 import { validate } from "../validate/index.ts";
 import { isConcept, isRecord } from "../validate/okf.ts";
 import { isTimestamp } from "../validate/profile.ts";
+import { addedClaims } from "./claims.ts";
 import type { GateDiff } from "./diff.ts";
+import type { PullRequest } from "./github.ts";
 import { openspecValidate } from "./openspec.ts";
 
 export type Effect = "block" | "warn";
@@ -42,6 +44,8 @@ export interface GateContext {
   /** Text of the `--pr-body` file. */
   prBody: string | undefined;
   openspec: OpenSpecBinary;
+  /** The PR read with `--pr`; without it, G7 only warns. */
+  pr: PullRequest | undefined;
   now: Date;
 }
 
@@ -216,6 +220,35 @@ export const g6: GateRule = (ctx) =>
     }));
   });
 
+/** G7: every human claim the branch adds names the PR author or an approver. */
+export const g7: GateRule = (ctx) => {
+  const claims = addedClaims(ctx.config.root, ctx.bundleRoot, ctx.diff);
+  if (claims.length === 0) return [];
+  const { pr } = ctx;
+  if (!pr)
+    return [
+      {
+        rule: "G7",
+        effect: "warn",
+        path: null,
+        line: null,
+        message: `${claims.length === 1 ? "1 human claim" : `${claims.length} human claims`} added (${claims.map((c) => `human:${c.login}`).join(", ")}); CI checks them against the PR with --pr`,
+        fix: "nothing to do locally; make sure the named people author or approve the PR",
+      },
+    ];
+  const allowed = new Set([pr.author, ...pr.approvers]);
+  return claims
+    .filter((c) => !allowed.has(c.login.toLowerCase()))
+    .map((c) => ({
+      rule: "G7",
+      effect: "block" as const,
+      path: c.file,
+      line: c.line,
+      message: `${c.key} names human:${c.login}, who is neither the author of PR #${pr.number} nor an approving reviewer`,
+      fix: `have ${c.login} approve the PR, or remove the claim`,
+    }));
+};
+
 /** Frontmatter of every changed concept. */
 function changedData(ctx: GateContext) {
   return changedConcepts(ctx).flatMap((rel) => {
@@ -303,7 +336,7 @@ export const g14: GateRule = (ctx) => {
   });
 };
 
-export const RULES: GateRule[] = [g1, g2, g3, g4, g5, g6, g8, g9, g10, g12, g13, g14, g18];
+export const RULES: GateRule[] = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g18];
 
 const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 const ruleNumber = (rule: string) => Number.parseInt(rule.slice(1), 10);
