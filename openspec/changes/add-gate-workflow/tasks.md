@@ -35,7 +35,7 @@ agent: implementer
 
 - [x] 3.1 Add the gate and comment workflows to the template
   - Done when: both workflow files parse as YAML and name the job `specfold-gate`
-- [ ] 3.2 Add the Claude Code hook settings to the template
+- [x] 3.2 Add the Claude Code hook settings to the template
   - Done when: `template/.claude/settings.json` parses and runs the three hooks
 - [ ] 3.3 Add CODEOWNERS, the PR template and the worktree ignore
   - Done when: the PR template has `Change:`, `Knowledge:` and `No-spec reason:` lines
