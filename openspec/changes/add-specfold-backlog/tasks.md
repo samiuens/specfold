@@ -89,7 +89,7 @@ scenarios: [specfold-audit#promise-past-due, specfold-audit#condition-trigger, s
 agent: implementer
 ```
 
-- [ ] 7.1 Add A6, A7 and A8
+- [x] 7.1 Add A6, A7 and A8
   - Done when: scenarios promise-past-due, condition-trigger, unanchored-promise and old-idea pass in `audit-rules.test.ts`
 
 ## 8. Lookup context
