@@ -21,6 +21,8 @@ export interface Config {
   agentPrefix: string;
   /** Supported tool ranges from `requires:`, e.g. `openspec: ">=1.15 <2"`. */
   requires: Record<string, string>;
+  /** `tasks.max_files_per_task` and `tasks.max_tasks_per_group`; both limits only warn. */
+  tasks: { maxFilesPerTask: number; maxTasksPerGroup: number };
 }
 
 /** The nearest directory at or above `cwd` that contains specfold.yaml. */
@@ -36,6 +38,14 @@ export function findRepoRoot(cwd: string): string | undefined {
 
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
+
+const positiveInt = (v: unknown, key: string, fallback: number): number => {
+  if (v === undefined) return fallback;
+  if (typeof v !== "number" || !Number.isInteger(v) || v < 1) {
+    throw new EnvError(`${CONFIG_FILE}: '${key}' must be a positive integer`);
+  }
+  return v;
+};
 
 const stringList = (v: unknown, key: string): string[] => {
   if (v === undefined) return [];
@@ -55,6 +65,7 @@ export function loadConfig(root: string): Config {
   if (!isRecord(data)) throw new EnvError(`${CONFIG_FILE}: expected a mapping at the top level`);
   const gate = isRecord(data.gate) ? data.gate : {};
   const actors = isRecord(data.actors) ? data.actors : {};
+  const tasks = isRecord(data.tasks) ? data.tasks : {};
   const folders: Record<string, FolderInfo> = {};
   if (isRecord(data.folders)) {
     for (const [path, info] of Object.entries(data.folders)) {
@@ -77,6 +88,10 @@ export function loadConfig(root: string): Config {
         (e): e is [string, string] => typeof e[1] === "string",
       ),
     ),
+    tasks: {
+      maxFilesPerTask: positiveInt(tasks.max_files_per_task, "tasks.max_files_per_task", 5),
+      maxTasksPerGroup: positiveInt(tasks.max_tasks_per_group, "tasks.max_tasks_per_group", 8),
+    },
   };
 }
 
