@@ -67,7 +67,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 5.1 Add `scripts/check-skills.mjs` for the shared SKILL.md frontmatter rules and relative links
+- [x] 5.1 Add `scripts/check-skills.mjs` for the shared SKILL.md frontmatter rules and relative links
   - Done when: it exits 0 on `.agents/skills` in the kit and 1 on a skill whose name differs from its folder
 
 ## 6. Knowledge
