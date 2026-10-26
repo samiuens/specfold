@@ -112,6 +112,13 @@ describe("gate: rules", () => {
     expect(findings[0]?.message).toContain("must include at least one scenario");
   }, 30_000);
 
+  it("G3: reports why OpenSpec could not validate at all", () => {
+    const root = gateRepo();
+    const findings = g3(ctx(root));
+    expect(findings).toEqual([expect.objectContaining({ rule: "G3", effect: "block", path: "openspec" })]);
+    expect(findings[0]?.message).toContain("No OpenSpec root found");
+  }, 30_000);
+
   it("G3: without OpenSpec, fails in CI and warns locally", () => {
     const root = gateRepo();
     expect(() => g3(ctx(root, { openspec: join(root, "no-openspec") }))).toThrow(EnvError);
