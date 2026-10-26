@@ -31,12 +31,23 @@ When `core.hooksPath` is set to another folder and no known hook manager is foun
 - **WHEN** `core.hooksPath` is `.githooks` and no manager is found
 - **THEN** the command exits with 2 and names `.githooks`
 
+### Requirement: Repository at the git root
+`specfold hooks install` SHALL exit with an environment error, changing nothing, when the folder holding `specfold.yaml` is not the root of its git working tree.
+
+#### Scenario: Nested repository
+- **WHEN** `specfold hooks install` runs in `examples/sample-app` inside another git repository
+- **THEN** the command exits with 2 and says that hooks are installed from the git root
+
 ### Requirement: Pre-commit checks
-`specfold hook pre-commit` SHALL validate the staged concepts, run `change check` for every active change with staged files, run `openspec validate --all --strict` when files under `openspec/` are staged and OpenSpec is installed, and exit with 1 when any of them reports an error.
+`specfold hook pre-commit` SHALL validate the staged concepts, check every active change with staged files (all rules of `change check` once the change has `tasks.md`, only the brief rules B0-B4 before), run `openspec validate --all --strict` when files under `openspec/` are staged and OpenSpec is installed, and exit with 1 when any of them reports an error.
 
 #### Scenario: Broken concept staged
 - **WHEN** a staged concept lacks `type`
 - **THEN** the hook prints the validate error and exits with 1
+
+#### Scenario: Change being planned staged
+- **WHEN** a staged change has a confirmed brief and a proposal but no `knowledge.md` and no `tasks.md`
+- **THEN** the hook exits with 0
 
 ### Requirement: Pre-push gate
 `specfold hook pre-push` SHALL run `specfold gate --base <base> --local`, with `<base>` from `origin/HEAD`, falling back to `origin/main`, and exit with the gate's code. When no base resolves, it SHALL warn and exit with 0.
@@ -67,14 +78,14 @@ After its own checks, `specfold hook <name> [args...]` SHALL run each command in
 - **THEN** stdout lists the knowledge sections and both change names within 40 lines
 
 ### Requirement: Claude post-tool-use
-`specfold hook claude-post-tool-use` SHALL read the hook event JSON from stdin and, for an `Edit` or `Write` of a file under `knowledge/`, validate that file, or for a file under `openspec/changes/<change>/`, run `change check <change>`. It SHALL print only errors to stderr and exit with 2 when there are errors, otherwise exit with 0 silently.
+`specfold hook claude-post-tool-use` SHALL read the hook event JSON from stdin and, for an `Edit` or `Write` of a file under `knowledge/`, validate that file, or for a file under `openspec/changes/<change>/`, check that change as the pre-commit hook does. It SHALL print only errors to stderr and exit with 2 when there are errors, otherwise exit with 0 silently.
 
 #### Scenario: Agent writes a broken concept
 - **WHEN** the event names a `Write` of `knowledge/decisions/x.md` and the file lacks `type`
 - **THEN** the validate error goes to stderr and the command exits with 2
 
 ### Requirement: Claude stop
-`specfold hook claude-stop` SHALL run the local gate against the same base as the pre-push hook and, when a blocking rule fails, print the blocking findings to stderr and exit with 2; otherwise exit with 0.
+`specfold hook claude-stop` SHALL run the local gate against the same base as the pre-push hook and, when a blocking rule fails, print the blocking findings to stderr and exit with 2, also when the event says a Stop hook is already active; otherwise, or when no base resolves, exit with 0.
 
 #### Scenario: Unfinished work
 - **WHEN** Claude tries to stop while a touched change has an unconfirmed brief

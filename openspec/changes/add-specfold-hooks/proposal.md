@@ -40,6 +40,9 @@ The merge gate runs in CI, but feedback arrives late there. Git hooks catch the 
 4. **pre-push without `origin/HEAD`:** the hook tries `git symbolic-ref refs/remotes/origin/HEAD`, then `origin/main`. If no base resolves, it prints a warning and lets the push through, because CI still gates.
 5. **Extra commands** run with `sh -c`; the hook's own arguments are passed as `$1`, `$2` and so on. A failing extra command fails the hook.
 6. **Claude hooks read the event JSON from stdin.** `claude-post-tool-use` only reacts to `Edit` and `Write` of files under `knowledge/` or `openspec/changes/`, and stays silent otherwise.
+7. **Changes being planned** (no `tasks.md` yet) get only the brief rules in pre-commit and post-tool-use, as in gate rules G5 and G18 (decided when implementation started).
+8. **Nested repositories** are refused by `hooks install`: `core.hooksPath` applies to the whole git repository (decided when implementation started).
+9. **claude-stop keeps blocking** while blocking findings remain, even with `stop_hook_active`; Claude Code's cap of 8 consecutive blocks ends any loop (decided when implementation started).
 
 ## Impact
 
