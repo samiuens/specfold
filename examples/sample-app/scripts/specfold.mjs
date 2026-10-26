@@ -4001,10 +4001,10 @@ var require_resolve_block_map = __commonJS({
       let offset = bm.offset;
       let commentEnd = null;
       for (const collItem of bm.items) {
-        const { start, key, sep: sep12, value } = collItem;
+        const { start, key, sep: sep13, value } = collItem;
         const keyProps = resolveProps.resolveProps(start, {
           indicator: "explicit-key-ind",
-          next: key ?? sep12?.[0],
+          next: key ?? sep13?.[0],
           offset,
           onError,
           parentIndent: bm.indent,
@@ -4018,7 +4018,7 @@ var require_resolve_block_map = __commonJS({
             else if ("indent" in key && key.indent !== bm.indent)
               onError(offset, "BAD_INDENT", startColMsg);
           }
-          if (!keyProps.anchor && !keyProps.tag && !sep12) {
+          if (!keyProps.anchor && !keyProps.tag && !sep13) {
             commentEnd = keyProps.end;
             if (keyProps.comment) {
               if (map.comment)
@@ -4042,7 +4042,7 @@ var require_resolve_block_map = __commonJS({
         ctx.atKey = false;
         if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
           onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
-        const valueProps = resolveProps.resolveProps(sep12 ?? [], {
+        const valueProps = resolveProps.resolveProps(sep13 ?? [], {
           indicator: "map-value-ind",
           next: value,
           offset: keyNode.range[2],
@@ -4058,7 +4058,7 @@ var require_resolve_block_map = __commonJS({
             if (ctx.options.strict && keyProps.start < valueProps.found.offset - 1024)
               onError(keyNode.range, "KEY_OVER_1024_CHARS", "The : indicator must be at most 1024 chars after the start of an implicit block mapping key");
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep12, null, valueProps, onError);
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep13, null, valueProps, onError);
           if (ctx.schema.compat)
             utilFlowIndentCheck.flowIndentCheck(bm.indent, value, onError);
           offset = valueNode.range[2];
@@ -4149,7 +4149,7 @@ var require_resolve_end = __commonJS({
       let comment = "";
       if (end) {
         let hasSpace = false;
-        let sep12 = "";
+        let sep13 = "";
         for (const token of end) {
           const { source, type } = token;
           switch (type) {
@@ -4163,13 +4163,13 @@ var require_resolve_end = __commonJS({
               if (!comment)
                 comment = cb;
               else
-                comment += sep12 + cb;
-              sep12 = "";
+                comment += sep13 + cb;
+              sep13 = "";
               break;
             }
             case "newline":
               if (comment)
-                sep12 += source;
+                sep13 += source;
               hasSpace = true;
               break;
             default:
@@ -4212,18 +4212,18 @@ var require_resolve_flow_collection = __commonJS({
       let offset = fc.offset + fc.start.source.length;
       for (let i = 0; i < fc.items.length; ++i) {
         const collItem = fc.items[i];
-        const { start, key, sep: sep12, value } = collItem;
+        const { start, key, sep: sep13, value } = collItem;
         const props = resolveProps.resolveProps(start, {
           flow: fcName,
           indicator: "explicit-key-ind",
-          next: key ?? sep12?.[0],
+          next: key ?? sep13?.[0],
           offset,
           onError,
           parentIndent: fc.indent,
           startOnNewline: false
         });
         if (!props.found) {
-          if (!props.anchor && !props.tag && !sep12 && !value) {
+          if (!props.anchor && !props.tag && !sep13 && !value) {
             if (i === 0 && props.comma)
               onError(props.comma, "UNEXPECTED_TOKEN", `Unexpected , in ${fcName}`);
             else if (i < fc.items.length - 1)
@@ -4277,8 +4277,8 @@ var require_resolve_flow_collection = __commonJS({
             }
           }
         }
-        if (!isMap2 && !sep12 && !props.found) {
-          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep12, null, props, onError);
+        if (!isMap2 && !sep13 && !props.found) {
+          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep13, null, props, onError);
           coll.items.push(valueNode);
           offset = valueNode.range[2];
           if (isBlock(value))
@@ -4290,7 +4290,7 @@ var require_resolve_flow_collection = __commonJS({
           if (isBlock(key))
             onError(keyNode.range, "BLOCK_IN_FLOW", blockMsg);
           ctx.atKey = false;
-          const valueProps = resolveProps.resolveProps(sep12 ?? [], {
+          const valueProps = resolveProps.resolveProps(sep13 ?? [], {
             flow: fcName,
             indicator: "map-value-ind",
             next: value,
@@ -4301,8 +4301,8 @@ var require_resolve_flow_collection = __commonJS({
           });
           if (valueProps.found) {
             if (!isMap2 && !props.found && ctx.options.strict) {
-              if (sep12)
-                for (const st of sep12) {
+              if (sep13)
+                for (const st of sep13) {
                   if (st === valueProps.found)
                     break;
                   if (st.type === "newline") {
@@ -4319,7 +4319,7 @@ var require_resolve_flow_collection = __commonJS({
             else
               onError(valueProps.start, "MISSING_CHAR", `Missing , or : between ${fcName} items`);
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep12, null, valueProps, onError) : null;
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep13, null, valueProps, onError) : null;
           if (valueNode) {
             if (isBlock(value))
               onError(valueNode.range, "BLOCK_IN_FLOW", blockMsg);
@@ -4499,7 +4499,7 @@ var require_resolve_block_scalar = __commonJS({
           chompStart = i + 1;
       }
       let value = "";
-      let sep12 = "";
+      let sep13 = "";
       let prevMoreIndented = false;
       for (let i = 0; i < contentStart; ++i)
         value += lines2[i][0].slice(trimIndent) + "\n";
@@ -4516,24 +4516,24 @@ var require_resolve_block_scalar = __commonJS({
           indent = "";
         }
         if (type === Scalar.Scalar.BLOCK_LITERAL) {
-          value += sep12 + indent.slice(trimIndent) + content;
-          sep12 = "\n";
+          value += sep13 + indent.slice(trimIndent) + content;
+          sep13 = "\n";
         } else if (indent.length > trimIndent || content[0] === "	") {
-          if (sep12 === " ")
-            sep12 = "\n";
-          else if (!prevMoreIndented && sep12 === "\n")
-            sep12 = "\n\n";
-          value += sep12 + indent.slice(trimIndent) + content;
-          sep12 = "\n";
+          if (sep13 === " ")
+            sep13 = "\n";
+          else if (!prevMoreIndented && sep13 === "\n")
+            sep13 = "\n\n";
+          value += sep13 + indent.slice(trimIndent) + content;
+          sep13 = "\n";
           prevMoreIndented = true;
         } else if (content === "") {
-          if (sep12 === "\n")
+          if (sep13 === "\n")
             value += "\n";
           else
-            sep12 = "\n";
+            sep13 = "\n";
         } else {
-          value += sep12 + content;
-          sep12 = " ";
+          value += sep13 + content;
+          sep13 = " ";
           prevMoreIndented = false;
         }
       }
@@ -4716,25 +4716,25 @@ var require_resolve_flow_scalar = __commonJS({
         trimBoth = /^[ \t]+|[ \t]+$/g;
       }
       let res = match[1].replace(trimEnd, "");
-      let sep12 = " ";
+      let sep13 = " ";
       let pos = line.lastIndex;
       while (match = line.exec(source)) {
         const lm = match[1].replace(trimBoth, "");
         if (lm === "") {
-          if (sep12 === "\n")
-            res += sep12;
+          if (sep13 === "\n")
+            res += sep13;
           else
-            sep12 = "\n";
+            sep13 = "\n";
         } else {
-          res += sep12 + lm;
-          sep12 = " ";
+          res += sep13 + lm;
+          sep13 = " ";
         }
         pos = line.lastIndex;
       }
       const last = /[ \t]*(.*)/sy;
       last.lastIndex = pos;
       match = last.exec(source);
-      return res + sep12 + (match?.[1] ?? "");
+      return res + sep13 + (match?.[1] ?? "");
     }
     function doubleQuotedValue(source, onError) {
       let res = "";
@@ -5544,14 +5544,14 @@ var require_cst_stringify = __commonJS({
         }
       }
     }
-    function stringifyItem({ start, key, sep: sep12, value }) {
+    function stringifyItem({ start, key, sep: sep13, value }) {
       let res = "";
       for (const st of start)
         res += st.source;
       if (key)
         res += stringifyToken(key);
-      if (sep12)
-        for (const st of sep12)
+      if (sep13)
+        for (const st of sep13)
           res += st.source;
       if (value)
         res += stringifyToken(value);
@@ -6718,18 +6718,18 @@ var require_parser = __commonJS({
         if (this.type === "map-value-ind") {
           const prev = getPrevProps(this.peek(2));
           const start = getFirstKeyStartProps(prev);
-          let sep12;
+          let sep13;
           if (scalar2.end) {
-            sep12 = scalar2.end;
-            sep12.push(this.sourceToken);
+            sep13 = scalar2.end;
+            sep13.push(this.sourceToken);
             delete scalar2.end;
           } else
-            sep12 = [this.sourceToken];
+            sep13 = [this.sourceToken];
           const map = {
             type: "block-map",
             offset: scalar2.offset,
             indent: scalar2.indent,
-            items: [{ start, key: scalar2, sep: sep12 }]
+            items: [{ start, key: scalar2, sep: sep13 }]
           };
           this.onKeyLine = true;
           this.stack[this.stack.length - 1] = map;
@@ -6882,15 +6882,15 @@ var require_parser = __commonJS({
                 } else if (isFlowToken(it.key) && !includesToken(it.sep, "newline")) {
                   const start2 = getFirstKeyStartProps(it.start);
                   const key = it.key;
-                  const sep12 = it.sep;
-                  sep12.push(this.sourceToken);
+                  const sep13 = it.sep;
+                  sep13.push(this.sourceToken);
                   delete it.key;
                   delete it.sep;
                   this.stack.push({
                     type: "block-map",
                     offset: this.offset,
                     indent: this.indent,
-                    items: [{ start: start2, key, sep: sep12 }]
+                    items: [{ start: start2, key, sep: sep13 }]
                   });
                 } else if (start.length > 0) {
                   it.sep = it.sep.concat(start, this.sourceToken);
@@ -7084,13 +7084,13 @@ var require_parser = __commonJS({
             const prev = getPrevProps(parent);
             const start = getFirstKeyStartProps(prev);
             fixFlowSeqItems(fc);
-            const sep12 = fc.end.splice(1, fc.end.length);
-            sep12.push(this.sourceToken);
+            const sep13 = fc.end.splice(1, fc.end.length);
+            sep13.push(this.sourceToken);
             const map = {
               type: "block-map",
               offset: fc.offset,
               indent: fc.indent,
-              items: [{ start, key: fc, sep: sep12 }]
+              items: [{ start, key: fc, sep: sep13 }]
             };
             this.onKeyLine = true;
             this.stack[this.stack.length - 1] = map;
@@ -7268,7 +7268,7 @@ var require_public_api = __commonJS({
       }
       return doc;
     }
-    function parse4(src, reviver, options) {
+    function parse5(src, reviver, options) {
       let _reviver = void 0;
       if (typeof reviver === "function") {
         _reviver = reviver;
@@ -7309,7 +7309,7 @@ var require_public_api = __commonJS({
         return value.toString(options);
       return new Document.Document(value, _replacer, options).toString(options);
     }
-    exports.parse = parse4;
+    exports.parse = parse5;
     exports.parseAllDocuments = parseAllDocuments;
     exports.parseDocument = parseDocument3;
     exports.stringify = stringify2;
@@ -7665,14 +7665,14 @@ register({
       );
     if (extra.length > 0) throw new UsageError(`unexpected argument '${extra[0]}'`);
     const config = requireConfig(io.cwd);
-    const check = values.check === true;
+    const check2 = values.check === true;
     const skills = listSkills(config.root);
     const actions = skills ? planLinks(config.root, skills, config.agentTargets) : [];
     const changes = actions.filter((a) => a.action !== "kept");
-    if (!check) applyLinks(config.root, actions);
-    const ok2 = !check || changes.length === 0;
+    if (!check2) applyLinks(config.root, actions);
+    const ok2 = !check2 || changes.length === 0;
     if (values.json) {
-      io.stdout(`${JSON.stringify({ ok: ok2, check, actions }, null, 2)}
+      io.stdout(`${JSON.stringify({ ok: ok2, check: check2, actions }, null, 2)}
 `);
     } else if (!skills) {
       io.stdout("no skills to link: .agents/skills/ does not exist\n");
@@ -7681,7 +7681,7 @@ register({
         (a) => `${a.path}: ${a.action}${a.target && a.action !== "kept" ? ` -> ${a.target}` : ""}`
       );
       const counts = changes.length === 0 ? "links are up to date" : plural(changes.length, "change");
-      lines2.push(`agents sync${check ? " --check" : ""}: ${counts}, ${actions.length - changes.length} kept`);
+      lines2.push(`agents sync${check2 ? " --check" : ""}: ${counts}, ${actions.length - changes.length} kept`);
       io.stdout(`${lines2.join("\n")}
 `);
     }
@@ -9880,12 +9880,12 @@ ${LOG_ENTRY}`);
 }
 
 // src/indexes/command.ts
-function syncIndexes(repoRoot, bundleRoot, generated, check) {
+function syncIndexes(repoRoot, bundleRoot, generated, check2) {
   const changed = [];
   for (const [rel, content] of [...generated].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) {
     const abs = join18(bundleRoot, rel);
     if (existsSync15(abs) && readFileSync11(abs, "utf8") === content) continue;
-    if (!check) writeFileSync(abs, content);
+    if (!check2) writeFileSync(abs, content);
     changed.push(relative5(repoRoot, abs).split(sep4).join("/"));
   }
   return changed;
@@ -9911,10 +9911,10 @@ register({
         fix: "point the comment at an existing concept or create it"
       });
     }
-    const check = values.check === true;
-    const changed = syncIndexes(config.root, bundleRoot, indexes, check);
-    const written = check ? [] : changed;
-    const outdated = check ? changed : [];
+    const check2 = values.check === true;
+    const changed = syncIndexes(config.root, bundleRoot, indexes, check2);
+    const written = check2 ? [] : changed;
+    const outdated = check2 ? changed : [];
     const sorted = sortFindings(findings);
     const { errors, warnings } = countBySeverity(sorted);
     const ok2 = errors === 0 && outdated.length === 0;
@@ -9922,7 +9922,7 @@ register({
       io.stdout(`${JSON.stringify({ ok: ok2, written, outdated, findings: sorted }, null, 2)}
 `);
     } else {
-      const counted = check ? `${outdated.length} outdated` : `${written.length} written`;
+      const counted = check2 ? `${outdated.length} outdated` : `${written.length} written`;
       const lines2 = [
         ...written.map((p) => `wrote ${p}`),
         ...outdated.map((p) => `outdated ${p}`),
@@ -10110,6 +10110,17 @@ function editFrontmatter(text2, edit) {
     else {
       const generated = keyRange(lines2, "generated");
       lines2.splice(generated ? generated[0] : lines2.length, 0, line);
+    }
+    setKeys.push(key);
+  }
+  for (const [key, block] of Object.entries(edit.setBlock ?? {})) {
+    const range = keyRange(lines2, key);
+    if (range) {
+      if (lines2.slice(range[0], range[1]).join("\n") === block.join("\n")) continue;
+      lines2.splice(range[0], range[1] - range[0], ...block);
+    } else {
+      const generated = keyRange(lines2, "generated");
+      lines2.splice(generated ? generated[1] : lines2.length, 0, ...block);
     }
     setKeys.push(key);
   }
@@ -11080,6 +11091,148 @@ register({
       );
     }
     return next || allDone ? 0 : 1;
+  }
+});
+
+// src/verify/command.ts
+import { existsSync as existsSync28, readFileSync as readFileSync20, statSync as statSync7, writeFileSync as writeFileSync6 } from "node:fs";
+import { join as join29, relative as relative13, resolve as resolve5, sep as sep12 } from "node:path";
+
+// src/verify/apply.ts
+var flowValue = (v) => typeof v === "string" && /^[A-Za-z0-9][\w:.+/@-]*$/.test(v) ? v : JSON.stringify(v);
+var flowEntry = (entry) => isRecord2(entry) ? `{ ${Object.entries(entry).map(([k, v]) => `${k}: ${flowValue(v)}`).join(", ")} }` : flowValue(entry);
+var sameLogin = (entry, by) => isRecord2(entry) && typeof entry.by === "string" && entry.by.toLowerCase() === by.toLowerCase();
+function verifyText(text2, login, at) {
+  const data = parseText("concept.md", text2).frontmatter?.data;
+  const current = isRecord2(data) ? data.verified : void 0;
+  const entries = Array.isArray(current) ? [...current] : current === void 0 ? [] : [current];
+  const by = `human:${login}`;
+  const entry = { by, at };
+  const index = entries.findIndex((e) => sameLogin(e, by));
+  if (index === -1) entries.push(entry);
+  else entries[index] = entry;
+  const block = entries.length === 1 ? [`verified: ${flowEntry(entries[0])}`] : ["verified:", ...entries.map((e) => `  - ${flowEntry(e)}`)];
+  return editFrontmatter(text2, { set: { status: "stable" }, setBlock: { verified: block } }).text;
+}
+
+// src/verify/login.ts
+var import_yaml7 = __toESM(require_dist(), 1);
+import { execFileSync as execFileSync3 } from "node:child_process";
+import { existsSync as existsSync27, readFileSync as readFileSync19 } from "node:fs";
+import { join as join28 } from "node:path";
+var LOCAL_FILE = ".specfold/local.yaml";
+var LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$/;
+var system = {
+  /** The login `gh api user` reports, or undefined when gh is missing or not logged in. */
+  ghLogin(cwd) {
+    try {
+      return execFileSync3("gh", ["api", "user", "--jq", ".login"], {
+        cwd,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+        timeout: 1e4
+      }).trim();
+    } catch {
+      return void 0;
+    }
+  },
+  /** stdin is a terminal, so a person can be at the keyboard. */
+  isInteractive() {
+    return process.stdin.isTTY === true;
+  }
+};
+function localLogin(root) {
+  const path = join28(root, LOCAL_FILE);
+  if (!existsSync27(path)) return void 0;
+  let data;
+  try {
+    data = (0, import_yaml7.parse)(readFileSync19(path, "utf8"));
+  } catch (error) {
+    throw new EnvError(`${LOCAL_FILE}: ${error.message.split("\n")[0]}`);
+  }
+  const login = data?.actors?.github_login;
+  return typeof login === "string" ? login : void 0;
+}
+function resolveLogin(root) {
+  const login = system.ghLogin(root) || localLogin(root);
+  if (!login)
+    throw new EnvError(
+      `no GitHub login found: log in with 'gh auth login', or set actors.github_login in ${LOCAL_FILE}`
+    );
+  if (!LOGIN.test(login)) throw new EnvError(`'${login}' is not a GitHub login`);
+  return login;
+}
+
+// src/verify/command.ts
+var AGENT_VARIABLES = ["CLAUDECODE", "SPECFOLD_MODEL"];
+function agentReason() {
+  const variable = AGENT_VARIABLES.find((v) => process.env[v]);
+  if (variable) return `${variable} is set`;
+  if (!system.isInteractive()) return "stdin is not a terminal";
+  return void 0;
+}
+function check(arg, root, bundleRoot) {
+  const inBundle = [resolve5(root, arg), resolve5(bundleRoot, arg)].map((abs) => relative13(bundleRoot, abs).split(sep12).join("/")).filter((rel2) => rel2 !== "" && !rel2.startsWith("..") && !rel2.startsWith("/"));
+  const rel = inBundle.find((r) => existsSync28(join29(bundleRoot, r)) && statSync7(join29(bundleRoot, r)).isFile());
+  if (!rel)
+    return { arg, reason: inBundle.length === 0 ? "outside the bundle" : "no such file in the bundle" };
+  if (!rel.endsWith(".md") || !isConcept(rel))
+    return { arg, rel, reason: "not a concept (index.md and log.md are generated)" };
+  const parsed = parseFile(bundleRoot, rel);
+  if (!isRecord2(parsed.frontmatter?.data)) return { arg, rel, reason: "no readable frontmatter" };
+  if (parsed.frontmatter.data.status === "deprecated")
+    return { arg, rel, reason: "deprecated concepts are not verified" };
+  return { arg, rel };
+}
+register({
+  name: "verify",
+  summary: "mark concepts as verified by you (humans only)",
+  usage: "specfold verify <path>... [--json]",
+  options: { json: { type: "boolean" } },
+  run: ({ io, values, positionals }) => {
+    if (positionals.length === 0) throw new UsageError("missing path: specfold verify <path>...");
+    const agent = agentReason();
+    if (agent)
+      throw new EnvError(`only humans verify (${agent}); run specfold verify yourself in a terminal`);
+    const config = requireConfig(io.cwd);
+    const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
+    const login = resolveLogin(config.root);
+    const targets = positionals.map((arg) => check(arg, config.root, bundleRoot));
+    const prefix = relative13(config.root, bundleRoot).split(sep12).join("/");
+    const shown = (t) => t.rel ? `${prefix}/${t.rel}` : t.arg;
+    const refused = targets.filter((t) => t.reason !== void 0);
+    const verified = [];
+    if (refused.length === 0) {
+      const at = isoWithOffset(/* @__PURE__ */ new Date());
+      const written = targets.map((t) => {
+        const abs = join29(bundleRoot, t.rel);
+        return { abs, text: verifyText(readFileSync20(abs, "utf8"), login, at) };
+      });
+      for (const w of written) writeFileSync6(w.abs, w.text);
+      verified.push(...targets.map(shown));
+    }
+    const ok2 = refused.length === 0;
+    if (values.json) {
+      const out = {
+        ok: ok2,
+        login,
+        verified,
+        refused: refused.map((t) => ({ path: shown(t), reason: t.reason }))
+      };
+      io.stdout(`${JSON.stringify(out, null, 2)}
+`);
+    } else {
+      const lines2 = ok2 ? [
+        ...verified.map((p) => `verified ${p}`),
+        `verify: ${plural(verified.length, "concept")} verified as human:${login}`
+      ] : [
+        ...refused.map((t) => `refused ${shown(t)}: ${t.reason}`),
+        `verify: ${plural(refused.length, "path")} refused, nothing written`
+      ];
+      io.stdout(`${lines2.join("\n")}
+`);
+    }
+    return ok2 ? 0 : 1;
   }
 });
 
