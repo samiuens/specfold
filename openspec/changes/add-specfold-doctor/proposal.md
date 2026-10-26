@@ -21,7 +21,9 @@ Setup problems (an old Node, a missing or incompatible OpenSpec, git hooks not i
 - Manifest and version-skew checks, config drift (M9, with the upgrader).
 - Repairing anything: doctor only reports.
 
-## Open points for review
+## Decisions
+
+Confirmed by the maintainer on 2026-10-26, each point as proposed:
 
 1. **Missing OpenSpec is a failure:** the workflow depends on OpenSpec. Missing graphify is fine (`ok`, reported as optional).
 2. **Hooks not installed is a warning:** the CI gate stays the enforcement.

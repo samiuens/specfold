@@ -23,7 +23,9 @@ Agents writing knowledge by hand get the frontmatter wrong: a missing `status`, 
 - Writing the body content (the `sf-capture` skill).
 - Updating indexes: the agent runs `specfold index` afterwards.
 
-## Open points for review
+## Decisions
+
+Confirmed by the maintainer on 2026-10-26, each point as proposed:
 
 1. **Default actor** when `--by` is missing: `<actors.agent_prefix><SPECFOLD_MODEL>` if the environment variable `SPECFOLD_MODEL` is set, otherwise `process:specfold-new`.
 2. **Empty description:** without `--description`, the concept gets `description: ""`, so `specfold validate` fails until it is filled. No placeholder text can slip through.
