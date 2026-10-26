@@ -1,0 +1,5 @@
+types: [Term, Decision, Reference]
+source_globs: ["src/**"]
+folders:
+  decisions: { title: Decisions, description: Decisions about the product }
+  domain/payments: { description: Money movement }
