@@ -3,14 +3,15 @@ type: Capability
 title: specfold doctor
 description: Why setup problems are checked in one command, and where the contract for specfold doctor lives.
 status: draft
-change: add-specfold-doctor
-resource: ../../openspec/changes/add-specfold-doctor/specs/specfold-doctor/spec.md
+change: 2026-10-26-add-specfold-doctor
+resource: ../../openspec/specs/specfold-doctor/spec.md
+spec: openspec/specs/specfold-doctor/spec.md
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T11:46:37+01:00 }
 sources:
   - id: proposal
-    resource: ../../openspec/changes/add-specfold-doctor/proposal.md
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-doctor/proposal.md
   - id: design
-    resource: ../../openspec/changes/add-specfold-doctor/design.md
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-doctor/design.md
 ---
 
 # Why
