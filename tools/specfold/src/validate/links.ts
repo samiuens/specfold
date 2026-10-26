@@ -5,7 +5,7 @@ import type { Rule } from "./index.ts";
 import { isConcept, isRecord } from "./okf.ts";
 import { resolveInBundle } from "./profile.ts";
 
-const SCHEME = /^[a-z][a-z0-9+.-]*:/i;
+export const SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 const LINK = /!?\[[^\]]*\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)/g;
 
 export interface BodyLink {
