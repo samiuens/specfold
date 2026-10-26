@@ -4001,10 +4001,10 @@ var require_resolve_block_map = __commonJS({
       let offset = bm.offset;
       let commentEnd = null;
       for (const collItem of bm.items) {
-        const { start, key, sep: sep9, value } = collItem;
+        const { start, key, sep: sep10, value } = collItem;
         const keyProps = resolveProps.resolveProps(start, {
           indicator: "explicit-key-ind",
-          next: key ?? sep9?.[0],
+          next: key ?? sep10?.[0],
           offset,
           onError,
           parentIndent: bm.indent,
@@ -4018,7 +4018,7 @@ var require_resolve_block_map = __commonJS({
             else if ("indent" in key && key.indent !== bm.indent)
               onError(offset, "BAD_INDENT", startColMsg);
           }
-          if (!keyProps.anchor && !keyProps.tag && !sep9) {
+          if (!keyProps.anchor && !keyProps.tag && !sep10) {
             commentEnd = keyProps.end;
             if (keyProps.comment) {
               if (map.comment)
@@ -4042,7 +4042,7 @@ var require_resolve_block_map = __commonJS({
         ctx.atKey = false;
         if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
           onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
-        const valueProps = resolveProps.resolveProps(sep9 ?? [], {
+        const valueProps = resolveProps.resolveProps(sep10 ?? [], {
           indicator: "map-value-ind",
           next: value,
           offset: keyNode.range[2],
@@ -4058,7 +4058,7 @@ var require_resolve_block_map = __commonJS({
             if (ctx.options.strict && keyProps.start < valueProps.found.offset - 1024)
               onError(keyNode.range, "KEY_OVER_1024_CHARS", "The : indicator must be at most 1024 chars after the start of an implicit block mapping key");
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep9, null, valueProps, onError);
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep10, null, valueProps, onError);
           if (ctx.schema.compat)
             utilFlowIndentCheck.flowIndentCheck(bm.indent, value, onError);
           offset = valueNode.range[2];
@@ -4149,7 +4149,7 @@ var require_resolve_end = __commonJS({
       let comment = "";
       if (end) {
         let hasSpace = false;
-        let sep9 = "";
+        let sep10 = "";
         for (const token of end) {
           const { source, type } = token;
           switch (type) {
@@ -4163,13 +4163,13 @@ var require_resolve_end = __commonJS({
               if (!comment)
                 comment = cb;
               else
-                comment += sep9 + cb;
-              sep9 = "";
+                comment += sep10 + cb;
+              sep10 = "";
               break;
             }
             case "newline":
               if (comment)
-                sep9 += source;
+                sep10 += source;
               hasSpace = true;
               break;
             default:
@@ -4212,18 +4212,18 @@ var require_resolve_flow_collection = __commonJS({
       let offset = fc.offset + fc.start.source.length;
       for (let i = 0; i < fc.items.length; ++i) {
         const collItem = fc.items[i];
-        const { start, key, sep: sep9, value } = collItem;
+        const { start, key, sep: sep10, value } = collItem;
         const props = resolveProps.resolveProps(start, {
           flow: fcName,
           indicator: "explicit-key-ind",
-          next: key ?? sep9?.[0],
+          next: key ?? sep10?.[0],
           offset,
           onError,
           parentIndent: fc.indent,
           startOnNewline: false
         });
         if (!props.found) {
-          if (!props.anchor && !props.tag && !sep9 && !value) {
+          if (!props.anchor && !props.tag && !sep10 && !value) {
             if (i === 0 && props.comma)
               onError(props.comma, "UNEXPECTED_TOKEN", `Unexpected , in ${fcName}`);
             else if (i < fc.items.length - 1)
@@ -4277,8 +4277,8 @@ var require_resolve_flow_collection = __commonJS({
             }
           }
         }
-        if (!isMap2 && !sep9 && !props.found) {
-          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep9, null, props, onError);
+        if (!isMap2 && !sep10 && !props.found) {
+          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep10, null, props, onError);
           coll.items.push(valueNode);
           offset = valueNode.range[2];
           if (isBlock(value))
@@ -4290,7 +4290,7 @@ var require_resolve_flow_collection = __commonJS({
           if (isBlock(key))
             onError(keyNode.range, "BLOCK_IN_FLOW", blockMsg);
           ctx.atKey = false;
-          const valueProps = resolveProps.resolveProps(sep9 ?? [], {
+          const valueProps = resolveProps.resolveProps(sep10 ?? [], {
             flow: fcName,
             indicator: "map-value-ind",
             next: value,
@@ -4301,8 +4301,8 @@ var require_resolve_flow_collection = __commonJS({
           });
           if (valueProps.found) {
             if (!isMap2 && !props.found && ctx.options.strict) {
-              if (sep9)
-                for (const st of sep9) {
+              if (sep10)
+                for (const st of sep10) {
                   if (st === valueProps.found)
                     break;
                   if (st.type === "newline") {
@@ -4319,7 +4319,7 @@ var require_resolve_flow_collection = __commonJS({
             else
               onError(valueProps.start, "MISSING_CHAR", `Missing , or : between ${fcName} items`);
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep9, null, valueProps, onError) : null;
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep10, null, valueProps, onError) : null;
           if (valueNode) {
             if (isBlock(value))
               onError(valueNode.range, "BLOCK_IN_FLOW", blockMsg);
@@ -4499,7 +4499,7 @@ var require_resolve_block_scalar = __commonJS({
           chompStart = i + 1;
       }
       let value = "";
-      let sep9 = "";
+      let sep10 = "";
       let prevMoreIndented = false;
       for (let i = 0; i < contentStart; ++i)
         value += lines[i][0].slice(trimIndent) + "\n";
@@ -4516,24 +4516,24 @@ var require_resolve_block_scalar = __commonJS({
           indent = "";
         }
         if (type === Scalar.Scalar.BLOCK_LITERAL) {
-          value += sep9 + indent.slice(trimIndent) + content;
-          sep9 = "\n";
+          value += sep10 + indent.slice(trimIndent) + content;
+          sep10 = "\n";
         } else if (indent.length > trimIndent || content[0] === "	") {
-          if (sep9 === " ")
-            sep9 = "\n";
-          else if (!prevMoreIndented && sep9 === "\n")
-            sep9 = "\n\n";
-          value += sep9 + indent.slice(trimIndent) + content;
-          sep9 = "\n";
+          if (sep10 === " ")
+            sep10 = "\n";
+          else if (!prevMoreIndented && sep10 === "\n")
+            sep10 = "\n\n";
+          value += sep10 + indent.slice(trimIndent) + content;
+          sep10 = "\n";
           prevMoreIndented = true;
         } else if (content === "") {
-          if (sep9 === "\n")
+          if (sep10 === "\n")
             value += "\n";
           else
-            sep9 = "\n";
+            sep10 = "\n";
         } else {
-          value += sep9 + content;
-          sep9 = " ";
+          value += sep10 + content;
+          sep10 = " ";
           prevMoreIndented = false;
         }
       }
@@ -4716,25 +4716,25 @@ var require_resolve_flow_scalar = __commonJS({
         trimBoth = /^[ \t]+|[ \t]+$/g;
       }
       let res = match[1].replace(trimEnd, "");
-      let sep9 = " ";
+      let sep10 = " ";
       let pos = line.lastIndex;
       while (match = line.exec(source)) {
         const lm = match[1].replace(trimBoth, "");
         if (lm === "") {
-          if (sep9 === "\n")
-            res += sep9;
+          if (sep10 === "\n")
+            res += sep10;
           else
-            sep9 = "\n";
+            sep10 = "\n";
         } else {
-          res += sep9 + lm;
-          sep9 = " ";
+          res += sep10 + lm;
+          sep10 = " ";
         }
         pos = line.lastIndex;
       }
       const last = /[ \t]*(.*)/sy;
       last.lastIndex = pos;
       match = last.exec(source);
-      return res + sep9 + (match?.[1] ?? "");
+      return res + sep10 + (match?.[1] ?? "");
     }
     function doubleQuotedValue(source, onError) {
       let res = "";
@@ -5544,14 +5544,14 @@ var require_cst_stringify = __commonJS({
         }
       }
     }
-    function stringifyItem({ start, key, sep: sep9, value }) {
+    function stringifyItem({ start, key, sep: sep10, value }) {
       let res = "";
       for (const st of start)
         res += st.source;
       if (key)
         res += stringifyToken(key);
-      if (sep9)
-        for (const st of sep9)
+      if (sep10)
+        for (const st of sep10)
           res += st.source;
       if (value)
         res += stringifyToken(value);
@@ -6718,18 +6718,18 @@ var require_parser = __commonJS({
         if (this.type === "map-value-ind") {
           const prev = getPrevProps(this.peek(2));
           const start = getFirstKeyStartProps(prev);
-          let sep9;
+          let sep10;
           if (scalar2.end) {
-            sep9 = scalar2.end;
-            sep9.push(this.sourceToken);
+            sep10 = scalar2.end;
+            sep10.push(this.sourceToken);
             delete scalar2.end;
           } else
-            sep9 = [this.sourceToken];
+            sep10 = [this.sourceToken];
           const map = {
             type: "block-map",
             offset: scalar2.offset,
             indent: scalar2.indent,
-            items: [{ start, key: scalar2, sep: sep9 }]
+            items: [{ start, key: scalar2, sep: sep10 }]
           };
           this.onKeyLine = true;
           this.stack[this.stack.length - 1] = map;
@@ -6882,15 +6882,15 @@ var require_parser = __commonJS({
                 } else if (isFlowToken(it.key) && !includesToken(it.sep, "newline")) {
                   const start2 = getFirstKeyStartProps(it.start);
                   const key = it.key;
-                  const sep9 = it.sep;
-                  sep9.push(this.sourceToken);
+                  const sep10 = it.sep;
+                  sep10.push(this.sourceToken);
                   delete it.key;
                   delete it.sep;
                   this.stack.push({
                     type: "block-map",
                     offset: this.offset,
                     indent: this.indent,
-                    items: [{ start: start2, key, sep: sep9 }]
+                    items: [{ start: start2, key, sep: sep10 }]
                   });
                 } else if (start.length > 0) {
                   it.sep = it.sep.concat(start, this.sourceToken);
@@ -7084,13 +7084,13 @@ var require_parser = __commonJS({
             const prev = getPrevProps(parent);
             const start = getFirstKeyStartProps(prev);
             fixFlowSeqItems(fc);
-            const sep9 = fc.end.splice(1, fc.end.length);
-            sep9.push(this.sourceToken);
+            const sep10 = fc.end.splice(1, fc.end.length);
+            sep10.push(this.sourceToken);
             const map = {
               type: "block-map",
               offset: fc.offset,
               indent: fc.indent,
-              items: [{ start, key: fc, sep: sep9 }]
+              items: [{ start, key: fc, sep: sep10 }]
             };
             this.onKeyLine = true;
             this.stack[this.stack.length - 1] = map;
@@ -7516,6 +7516,7 @@ function loadConfig(root) {
   const actors = isRecord(data.actors) ? data.actors : {};
   const tasks = isRecord(data.tasks) ? data.tasks : {};
   const agents = isRecord(data.agents) ? data.agents : {};
+  const audit = isRecord(data.audit) ? data.audit : {};
   const folders = {};
   if (isRecord(data.folders)) {
     for (const [path, info] of Object.entries(data.folders)) {
@@ -7542,7 +7543,8 @@ function loadConfig(root) {
       maxFilesPerTask: positiveInt(tasks.max_files_per_task, "tasks.max_files_per_task", 5),
       maxTasksPerGroup: positiveInt(tasks.max_tasks_per_group, "tasks.max_tasks_per_group", 8)
     },
-    agentTargets: agents.targets === void 0 ? [".claude/skills"] : stringList(agents.targets, "agents.targets").map((t) => repoFolder(t, "agents.targets"))
+    agentTargets: agents.targets === void 0 ? [".claude/skills"] : stringList(agents.targets, "agents.targets").map((t) => repoFolder(t, "agents.targets")),
+    unverifiedAfterDays: positiveInt(audit.unverified_after_days, "audit.unverified_after_days", 30)
   };
 }
 function requireConfig(cwd) {
@@ -7682,21 +7684,81 @@ register({
   }
 });
 
-// src/change/command.ts
-var import_yaml5 = __toESM(require_dist(), 1);
-import { existsSync as existsSync9, readFileSync as readFileSync7 } from "node:fs";
-import { join as join11 } from "node:path";
+// src/audit/rules.ts
+import { existsSync as existsSync5, readFileSync as readFileSync4 } from "node:fs";
+import { join as join8, relative as relative3, sep as sep2 } from "node:path";
 
-// src/tasks/command.ts
-import { existsSync as existsSync5, readFileSync as readFileSync3, statSync as statSync3 } from "node:fs";
-import { join as join6 } from "node:path";
-
-// src/tasks/git.ts
-import { execFileSync } from "node:child_process";
+// src/bundle.ts
+var import_yaml2 = __toESM(require_dist(), 1);
+import { readdirSync as readdirSync2, readFileSync as readFileSync2 } from "node:fs";
+import { join as join3 } from "node:path";
+var RESERVED = /* @__PURE__ */ new Set(["index.md", "log.md"]);
+function walk(bundleRoot) {
+  const out = [];
+  const visit = (relDir) => {
+    const dirents = readdirSync2(join3(bundleRoot, relDir), { withFileTypes: true }).filter((d) => !d.name.startsWith(".")).sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+    for (const d of dirents) {
+      const rel = relDir ? `${relDir}/${d.name}` : d.name;
+      out.push({ rel, isDir: d.isDirectory() });
+      if (d.isDirectory()) visit(rel);
+    }
+  };
+  visit("");
+  return out;
+}
+function keyLines(doc, counter) {
+  const lines = /* @__PURE__ */ new Map();
+  const contents = doc.contents;
+  for (const item of contents?.items ?? []) {
+    const offset = item.key?.range?.[0];
+    if (typeof item.key?.value === "string" && offset !== void 0) {
+      lines.set(item.key.value, counter.linePos(offset).line + 1);
+    }
+  }
+  return lines;
+}
+function parseFile(bundleRoot, rel) {
+  const text2 = readFileSync2(join3(bundleRoot, rel), "utf8").replace(/\r\n/g, "\n");
+  const lines = text2.split("\n");
+  if (lines[0] !== "---") return { rel, hasFrontmatter: false, body: text2, bodyStartLine: 1 };
+  const end = lines.findIndex((line, i) => i > 0 && (line === "---" || line === "..."));
+  if (end === -1) {
+    return {
+      rel,
+      hasFrontmatter: true,
+      frontmatterError: { message: "frontmatter block is not closed with ---", line: 1 },
+      body: "",
+      bodyStartLine: lines.length + 1
+    };
+  }
+  const body = lines.slice(end + 1).join("\n");
+  const bodyStartLine = end + 2;
+  const counter = new import_yaml2.LineCounter();
+  const doc = (0, import_yaml2.parseDocument)(lines.slice(1, end).join("\n"), { lineCounter: counter, schema: "core" });
+  const error = doc.errors[0];
+  if (error) {
+    const line = (error.linePos?.[0]?.line ?? 0) + 1;
+    return {
+      rel,
+      hasFrontmatter: true,
+      frontmatterError: { message: error.message.split("\n")[0] ?? "invalid YAML", line },
+      body,
+      bodyStartLine
+    };
+  }
+  const keys = keyLines(doc, counter);
+  return {
+    rel,
+    hasFrontmatter: true,
+    frontmatter: { data: doc.toJS(), lineOf: (key) => keys.get(key) ?? 1 },
+    body,
+    bodyStartLine
+  };
+}
 
 // src/glob.ts
-import { readdirSync as readdirSync2 } from "node:fs";
-import { join as join3 } from "node:path";
+import { readdirSync as readdirSync3 } from "node:fs";
+import { join as join4 } from "node:path";
 function expandBraces(glob) {
   const open = glob.indexOf("{");
   if (open === -1) return [glob];
@@ -7754,7 +7816,7 @@ var SKIP = /* @__PURE__ */ new Set(["node_modules"]);
 function walkFiles(root) {
   const out = [];
   const visit = (rel) => {
-    for (const d of readdirSync2(join3(root, rel), { withFileTypes: true })) {
+    for (const d of readdirSync3(join4(root, rel), { withFileTypes: true })) {
       if (d.name.startsWith(".") || SKIP.has(d.name)) continue;
       const path = rel ? `${rel}/${d.name}` : d.name;
       if (d.isDirectory()) visit(path);
@@ -7765,7 +7827,723 @@ function walkFiles(root) {
   return out.sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
 }
 
+// src/indexes/refs.ts
+import { readFileSync as readFileSync3, statSync as statSync3 } from "node:fs";
+import { join as join5 } from "node:path";
+var MAX_BYTES = 1024 * 1024;
+var REFERENCE = /see knowledge:\s+(\/[^\s"'`)]+\.md)\b/g;
+function scanReferences(repoRoot, sourceGlobs) {
+  if (sourceGlobs.length === 0) return [];
+  const patterns = sourceGlobs.map(globToRegExp);
+  const refs = [];
+  for (const file of walkFiles(repoRoot)) {
+    if (!patterns.some((p) => p.test(file))) continue;
+    const abs = join5(repoRoot, file);
+    if (statSync3(abs).size > MAX_BYTES) continue;
+    const text2 = readFileSync3(abs, "utf8");
+    if (text2.includes("\0")) continue;
+    text2.split("\n").forEach((content, i) => {
+      for (const match of content.matchAll(REFERENCE)) {
+        refs.push({ concept: (match[1] ?? "").slice(1), file, line: i + 1 });
+      }
+    });
+  }
+  return refs;
+}
+function locationsByConcept(refs) {
+  const map = /* @__PURE__ */ new Map();
+  for (const r of refs) map.set(r.concept, [...map.get(r.concept) ?? [], `${r.file}:${r.line}`]);
+  return map;
+}
+
+// src/validate/links.ts
+import { existsSync as existsSync4 } from "node:fs";
+import { dirname as dirname3, join as join7 } from "node:path";
+
+// src/validate/okf.ts
+var isRecord2 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
+var baseName = (rel) => rel.slice(rel.lastIndexOf("/") + 1);
+var isConcept = (rel) => !RESERVED.has(baseName(rel));
+var okf1 = (file) => {
+  if (!isConcept(file.rel)) return [];
+  const finding3 = (message, line) => [
+    {
+      rule: "OKF-1",
+      severity: "error",
+      path: file.rel,
+      line,
+      message,
+      fix: "start the file with a YAML frontmatter block between --- lines"
+    }
+  ];
+  if (!file.hasFrontmatter) return finding3("missing YAML frontmatter", 1);
+  if (file.frontmatterError) {
+    return finding3(
+      `frontmatter is not valid YAML: ${file.frontmatterError.message}`,
+      file.frontmatterError.line
+    );
+  }
+  if (!isRecord2(file.frontmatter?.data)) return finding3("frontmatter is not a mapping", 1);
+  return [];
+};
+var okf2 = (file) => {
+  const data = file.frontmatter?.data;
+  if (!isConcept(file.rel) || !isRecord2(data)) return [];
+  if (typeof data.type === "string" && data.type.trim() !== "") return [];
+  return [
+    {
+      rule: "OKF-2",
+      severity: "error",
+      path: file.rel,
+      line: file.frontmatter?.lineOf("type") ?? 1,
+      message: "frontmatter has no non-empty 'type'",
+      fix: "add a 'type', for example 'type: Decision'"
+    }
+  ];
+};
+var okf3 = (file, line, message, fix) => ({
+  rule: "OKF-3",
+  severity: "error",
+  path: file.rel,
+  line,
+  message,
+  fix
+});
+function isCalendarDate(text2) {
+  const date = /* @__PURE__ */ new Date(`${text2}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text2;
+}
+var okf3Index = (file) => {
+  if (baseName(file.rel) !== "index.md" || !file.hasFrontmatter) return [];
+  if (file.rel !== "index.md") {
+    return [
+      okf3(
+        file,
+        1,
+        "folder index has frontmatter",
+        "remove the frontmatter; only the bundle-root index may carry okf_version"
+      )
+    ];
+  }
+  const data = file.frontmatter?.data;
+  if (!isRecord2(data)) {
+    return [
+      okf3(
+        file,
+        1,
+        "root index frontmatter is not a mapping",
+        `keep only 'okf_version: "0.2"' in the frontmatter`
+      )
+    ];
+  }
+  return Object.keys(data).filter((key) => key !== "okf_version").map(
+    (key) => okf3(
+      file,
+      file.frontmatter?.lineOf(key) ?? 1,
+      `root index frontmatter has '${key}'`,
+      `remove '${key}'; only okf_version is allowed`
+    )
+  );
+};
+var okf3Log = (file) => {
+  if (baseName(file.rel) !== "log.md") return [];
+  if (file.hasFrontmatter) {
+    return [
+      okf3(file, 1, "log.md has frontmatter", "remove the frontmatter; log.md starts with an H1 title")
+    ];
+  }
+  const findings = [];
+  let previous;
+  file.body.split("\n").forEach((text2, i) => {
+    const heading = /^## (.*)$/.exec(text2);
+    if (!heading) return;
+    const line = file.bodyStartLine + i;
+    const date = heading[1]?.trim() ?? "";
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !isCalendarDate(date)) {
+      findings.push(
+        okf3(file, line, `log heading '${date}' is not a YYYY-MM-DD date`, "use '## YYYY-MM-DD' headings")
+      );
+      return;
+    }
+    if (previous !== void 0 && date >= previous) {
+      findings.push(
+        okf3(
+          file,
+          line,
+          `log date ${date} is not older than ${previous}`,
+          "order log dates newest first, one heading per date"
+        )
+      );
+    }
+    previous = date;
+  });
+  return findings;
+};
+
+// src/validate/profile.ts
+import { existsSync as existsSync3 } from "node:fs";
+import { dirname as dirname2, join as join6, relative as relative2 } from "node:path";
+function conceptData(file) {
+  const data = file.frontmatter?.data;
+  if (!isConcept(file.rel) || !isRecord2(data)) return void 0;
+  return typeof data.type === "string" && data.type.trim() !== "" ? data : void 0;
+}
+function finding(rule, file, key, message, fix) {
+  return {
+    rule,
+    severity: "error",
+    path: file.rel,
+    line: key === null ? 1 : file.frontmatter?.lineOf(key) ?? 1,
+    message,
+    fix
+  };
+}
+var nonEmptyString = (v) => typeof v === "string" && v.trim() !== "";
+var p1 = (file, ctx) => {
+  const data = conceptData(file);
+  const types = ctx.config?.types ?? [];
+  if (!data || types.includes(data.type)) return [];
+  return [
+    finding(
+      "P1",
+      file,
+      "type",
+      `type '${data.type}' is not in specfold.yaml types`,
+      `use one of: ${types.join(", ")}`
+    )
+  ];
+};
+var p2 = (file) => {
+  const data = conceptData(file);
+  if (!data) return [];
+  const findings = [];
+  if (!nonEmptyString(data.title)) {
+    findings.push(finding("P2", file, "title", "missing or empty 'title'", "add a short 'title'"));
+  }
+  const description = data.description;
+  if (!nonEmptyString(description)) {
+    findings.push(
+      finding("P2", file, "description", "missing or empty 'description'", "add a one-line 'description'")
+    );
+  } else if (/[\r\n]/.test(description.trim())) {
+    findings.push(
+      finding(
+        "P2",
+        file,
+        "description",
+        "'description' spans several lines",
+        "write the description as one line"
+      )
+    );
+  } else if ([...description].length > 160) {
+    findings.push(
+      finding(
+        "P2",
+        file,
+        "description",
+        `'description' has ${[...description].length} characters (max 160)`,
+        "shorten the description to 160 characters"
+      )
+    );
+  }
+  return findings;
+};
+var STATUSES = ["draft", "stable", "deprecated"];
+var p3 = (file) => {
+  const data = conceptData(file);
+  if (!data || STATUSES.includes(data.status)) return [];
+  const message = data.status === void 0 ? "missing 'status'" : `status '${String(data.status)}' is not allowed`;
+  return [
+    finding(
+      "P3",
+      file,
+      data.status === void 0 ? null : "status",
+      message,
+      `set 'status' to ${STATUSES.join(", ")}`
+    )
+  ];
+};
+var ACTOR = /^(?:human:\S+|process:\S+|[^\s/:]+\/\S+)$/;
+var p4 = (file) => {
+  const data = conceptData(file);
+  if (!data) return [];
+  if (data.generated === void 0 && data.verified === void 0) {
+    return [
+      finding(
+        "P4",
+        file,
+        null,
+        "neither 'generated' nor 'verified' is set",
+        "add 'generated: { by: <actor>, at: <timestamp> }'"
+      )
+    ];
+  }
+  const findings = [];
+  const checkStamp = (key, value) => {
+    if (!isRecord2(value) || value.by === void 0 || value.at === void 0) {
+      findings.push(
+        finding(
+          "P4",
+          file,
+          key,
+          `'${key}' entries need 'by' and 'at'`,
+          "write '{ by: <actor>, at: <timestamp> }'"
+        )
+      );
+      return;
+    }
+    if (typeof value.by !== "string" || !ACTOR.test(value.by)) {
+      findings.push(
+        finding(
+          "P4",
+          file,
+          key,
+          `actor '${String(value.by)}' in '${key}' is malformed`,
+          "use '<producer>/<version>', 'human:<id>' or 'process:<id>'"
+        )
+      );
+    }
+  };
+  if (data.generated !== void 0) checkStamp("generated", data.generated);
+  if (data.verified !== void 0) {
+    const entries = Array.isArray(data.verified) ? data.verified : [data.verified];
+    for (const entry of entries) checkStamp("verified", entry);
+  }
+  return findings;
+};
+var TIMESTAMP = /^(\d{4}-\d{2}-\d{2})T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/;
+function isTimestamp(value) {
+  if (typeof value !== "string") return false;
+  const match = TIMESTAMP.exec(value);
+  return match !== null && !Number.isNaN(Date.parse(value)) && (/* @__PURE__ */ new Date(`${match[1]}T00:00:00Z`)).toISOString().startsWith(match[1] ?? "");
+}
+var p5 = (file) => {
+  const data = conceptData(file);
+  if (!data) return [];
+  const checks = [];
+  if (isRecord2(data.generated))
+    checks.push({ key: "generated", label: "generated.at", value: data.generated.at });
+  const verified = Array.isArray(data.verified) ? data.verified : data.verified === void 0 ? [] : [data.verified];
+  for (const v of verified)
+    if (isRecord2(v)) checks.push({ key: "verified", label: "verified.at", value: v.at });
+  if (data.stale_after !== void 0)
+    checks.push({ key: "stale_after", label: "stale_after", value: data.stale_after });
+  if (Array.isArray(data.sources)) {
+    for (const s of data.sources) {
+      if (isRecord2(s) && s.last_modified !== void 0) {
+        checks.push({ key: "sources", label: "sources.last_modified", value: s.last_modified });
+      }
+    }
+  }
+  return checks.filter((c) => c.value !== void 0 && !isTimestamp(c.value)).map(
+    (c) => finding(
+      "P5",
+      file,
+      c.key,
+      `${c.label} '${String(c.value)}' is not an ISO 8601 date-time with offset`,
+      "write it like 2026-10-26T10:00:00Z or 2026-10-26T10:00:00+01:00"
+    )
+  );
+};
+var p6 = (file) => {
+  const data = conceptData(file);
+  if (!data) return [];
+  if (data.sources === void 0) {
+    return data.type === "Decision" ? [
+      finding(
+        "P6",
+        file,
+        null,
+        "a Decision needs 'sources'",
+        "add 'sources' with at least one { id, resource } entry"
+      )
+    ] : [];
+  }
+  if (!Array.isArray(data.sources) || data.type === "Decision" && data.sources.length === 0) {
+    return [
+      finding(
+        "P6",
+        file,
+        "sources",
+        "'sources' must be a non-empty list",
+        "list sources as '- { id, resource }' entries"
+      )
+    ];
+  }
+  return data.sources.filter((s) => !isRecord2(s) || !nonEmptyString(s.resource)).map(
+    () => finding(
+      "P6",
+      file,
+      "sources",
+      "a 'sources' entry has no 'resource'",
+      "give every source a 'resource' path or URL"
+    )
+  );
+};
+var NEEDS_STALE_AFTER = ["Runbook", "Interface"];
+var p7 = (file) => {
+  const data = conceptData(file);
+  if (!data || !NEEDS_STALE_AFTER.includes(data.type) || data.stale_after !== void 0) return [];
+  return [
+    finding(
+      "P7",
+      file,
+      null,
+      `a ${data.type} needs 'stale_after'`,
+      "add 'stale_after: <timestamp>' for the next review"
+    )
+  ];
+};
+var KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+var p8 = (ctx, inSelection) => ctx.entries.filter((e) => inSelection(e.rel)).filter((e) => {
+  const name = e.rel.slice(e.rel.lastIndexOf("/") + 1);
+  return e.isDir ? !KEBAB.test(name) : !(name.endsWith(".md") && KEBAB.test(name.slice(0, -3)));
+}).map((e) => ({
+  rule: "P8",
+  severity: "error",
+  path: e.rel,
+  line: null,
+  message: `${e.isDir ? "folder" : "file"} name is not kebab-case${e.isDir ? "" : " Markdown"}`,
+  fix: "rename it with lowercase letters, digits and single hyphens (files end in .md)"
+}));
+var NORMATIVE = /\b(SHALL|MUST)\b/;
+var p9 = (file) => {
+  if (!conceptData(file)) return [];
+  const findings = [];
+  let fence;
+  file.body.split("\n").forEach((text2, i) => {
+    const marker = /^\s*(`{3,}|~{3,})/.exec(text2)?.[1];
+    if (marker) {
+      if (fence === void 0) fence = marker[0];
+      else if (marker[0] === fence) fence = void 0;
+      return;
+    }
+    if (fence !== void 0) return;
+    const word = NORMATIVE.exec(text2.replace(/`[^`]*`/g, ""))?.[1];
+    if (word) {
+      findings.push({
+        rule: "P9",
+        severity: "error",
+        path: file.rel,
+        line: file.bodyStartLine + i,
+        message: `normative '${word}' in knowledge`,
+        fix: "move the requirement into an OpenSpec spec and describe the context here instead"
+      });
+    }
+  });
+  return findings;
+};
+var MAX_BODY_LINES = 300;
+var p10 = (file) => {
+  if (!conceptData(file)) return [];
+  const lines = file.body.replace(/\n+$/, "").split("\n").length;
+  if (lines <= MAX_BODY_LINES) return [];
+  return [
+    {
+      rule: "P10",
+      severity: "warning",
+      path: file.rel,
+      line: null,
+      message: `body has ${lines} lines (more than ${MAX_BODY_LINES})`,
+      fix: "split the topic into a folder with its own index.md"
+    }
+  ];
+};
+var DECISIONS = ["accepted", "rejected", "superseded"];
+var p11 = (file, ctx) => {
+  const data = conceptData(file);
+  if (!data) return [];
+  const findings = [];
+  if (data.type === "Decision" && !DECISIONS.includes(data.decision)) {
+    findings.push(
+      finding(
+        "P11",
+        file,
+        data.decision === void 0 ? null : "decision",
+        data.decision === void 0 ? "a Decision needs 'decision'" : `decision '${String(data.decision)}' is not allowed`,
+        `set 'decision' to ${DECISIONS.join(", ")}`
+      )
+    );
+  }
+  if (data.supersedes !== void 0) {
+    const target = typeof data.supersedes === "string" ? resolveInBundle(ctx.bundleRoot, file.rel, data.supersedes) : void 0;
+    if (!target || !existsSync3(target)) {
+      findings.push(
+        finding(
+          "P11",
+          file,
+          "supersedes",
+          `superseded concept '${String(data.supersedes)}' does not exist`,
+          "point 'supersedes' at an existing concept, e.g. /decisions/old.md"
+        )
+      );
+    }
+  }
+  if (data.spec !== void 0) {
+    const root = ctx.config?.root;
+    if (typeof data.spec !== "string" || !root || !existsSync3(join6(root, data.spec))) {
+      findings.push(
+        finding(
+          "P11",
+          file,
+          "spec",
+          `spec '${String(data.spec)}' does not exist`,
+          "use the repository-relative path openspec/specs/<capability>/spec.md"
+        )
+      );
+    }
+  }
+  if (data.not !== void 0) {
+    const valid = Array.isArray(data.not) && data.not.every(
+      (n) => isRecord2(n) && nonEmptyString(n.term) && nonEmptyString(n.why) && nonEmptyString(n.instead)
+    );
+    if (!valid) {
+      findings.push(
+        finding(
+          "P11",
+          file,
+          "not",
+          "'not' must be a list of { term, why, instead }",
+          "write each misreading as '- { term, why, instead }'"
+        )
+      );
+    }
+  }
+  return findings;
+};
+function resolveInBundle(bundleRoot, fromRel, target) {
+  const clean = target.split("#")[0] ?? "";
+  if (clean === "") return void 0;
+  const abs = clean.startsWith("/") ? join6(bundleRoot, clean) : join6(bundleRoot, dirname2(fromRel), clean);
+  const rel = relative2(bundleRoot, abs);
+  return rel.startsWith("..") ? void 0 : abs;
+}
+
+// src/validate/links.ts
+var SCHEME = /^[a-z][a-z0-9+.-]*:/i;
+var LINK = /!?\[[^\]]*\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)/g;
+function bodyLinks(file, bundleRoot) {
+  const links = [];
+  let fence;
+  file.body.split("\n").forEach((text2, i) => {
+    const marker = /^\s*(`{3,}|~{3,})/.exec(text2)?.[1];
+    if (marker) {
+      if (fence === void 0) fence = marker[0];
+      else if (marker[0] === fence) fence = void 0;
+      return;
+    }
+    if (fence !== void 0) return;
+    for (const match of text2.replace(/`[^`]*`/g, "").matchAll(LINK)) {
+      const target = match[1] ?? "";
+      if (SCHEME.test(target) || target.startsWith("#")) continue;
+      let decoded = target;
+      try {
+        decoded = decodeURIComponent(target);
+      } catch {
+      }
+      links.push({
+        target,
+        abs: resolveInBundle(bundleRoot, file.rel, decoded),
+        line: file.bodyStartLine + i
+      });
+    }
+  });
+  return links;
+}
+var l1 = (file, ctx) => {
+  if (!isConcept(file.rel) || !isRecord2(file.frontmatter?.data)) return [];
+  const severity = ctx.config?.blockOnBrokenLinks === false ? "warning" : "error";
+  return bodyLinks(file, ctx.bundleRoot).filter((link) => !(link.abs && existsSync4(link.abs))).map((link) => ({
+    rule: "L1",
+    severity,
+    path: file.rel,
+    line: link.line,
+    message: `broken link '${link.target}'`,
+    fix: "point the link at an existing concept, bundle-absolute like /decisions/x.md"
+  }));
+};
+var l2 = (file, ctx) => {
+  const data = file.frontmatter?.data;
+  if (!isConcept(file.rel) || !isRecord2(data)) return [];
+  const checks = [];
+  if (typeof data.resource === "string") checks.push({ key: "resource", value: data.resource });
+  if (Array.isArray(data.sources)) {
+    for (const s of data.sources) {
+      if (isRecord2(s) && typeof s.resource === "string") checks.push({ key: "sources", value: s.resource });
+    }
+  }
+  return checks.filter(({ value }) => {
+    if (SCHEME.test(value) || value.trim() === "") return false;
+    const path = value.split("#")[0] ?? "";
+    const abs = path.startsWith("/") ? join7(ctx.bundleRoot, path) : join7(ctx.bundleRoot, dirname3(file.rel), path);
+    return !existsSync4(abs);
+  }).map(({ key, value }) => ({
+    rule: "L2",
+    severity: "error",
+    path: file.rel,
+    line: file.frontmatter?.lineOf(key) ?? 1,
+    message: `resource '${value}' does not exist`,
+    fix: "use a URL, a bundle-absolute path or a path relative to this concept"
+  }));
+};
+
+// src/audit/rules.ts
+var DAY_MS = 24 * 60 * 60 * 1e3;
+var INSTRUCTION_FILES = ["AGENTS.md", "CLAUDE.md"];
+var EXEMPT_FOLDERS = ["vision/", "backlog/"];
+var MENTION = /(?:^|[\s(`[])\/([a-z0-9][a-z0-9/-]*\.md)\b/g;
+function instructionMentions(repoRoot) {
+  return INSTRUCTION_FILES.filter((f) => existsSync5(join8(repoRoot, f))).flatMap(
+    (f) => [...readFileSync4(join8(repoRoot, f), "utf8").matchAll(MENTION)].map((m) => m[1])
+  );
+}
+var finding2 = (rule, path, line, message, fix) => ({
+  rule,
+  severity: "warning",
+  path,
+  line,
+  message,
+  fix
+});
+function concepts(bundleRoot) {
+  const out = /* @__PURE__ */ new Map();
+  for (const entry of walk(bundleRoot)) {
+    if (entry.isDir || !entry.rel.endsWith(".md") || !isConcept(entry.rel)) continue;
+    const file = parseFile(bundleRoot, entry.rel);
+    const data = file.frontmatter?.data;
+    if (isRecord2(data)) out.set(entry.rel, { file, data });
+  }
+  return out;
+}
+function auditBundle(config, bundleRoot, now) {
+  const all = concepts(bundleRoot);
+  const findings = [];
+  const line = (c, key) => c.file.frontmatter?.lineOf(key) ?? null;
+  const toRel2 = (abs) => relative3(bundleRoot, abs).split(sep2).join("/");
+  const incoming = /* @__PURE__ */ new Set();
+  for (const [rel, c] of all) {
+    const stale = c.data.stale_after;
+    if (isTimestamp(stale) && Date.parse(stale) < now.getTime())
+      findings.push(
+        finding2(
+          "A1",
+          rel,
+          line(c, "stale_after"),
+          `stale since ${stale}`,
+          "review the concept against its sources, then move stale_after forward or deprecate it"
+        )
+      );
+    const at = isRecord2(c.data.generated) ? c.data.generated.at : void 0;
+    if (c.data.verified === void 0 && isTimestamp(at)) {
+      const days = Math.floor((now.getTime() - Date.parse(at)) / DAY_MS);
+      if (days > config.unverifiedAfterDays)
+        findings.push(
+          finding2(
+            "A2",
+            rel,
+            line(c, "generated"),
+            `unverified for ${days} days (limit ${config.unverifiedAfterDays})`,
+            "have a human review it and run specfold verify, or deprecate it"
+          )
+        );
+    }
+    const deprecated = c.data.status === "deprecated";
+    for (const link of bodyLinks(c.file, bundleRoot)) {
+      if (!link.abs) continue;
+      const target = toRel2(link.abs);
+      if (target !== rel) incoming.add(target);
+      const linked = all.get(target);
+      if (!deprecated && linked?.data.status === "deprecated")
+        findings.push(
+          finding2(
+            "A3",
+            rel,
+            link.line,
+            `links to deprecated concept /${target}`,
+            "link the concept that replaced it, or remove the link"
+          )
+        );
+    }
+  }
+  for (const ref of scanReferences(config.root, config.sourceGlobs)) incoming.add(ref.concept);
+  for (const mention of instructionMentions(config.root)) incoming.add(mention);
+  for (const [rel, c] of all) {
+    if (incoming.has(rel) || EXEMPT_FOLDERS.some((f) => rel.startsWith(f))) continue;
+    const spec = c.data.spec;
+    if (c.data.type === "Capability" && typeof spec === "string" && existsSync5(join8(config.root, spec)))
+      continue;
+    findings.push(
+      finding2(
+        "A4",
+        rel,
+        null,
+        "no concept links here and no code references it",
+        "link it from a related concept, or deprecate it"
+      )
+    );
+  }
+  const carded = new Set(
+    [...all.values()].filter((c) => c.data.type === "Capability" && typeof c.data.spec === "string").map((c) => c.data.spec)
+  );
+  const specsDir = join8(config.root, "openspec", "specs");
+  if (existsSync5(specsDir)) {
+    for (const rel of walkFiles(specsDir)) {
+      if (!rel.endsWith("/spec.md")) continue;
+      const spec = `openspec/specs/${rel}`;
+      if (!carded.has(spec))
+        findings.push(
+          finding2(
+            "A5",
+            spec,
+            null,
+            `spec '${rel.slice(0, -"/spec.md".length)}' has no capability card`,
+            `create a Capability concept with spec: ${spec}`
+          )
+        );
+    }
+  }
+  return findings;
+}
+
+// src/audit/command.ts
+register({
+  name: "audit",
+  summary: "report stale, unverified, deprecated-linked and orphaned concepts and specs without a card",
+  usage: "specfold audit [--json]",
+  options: { json: { type: "boolean" } },
+  run: ({ io, values, positionals }) => {
+    if (positionals.length > 0) throw new UsageError(`unexpected argument '${positionals[0]}'`);
+    const config = requireConfig(io.cwd);
+    const findings = sortFindings(
+      auditBundle(config, resolveBundleRoot(io.cwd, void 0, config), /* @__PURE__ */ new Date())
+    );
+    const counts = {};
+    for (const f of findings) counts[f.rule] = (counts[f.rule] ?? 0) + 1;
+    if (values.json) {
+      io.stdout(`${JSON.stringify({ ok: findings.length === 0, findings, counts }, null, 2)}
+`);
+    } else {
+      const lines = findings.map(findingLine);
+      const byRule = Object.entries(counts).sort(([a], [b]) => a < b ? -1 : 1).map(([rule, n]) => `${rule} ${n}`).join(", ");
+      lines.push(`audit: ${plural(findings.length, "finding")}${byRule ? ` (${byRule})` : ""}`);
+      io.stdout(`${lines.join("\n")}
+`);
+    }
+    return findings.length === 0 ? 0 : 1;
+  }
+});
+
+// src/change/command.ts
+var import_yaml5 = __toESM(require_dist(), 1);
+import { existsSync as existsSync11, readFileSync as readFileSync9 } from "node:fs";
+import { join as join14 } from "node:path";
+
+// src/tasks/command.ts
+import { existsSync as existsSync8, readFileSync as readFileSync6, statSync as statSync4 } from "node:fs";
+import { join as join11 } from "node:path";
+
 // src/tasks/git.ts
+import { execFileSync } from "node:child_process";
 var RECORD = "";
 var FIELD = "";
 var VALUE = "";
@@ -7873,21 +8651,21 @@ function checkTrailers(tasks, commits, ctx) {
 }
 
 // src/tasks/parse.ts
-var import_yaml2 = __toESM(require_dist(), 1);
+var import_yaml3 = __toESM(require_dist(), 1);
 var FOLLOW_UP = "Workflow follow-up";
 var GROUP = /^## (\d+)\. (.+?)\s*$/;
 var H2 = /^## (.*?)\s*$/;
 var TASK = /^- \[([ xX])\] (\d+)\.(\d+)(?: (.*))?$/;
 var DONE = /^\s+- Done when:(.*)$/;
-var isRecord2 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
+var isRecord3 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
 function parseMeta(source) {
   let data;
   try {
-    data = (0, import_yaml2.parse)(source);
+    data = (0, import_yaml3.parse)(source);
   } catch (error) {
     return { error: `metadata is not valid YAML: ${error.message.split("\n")[0]}` };
   }
-  if (!isRecord2(data)) return { error: "metadata must be a mapping" };
+  if (!isRecord3(data)) return { error: "metadata must be a mapping" };
   const strings = (v) => Array.isArray(v) && v.every((x) => typeof x === "string");
   if (data.files === void 0) return { error: "metadata has no 'files'" };
   if (!strings(data.files)) return { error: "'files' must be a list of globs" };
@@ -7966,8 +8744,8 @@ function parseTasks(text2) {
 }
 
 // src/tasks/rules.ts
-import { existsSync as existsSync3 } from "node:fs";
-import { join as join4 } from "node:path";
+import { existsSync as existsSync6 } from "node:fs";
+import { join as join9 } from "node:path";
 
 // src/tasks/overlap.ts
 var WILDCARD = /[*?{[]/;
@@ -8169,7 +8947,7 @@ function checkStatic(tasks, ctx) {
         );
     }
     const agent = group.meta?.agent;
-    if (agent && agent !== DEFAULT_AGENT && !existsSync3(join4(ctx.repoRoot, ".claude", "agents", `${agent}.md`))) {
+    if (agent && agent !== DEFAULT_AGENT && !existsSync6(join9(ctx.repoRoot, ".claude", "agents", `${agent}.md`))) {
       add(
         "T7",
         "warning",
@@ -8251,24 +9029,24 @@ function checkStatic(tasks, ctx) {
 }
 
 // src/tasks/scenarios.ts
-import { existsSync as existsSync4, readFileSync as readFileSync2 } from "node:fs";
-import { join as join5 } from "node:path";
+import { existsSync as existsSync7, readFileSync as readFileSync5 } from "node:fs";
+import { join as join10 } from "node:path";
 var SCENARIO = /^#### Scenario:\s*(.+?)\s*$/gm;
 var scenarioSlug = (title) => title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 function collect(specsDir, into) {
-  if (!existsSync4(specsDir)) return;
+  if (!existsSync7(specsDir)) return;
   for (const rel of walkFiles(specsDir)) {
     if (!rel.endsWith("/spec.md")) continue;
     const capability = rel.slice(0, -"/spec.md".length);
-    for (const m of readFileSync2(join5(specsDir, rel), "utf8").matchAll(SCENARIO)) {
+    for (const m of readFileSync5(join10(specsDir, rel), "utf8").matchAll(SCENARIO)) {
       into.add(`${capability}#${scenarioSlug(m[1])}`);
     }
   }
 }
 function knownScenarioIds(repoRoot, changeDir2) {
   const ids = /* @__PURE__ */ new Set();
-  collect(join5(changeDir2, "specs"), ids);
-  collect(join5(repoRoot, "openspec", "specs"), ids);
+  collect(join10(changeDir2, "specs"), ids);
+  collect(join10(repoRoot, "openspec", "specs"), ids);
   return ids;
 }
 
@@ -8278,16 +9056,16 @@ function changeDir(config, change) {
   if (!change) throw new UsageError("missing change name");
   if (!CHANGE_NAME.test(change) || change === "archive")
     throw new UsageError(`'${change}' is not a change name (kebab-case)`);
-  const dir = join6(config.root, "openspec", "changes", change);
-  if (!existsSync5(dir) || !statSync3(dir).isDirectory())
+  const dir = join11(config.root, "openspec", "changes", change);
+  if (!existsSync8(dir) || !statSync4(dir).isDirectory())
     throw new EnvError(`unknown change '${change}': no folder openspec/changes/${change}/`);
   return dir;
 }
 function checkChangeTasks(config, change, base) {
   const dir = changeDir(config, change);
   const file = `openspec/changes/${change}/tasks.md`;
-  const path = join6(dir, "tasks.md");
-  if (!existsSync5(path)) {
+  const path = join11(dir, "tasks.md");
+  if (!existsSync8(path)) {
     return [
       {
         rule: "T0",
@@ -8301,7 +9079,7 @@ function checkChangeTasks(config, change, base) {
       }
     ];
   }
-  const tasks = parseTasks(readFileSync3(path, "utf8"));
+  const tasks = parseTasks(readFileSync6(path, "utf8"));
   const findings = checkStatic(tasks, {
     repoRoot: config.root,
     file,
@@ -8352,539 +9130,8 @@ register({
 });
 
 // src/change/brief.ts
-import { existsSync as existsSync7, readFileSync as readFileSync5 } from "node:fs";
-import { join as join9 } from "node:path";
-
-// src/validate/profile.ts
-import { existsSync as existsSync6 } from "node:fs";
-import { dirname as dirname2, join as join8, relative as relative2 } from "node:path";
-
-// src/bundle.ts
-var import_yaml3 = __toESM(require_dist(), 1);
-import { readdirSync as readdirSync3, readFileSync as readFileSync4 } from "node:fs";
-import { join as join7 } from "node:path";
-var RESERVED = /* @__PURE__ */ new Set(["index.md", "log.md"]);
-function walk(bundleRoot) {
-  const out = [];
-  const visit = (relDir) => {
-    const dirents = readdirSync3(join7(bundleRoot, relDir), { withFileTypes: true }).filter((d) => !d.name.startsWith(".")).sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
-    for (const d of dirents) {
-      const rel = relDir ? `${relDir}/${d.name}` : d.name;
-      out.push({ rel, isDir: d.isDirectory() });
-      if (d.isDirectory()) visit(rel);
-    }
-  };
-  visit("");
-  return out;
-}
-function keyLines(doc, counter) {
-  const lines = /* @__PURE__ */ new Map();
-  const contents = doc.contents;
-  for (const item of contents?.items ?? []) {
-    const offset = item.key?.range?.[0];
-    if (typeof item.key?.value === "string" && offset !== void 0) {
-      lines.set(item.key.value, counter.linePos(offset).line + 1);
-    }
-  }
-  return lines;
-}
-function parseFile(bundleRoot, rel) {
-  const text2 = readFileSync4(join7(bundleRoot, rel), "utf8").replace(/\r\n/g, "\n");
-  const lines = text2.split("\n");
-  if (lines[0] !== "---") return { rel, hasFrontmatter: false, body: text2, bodyStartLine: 1 };
-  const end = lines.findIndex((line, i) => i > 0 && (line === "---" || line === "..."));
-  if (end === -1) {
-    return {
-      rel,
-      hasFrontmatter: true,
-      frontmatterError: { message: "frontmatter block is not closed with ---", line: 1 },
-      body: "",
-      bodyStartLine: lines.length + 1
-    };
-  }
-  const body = lines.slice(end + 1).join("\n");
-  const bodyStartLine = end + 2;
-  const counter = new import_yaml3.LineCounter();
-  const doc = (0, import_yaml3.parseDocument)(lines.slice(1, end).join("\n"), { lineCounter: counter, schema: "core" });
-  const error = doc.errors[0];
-  if (error) {
-    const line = (error.linePos?.[0]?.line ?? 0) + 1;
-    return {
-      rel,
-      hasFrontmatter: true,
-      frontmatterError: { message: error.message.split("\n")[0] ?? "invalid YAML", line },
-      body,
-      bodyStartLine
-    };
-  }
-  const keys = keyLines(doc, counter);
-  return {
-    rel,
-    hasFrontmatter: true,
-    frontmatter: { data: doc.toJS(), lineOf: (key) => keys.get(key) ?? 1 },
-    body,
-    bodyStartLine
-  };
-}
-
-// src/validate/okf.ts
-var isRecord3 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
-var baseName = (rel) => rel.slice(rel.lastIndexOf("/") + 1);
-var isConcept = (rel) => !RESERVED.has(baseName(rel));
-var okf1 = (file) => {
-  if (!isConcept(file.rel)) return [];
-  const finding2 = (message, line) => [
-    {
-      rule: "OKF-1",
-      severity: "error",
-      path: file.rel,
-      line,
-      message,
-      fix: "start the file with a YAML frontmatter block between --- lines"
-    }
-  ];
-  if (!file.hasFrontmatter) return finding2("missing YAML frontmatter", 1);
-  if (file.frontmatterError) {
-    return finding2(
-      `frontmatter is not valid YAML: ${file.frontmatterError.message}`,
-      file.frontmatterError.line
-    );
-  }
-  if (!isRecord3(file.frontmatter?.data)) return finding2("frontmatter is not a mapping", 1);
-  return [];
-};
-var okf2 = (file) => {
-  const data = file.frontmatter?.data;
-  if (!isConcept(file.rel) || !isRecord3(data)) return [];
-  if (typeof data.type === "string" && data.type.trim() !== "") return [];
-  return [
-    {
-      rule: "OKF-2",
-      severity: "error",
-      path: file.rel,
-      line: file.frontmatter?.lineOf("type") ?? 1,
-      message: "frontmatter has no non-empty 'type'",
-      fix: "add a 'type', for example 'type: Decision'"
-    }
-  ];
-};
-var okf3 = (file, line, message, fix) => ({
-  rule: "OKF-3",
-  severity: "error",
-  path: file.rel,
-  line,
-  message,
-  fix
-});
-function isCalendarDate(text2) {
-  const date = /* @__PURE__ */ new Date(`${text2}T00:00:00Z`);
-  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text2;
-}
-var okf3Index = (file) => {
-  if (baseName(file.rel) !== "index.md" || !file.hasFrontmatter) return [];
-  if (file.rel !== "index.md") {
-    return [
-      okf3(
-        file,
-        1,
-        "folder index has frontmatter",
-        "remove the frontmatter; only the bundle-root index may carry okf_version"
-      )
-    ];
-  }
-  const data = file.frontmatter?.data;
-  if (!isRecord3(data)) {
-    return [
-      okf3(
-        file,
-        1,
-        "root index frontmatter is not a mapping",
-        `keep only 'okf_version: "0.2"' in the frontmatter`
-      )
-    ];
-  }
-  return Object.keys(data).filter((key) => key !== "okf_version").map(
-    (key) => okf3(
-      file,
-      file.frontmatter?.lineOf(key) ?? 1,
-      `root index frontmatter has '${key}'`,
-      `remove '${key}'; only okf_version is allowed`
-    )
-  );
-};
-var okf3Log = (file) => {
-  if (baseName(file.rel) !== "log.md") return [];
-  if (file.hasFrontmatter) {
-    return [
-      okf3(file, 1, "log.md has frontmatter", "remove the frontmatter; log.md starts with an H1 title")
-    ];
-  }
-  const findings = [];
-  let previous;
-  file.body.split("\n").forEach((text2, i) => {
-    const heading = /^## (.*)$/.exec(text2);
-    if (!heading) return;
-    const line = file.bodyStartLine + i;
-    const date = heading[1]?.trim() ?? "";
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !isCalendarDate(date)) {
-      findings.push(
-        okf3(file, line, `log heading '${date}' is not a YYYY-MM-DD date`, "use '## YYYY-MM-DD' headings")
-      );
-      return;
-    }
-    if (previous !== void 0 && date >= previous) {
-      findings.push(
-        okf3(
-          file,
-          line,
-          `log date ${date} is not older than ${previous}`,
-          "order log dates newest first, one heading per date"
-        )
-      );
-    }
-    previous = date;
-  });
-  return findings;
-};
-
-// src/validate/profile.ts
-function conceptData(file) {
-  const data = file.frontmatter?.data;
-  if (!isConcept(file.rel) || !isRecord3(data)) return void 0;
-  return typeof data.type === "string" && data.type.trim() !== "" ? data : void 0;
-}
-function finding(rule, file, key, message, fix) {
-  return {
-    rule,
-    severity: "error",
-    path: file.rel,
-    line: key === null ? 1 : file.frontmatter?.lineOf(key) ?? 1,
-    message,
-    fix
-  };
-}
-var nonEmptyString = (v) => typeof v === "string" && v.trim() !== "";
-var p1 = (file, ctx) => {
-  const data = conceptData(file);
-  const types = ctx.config?.types ?? [];
-  if (!data || types.includes(data.type)) return [];
-  return [
-    finding(
-      "P1",
-      file,
-      "type",
-      `type '${data.type}' is not in specfold.yaml types`,
-      `use one of: ${types.join(", ")}`
-    )
-  ];
-};
-var p2 = (file) => {
-  const data = conceptData(file);
-  if (!data) return [];
-  const findings = [];
-  if (!nonEmptyString(data.title)) {
-    findings.push(finding("P2", file, "title", "missing or empty 'title'", "add a short 'title'"));
-  }
-  const description = data.description;
-  if (!nonEmptyString(description)) {
-    findings.push(
-      finding("P2", file, "description", "missing or empty 'description'", "add a one-line 'description'")
-    );
-  } else if (/[\r\n]/.test(description.trim())) {
-    findings.push(
-      finding(
-        "P2",
-        file,
-        "description",
-        "'description' spans several lines",
-        "write the description as one line"
-      )
-    );
-  } else if ([...description].length > 160) {
-    findings.push(
-      finding(
-        "P2",
-        file,
-        "description",
-        `'description' has ${[...description].length} characters (max 160)`,
-        "shorten the description to 160 characters"
-      )
-    );
-  }
-  return findings;
-};
-var STATUSES = ["draft", "stable", "deprecated"];
-var p3 = (file) => {
-  const data = conceptData(file);
-  if (!data || STATUSES.includes(data.status)) return [];
-  const message = data.status === void 0 ? "missing 'status'" : `status '${String(data.status)}' is not allowed`;
-  return [
-    finding(
-      "P3",
-      file,
-      data.status === void 0 ? null : "status",
-      message,
-      `set 'status' to ${STATUSES.join(", ")}`
-    )
-  ];
-};
-var ACTOR = /^(?:human:\S+|process:\S+|[^\s/:]+\/\S+)$/;
-var p4 = (file) => {
-  const data = conceptData(file);
-  if (!data) return [];
-  if (data.generated === void 0 && data.verified === void 0) {
-    return [
-      finding(
-        "P4",
-        file,
-        null,
-        "neither 'generated' nor 'verified' is set",
-        "add 'generated: { by: <actor>, at: <timestamp> }'"
-      )
-    ];
-  }
-  const findings = [];
-  const checkStamp = (key, value) => {
-    if (!isRecord3(value) || value.by === void 0 || value.at === void 0) {
-      findings.push(
-        finding(
-          "P4",
-          file,
-          key,
-          `'${key}' entries need 'by' and 'at'`,
-          "write '{ by: <actor>, at: <timestamp> }'"
-        )
-      );
-      return;
-    }
-    if (typeof value.by !== "string" || !ACTOR.test(value.by)) {
-      findings.push(
-        finding(
-          "P4",
-          file,
-          key,
-          `actor '${String(value.by)}' in '${key}' is malformed`,
-          "use '<producer>/<version>', 'human:<id>' or 'process:<id>'"
-        )
-      );
-    }
-  };
-  if (data.generated !== void 0) checkStamp("generated", data.generated);
-  if (data.verified !== void 0) {
-    const entries = Array.isArray(data.verified) ? data.verified : [data.verified];
-    for (const entry of entries) checkStamp("verified", entry);
-  }
-  return findings;
-};
-var TIMESTAMP = /^(\d{4}-\d{2}-\d{2})T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/;
-function isTimestamp(value) {
-  if (typeof value !== "string") return false;
-  const match = TIMESTAMP.exec(value);
-  return match !== null && !Number.isNaN(Date.parse(value)) && (/* @__PURE__ */ new Date(`${match[1]}T00:00:00Z`)).toISOString().startsWith(match[1] ?? "");
-}
-var p5 = (file) => {
-  const data = conceptData(file);
-  if (!data) return [];
-  const checks = [];
-  if (isRecord3(data.generated))
-    checks.push({ key: "generated", label: "generated.at", value: data.generated.at });
-  const verified = Array.isArray(data.verified) ? data.verified : data.verified === void 0 ? [] : [data.verified];
-  for (const v of verified)
-    if (isRecord3(v)) checks.push({ key: "verified", label: "verified.at", value: v.at });
-  if (data.stale_after !== void 0)
-    checks.push({ key: "stale_after", label: "stale_after", value: data.stale_after });
-  if (Array.isArray(data.sources)) {
-    for (const s of data.sources) {
-      if (isRecord3(s) && s.last_modified !== void 0) {
-        checks.push({ key: "sources", label: "sources.last_modified", value: s.last_modified });
-      }
-    }
-  }
-  return checks.filter((c) => c.value !== void 0 && !isTimestamp(c.value)).map(
-    (c) => finding(
-      "P5",
-      file,
-      c.key,
-      `${c.label} '${String(c.value)}' is not an ISO 8601 date-time with offset`,
-      "write it like 2026-10-26T10:00:00Z or 2026-10-26T10:00:00+01:00"
-    )
-  );
-};
-var p6 = (file) => {
-  const data = conceptData(file);
-  if (!data) return [];
-  if (data.sources === void 0) {
-    return data.type === "Decision" ? [
-      finding(
-        "P6",
-        file,
-        null,
-        "a Decision needs 'sources'",
-        "add 'sources' with at least one { id, resource } entry"
-      )
-    ] : [];
-  }
-  if (!Array.isArray(data.sources) || data.type === "Decision" && data.sources.length === 0) {
-    return [
-      finding(
-        "P6",
-        file,
-        "sources",
-        "'sources' must be a non-empty list",
-        "list sources as '- { id, resource }' entries"
-      )
-    ];
-  }
-  return data.sources.filter((s) => !isRecord3(s) || !nonEmptyString(s.resource)).map(
-    () => finding(
-      "P6",
-      file,
-      "sources",
-      "a 'sources' entry has no 'resource'",
-      "give every source a 'resource' path or URL"
-    )
-  );
-};
-var NEEDS_STALE_AFTER = ["Runbook", "Interface"];
-var p7 = (file) => {
-  const data = conceptData(file);
-  if (!data || !NEEDS_STALE_AFTER.includes(data.type) || data.stale_after !== void 0) return [];
-  return [
-    finding(
-      "P7",
-      file,
-      null,
-      `a ${data.type} needs 'stale_after'`,
-      "add 'stale_after: <timestamp>' for the next review"
-    )
-  ];
-};
-var KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-var p8 = (ctx, inSelection) => ctx.entries.filter((e) => inSelection(e.rel)).filter((e) => {
-  const name = e.rel.slice(e.rel.lastIndexOf("/") + 1);
-  return e.isDir ? !KEBAB.test(name) : !(name.endsWith(".md") && KEBAB.test(name.slice(0, -3)));
-}).map((e) => ({
-  rule: "P8",
-  severity: "error",
-  path: e.rel,
-  line: null,
-  message: `${e.isDir ? "folder" : "file"} name is not kebab-case${e.isDir ? "" : " Markdown"}`,
-  fix: "rename it with lowercase letters, digits and single hyphens (files end in .md)"
-}));
-var NORMATIVE = /\b(SHALL|MUST)\b/;
-var p9 = (file) => {
-  if (!conceptData(file)) return [];
-  const findings = [];
-  let fence;
-  file.body.split("\n").forEach((text2, i) => {
-    const marker = /^\s*(`{3,}|~{3,})/.exec(text2)?.[1];
-    if (marker) {
-      if (fence === void 0) fence = marker[0];
-      else if (marker[0] === fence) fence = void 0;
-      return;
-    }
-    if (fence !== void 0) return;
-    const word = NORMATIVE.exec(text2.replace(/`[^`]*`/g, ""))?.[1];
-    if (word) {
-      findings.push({
-        rule: "P9",
-        severity: "error",
-        path: file.rel,
-        line: file.bodyStartLine + i,
-        message: `normative '${word}' in knowledge`,
-        fix: "move the requirement into an OpenSpec spec and describe the context here instead"
-      });
-    }
-  });
-  return findings;
-};
-var MAX_BODY_LINES = 300;
-var p10 = (file) => {
-  if (!conceptData(file)) return [];
-  const lines = file.body.replace(/\n+$/, "").split("\n").length;
-  if (lines <= MAX_BODY_LINES) return [];
-  return [
-    {
-      rule: "P10",
-      severity: "warning",
-      path: file.rel,
-      line: null,
-      message: `body has ${lines} lines (more than ${MAX_BODY_LINES})`,
-      fix: "split the topic into a folder with its own index.md"
-    }
-  ];
-};
-var DECISIONS = ["accepted", "rejected", "superseded"];
-var p11 = (file, ctx) => {
-  const data = conceptData(file);
-  if (!data) return [];
-  const findings = [];
-  if (data.type === "Decision" && !DECISIONS.includes(data.decision)) {
-    findings.push(
-      finding(
-        "P11",
-        file,
-        data.decision === void 0 ? null : "decision",
-        data.decision === void 0 ? "a Decision needs 'decision'" : `decision '${String(data.decision)}' is not allowed`,
-        `set 'decision' to ${DECISIONS.join(", ")}`
-      )
-    );
-  }
-  if (data.supersedes !== void 0) {
-    const target = typeof data.supersedes === "string" ? resolveInBundle(ctx.bundleRoot, file.rel, data.supersedes) : void 0;
-    if (!target || !existsSync6(target)) {
-      findings.push(
-        finding(
-          "P11",
-          file,
-          "supersedes",
-          `superseded concept '${String(data.supersedes)}' does not exist`,
-          "point 'supersedes' at an existing concept, e.g. /decisions/old.md"
-        )
-      );
-    }
-  }
-  if (data.spec !== void 0) {
-    const root = ctx.config?.root;
-    if (typeof data.spec !== "string" || !root || !existsSync6(join8(root, data.spec))) {
-      findings.push(
-        finding(
-          "P11",
-          file,
-          "spec",
-          `spec '${String(data.spec)}' does not exist`,
-          "use the repository-relative path openspec/specs/<capability>/spec.md"
-        )
-      );
-    }
-  }
-  if (data.not !== void 0) {
-    const valid = Array.isArray(data.not) && data.not.every(
-      (n) => isRecord3(n) && nonEmptyString(n.term) && nonEmptyString(n.why) && nonEmptyString(n.instead)
-    );
-    if (!valid) {
-      findings.push(
-        finding(
-          "P11",
-          file,
-          "not",
-          "'not' must be a list of { term, why, instead }",
-          "write each misreading as '- { term, why, instead }'"
-        )
-      );
-    }
-  }
-  return findings;
-};
-function resolveInBundle(bundleRoot, fromRel, target) {
-  const clean = target.split("#")[0] ?? "";
-  if (clean === "") return void 0;
-  const abs = clean.startsWith("/") ? join8(bundleRoot, clean) : join8(bundleRoot, dirname2(fromRel), clean);
-  const rel = relative2(bundleRoot, abs);
-  return rel.startsWith("..") ? void 0 : abs;
-}
-
-// src/change/brief.ts
+import { existsSync as existsSync9, readFileSync as readFileSync7 } from "node:fs";
+import { join as join12 } from "node:path";
 var BRIEF_SECTIONS = ["Wish", "Decisions", "Out of scope", "Open questions", "Confirmation"];
 var SHORT_SECTIONS = ["Wish", "Confirmation"];
 var HUMAN = /^human:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$/;
@@ -8908,8 +9155,8 @@ function checkBrief(bundleRoot, dir, change, skipSpecs) {
   const file = `openspec/changes/${change}/brief.md`;
   const out = [];
   const add = (rule, line, message, fix, severity = "error") => out.push({ rule, severity, file, group: null, task: null, line, message, fix });
-  const path = join9(dir, "brief.md");
-  if (!existsSync7(path)) {
+  const path = join12(dir, "brief.md");
+  if (!existsSync9(path)) {
     add(
       "B0",
       null,
@@ -8918,7 +9165,7 @@ function checkBrief(bundleRoot, dir, change, skipSpecs) {
     );
     return out;
   }
-  const sections = splitSections(readFileSync5(path, "utf8"));
+  const sections = splitSections(readFileSync7(path, "utf8"));
   for (const name of skipSpecs ? SHORT_SECTIONS : BRIEF_SECTIONS) {
     if (!sections.has(name))
       add(
@@ -8991,7 +9238,7 @@ function checkBrief(bundleRoot, dir, change, skipSpecs) {
         `decision ${label} has source '${source}'`,
         "use user, delegated or knowledge:/<path>.md"
       );
-    else if (m[1] && !existsSync7(join9(bundleRoot, m[1])))
+    else if (m[1] && !existsSync9(join12(bundleRoot, m[1])))
       add("B4", row.line, `decision ${label} cites missing concept /${m[1]}`, "point at an existing concept");
   }
   return out;
@@ -8999,14 +9246,14 @@ function checkBrief(bundleRoot, dir, change, skipSpecs) {
 
 // src/change/knowledge.ts
 var import_yaml4 = __toESM(require_dist(), 1);
-import { existsSync as existsSync8, readFileSync as readFileSync6 } from "node:fs";
-import { join as join10 } from "node:path";
+import { existsSync as existsSync10, readFileSync as readFileSync8 } from "node:fs";
+import { join as join13 } from "node:path";
 var OPS = /* @__PURE__ */ new Set(["create", "update", "deprecate"]);
 var BUNDLE_PATH = /^(?!\/)(?!(?:.*\/)?\.\.(?:\/|$))\S+\.md$/;
 var MAX_SUMMARY = 160;
 function deltaCapabilities(dir) {
-  const specs = join10(dir, "specs");
-  if (!existsSync8(specs)) return [];
+  const specs = join13(dir, "specs");
+  if (!existsSync10(specs)) return [];
   return walkFiles(specs).filter((rel) => rel.endsWith("/spec.md")).map((rel) => rel.slice(0, -"/spec.md".length));
 }
 function conceptType(bundleRoot, path) {
@@ -9018,12 +9265,12 @@ function checkKnowledge(config, bundleRoot, dir, options) {
   const file = `${options.relDir}/knowledge.md`;
   const findings = [];
   const add = (rule, line, message, fix) => findings.push({ rule, severity: "error", file, group: null, task: null, line, message, fix });
-  const path = join10(dir, "knowledge.md");
-  if (!existsSync8(path)) {
+  const path = join13(dir, "knowledge.md");
+  if (!existsSync10(path)) {
     add("K0", null, "the change has no knowledge.md", "write knowledge.md from the schema template");
     return { findings, ops: [] };
   }
-  const lines = readFileSync6(path, "utf8").split(/\r?\n/);
+  const lines = readFileSync8(path, "utf8").split(/\r?\n/);
   const start = lines.findIndex((l) => /^## Delta\s*$/.test(l));
   if (start === -1) {
     add(
@@ -9128,7 +9375,7 @@ function checkKnowledge(config, bundleRoot, dir, options) {
     seen.add(op.path);
   }
   for (const op of ops) {
-    const exists = existsSync8(join10(bundleRoot, op.path));
+    const exists = existsSync10(join13(bundleRoot, op.path));
     if (!exists) {
       if (op.op !== "create")
         add("K4", op.line, `${op.op} names missing concept ${op.path}`, "fix the path or use op: create");
@@ -9145,7 +9392,7 @@ function checkKnowledge(config, bundleRoot, dir, options) {
   }
   for (const cap of deltaCapabilities(dir)) {
     const card = `capabilities/${cap}.md`;
-    const exists = existsSync8(join10(config.root, "openspec", "specs", cap, "spec.md"));
+    const exists = existsSync10(join13(config.root, "openspec", "specs", cap, "spec.md"));
     const expected = options.archived && exists ? ["create", "update"] : [exists ? "update" : "create"];
     const op = ops.find((o) => o.path === card && o.type === "Capability");
     if (!op || !expected.includes(op.op)) {
@@ -9162,10 +9409,10 @@ function checkKnowledge(config, bundleRoot, dir, options) {
 
 // src/change/command.ts
 function skipsSpecs(dir) {
-  const path = join11(dir, ".openspec.yaml");
-  if (!existsSync9(path)) return false;
+  const path = join14(dir, ".openspec.yaml");
+  if (!existsSync11(path)) return false;
   try {
-    return (0, import_yaml5.parse)(readFileSync7(path, "utf8"))?.skip_specs === true;
+    return (0, import_yaml5.parse)(readFileSync9(path, "utf8"))?.skip_specs === true;
   } catch {
     return false;
   }
@@ -9218,8 +9465,8 @@ register({
 import { execFileSync as execFileSync2 } from "node:child_process";
 
 // src/doctor/checks.ts
-import { existsSync as existsSync10, readdirSync as readdirSync4, readFileSync as readFileSync8, statSync as statSync4 } from "node:fs";
-import { join as join12 } from "node:path";
+import { existsSync as existsSync12, readdirSync as readdirSync4, readFileSync as readFileSync10, statSync as statSync5 } from "node:fs";
+import { join as join15 } from "node:path";
 var DEFAULT_OPENSPEC_RANGE = ">=1.15 <2";
 var MIN_NODE = "20.19.0";
 var parts = (v) => v.split(".").map((n) => Number.parseInt(n, 10) || 0);
@@ -9254,14 +9501,14 @@ var firstVersion = (text2) => text2 ? /\d+\.\d+\.\d+/.exec(text2)?.[0] : void 0;
 var ok = (id, message) => ({ id, status: "ok", message, fix: null });
 function hookManagerMentions(root) {
   const files = ["lefthook.yml", "lefthook.yaml", ".lefthook.yml", ".pre-commit-config.yaml"].map(
-    (f) => join12(root, f)
+    (f) => join15(root, f)
   );
-  const husky = join12(root, ".husky");
-  if (existsSync10(husky) && statSync4(husky).isDirectory()) {
-    for (const f of readdirSync4(husky)) files.push(join12(husky, f));
+  const husky = join15(root, ".husky");
+  if (existsSync12(husky) && statSync5(husky).isDirectory()) {
+    for (const f of readdirSync4(husky)) files.push(join15(husky, f));
   }
   return files.some(
-    (f) => existsSync10(f) && statSync4(f).isFile() && readFileSync8(f, "utf8").includes("specfold hook")
+    (f) => existsSync12(f) && statSync5(f).isFile() && readFileSync10(f, "utf8").includes("specfold hook")
   );
 }
 function runChecks(env) {
@@ -9297,8 +9544,8 @@ function runChecks(env) {
     }
   }
   const range = config?.requires.openspec ?? DEFAULT_OPENSPEC_RANGE;
-  const local = root ? join12(root, "node_modules", ".bin", "openspec") : void 0;
-  const useLocal = local !== void 0 && existsSync10(local);
+  const local = root ? join15(root, "node_modules", ".bin", "openspec") : void 0;
+  const useLocal = local !== void 0 && existsSync12(local);
   const source = useLocal ? "node_modules/.bin" : "PATH";
   const openspec = firstVersion(env.exec(useLocal ? local : "openspec", ["--version"], env.cwd));
   if (!openspec) {
@@ -9336,14 +9583,14 @@ function runChecks(env) {
       fix: "specfold hooks install"
     });
   }
-  if (!root || !existsSync10(join12(root, "knowledge"))) {
+  if (!root || !existsSync12(join15(root, "knowledge"))) {
     checks.push({
       id: "D5",
       status: "fail",
       message: "no knowledge/ bundle",
       fix: "create knowledge/ with a root index.md, or run 'specfold init'"
     });
-  } else if (!existsSync10(join12(root, "knowledge", "index.md"))) {
+  } else if (!existsSync12(join15(root, "knowledge", "index.md"))) {
     checks.push({
       id: "D5",
       status: "fail",
@@ -9401,11 +9648,11 @@ register({
 });
 
 // src/indexes/command.ts
-import { existsSync as existsSync11, readFileSync as readFileSync10, writeFileSync } from "node:fs";
-import { join as join14, relative as relative4, sep as sep3 } from "node:path";
+import { existsSync as existsSync13, readFileSync as readFileSync11, writeFileSync } from "node:fs";
+import { join as join16, relative as relative5, sep as sep4 } from "node:path";
 
 // src/indexes/generate.ts
-import { basename, relative as relative3, sep as sep2 } from "node:path";
+import { basename, relative as relative4, sep as sep3 } from "node:path";
 var LOG_ENTRY = "* [Log](log.md) - Dated record of changes to this bundle";
 var byCodeUnit = (a, b) => a < b ? -1 : a > b ? 1 : 0;
 var isRecord4 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -9419,9 +9666,9 @@ function folderTitle(config, folder, fallbackName) {
 function generateIndexes(bundleRoot, config, refs = /* @__PURE__ */ new Map()) {
   const entries = walk(bundleRoot);
   const folders = ["", ...entries.filter((e) => e.isDir).map((e) => e.rel)];
-  const repoRel = (rel) => relative3(config.root, `${bundleRoot}${sep2}${rel}`).split(sep2).join("/");
+  const repoRel = (rel) => relative4(config.root, `${bundleRoot}${sep3}${rel}`).split(sep3).join("/");
   const findings = [];
-  const concepts = /* @__PURE__ */ new Set();
+  const concepts2 = /* @__PURE__ */ new Set();
   const indexes = /* @__PURE__ */ new Map();
   const typeOrder = (t) => {
     const i = config.types.indexOf(t);
@@ -9452,7 +9699,7 @@ function generateIndexes(bundleRoot, config, refs = /* @__PURE__ */ new Map()) {
         });
         continue;
       }
-      concepts.add(child.rel);
+      concepts2.add(child.rel);
       items.push({
         file: name,
         type,
@@ -9497,46 +9744,17 @@ ${LOG_ENTRY}`);
     indexes.set(`${prefix}index.md`, `${blocks.join("\n\n")}
 `);
   }
-  return { indexes, findings, concepts };
-}
-
-// src/indexes/refs.ts
-import { readFileSync as readFileSync9, statSync as statSync5 } from "node:fs";
-import { join as join13 } from "node:path";
-var MAX_BYTES = 1024 * 1024;
-var REFERENCE = /see knowledge:\s+(\/[^\s"'`)]+\.md)\b/g;
-function scanReferences(repoRoot, sourceGlobs) {
-  if (sourceGlobs.length === 0) return [];
-  const patterns = sourceGlobs.map(globToRegExp);
-  const refs = [];
-  for (const file of walkFiles(repoRoot)) {
-    if (!patterns.some((p) => p.test(file))) continue;
-    const abs = join13(repoRoot, file);
-    if (statSync5(abs).size > MAX_BYTES) continue;
-    const text2 = readFileSync9(abs, "utf8");
-    if (text2.includes("\0")) continue;
-    text2.split("\n").forEach((content, i) => {
-      for (const match of content.matchAll(REFERENCE)) {
-        refs.push({ concept: (match[1] ?? "").slice(1), file, line: i + 1 });
-      }
-    });
-  }
-  return refs;
-}
-function locationsByConcept(refs) {
-  const map = /* @__PURE__ */ new Map();
-  for (const r of refs) map.set(r.concept, [...map.get(r.concept) ?? [], `${r.file}:${r.line}`]);
-  return map;
+  return { indexes, findings, concepts: concepts2 };
 }
 
 // src/indexes/command.ts
 function syncIndexes(repoRoot, bundleRoot, generated, check) {
   const changed = [];
   for (const [rel, content] of [...generated].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) {
-    const abs = join14(bundleRoot, rel);
-    if (existsSync11(abs) && readFileSync10(abs, "utf8") === content) continue;
+    const abs = join16(bundleRoot, rel);
+    if (existsSync13(abs) && readFileSync11(abs, "utf8") === content) continue;
     if (!check) writeFileSync(abs, content);
-    changed.push(relative4(repoRoot, abs).split(sep3).join("/"));
+    changed.push(relative5(repoRoot, abs).split(sep4).join("/"));
   }
   return changed;
 }
@@ -9549,9 +9767,9 @@ register({
     const config = requireConfig(io.cwd);
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, config);
     const refs = scanReferences(config.root, config.sourceGlobs);
-    const { indexes, findings, concepts } = generateIndexes(bundleRoot, config, locationsByConcept(refs));
+    const { indexes, findings, concepts: concepts2 } = generateIndexes(bundleRoot, config, locationsByConcept(refs));
     for (const ref of refs) {
-      if (concepts.has(ref.concept)) continue;
+      if (concepts2.has(ref.concept)) continue;
       findings.push({
         rule: "I2",
         severity: "warning",
@@ -9587,8 +9805,8 @@ register({
 });
 
 // src/log/command.ts
-import { existsSync as existsSync12, readFileSync as readFileSync11, writeFileSync as writeFileSync2 } from "node:fs";
-import { join as join15 } from "node:path";
+import { existsSync as existsSync14, readFileSync as readFileSync12, writeFileSync as writeFileSync2 } from "node:fs";
+import { join as join17 } from "node:path";
 
 // src/log/insert.ts
 var DATE_HEADING = /^## (\d{4}-\d{2}-\d{2})\s*$/;
@@ -9644,9 +9862,9 @@ register({
     const date = values.date ?? localDate();
     if (!isCalendarDate2(date)) throw new UsageError(`date '${date}' is not a valid YYYY-MM-DD date`);
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, void 0);
-    const path = join15(bundleRoot, "log.md");
+    const path = join17(bundleRoot, "log.md");
     const entry = `* **${kind}**: ${message}`;
-    writeFileSync2(path, insertEntry(existsSync12(path) ? readFileSync11(path, "utf8") : void 0, date, entry));
+    writeFileSync2(path, insertEntry(existsSync14(path) ? readFileSync12(path, "utf8") : void 0, date, entry));
     io.stdout(`${entry}
 `);
     return 0;
@@ -9654,7 +9872,7 @@ register({
 });
 
 // src/lookup/command.ts
-import { relative as relative5, sep as sep4 } from "node:path";
+import { relative as relative6, sep as sep5 } from "node:path";
 
 // src/lookup/search.ts
 var WEIGHTS = { title: 3, tags: 2, description: 1, type: 1 };
@@ -9733,7 +9951,7 @@ register({
     const type = values.type;
     const hits = search(bundleRoot, query, type ? { type } : {}).slice(0, Number(limitArg));
     const results = hits.map((h) => ({
-      path: relative5(base, `${bundleRoot}${sep4}${h.rel}`).split(sep4).join("/"),
+      path: relative6(base, `${bundleRoot}${sep5}${h.rel}`).split(sep5).join("/"),
       title: h.title,
       description: h.description,
       type: h.type,
@@ -9755,12 +9973,12 @@ register({
 });
 
 // src/new/command.ts
-import { existsSync as existsSync14, mkdirSync as mkdirSync2, writeFileSync as writeFileSync3 } from "node:fs";
-import { dirname as dirname3, join as join17, relative as relative6, sep as sep5 } from "node:path";
+import { existsSync as existsSync16, mkdirSync as mkdirSync2, writeFileSync as writeFileSync3 } from "node:fs";
+import { dirname as dirname4, join as join19, relative as relative7, sep as sep6 } from "node:path";
 
 // src/new/templates.ts
-import { existsSync as existsSync13, readFileSync as readFileSync12 } from "node:fs";
-import { join as join16 } from "node:path";
+import { existsSync as existsSync15, readFileSync as readFileSync13 } from "node:fs";
+import { join as join18 } from "node:path";
 var HEADINGS = {
   Term: ["Meaning", "Not to be confused with", "Related"],
   "Business Rule": ["Rule", "Why", "Related"],
@@ -9784,9 +10002,9 @@ function builtInBody(type) {
 `;
 }
 function overrideTemplate(repoRoot, type, values) {
-  const path = join16(repoRoot, TEMPLATE_DIR, `${typeSlug(type)}.md`);
-  if (!existsSync13(path)) return void 0;
-  return readFileSync12(path, "utf8").replace(
+  const path = join18(repoRoot, TEMPLATE_DIR, `${typeSlug(type)}.md`);
+  if (!existsSync15(path)) return void 0;
+  return readFileSync13(path, "utf8").replace(
     /\{\{(type|title|description|by|now)\}\}/g,
     (_, key) => values[key]
   );
@@ -9796,7 +10014,7 @@ function overrideTemplate(repoRoot, type, values) {
 var KEBAB2 = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 var ACTOR2 = /^(?:process:\S+|[^\s/:]+\/\S+)$/;
 var RESERVED_WORDS = /^(?:true|false|null|yes|no|on|off|~)$/i;
-var DAY_MS = 24 * 60 * 60 * 1e3;
+var DAY_MS2 = 24 * 60 * 60 * 1e3;
 function scalar(value) {
   const plain = /^[A-Za-z0-9][A-Za-z0-9 _.,;()'/-]*$/.test(value) && !RESERVED_WORDS.test(value) && !value.endsWith(" ");
   return plain ? value : JSON.stringify(value);
@@ -9821,7 +10039,7 @@ function renderConcept(repoRoot, fields) {
     `description: ${scalar(description)}`,
     "status: draft",
     ...type === "Decision" ? ["decision: accepted"] : [],
-    ...type === "Runbook" || type === "Interface" ? [`stale_after: ${isoWithOffset(new Date(now.getTime() + 90 * DAY_MS))}`] : [],
+    ...type === "Runbook" || type === "Interface" ? [`stale_after: ${isoWithOffset(new Date(now.getTime() + 90 * DAY_MS2))}`] : [],
     `generated: { by: ${scalar(by)}, at: ${placeholders.now} }`,
     ...type === "Decision" ? ["sources: []"] : [],
     "---",
@@ -9865,9 +10083,9 @@ register({
     if (!ACTOR2.test(by))
       throw new UsageError(`actor '${by}' must look like '<producer>/<version>' or 'process:<id>'`);
     const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
-    const abs = join17(bundleRoot, rel);
-    const shown = relative6(config.root, abs).split(sep5).join("/");
-    if (existsSync14(abs)) {
+    const abs = join19(bundleRoot, rel);
+    const shown = relative7(config.root, abs).split(sep6).join("/");
+    if (existsSync16(abs)) {
       if (values.json) io.stdout(`${JSON.stringify({ created: null, error: `${shown} already exists` })}
 `);
       else io.stderr(`specfold: ${shown} already exists
@@ -9877,7 +10095,7 @@ register({
     const title = values.title ?? titleFromPath(rel);
     const description = values.description ?? "";
     const content = renderConcept(config.root, { type, title, description, by, now: /* @__PURE__ */ new Date() });
-    mkdirSync2(dirname3(abs), { recursive: true });
+    mkdirSync2(dirname4(abs), { recursive: true });
     writeFileSync3(abs, content);
     io.stdout(values.json ? `${JSON.stringify({ created: shown })}
 ` : `${shown}
@@ -9887,12 +10105,12 @@ register({
 });
 
 // src/sync/command.ts
-import { existsSync as existsSync16, readdirSync as readdirSync5, readFileSync as readFileSync14, writeFileSync as writeFileSync5 } from "node:fs";
-import { join as join19, relative as relative8, sep as sep7 } from "node:path";
+import { existsSync as existsSync18, readdirSync as readdirSync5, readFileSync as readFileSync15, writeFileSync as writeFileSync5 } from "node:fs";
+import { join as join21, relative as relative9, sep as sep8 } from "node:path";
 
 // src/sync/apply.ts
-import { existsSync as existsSync15, mkdirSync as mkdirSync3, readFileSync as readFileSync13, writeFileSync as writeFileSync4 } from "node:fs";
-import { dirname as dirname4, join as join18, relative as relative7, sep as sep6 } from "node:path";
+import { existsSync as existsSync17, mkdirSync as mkdirSync3, readFileSync as readFileSync14, writeFileSync as writeFileSync4 } from "node:fs";
+import { dirname as dirname5, join as join20, relative as relative8, sep as sep7 } from "node:path";
 
 // src/sync/frontmatter.ts
 var import_yaml6 = __toESM(require_dist(), 1);
@@ -9954,23 +10172,23 @@ function editFrontmatter(text2, edit) {
 }
 
 // src/sync/apply.ts
-var posix2 = (p) => p.split(sep6).join("/");
+var posix2 = (p) => p.split(sep7).join("/");
 var CAPABILITY = /^capabilities\/(.+)\.md$/;
 function editsFor(op, abs, ctx) {
   const set = {};
   const addSources = [];
   if (op.op === "deprecate") set.status = "deprecated";
   const cap = op.type === "Capability" ? CAPABILITY.exec(op.path)?.[1] : void 0;
-  const archive = join18(ctx.repoRoot, "openspec", "changes", "archive", ctx.archivedId);
-  const fromCard = (target) => posix2(relative7(dirname4(abs), target));
+  const archive = join20(ctx.repoRoot, "openspec", "changes", "archive", ctx.archivedId);
+  const fromCard = (target) => posix2(relative8(dirname5(abs), target));
   if (cap) {
-    const spec = join18(ctx.repoRoot, "openspec", "specs", cap, "spec.md");
-    set.spec = posix2(relative7(ctx.repoRoot, spec));
+    const spec = join20(ctx.repoRoot, "openspec", "specs", cap, "spec.md");
+    set.spec = posix2(relative8(ctx.repoRoot, spec));
     set.resource = fromCard(spec);
     set.change = ctx.archivedId;
     for (const artifact of ["proposal", "design"]) {
-      const file = join18(archive, `${artifact}.md`);
-      if (existsSync15(file))
+      const file = join20(archive, `${artifact}.md`);
+      if (existsSync17(file))
         addSources.push({ id: `${artifact}-${ctx.archivedId}`, resource: fromCard(file) });
     }
   }
@@ -9980,12 +10198,12 @@ function editsFor(op, abs, ctx) {
 function planOps(ops, ctx) {
   const plan = { actions: [], writes: /* @__PURE__ */ new Map() };
   for (const op of ops) {
-    const abs = join18(ctx.bundleRoot, op.path);
-    const shown = posix2(relative7(ctx.repoRoot, abs));
+    const abs = join20(ctx.bundleRoot, op.path);
+    const shown = posix2(relative8(ctx.repoRoot, abs));
     let original;
     let text2;
-    if (existsSync15(abs)) {
-      original = readFileSync13(abs, "utf8");
+    if (existsSync17(abs)) {
+      original = readFileSync14(abs, "utf8");
       text2 = original;
     } else if (op.op === "create") {
       text2 = renderConcept(ctx.repoRoot, {
@@ -10008,7 +10226,7 @@ function planOps(ops, ctx) {
 }
 function applyWrites(plan) {
   for (const [abs, content] of plan.writes) {
-    mkdirSync3(dirname4(abs), { recursive: true });
+    mkdirSync3(dirname5(abs), { recursive: true });
     writeFileSync4(abs, content);
   }
 }
@@ -10018,13 +10236,13 @@ var NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 var ARCHIVED = /^(\d{4}-\d{2}-\d{2})-([a-z0-9]+(?:-[a-z0-9]+)*)$/;
 function resolveArchived(config, arg) {
   if (!arg) throw new UsageError("missing change name");
-  const archive = join19(config.root, "openspec", "changes", "archive");
-  if (ARCHIVED.test(arg) && existsSync16(join19(archive, arg))) return arg;
+  const archive = join21(config.root, "openspec", "changes", "archive");
+  if (ARCHIVED.test(arg) && existsSync18(join21(archive, arg))) return arg;
   if (!NAME.test(arg)) throw new UsageError(`'${arg}' is not a change name or archived change id`);
-  const ids = existsSync16(archive) ? readdirSync5(archive).filter((d) => ARCHIVED.exec(d)?.[2] === arg).sort() : [];
+  const ids = existsSync18(archive) ? readdirSync5(archive).filter((d) => ARCHIVED.exec(d)?.[2] === arg).sort() : [];
   const newest = ids.at(-1);
   if (newest) return newest;
-  if (existsSync16(join19(config.root, "openspec", "changes", arg)))
+  if (existsSync18(join21(config.root, "openspec", "changes", arg)))
     throw new EnvError(`change '${arg}' is not archived yet: run 'openspec archive ${arg}' first`);
   throw new EnvError(`unknown change '${arg}': no archived folder openspec/changes/archive/<date>-${arg}/`);
 }
@@ -10045,7 +10263,7 @@ register({
 ` : `${text2.join("\n")}
 `
     );
-    const { findings, ops } = checkKnowledge(config, bundleRoot, join19(config.root, relDir), {
+    const { findings, ops } = checkKnowledge(config, bundleRoot, join21(config.root, relDir), {
       relDir,
       archived: true
     });
@@ -10060,9 +10278,9 @@ register({
     const by = model ? `${config.agentPrefix}${model}` : "process:specfold-sync";
     const plan = planOps(ops, { repoRoot: config.root, bundleRoot, archivedId: id, by, now: /* @__PURE__ */ new Date() });
     const actions = [...plan.actions];
-    const logPath = join19(bundleRoot, "log.md");
-    const logRel = relative8(config.root, logPath).split(sep7).join("/");
-    const logText = existsSync16(logPath) ? readFileSync14(logPath, "utf8") : void 0;
+    const logPath = join21(bundleRoot, "log.md");
+    const logRel = relative9(config.root, logPath).split(sep8).join("/");
+    const logText = existsSync18(logPath) ? readFileSync15(logPath, "utf8") : void 0;
     const needsLog = !logText?.includes(id);
     if (!dryRun) {
       applyWrites(plan);
@@ -10092,8 +10310,8 @@ register({
 });
 
 // src/tasks/progress-command.ts
-import { existsSync as existsSync17, readdirSync as readdirSync6, readFileSync as readFileSync15 } from "node:fs";
-import { join as join20 } from "node:path";
+import { existsSync as existsSync19, readdirSync as readdirSync6, readFileSync as readFileSync16 } from "node:fs";
+import { join as join22 } from "node:path";
 
 // src/tasks/progress.ts
 function progressOf(tasks) {
@@ -10117,12 +10335,12 @@ function progressOf(tasks) {
 
 // src/tasks/progress-command.ts
 function readTasks(config, change) {
-  const path = join20(changeDir(config, change), "tasks.md");
-  return existsSync17(path) ? parseTasks(readFileSync15(path, "utf8")) : void 0;
+  const path = join22(changeDir(config, change), "tasks.md");
+  return existsSync19(path) ? parseTasks(readFileSync16(path, "utf8")) : void 0;
 }
 function activeChanges(config) {
-  const dir = join20(config.root, "openspec", "changes");
-  if (!existsSync17(dir)) return [];
+  const dir = join22(config.root, "openspec", "changes");
+  if (!existsSync19(dir)) return [];
   return readdirSync6(dir, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort();
 }
 function commitsByTask(config, change) {
@@ -10286,79 +10504,12 @@ register({
 });
 
 // src/validate/index.ts
-import { existsSync as existsSync19 } from "node:fs";
-import { relative as relative9, resolve as resolve3, sep as sep8 } from "node:path";
-
-// src/validate/links.ts
-import { existsSync as existsSync18 } from "node:fs";
-import { dirname as dirname5, join as join21 } from "node:path";
-var SCHEME = /^[a-z][a-z0-9+.-]*:/i;
-var LINK = /!?\[[^\]]*\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)/g;
-var l1 = (file, ctx) => {
-  if (!isConcept(file.rel) || !isRecord3(file.frontmatter?.data)) return [];
-  const severity = ctx.config?.blockOnBrokenLinks === false ? "warning" : "error";
-  const findings = [];
-  let fence;
-  file.body.split("\n").forEach((text2, i) => {
-    const marker = /^\s*(`{3,}|~{3,})/.exec(text2)?.[1];
-    if (marker) {
-      if (fence === void 0) fence = marker[0];
-      else if (marker[0] === fence) fence = void 0;
-      return;
-    }
-    if (fence !== void 0) return;
-    for (const match of text2.replace(/`[^`]*`/g, "").matchAll(LINK)) {
-      const target = match[1] ?? "";
-      if (SCHEME.test(target) || target.startsWith("#")) continue;
-      let decoded = target;
-      try {
-        decoded = decodeURIComponent(target);
-      } catch {
-      }
-      const abs = resolveInBundle(ctx.bundleRoot, file.rel, decoded);
-      if (abs && existsSync18(abs)) continue;
-      findings.push({
-        rule: "L1",
-        severity,
-        path: file.rel,
-        line: file.bodyStartLine + i,
-        message: `broken link '${target}'`,
-        fix: "point the link at an existing concept, bundle-absolute like /decisions/x.md"
-      });
-    }
-  });
-  return findings;
-};
-var l2 = (file, ctx) => {
-  const data = file.frontmatter?.data;
-  if (!isConcept(file.rel) || !isRecord3(data)) return [];
-  const checks = [];
-  if (typeof data.resource === "string") checks.push({ key: "resource", value: data.resource });
-  if (Array.isArray(data.sources)) {
-    for (const s of data.sources) {
-      if (isRecord3(s) && typeof s.resource === "string") checks.push({ key: "sources", value: s.resource });
-    }
-  }
-  return checks.filter(({ value }) => {
-    if (SCHEME.test(value) || value.trim() === "") return false;
-    const path = value.split("#")[0] ?? "";
-    const abs = path.startsWith("/") ? join21(ctx.bundleRoot, path) : join21(ctx.bundleRoot, dirname5(file.rel), path);
-    return !existsSync18(abs);
-  }).map(({ key, value }) => ({
-    rule: "L2",
-    severity: "error",
-    path: file.rel,
-    line: file.frontmatter?.lineOf(key) ?? 1,
-    message: `resource '${value}' does not exist`,
-    fix: "use a URL, a bundle-absolute path or a path relative to this concept"
-  }));
-};
-
-// src/validate/index.ts
+import { existsSync as existsSync20 } from "node:fs";
+import { relative as relative10, resolve as resolve3, sep as sep9 } from "node:path";
 var okfRules = [okf1, okf2, okf3Index, okf3Log];
 var profileRules = [p1, p2, p3, p4, p5, p6, p7, p9, p10, p11, l1, l2];
 var profileBundleRules = [p8];
-var toRel = (root, abs) => relative9(root, abs).split(sep8).join("/");
+var toRel = (root, abs) => relative10(root, abs).split(sep9).join("/");
 function validate(input) {
   const entries = walk(input.bundleRoot);
   const roots = input.paths.map((abs) => toRel(input.bundleRoot, abs));
@@ -10391,11 +10542,11 @@ register({
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, config);
     const paths = positionals.map((p) => {
       const abs = resolve3(io.cwd, p);
-      const rel = relative9(bundleRoot, abs);
+      const rel = relative10(bundleRoot, abs);
       if (rel.startsWith("..") || resolve3(bundleRoot, rel) !== abs) {
         throw new UsageError(`path is outside the bundle ${bundleRoot}: ${p}`);
       }
-      if (!existsSync19(abs)) throw new UsageError(`path not found: ${p}`);
+      if (!existsSync20(abs)) throw new UsageError(`path not found: ${p}`);
       return abs;
     });
     const { findings, checked } = validate({ bundleRoot, paths, okfOnly, ...config ? { config } : {} });

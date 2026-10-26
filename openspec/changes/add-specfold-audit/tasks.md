@@ -49,7 +49,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 4.1 Rebuild the bundled CLI
+- [x] 4.1 Rebuild the bundled CLI
   - Done when: `npm run build -w specfold` leaves no diff
 
 ## 5. Knowledge
