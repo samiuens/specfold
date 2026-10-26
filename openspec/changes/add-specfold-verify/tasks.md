@@ -21,7 +21,7 @@ scenarios: [specfold-verify#no-login-available, specfold-verify#second-reviewer]
 agent: implementer
 ```
 
-- [ ] 2.1 Resolve the login from the GitHub CLI or `.specfold/local.yaml`
+- [x] 2.1 Resolve the login from the GitHub CLI or `.specfold/local.yaml`
   - Done when: scenario no-login-available passes in `verify-login.test.ts`
 - [ ] 2.2 Write `status: stable` and the `verified` entry into a concept's text
   - Done when: scenario second-reviewer passes in `verify-apply.test.ts`
