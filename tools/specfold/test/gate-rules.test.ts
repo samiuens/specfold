@@ -21,6 +21,7 @@ import {
   g12,
   g13,
   g14,
+  g15,
   g18,
   runGate,
 } from "../src/gate/rules.ts";
@@ -57,7 +58,7 @@ const rules = (rule: GateRule, root: string, o?: Options) =>
 describe("gate: rules", () => {
   it("reports nothing but G3 setup for an unchanged clean repository", () => {
     const root = gateRepo();
-    for (const rule of [g1, g2, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g18])
+    for (const rule of [g1, g2, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g15, g18])
       expect(rule(ctx(root))).toEqual([]);
   });
 
@@ -195,6 +196,80 @@ describe("gate: rules", () => {
     const findings = g13(ctx(root));
     expect(findings).toEqual([expect.objectContaining({ rule: "G13", effect: "block" })]);
     expect(findings[0]?.message).toMatch(/^B2 /);
+  });
+
+  // spec: specfold-gate#new-scenario-without-test
+  it("G15: blocks a new scenario of a change with tasks.md that no test names", () => {
+    const root = gateRepo();
+    const files = demoChange();
+    delete files["test/checkout.test.ts"];
+    commit(root, files);
+    expect(g15(ctx(root))).toEqual([
+      expect.objectContaining({
+        rule: "G15",
+        effect: "block",
+        path: "openspec/changes/demo/specs/guest-checkout/spec.md",
+        line: 6,
+        message: "scenario guest-checkout#guest-pays-without-account has no test reference",
+      }),
+    ]);
+    commit(root, { "test/checkout.test.ts": demoChange()["test/checkout.test.ts"] as string });
+    expect(g15(ctx(root))).toEqual([]);
+  });
+
+  // spec: specfold-gate#planned-change-skipped
+  it("G15: skips the scenarios of a change without tasks.md", () => {
+    const root = gateRepo();
+    const files = demoChange();
+    delete files["test/checkout.test.ts"];
+    delete files["openspec/changes/demo/tasks.md"];
+    commit(root, files);
+    expect(g15(ctx(root))).toEqual([]);
+  });
+
+  // spec: specfold-gate#renamed-scenario
+  it("G15: blocks a test that still names a scenario the archived change renamed", () => {
+    const main = (title: string) =>
+      `## Requirements\n\n### Requirement: Guest checkout\nIt SHALL work.\n\n#### Scenario: ${title}\n- **WHEN** x\n- **THEN** y\n`;
+    const root = gateRepo({
+      "openspec/specs/guest-checkout/spec.md": main("Guest pays"),
+      "test/checkout.test.ts": `// ${"spec"}: guest-checkout#guest-pays\n`,
+    });
+    const id = "2026-10-26-rename";
+    commit(root, {
+      "openspec/specs/guest-checkout/spec.md": main("Guest pays by card"),
+      [`openspec/changes/archive/${id}/tasks.md`]: "# Tasks\n",
+      [`openspec/changes/archive/${id}/specs/guest-checkout/spec.md`]: main("Guest pays by card").replace(
+        "## Requirements",
+        "## MODIFIED Requirements",
+      ),
+    });
+    expect(rules(g15, root)).toEqual([
+      ["G15", "block", `openspec/changes/archive/${id}/specs/guest-checkout/spec.md`],
+      ["G15", "block", "test/checkout.test.ts"],
+    ]);
+  });
+
+  // spec: specfold-gate#old-gaps
+  it("G15: warns once about main-spec scenarios the branch did not touch", () => {
+    const root = gateRepo({
+      "openspec/specs/cart/spec.md": `## Requirements\n\n### Requirement: Cart\nIt SHALL add.\n\n${[
+        "A",
+        "B",
+        "C",
+      ]
+        .map((t) => `#### Scenario: ${t}\n- **WHEN** x\n- **THEN** y\n`)
+        .join("\n")}`,
+    });
+    commit(root, { "src/app.ts": "export const app = 2;\n" });
+    expect(g15(ctx(root))).toEqual([
+      expect.objectContaining({
+        rule: "G15",
+        effect: "warn",
+        path: null,
+        message: "3 main-spec scenarios have no test reference",
+      }),
+    ]);
   });
 
   // spec: specfold-gate#overlapping-parallel-groups

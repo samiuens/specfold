@@ -47,7 +47,7 @@ scenarios: [specfold-gate#new-scenario-without-test, specfold-gate#planned-chang
 agent: implementer
 ```
 
-- [ ] 4.1 Add G15 to the gate
+- [x] 4.1 Add G15 to the gate
   - Done when: scenarios new-scenario-without-test, planned-change-skipped, renamed-scenario and old-gaps pass in `gate-rules.test.ts`
 
 ## 5. Settings files
