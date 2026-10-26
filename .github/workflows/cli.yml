@@ -33,3 +33,5 @@ jobs:
           git diff --exit-code -- scripts/specfold.mjs || { echo "::error::scripts/specfold.mjs is stale; run 'npm run build -w specfold' and commit it"; exit 1; }
       - name: Validate the kit's knowledge
         run: node scripts/specfold.mjs validate
+      - name: Knowledge indexes are up to date
+        run: node scripts/specfold.mjs index --check
