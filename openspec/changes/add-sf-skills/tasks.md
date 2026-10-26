@@ -37,7 +37,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 3.1 Write `sf-interview` with the question rounds, the timeout rule and the brief
+- [x] 3.1 Write `sf-interview` with the question rounds, the timeout rule and the brief
   - Done when: `node scripts/check-skills.mjs template/.agents/skills` reports no problem for `sf-interview`
 - [ ] 3.2 Write `sf-plan` and `.claude/agents/planner.md`
   - Done when: `node scripts/check-skills.mjs template/.agents/skills` reports no problem for `sf-plan` and the planner's frontmatter names only documented keys
