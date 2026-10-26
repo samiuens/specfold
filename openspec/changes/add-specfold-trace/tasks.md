@@ -21,7 +21,7 @@ scenarios: [specfold-trace#nested-capability, specfold-trace#removed-in-a-change
 agent: implementer
 ```
 
-- [ ] 2.1 Parse main and delta specs into scenarios with ids
+- [x] 2.1 Parse main and delta specs into scenarios with ids
   - Done when: scenarios nested-capability and removed-in-a-change pass in `trace.test.ts`
 - [ ] 2.2 Scan test files for references and build the report
   - Done when: scenarios reference-in-a-test-name and reference-outside-test-files pass in `trace.test.ts`
