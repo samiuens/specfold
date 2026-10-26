@@ -16,13 +16,13 @@ register({
     const config = requireConfig(io.cwd);
     const change = values.change as string | undefined;
     const index = buildTraceIndex(config);
+    if (change !== undefined) changeDir(config, change);
     const scope =
       change === undefined
         ? undefined
-        : (changeDir(config, change),
-          changedScenarios(
+        : changedScenarios(
             index.active.get(change) ?? changeSpecs(config.root, `openspec/changes/${change}`),
-          ));
+          );
     const report = traceReport(index, scope);
     const uncovered = report.scenarios.filter((s) => s.refs.length === 0);
     const counts = {
