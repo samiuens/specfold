@@ -43,7 +43,7 @@ agent: implementer
 
 - [x] 3.1 Add the bundle walk and frontmatter split with body line offsets, plus the valid fixture bundle
   - Done when: scenarios whole-bundle-by-default, selected-paths, path-outside-the-bundle and other-bundle-root pass
-- [ ] 3.2 Add the `validate` command with OKF-1 and OKF-2 and the read-only guarantee
+- [x] 3.2 Add the `validate` command with OKF-1 and OKF-2 and the read-only guarantee
   - Done when: scenarios missing-configuration, missing-frontmatter, invalid-yaml, empty-type, files-unchanged, deterministic-order and machine-readable-result pass
 - [ ] 3.3 Add OKF-3 for index and log files
   - Done when: the four OKF-3 scenarios pass
