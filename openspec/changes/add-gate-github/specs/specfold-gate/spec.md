@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: G7 human claims match the PR
-With `--pr <number>`, the gate SHALL read the pull request's author and reviews from the GitHub REST API and block with rule `G7` for every `human:<login>` that the diff adds to a concept's `verified` or a brief's `confirmed_by`, unless the login is the PR author or a reviewer whose latest review is `APPROVED`.
+With `--pr <number>`, the gate SHALL read the pull request's author and reviews from the GitHub REST API and block with rule `G7` for every `human:<login>` that the diff adds to a concept's `verified` or a brief's `confirmed_by`, unless the login is the PR author or a reviewer whose latest review, ignoring `COMMENTED` reviews, is `APPROVED`. Logins SHALL be compared case-insensitively.
 
 #### Scenario: Approver verified
 - **WHEN** a PR by `ana` adds `verified: { by: human:ben, ... }` and `ben`'s latest review is `APPROVED`
@@ -14,6 +14,10 @@ With `--pr <number>`, the gate SHALL read the pull request's author and reviews 
 #### Scenario: Approval withdrawn
 - **WHEN** `ben` first approved and later requested changes
 - **THEN** `ben` does not count as an approver
+
+#### Scenario: Comment after approval
+- **WHEN** `ben` first approved and later left a review with state `COMMENTED`
+- **THEN** `ben` still counts as an approver
 
 ### Requirement: G7 GitHub access
 The gate SHALL authenticate with `GITHUB_TOKEN`, take the repository from `GITHUB_REPOSITORY` and the API base from `GITHUB_API_URL` (default `https://api.github.com`), and SHALL exit with an environment error when any request fails or the token or repository is missing.

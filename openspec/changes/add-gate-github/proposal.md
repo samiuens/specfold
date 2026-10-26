@@ -28,6 +28,7 @@ Agents write `status: draft` and only humans verify (`/decisions/humans-verify-o
 2. **API errors** (missing token, 404, rate limit) are environment errors (exit 2), never a pass.
 3. **Pagination:** reviews are read page by page (100 per page) until a short page.
 4. **The API base** comes from `GITHUB_API_URL` (set by GitHub Actions, and in tests to a local server), defaulting to `https://api.github.com`.
+5. **Comment reviews** don't withdraw an approval, matching GitHub's own review state; only `CHANGES_REQUESTED` or a dismissal does.
 
 ## Impact
 
