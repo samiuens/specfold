@@ -33,7 +33,7 @@ scenarios: [specfold-sync#missing-concept-gets-a-stub, specfold-sync#actor-witho
 agent: implementer
 ```
 
-- [ ] 3.1 Plan and apply create, deprecate, capability and decision actions
+- [x] 3.1 Plan and apply create, deprecate, capability and decision actions
   - Done when: the six scenarios of this group pass in `sync-apply.test.ts`
 
 ## 4. Sync command
