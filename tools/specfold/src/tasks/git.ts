@@ -1,5 +1,4 @@
-import { execFileSync } from "node:child_process";
-import { EnvError } from "../errors.ts";
+import { git } from "../git.ts";
 import { matchesAny } from "../glob.ts";
 import type { Task, TasksFile } from "./parse.ts";
 import type { TaskFinding } from "./rules.ts";
@@ -15,17 +14,6 @@ export interface Commit {
 const RECORD = "\x1d";
 const FIELD = "\x1f";
 const VALUE = "\x1e";
-
-function git(repoRoot: string, args: string[]): string {
-  try {
-    return execFileSync("git", args, { cwd: repoRoot, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
-  } catch (error) {
-    const stderr = String((error as { stderr?: unknown }).stderr ?? "")
-      .trim()
-      .split("\n")[0];
-    throw new EnvError(`git ${args[0]} failed${stderr ? `: ${stderr}` : ""}`);
-  }
-}
 
 /** Commits in `range` (oldest first) with their `Task:` trailers and changed files. */
 export function readCommits(repoRoot: string, range: string, withFiles = true): Commit[] {
