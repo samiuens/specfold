@@ -1,12 +1,14 @@
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { parse } from "yaml";
 import { isoWithOffset, scalar } from "../src/new/command.ts";
+import { system } from "../src/verify/login.ts";
 import { run, tempDir } from "./helpers.ts";
 
 afterEach(() => {
   vi.unstubAllEnvs();
+  vi.restoreAllMocks();
 });
 
 const frontmatter = (repo: string, rel: string) =>
@@ -147,3 +149,50 @@ describe("new: helpers", () => {
     expect(isoWithOffset(new Date())).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[+-]\d{2}:\d{2}$/);
   });
 });
+
+describe("new: future-facing types", () => {
+  it("writes the keys of a backlog item", async () => {
+    vi.stubEnv("SPECFOLD_MODEL", "opus");
+    const repo = futureRepo();
+    expect((await run(["new", "Backlog Item", "backlog/dark-mode.md"], repo)).code).toBe(0);
+    expect(frontmatter(repo, "knowledge/backlog/dark-mode.md")).toMatchObject({
+      state: "open",
+      priority: "medium",
+      origin: "claude-code/opus",
+    });
+  });
+
+  // spec: specfold-new#commitment-drafted-by-an-agent
+  it("leaves committed_by out of a commitment an agent drafts", async () => {
+    vi.stubEnv("SPECFOLD_MODEL", "opus");
+    const repo = futureRepo();
+    expect((await run(["new", "Deferred Commitment", "commitments/eu-data.md"], repo)).code).toBe(0);
+    const data = frontmatter(repo, "knowledge/commitments/eu-data.md");
+    expect(data).toMatchObject({ state: "open", trigger: "" });
+    expect(data).not.toHaveProperty("committed_by");
+  });
+
+  // spec: specfold-new#commitment-written-by-a-human
+  it("writes committed_by for a human at a terminal", async () => {
+    vi.stubEnv("SPECFOLD_MODEL", "");
+    vi.stubEnv("CLAUDECODE", "");
+    vi.spyOn(system, "isInteractive").mockReturnValue(true);
+    vi.spyOn(system, "ghLogin").mockReturnValue("ana");
+    const repo = futureRepo();
+    expect((await run(["new", "Deferred Commitment", "commitments/eu-data.md"], repo)).code).toBe(0);
+    expect(frontmatter(repo, "knowledge/commitments/eu-data.md")).toMatchObject({
+      committed_by: "human:ana",
+    });
+  });
+});
+
+/** A repository whose types include the future-facing ones. */
+function futureRepo(): string {
+  const repo = tempDir();
+  mkdirSync(join(repo, "knowledge"));
+  writeFileSync(
+    join(repo, "specfold.yaml"),
+    "types: [Vision, Deferred Commitment, Backlog Item]\nactors:\n  agent_prefix: claude-code/\n",
+  );
+  return repo;
+}

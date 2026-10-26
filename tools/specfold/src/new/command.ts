@@ -3,6 +3,7 @@ import { dirname, join, relative, sep } from "node:path";
 import { register } from "../cli.ts";
 import { UsageError } from "../errors.ts";
 import { requireConfig, resolveBundleRoot } from "../repo.ts";
+import { agentReason, resolveLogin } from "../verify/login.ts";
 import { builtInBody, overrideTemplate } from "./templates.ts";
 
 const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -41,11 +42,15 @@ export interface ConceptFields {
   description: string;
   by: string;
   now: Date;
+  /** `origin` of a Backlog Item; defaults to `by`. */
+  origin?: string;
+  /** GitHub login written as `committed_by` of a Deferred Commitment; left out when absent. */
+  committedBy?: string;
 }
 
 /** A new concept's text from the type's override template, or from the built-in frontmatter and body. */
 export function renderConcept(repoRoot: string, fields: ConceptFields): string {
-  const { type, title, description, by, now } = fields;
+  const { type, title, description, by, now, origin, committedBy } = fields;
   const placeholders = { type, title, description, by, now: isoWithOffset(now) };
   return (
     overrideTemplate(repoRoot, type, placeholders) ??
@@ -59,6 +64,12 @@ export function renderConcept(repoRoot: string, fields: ConceptFields): string {
       ...(type === "Runbook" || type === "Interface"
         ? [`stale_after: ${isoWithOffset(new Date(now.getTime() + 90 * DAY_MS))}`]
         : []),
+      ...(type === "Backlog Item"
+        ? ["state: open", "priority: medium", `origin: ${scalar(origin ?? by)}`]
+        : []),
+      ...(type === "Deferred Commitment"
+        ? ["state: open", 'trigger: ""', ...(committedBy ? [`committed_by: human:${committedBy}`] : [])]
+        : []),
       `generated: { by: ${scalar(by)}, at: ${placeholders.now} }`,
       ...(type === "Decision" ? ["sources: []"] : []),
       "---",
@@ -66,6 +77,16 @@ export function renderConcept(repoRoot: string, fields: ConceptFields): string {
       builtInBody(type),
     ].join("\n")
   );
+}
+
+/** The login of the person at the keyboard, or undefined for an agent or when no login resolves. */
+function humanLogin(root: string): string | undefined {
+  if (agentReason()) return undefined;
+  try {
+    return resolveLogin(root);
+  } catch {
+    return undefined;
+  }
 }
 
 function bundlePath(arg: string): string {
@@ -122,7 +143,15 @@ register({
 
     const title = (values.title as string | undefined) ?? titleFromPath(rel);
     const description = (values.description as string | undefined) ?? "";
-    const content = renderConcept(config.root, { type, title, description, by, now: new Date() });
+    const committedBy = type === "Deferred Commitment" ? humanLogin(config.root) : undefined;
+    const content = renderConcept(config.root, {
+      type,
+      title,
+      description,
+      by,
+      now: new Date(),
+      ...(committedBy ? { committedBy } : {}),
+    });
     mkdirSync(dirname(abs), { recursive: true });
     writeFileSync(abs, content);
     io.stdout(values.json ? `${JSON.stringify({ created: shown })}\n` : `${shown}\n`);

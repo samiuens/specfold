@@ -37,7 +37,7 @@ agent: implementer
 
 - [x] 3.1 Share the agent guard and let `verifyText` keep the status
   - Done when: `verify-apply.test.ts` covers an entry added without changing `status`, and the verify tests still pass
-- [ ] 3.2 Write the backlog item and commitment keys in new concepts
+- [x] 3.2 Write the backlog item and commitment keys in new concepts
   - Done when: scenarios commitment-drafted-by-an-agent and commitment-written-by-a-human pass in `new.test.ts`
 
 ## 4. Future-facing items
