@@ -3,7 +3,7 @@ type: Component
 title: specfold CLI
 description: How the specfold CLI is structured, built and shipped as one bundled file.
 status: draft
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:22:47+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T16:31:58+01:00 }
 sources:
   - id: source
     resource: ../../tools/specfold/src/cli.ts
@@ -27,6 +27,9 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/agents/` | the `agents sync` command: relative symlinks from `.agents/skills/` into each `agents.targets` folder, keeping real folders and foreign links |
 | `src/audit/` | the `audit` command: rules A1 to A5 over the parsed bundle, the main specs, code references and the root agent instruction files |
 | `src/bundle.ts` | walks a bundle and splits frontmatter from the body with line numbers |
+| `src/gate/` | the `gate` command: the diff against a merge base (touched and archived changes), rules G1-G6, G8-G10, G12-G14 and G18 over existing rule functions, `openspec validate`, ordering and counts |
+| `src/git.ts` | runs git; failures become environment errors |
+| `src/openspec.ts` | finds the OpenSpec binary: `node_modules/.bin/openspec`, then the PATH |
 | `src/doctor/` | the `doctor` command: checks D1 to D6 over an injected environment, version ranges |
 | `src/glob.ts` | dependency-free glob matching (`**` also matches zero folders) and the repository file walk |
 | `src/validate/` | the `validate` command and its rule sets (OKF, profile, links) |
@@ -34,7 +37,7 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/log/` | the `log add` command and the insertion of entries into date sections |
 | `src/lookup/` | the `lookup` command: frontmatter search, weighted ranking, trust flags |
 | `src/new/` | the `new` command: per-type templates, override files, frontmatter rendering |
-| `src/sync/` | the `sync` command: resolves archived changes, plans and applies delta ops, edits frontmatter line by line, then indexes and log |
+| `src/sync/` | the `sync` command: resolves archived changes, plans (`planSync`, also used by the gate) and applies delta ops, edits frontmatter line by line, then indexes and log |
 | `src/tasks/` | the `tasks check`, `status` and `resume` commands: the `tasks.md` parser, rules T0 to T11, file overlap between parallel groups, task commits from git trailers, group progress |
 
 # How commands work
@@ -52,6 +55,7 @@ Under Node, `yaml` resolves to its CommonJS build, so the bundle banner provides
 - [specfold audit](/capabilities/specfold-audit.md)
 - [specfold change check](/capabilities/specfold-change-check.md)
 - [specfold doctor](/capabilities/specfold-doctor.md)
+- [specfold gate](/capabilities/specfold-gate.md)
 - [specfold index](/capabilities/specfold-index.md)
 - [specfold log](/capabilities/specfold-log.md)
 - [specfold lookup](/capabilities/specfold-lookup.md)

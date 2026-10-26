@@ -1,0 +1,27 @@
+---
+type: Capability
+title: specfold gate
+description: Why specfold gate gives one merge verdict, and where the contract for its rules lives.
+status: draft
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T16:31:42+01:00 }
+---
+
+# Why
+
+The checks that keep knowledge and specs honest exist as separate commands (`validate`, `index --check`, `change check`, `tasks check`, `sync --dry-run`, `audit`, `openspec validate`). Nobody runs all of them on every branch, so nothing stops a merge. `specfold gate` runs them together on what a branch changes and gives one verdict, the same in CI, in the pre-push hook and in Claude Code's Stop hook ([a required CI check blocks merges](/decisions/blocking-merge-gate.md), [deterministic CLI](/decisions/deterministic-cli.md)).
+
+# Choices made while specifying and building
+
+- **The diff decides what is touched.** A change counts as part of the branch when the diff touches its folder; an archived change counts when its archive folder is new since the merge base. Rules about concepts (G8, G9) look at changed concepts only, so nobody gets blocked by decay they didn't cause; G12 still reports old drafts and stale concepts bundle-wide as warnings.
+- **Changes being planned pass.** G5 and G18 skip a touched change until it has `tasks.md`, so a planning PR can stop after the proposal. G13 still applies, because a brief is confirmed when the user approves it, not at the end.
+- **Skipping the spec needs a reason.** Source changes without a change pass only with the escape label (default `no-spec`) plus a `No-spec reason:` line in the PR body. Locally the label isn't known, so G4 only warns there.
+- **CI never passes silently.** Without OpenSpec installed, the gate stops with exit 2 in CI and only warns with `--local`, so hooks still work on machines without it.
+- **Existing rules, new ids.** Validate, change, tasks and audit findings keep their own rule id at the start of the message (for example `T5 ...`) under the gate rule that runs them.
+- **What must be fixed comes first.** Blocking findings come first, then warnings, each sorted by rule number; JSON `counts` gives totals per effect and per rule for the workflow summary.
+
+# Related
+
+- [specfold change check](/capabilities/specfold-change-check.md)
+- [specfold tasks](/capabilities/specfold-tasks.md)
+- [specfold audit](/capabilities/specfold-audit.md)
+- [specfold CLI](/architecture/specfold-cli.md)
