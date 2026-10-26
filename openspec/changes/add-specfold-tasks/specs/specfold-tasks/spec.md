@@ -167,13 +167,6 @@ With `--base`, the command SHALL inspect commits from the merge base to `HEAD` a
 - **WHEN** the commit for task 2.1 changes `src/checkout/a.ts` and ticks task 2.1 in `openspec/changes/<change>/tasks.md`
 - **THEN** no `T11` warning is reported for that commit
 
-### Requirement: Change check runs tasks check
-`specfold change check <change>` SHALL run the tasks check for the same change and include its findings, rule ids and exit-code effect in its own result.
-
-#### Scenario: Tasks error fails change check
-- **WHEN** a change's `knowledge.md` is valid but its `tasks.md` has a `T4` cycle
-- **THEN** `specfold change check <change>` reports the `T4` error and exits with 1
-
 ### Requirement: Status command
 The CLI SHALL provide `specfold status [<change>] [--json]`. For one change it SHALL list each group with done and total tasks and a state (`done`, `in progress`, `ready`, or `blocked` with the open dependencies), then the next open task. Without a change, it SHALL print one line per active change with done/total and its next open task.
 
@@ -198,14 +191,3 @@ The CLI SHALL provide `specfold resume <change> [--json]`, which prints the next
 #### Scenario: All done
 - **WHEN** every task of the change is ticked
 - **THEN** resume reports that all tasks are done and exits with 0
-
-### Requirement: Gate rule G18
-`specfold gate` SHALL run the tasks check, with the PR's merge base as `--base`, for every change added or modified in the PR. Error findings SHALL block the merge as rule G18; warnings SHALL be reported without blocking.
-
-#### Scenario: Overlap blocks the merge
-- **WHEN** a PR modifies a change whose parallel groups 2 and 3 own overlapping files
-- **THEN** the gate fails with rule G18 and the `T5` finding
-
-#### Scenario: Size only warns
-- **WHEN** a PR's change has a group with 10 tasks and no other findings
-- **THEN** the gate passes and reports the `T9` warning
