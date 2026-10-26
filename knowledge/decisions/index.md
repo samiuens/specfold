@@ -7,6 +7,7 @@
 * [Custom OpenSpec schema with brief and knowledge artifacts](custom-openspec-schema.md) - Changes use the custom schema specfold, forked from spec-driven, with a first brief artifact and a knowledge artifact.
 * [Delivered as template repo, bootstrap prompt and migration skill](delivery-template-bootstrap-migrate.md) - One kit repo ships a template for new projects, a paste-able bootstrap prompt and a migration skill for existing ones.
 * [English only](english-only.md) - Knowledge, specs, skills and docs are written in English.
+* [Every change is broken down into task groups, and subagents work on groups](task-breakdown.md) - tasks.md splits each change into task groups with owned files and small tasks with a done check; one implementer takes one group, never a whole change.
 * [Every install and upgrade path works from a private kit repo](private-kit-repo.md) - Release downloads authenticate through gh or a token, so the kit works while its repo is private.
 * [Everything that must be correct is deterministic code](deterministic-cli.md) - Validation, indexing and gate checks live in the specfold CLI; skills call it and never re-implement its checks.
 * [First specs are OpenSpec changes, not baseline specs](specs-start-as-changes.md) - Specs for not-yet-built commands are written as OpenSpec changes and only reach openspec/specs/ when implemented and archived.
