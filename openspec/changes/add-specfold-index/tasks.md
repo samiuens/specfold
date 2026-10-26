@@ -59,7 +59,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 5.1 Move folder titles and descriptions into `specfold.yaml`, then regenerate the kit's indexes with the bundle
+- [x] 5.1 Move folder titles and descriptions into `specfold.yaml`, then regenerate the kit's indexes with the bundle
   - Done when: `node scripts/specfold.mjs index --check` exits 0 in the kit repo
 - [ ] 5.2 Run `index --check` in CI, and tell agents in `AGENTS.md` that indexes are generated
   - Done when: the `cli` workflow passes on this PR

@@ -11,7 +11,30 @@ requires:
   openspec: ">=1.15 <2"
   okf: "0.2"
 
-source_globs: ["tools/**", "scripts/**", "template/**"]
+# test fixtures are left out: they hold deliberate references to concepts that do not exist
+source_globs: ["tools/specfold/src/**", "tools/specfold/build.mjs", "scripts/**", "template/**"]
+
+folders:
+  architecture:
+    description: "CLI modules, gate pipeline and release flow"
+  backlog:
+    description: "Ideas and work needed later but not now"
+  capabilities:
+    description: "One card per kit spec: why it exists and where its contract lives"
+  commitments:
+    description: "Promises the project has made for later"
+  conventions:
+    description: "How the kit repo writes code, tests, skills and knowledge"
+  decisions:
+    description: "Decisions about the kit, accepted and rejected"
+  domain:
+    description: "Terms and business rules of the kit's problem space"
+  references:
+    description: "Summaries of upstream docs the kit depends on, with short stale_after"
+  runbooks:
+    description: "How to run recurring maintenance tasks"
+  vision:
+    description: "Where Specfold is heading"
 
 gate:
   require_change_for_source_changes: true
