@@ -19,3 +19,10 @@
 ## Risks / Trade-offs
 
 <!-- Known risks and trade-offs -->
+
+## Commitments
+
+<!-- Every open deferred commitment this change touches, one per line:
+- [Title](/commitments/x.md): kept
+- [Title](/commitments/y.md): blocked: <why the design cannot keep it>
+Write `none` when no open commitment is touched. -->

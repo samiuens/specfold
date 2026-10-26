@@ -9,7 +9,7 @@ scenarios: [specfold-schema#design-rendered-for-a-change, specfold-schema#design
 agent: implementer
 ```
 
-- [ ] 1.1 End the design template with a Commitments section and explain it in the instruction
+- [x] 1.1 End the design template with a Commitments section and explain it in the instruction
   - Done when: scenario design-rendered-for-a-change passes in `schema.test.ts` and the kit and sample copies equal the template
 - [ ] 1.2 Add the design rule to the shipped and the kit's config
   - Done when: scenarios design-rule-shown and config-loads-cleanly pass in `schema-config.test.ts`
