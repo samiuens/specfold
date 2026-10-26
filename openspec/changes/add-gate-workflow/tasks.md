@@ -9,7 +9,7 @@ scenarios: [specfold-gate#summary-of-a-blocked-branch]
 agent: implementer
 ```
 
-- [ ] 1.1 Add `--summary <file>` with the Markdown summary
+- [x] 1.1 Add `--summary <file>` with the Markdown summary
   - Done when: scenario summary-of-a-blocked-branch passes in `gate-summary.test.ts`
 
 ## 2. Bundle

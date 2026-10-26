@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { register } from "../cli.ts";
 import { UsageError } from "../errors.ts";
@@ -8,6 +8,7 @@ import { type Config, requireConfig, resolveBundleRoot } from "../repo.ts";
 import { computeDiff } from "./diff.ts";
 import { fetchPullRequest, githubEnv } from "./github.ts";
 import { type GateContext, type GateFinding, runGate } from "./rules.ts";
+import { renderSummary } from "./summary.ts";
 
 const location = (f: GateFinding) =>
   f.path === null ? "" : `${f.path}${f.line === null ? "" : `:${f.line}`} `;
@@ -39,32 +40,36 @@ export const localGate = (config: Config, cwd: string, base: string): GateFindin
 
 /** Findings (blocking ones with their fix), then the verdict line. */
 export function renderGate(findings: GateFinding[]): string {
-  const counts = countFindings(findings);
   const lines = findings.flatMap((f) => [
     `${f.effect} ${f.rule} ${location(f)}${f.message}`,
     ...(f.effect === "block" ? [`    fix: ${f.fix}`] : []),
   ]);
+  lines.push(`gate: ${verdict(findings)}`);
+  return `${lines.join("\n")}\n`;
+}
+
+/** `passed, 2 warnings` or `blocked by G2, G4 (3 blocking findings, 2 warnings)`. */
+function verdict(findings: GateFinding[]): string {
+  const counts = countFindings(findings);
   const blocking = [...new Set(findings.filter((f) => f.effect === "block").map((f) => f.rule))];
   const warnings = plural(counts.warn, "warning");
-  lines.push(
-    counts.block === 0
-      ? `gate: passed, ${warnings}`
-      : `gate: blocked by ${blocking.join(", ")} (${plural(counts.block, "blocking finding")}, ${warnings})`,
-  );
-  return `${lines.join("\n")}\n`;
+  return counts.block === 0
+    ? `passed, ${warnings}`
+    : `blocked by ${blocking.join(", ")} (${plural(counts.block, "blocking finding")}, ${warnings})`;
 }
 
 register({
   name: "gate",
   summary: "decide whether a branch may merge: run the merge-gate rules on its diff",
   usage:
-    "specfold gate --base <ref> [--local] [--pr <number>] [--label <name>]... [--pr-body <file>] [--json]",
+    "specfold gate --base <ref> [--local] [--pr <number>] [--label <name>]... [--pr-body <file>] [--summary <file>] [--json]",
   options: {
     base: { type: "string" },
     local: { type: "boolean" },
     pr: { type: "string" },
     label: { type: "string", multiple: true },
     "pr-body": { type: "string" },
+    summary: { type: "string" },
     json: { type: "boolean" },
   },
   run: async ({ io, values, positionals }) => {
@@ -89,6 +94,9 @@ register({
         pr,
       }),
     );
+    const summary = values.summary as string | undefined;
+    if (summary !== undefined)
+      writeFileSync(resolve(io.cwd, summary), renderSummary(findings, verdict(findings)));
     const counts = countFindings(findings);
     const ok = counts.block === 0;
     if (values.json) {
