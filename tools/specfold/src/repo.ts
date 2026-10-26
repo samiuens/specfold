@@ -28,7 +28,12 @@ export interface Config {
   /** `audit.unverified_after_days`: age after which a concept without `verified` is an audit finding. */
   unverifiedAfterDays: number;
   /** `gate.*` settings beyond `block_on_broken_links`. */
-  gate: { requireChangeForSourceChanges: boolean; escapeLabel: string; blockOnStaleTouched: boolean };
+  gate: {
+    requireChangeForSourceChanges: boolean;
+    escapeLabel: string;
+    blockOnStaleTouched: boolean;
+    blockOnDrift: boolean;
+  };
   /** `hooks.extra`: shell commands per git hook name, run after Specfold's own checks. */
   hooksExtra: Record<string, string[]>;
   /** `trace.test_globs`: files whose `spec:` references count as tests. */
@@ -143,6 +148,7 @@ export function loadConfig(root: string): Config {
       escapeLabel:
         typeof gate.escape_label === "string" && gate.escape_label !== "" ? gate.escape_label : "no-spec",
       blockOnStaleTouched: gate.block_on_stale_touched !== false,
+      blockOnDrift: gate.block_on_drift === true,
     },
     hooksExtra,
     traceTestGlobs:
