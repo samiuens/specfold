@@ -13,3 +13,4 @@
 * **Update**: `specfold doctor` implemented (change `add-specfold-doctor`); all M1 commands specified in #7 are built.
 * **Update**: `specfold doctor` D3 now prefers a repository-local OpenSpec (change `update-doctor-local-openspec`); the kit pins OpenSpec 1.15.0 as a dev dependency.
 * **Decision**: Knowledge is written before archive and synced after (/decisions/write-knowledge-before-sync-after.md)
+* **Change**: add-specfold-schema: the specfold schema ships in template/ and the kit uses it (/capabilities/specfold-schema.md)

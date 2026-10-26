@@ -49,7 +49,7 @@ scenarios: []
 agent: knowledge-curator
 ```
 
-- [ ] 4.1 Create the `specfold-schema` capability card, update the OpenSpec reference and add the log entry
+- [x] 4.1 Create the `specfold-schema` capability card, update the OpenSpec reference and add the log entry
   - Done when: `node scripts/specfold.mjs validate` and `node scripts/specfold.mjs index --check` exit 0
 
 ## Workflow follow-up
