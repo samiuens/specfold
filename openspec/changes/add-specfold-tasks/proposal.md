@@ -36,7 +36,7 @@ Choices the request and the plan do not settle; each is written into the spec as
 3. **Last group not named "Knowledge"** is a warning, not a block.
 4. **Unknown `agent:` role** is a warning until M8 defines the roles.
 5. **Missing `tasks.md`** is an error for `tasks check` and G18.
-6. **Trailer checks** (ticked task without a commit, commit with an unknown task id, commit touching files outside its group) only warn, and run only with `--base`.
+6. **Trailer checks** (ticked task without a commit, commit with an unknown task id, commit touching files outside its group) only warn, and run only with `--base`. The change's own `tasks.md` is exempt from the scope and size checks, because every task commit ticks it (found while dogfooding `add-specfold-validate`).
 7. **`max_files_per_task`** is measured from the files changed by the commits that carry a task's trailer, so it is only checked with `--base`.
 8. **Glob overlap** is decided from existing files plus nested `/**` directories (see the requirement), so it never needs to enumerate all possible paths.
 
