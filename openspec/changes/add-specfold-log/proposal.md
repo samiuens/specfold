@@ -22,7 +22,9 @@
 - Editing or removing existing entries.
 - Generating entries automatically from archives (`specfold sync`, M2).
 
-## Open points for review
+## Decisions
+
+Confirmed by the maintainer on 2026-10-26, each point as proposed:
 
 1. **Kind:** defaults to `Update`. Any single word starting with an uppercase letter is allowed (for example `Creation`, `Deprecation`, `Migration`), with no fixed list.
 2. **Date:** the machine's local date unless `--date` is given.

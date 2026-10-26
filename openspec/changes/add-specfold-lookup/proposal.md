@@ -24,7 +24,9 @@ Agents answer "why and what" questions cheapest from frontmatter: a path and one
 - The drift flag (`specfold drift`, M5).
 - Full-text search of concept bodies: the plan keeps lookup to frontmatter on purpose.
 
-## Open points for review
+## Decisions
+
+Confirmed by the maintainer on 2026-10-26, each point as proposed:
 
 1. **Prefix matching:** `verif` matches `verified`. Words are split on anything that is not a letter or digit.
 2. **Paths** are printed relative to the repository root (`knowledge/decisions/x.md`), so agents can open them directly.
