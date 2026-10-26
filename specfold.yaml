@@ -1,0 +1,39 @@
+# Specfold settings for the kit repo itself (dogfooding). Not shipped: the
+# template's own specfold.yaml lives in template/.
+kit_version: 0.0.0          # unreleased; set by the upgrader from v0.1.0 on
+profile_version: 1
+channel: stable
+
+source:
+  github: samiuens/specfold
+
+requires:
+  openspec: ">=1.15 <2"
+  okf: "0.2"
+
+source_globs: ["tools/**", "scripts/**", "template/**"]
+
+gate:
+  require_change_for_source_changes: true
+  escape_label: no-spec
+  block_on_stale_touched: true
+  block_on_broken_links: true
+  block_on_drift: false
+
+types:
+  - Term
+  - Business Rule
+  - Component
+  - Data Flow
+  - Interface
+  - Decision
+  - Capability
+  - Convention
+  - Runbook
+  - Reference
+  - Vision
+  - Deferred Commitment
+  - Backlog Item
+
+actors:
+  agent_prefix: "claude-code/"
