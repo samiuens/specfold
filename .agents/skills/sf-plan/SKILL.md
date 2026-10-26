@@ -9,7 +9,7 @@ The planner role for tools that cannot load `.claude/agents/planner.md`. Claude 
 
 ## Steps
 
-1. Run the `sf-interview` skill until the user has approved the plan and `brief.md` is written.
+1. Run the `sf-interview` skill until the user has approved the plan and `brief.md` is written. The user states their login for `confirmed_by` when approving; never take it from earlier files.
 2. Decide the change boundaries: one change per capability where possible; split when parts can ship independently. Ask if unsure.
 3. For each change, write the artifacts in order with `openspec instructions <artifact> --change <name>`: proposal, specs, design (only if needed), knowledge, tasks. Follow each instruction and the `rules` in `openspec/config.yaml`.
 4. Check: `node scripts/specfold.mjs change check <name>` and `openspec validate <name> --strict` must report no errors.
