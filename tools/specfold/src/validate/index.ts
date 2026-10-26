@@ -6,6 +6,7 @@ import { EnvError, UsageError } from "../errors.ts";
 import { type Finding, renderHuman, renderJson } from "../findings.ts";
 import { type Config, findRepoRoot, requireConfig } from "../repo.ts";
 import { okf1, okf2, okf3Index, okf3Log } from "./okf.ts";
+import { p1, p2, p3, p4 } from "./profile.ts";
 
 export interface RuleContext {
   bundleRoot: string;
@@ -18,7 +19,7 @@ export type Rule = (file: ParsedFile, ctx: RuleContext) => Finding[];
 
 const okfRules: Rule[] = [okf1, okf2, okf3Index, okf3Log];
 /** Profile and link rules; they only run without --okf-only. */
-const profileRules: Rule[] = [];
+const profileRules: Rule[] = [p1, p2, p3, p4];
 
 export interface ValidateInput {
   bundleRoot: string;
