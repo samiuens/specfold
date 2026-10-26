@@ -4,6 +4,7 @@
 * [Built-in git hooks with adapters instead of lefthook](built-in-git-hooks.md) - Specfold installs its own git hooks via core.hooksPath and adds one entry to an existing hook manager instead of requiring lefthook.
 * [Claude Code skills are symlinks into .agents/skills/](skills-symlinked-for-claude.md) - specfold agents sync links each .agents/skills/<name> into .claude/skills/ instead of copying it.
 * [Code comments point to knowledge](code-comments-point-to-knowledge.md) - Code comments stay short; rationale lives in knowledge and the comment only references it with see knowledge:.
+* [Commit convention for the kit repo](commit-convention.md) - Kit-repo commits use Conventional Commits with a type-matched gitmoji, subject only, the human as author and the agent as co-author; not shipped.
 * [Custom OpenSpec schema with brief and knowledge artifacts](custom-openspec-schema.md) - Changes use the custom schema specfold, forked from spec-driven, with a first brief artifact and a knowledge artifact.
 * [Delivered as template repo, bootstrap prompt and migration skill](delivery-template-bootstrap-migrate.md) - One kit repo ships a template for new projects, a paste-able bootstrap prompt and a migration skill for existing ones.
 * [English only](english-only.md) - Knowledge, specs, skills and docs are written in English.
