@@ -10827,7 +10827,7 @@ register({
 });
 
 // src/gate/command.ts
-import { existsSync as existsSync30, readFileSync as readFileSync22, writeFileSync as writeFileSync8 } from "node:fs";
+import { existsSync as existsSync30, readFileSync as readFileSync23, writeFileSync as writeFileSync8 } from "node:fs";
 import { resolve as resolve5 } from "node:path";
 
 // src/gate/diff.ts
@@ -10927,7 +10927,7 @@ async function fetchPullRequest(env, number) {
 }
 
 // src/gate/rules.ts
-import { existsSync as existsSync29 } from "node:fs";
+import { existsSync as existsSync29, readFileSync as readFileSync22 } from "node:fs";
 import { join as join33, relative as relative16, sep as sep16 } from "node:path";
 
 // src/sync/plan.ts
@@ -11178,14 +11178,23 @@ import { join as join32, relative as relative15, sep as sep15 } from "node:path"
 var BRIEF = /^openspec\/changes\/(?:archive\/)?[^/]+\/brief\.md$/;
 var ARCHIVED_BRIEF = /^openspec\/changes\/archive\/\d{4}-\d{2}-\d{2}-([^/]+)\/brief\.md$/;
 var CONFIRMED_BY = /^confirmed_by:[ \t]*(\S+)/;
-function verifiedClaims(file, text3) {
+function conceptClaims(file, text3) {
   const fm = parseText(file, text3).frontmatter;
   if (!fm || !isRecord2(fm.data)) return [];
   const verified = fm.data.verified;
   const entries = Array.isArray(verified) ? verified : verified === void 0 ? [] : [verified];
-  return entries.flatMap(
+  const claims = entries.flatMap(
     (e) => isRecord2(e) && typeof e.by === "string" && e.by.startsWith("human:") ? [{ login: e.by.slice("human:".length), file, line: fm.lineOf("verified"), key: "verified" }] : []
   );
+  const committed = fm.data.committed_by;
+  if (typeof committed === "string" && committed.startsWith("human:"))
+    claims.push({
+      login: committed.slice("human:".length),
+      file,
+      line: fm.lineOf("committed_by"),
+      key: "committed_by"
+    });
+  return claims;
 }
 function briefClaims(file, text3) {
   const lines3 = text3.split(/\r?\n/);
@@ -11210,7 +11219,7 @@ function addedClaims(root, bundleRoot, diff) {
     let extract;
     if (BRIEF.test(file)) extract = briefClaims;
     else if (file.startsWith(bundlePrefix) && file.endsWith(".md") && isConcept(file.slice(bundlePrefix.length)))
-      extract = verifiedClaims;
+      extract = conceptClaims;
     if (!extract) continue;
     const active = ARCHIVED_BRIEF.exec(file);
     const bases = [file, ...active ? [`openspec/changes/${active[1]}/brief.md`] : []];
@@ -11440,6 +11449,95 @@ var g16 = (ctx) => {
     }))
   );
 };
+var COMMITMENTS_HEADING = /^##\s+Commitments\s*$/;
+var COMMITMENT_LINK = /(?:\]\(|`)(\/[^)\s`]+\.md)[)`]/;
+var VERDICT = /^\s*:\s*(kept|blocked)\b(?:\s*:\s*(.*))?/;
+function commitmentEntries(text3) {
+  const lines3 = text3.replace(/<!--[\s\S]*?-->/g, (c) => c.replace(/[^\n]/g, "")).split("\n");
+  const start = lines3.findIndex((l) => COMMITMENTS_HEADING.test(l));
+  if (start === -1) return void 0;
+  const entries = [];
+  for (let i = start + 1; i < lines3.length && !/^##\s/.test(lines3[i]); i++)
+    if (/^\s*[-*]\s+/.test(lines3[i])) entries.push({ line: i + 1, text: lines3[i] });
+  return entries;
+}
+var g17 = (ctx) => {
+  const root = ctx.config.root;
+  const open = listItems(ctx.bundleRoot, "commitments").filter((c) => c.data.state === "open");
+  const findings = [];
+  const warn = (path, line, message, fix) => findings.push({ rule: "G17", effect: "warn", path, line, message, fix });
+  for (const change of ctx.diff.activeChanges) {
+    const rel = `openspec/changes/${change}/design.md`;
+    if (!existsSync29(join33(root, rel))) continue;
+    const entries = commitmentEntries(readFileSync22(join33(root, rel), "utf8"));
+    if (entries === void 0) {
+      if (open.length > 0)
+        warn(
+          rel,
+          null,
+          `design has no '## Commitments' section while ${open.length === 1 ? "1 open commitment exists" : `${open.length} open commitments exist`}`,
+          "add '## Commitments' listing each open commitment the change touches as kept or blocked, or 'none'"
+        );
+      continue;
+    }
+    for (const entry of entries) {
+      const link = COMMITMENT_LINK.exec(entry.text);
+      if (!link) {
+        warn(
+          rel,
+          entry.line,
+          "commitment entry links no concept",
+          "write '- [Title](/commitments/x.md): kept'"
+        );
+        continue;
+      }
+      const target = link[1].slice(1);
+      const data = existsSync29(join33(ctx.bundleRoot, target)) ? parseFile(ctx.bundleRoot, target).frontmatter?.data : void 0;
+      if (!isRecord2(data) || data.type !== "Deferred Commitment" || data.state !== "open")
+        warn(
+          rel,
+          entry.line,
+          `/${target} is not an open commitment`,
+          "link an open commitment (specfold commitments list) or remove the entry"
+        );
+      const verdict2 = VERDICT.exec(entry.text.slice((link.index ?? 0) + link[0].length));
+      if (!verdict2)
+        warn(
+          rel,
+          entry.line,
+          `entry for /${target} says neither kept nor blocked`,
+          "end the entry with ': kept' or ': blocked: <reason>'"
+        );
+      else if (verdict2[1] === "blocked")
+        warn(
+          rel,
+          entry.line,
+          `design blocks commitment /${target}${verdict2[2] ? `: ${verdict2[2].trim()}` : ""}`,
+          "change the design to keep it, or have a human withdraw the commitment"
+        );
+    }
+  }
+  const verified = new Set(
+    addedClaims(root, ctx.bundleRoot, ctx.diff).filter((c) => c.key === "verified").map((c) => c.file)
+  );
+  for (const { rel, data, lineOf } of changedData(ctx)) {
+    if (data.type !== "Deferred Commitment" || data.state !== "withdrawn") continue;
+    const file = inRepo(ctx, rel);
+    const base = baseVersion(root, ctx.diff.mergeBase, file);
+    const before = base === void 0 ? void 0 : parseText(rel, base).frontmatter?.data;
+    if (isRecord2(before) && before.state === "withdrawn") continue;
+    if (!verified.has(file))
+      findings.push({
+        rule: "G17",
+        effect: "block",
+        path: file,
+        line: lineOf("state"),
+        message: "commitment is withdrawn without a human verification",
+        fix: "a human runs specfold commitments withdraw <commitment> --reason <text>, which records their verification"
+      });
+  }
+  return findings;
+};
 var g6 = (ctx) => ctx.diff.archivedChanges.flatMap((id) => {
   const sync = planSync(ctx.config, ctx.bundleRoot, id, ctx.now);
   if (sync.findings.length > 0)
@@ -11548,7 +11646,7 @@ var g14 = (ctx) => {
     return [];
   });
 };
-var RULES = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g15, g16, g18];
+var RULES = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g15, g16, g17, g18];
 var compare3 = (a, b) => a < b ? -1 : a > b ? 1 : 0;
 var ruleNumber = (rule) => Number.parseInt(rule.slice(1), 10);
 function sortGateFindings(findings) {
@@ -11643,7 +11741,7 @@ register({
       gateContext(config, io.cwd, base, {
         local,
         labels: values.label ?? [],
-        prBody: bodyFile === void 0 ? void 0 : readFileSync22(resolve5(io.cwd, bodyFile), "utf8"),
+        prBody: bodyFile === void 0 ? void 0 : readFileSync23(resolve5(io.cwd, bodyFile), "utf8"),
         pr
       })
     );
@@ -11664,7 +11762,7 @@ register({
 
 // src/hooks/install.ts
 var import_yaml8 = __toESM(require_dist(), 1);
-import { chmodSync, existsSync as existsSync31, mkdirSync as mkdirSync5, readFileSync as readFileSync23, realpathSync, writeFileSync as writeFileSync9 } from "node:fs";
+import { chmodSync, existsSync as existsSync31, mkdirSync as mkdirSync5, readFileSync as readFileSync24, realpathSync, writeFileSync as writeFileSync9 } from "node:fs";
 import { join as join34 } from "node:path";
 var HOOKS_PATH = ".specfold/hooks";
 var OWN_HOOKS = ["pre-commit", "pre-push", "post-checkout", "post-merge"];
@@ -11678,7 +11776,7 @@ function gitConfig(root, key) {
   }
 }
 function writeIfChanged(path, text3, mode) {
-  if (existsSync31(path) && readFileSync23(path, "utf8") === text3) return false;
+  if (existsSync31(path) && readFileSync24(path, "utf8") === text3) return false;
   mkdirSync5(join34(path, ".."), { recursive: true });
   writeFileSync9(path, text3);
   if (mode !== void 0) chmodSync(path, mode);
@@ -11727,7 +11825,7 @@ function detectManager(root) {
   return void 0;
 }
 function readDocument(path) {
-  const doc = (0, import_yaml8.parseDocument)(existsSync31(path) ? readFileSync23(path, "utf8") : "");
+  const doc = (0, import_yaml8.parseDocument)(existsSync31(path) ? readFileSync24(path, "utf8") : "");
   if (doc.errors[0]) throw new EnvError(`${path}: ${doc.errors[0].message.split("\n")[0]}`);
   return (0, import_yaml8.isMap)(doc.contents) ? doc : new import_yaml8.Document({});
 }
@@ -11756,7 +11854,7 @@ function huskyEntries(config) {
     const path = `.husky/${hook}`;
     const abs = join34(config.root, path);
     const line = `${hookCommand(hook)} "$@"`;
-    const text3 = existsSync31(abs) ? readFileSync23(abs, "utf8") : "";
+    const text3 = existsSync31(abs) ? readFileSync24(abs, "utf8") : "";
     if (text3.split("\n").some((l) => l.trim() === line)) continue;
     writeIfChanged(abs, `${text3}${text3 === "" || text3.endsWith("\n") ? "" : "\n"}${line}
 `, 493);
@@ -11843,7 +11941,7 @@ function localBase(root) {
 }
 
 // src/hooks/claude.ts
-import { existsSync as existsSync32, readdirSync as readdirSync6, readFileSync as readFileSync24, statSync as statSync9 } from "node:fs";
+import { existsSync as existsSync32, readdirSync as readdirSync6, readFileSync as readFileSync25, statSync as statSync9 } from "node:fs";
 import { isAbsolute, join as join35, relative as relative17, resolve as resolve6, sep as sep17 } from "node:path";
 var MAX_LINES = 40;
 var DUE_WINDOW_MS = 30 * 24 * 60 * 60 * 1e3;
@@ -11860,7 +11958,7 @@ var dueSoon = (bundleRoot, now = Date.now()) => listItems(bundleRoot, "commitmen
 function sessionStart({ config, io }) {
   const bundleRoot = resolveBundleRoot(config.root, void 0, config);
   const index = join35(bundleRoot, "index.md");
-  const sections = existsSync32(index) ? readFileSync24(index, "utf8").split("\n").filter((l) => /^\* \[/.test(l)) : [];
+  const sections = existsSync32(index) ? readFileSync25(index, "utf8").split("\n").filter((l) => /^\* \[/.test(l)) : [];
   const changes = activeChanges(config.root);
   const due = dueSoon(bundleRoot);
   const out = [
@@ -12271,7 +12369,7 @@ register({
 });
 
 // src/tasks/progress-command.ts
-import { existsSync as existsSync35, readdirSync as readdirSync8, readFileSync as readFileSync25 } from "node:fs";
+import { existsSync as existsSync35, readdirSync as readdirSync8, readFileSync as readFileSync26 } from "node:fs";
 import { join as join38 } from "node:path";
 
 // src/tasks/progress.ts
@@ -12297,7 +12395,7 @@ function progressOf(tasks) {
 // src/tasks/progress-command.ts
 function readTasks(config, change) {
   const path = join38(changeDir(config, change), "tasks.md");
-  return existsSync35(path) ? parseTasks(readFileSync25(path, "utf8")) : void 0;
+  return existsSync35(path) ? parseTasks(readFileSync26(path, "utf8")) : void 0;
 }
 function activeChanges2(config) {
   const dir = join38(config.root, "openspec", "changes");
@@ -12507,7 +12605,7 @@ register({
 });
 
 // src/verify/command.ts
-import { existsSync as existsSync36, readFileSync as readFileSync26, statSync as statSync11, writeFileSync as writeFileSync11 } from "node:fs";
+import { existsSync as existsSync36, readFileSync as readFileSync27, statSync as statSync11, writeFileSync as writeFileSync11 } from "node:fs";
 import { join as join39, relative as relative20, resolve as resolve7, sep as sep20 } from "node:path";
 function check(arg, root, bundleRoot) {
   const inBundle = [resolve7(root, arg), resolve7(bundleRoot, arg)].map((abs) => relative20(bundleRoot, abs).split(sep20).join("/")).filter((rel2) => rel2 !== "" && !rel2.startsWith("..") && !rel2.startsWith("/"));
@@ -12544,7 +12642,7 @@ register({
       const at = isoWithOffset(/* @__PURE__ */ new Date());
       const written = targets.map((t) => {
         const abs = join39(bundleRoot, t.rel);
-        return { abs, text: verifyText(readFileSync26(abs, "utf8"), login, at) };
+        return { abs, text: verifyText(readFileSync27(abs, "utf8"), login, at) };
       });
       for (const w of written) writeFileSync11(w.abs, w.text);
       verified.push(...targets.map(shown));
