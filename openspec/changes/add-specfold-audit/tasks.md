@@ -63,7 +63,7 @@ agent: knowledge-curator
 
 - [x] 5.1 Write the concepts listed in `knowledge.md`
   - Done when: `node scripts/specfold.mjs validate` exits 0
-- [ ] 5.2 Link the kit's orphaned decisions and the code-comment convention
+- [x] 5.2 Link the kit's orphaned decisions and the code-comment convention
   - Done when: `node scripts/specfold.mjs audit` exits 0 in the kit
 
 ## Workflow follow-up

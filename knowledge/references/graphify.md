@@ -3,7 +3,7 @@ type: Reference
 title: graphify 0.9.95
 description: graphify's install routes, code-only mode, ignore file, refresh and query commands, as read from the 0.9.95 package on 2026-10-26.
 status: draft
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T02:10:00+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:22:28+01:00 }
 stale_after: 2026-11-25T00:00:00+01:00
 sources:
   - id: pypi
@@ -38,3 +38,7 @@ PyPI package `graphifyy` 0.9.95 (2026-10-23), repo Graphify-Labs/graphify, docs 
 - `.graphifyignore` uses gitignore syntax (last match wins, nested files); `.gitignore` is honoured unless `--no-gitignore`.
 - `graphify hook install` installs post-commit, post-checkout, post-merge and post-rewrite git hooks.
 - `graphify query "<q>"` (`--budget`, `--seed`, `--dfs`, `--graph`), `graphify path "A" "B"`, `graphify explain "X"`; exit 0 on an answer, 3 when ambiguous, 4 when nothing matches.
+
+# Related
+
+- [graphify is optional and code-only](/decisions/graphify-code-only.md)

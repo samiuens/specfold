@@ -4,7 +4,7 @@ title: Where Specfold is heading
 description: Goals, non-goals and principles for Specfold up to its first stable release; a draft written by an agent for the maintainer to verify.
 status: draft
 horizon: "2027"
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T02:10:00+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:22:28+01:00 }
 sources:
   - id: plan
     resource: ../../docs/plan.md
@@ -39,3 +39,6 @@ sources:
 
 - [Self-hosting](/decisions/self-hosting.md)
 - [Rather ask than assume](/decisions/rather-ask-than-assume.md)
+- [The framework is called Specfold](/decisions/naming-specfold.md)
+- [English only](/decisions/english-only.md)
+- [One product version](/decisions/versioning.md)
