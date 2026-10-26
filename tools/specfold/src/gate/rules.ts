@@ -1,4 +1,5 @@
 import { relative, sep } from "node:path";
+import { EnvError } from "../errors.ts";
 import type { Finding } from "../findings.ts";
 import { syncIndexes } from "../indexes/command.ts";
 import { generateIndexes } from "../indexes/generate.ts";
@@ -7,6 +8,7 @@ import type { OpenSpecBinary } from "../openspec.ts";
 import type { Config } from "../repo.ts";
 import { validate } from "../validate/index.ts";
 import type { GateDiff } from "./diff.ts";
+import { openspecValidate } from "./openspec.ts";
 
 export type Effect = "block" | "warn";
 
@@ -88,13 +90,40 @@ export const g2: GateRule = (ctx) => {
   }));
 };
 
+/** G3: `openspec validate --all --strict`. */
+export const g3: GateRule = (ctx) => {
+  const issues = openspecValidate(ctx.config.root, ctx.openspec);
+  if (issues === undefined) {
+    const message = `openspec is not installed (looked for ${ctx.openspec.command})`;
+    if (!ctx.local) throw new EnvError(message);
+    return [
+      {
+        rule: "G3",
+        effect: "warn",
+        path: null,
+        line: null,
+        message: `${message}; specs were not validated`,
+        fix: "install OpenSpec so that `openspec` is on the PATH or in node_modules/.bin",
+      },
+    ];
+  }
+  return issues.map((i) => ({
+    rule: "G3",
+    effect: "block",
+    path: i.path,
+    line: null,
+    message: i.message,
+    fix: "run openspec validate --all --strict and fix the reported items",
+  }));
+};
+
 /** G10: the link rules of validate. */
 export const g10: GateRule = (ctx) =>
   validateFindings(ctx)
     .filter((f) => LINK_RULES.has(f.rule))
     .map((f) => fromBundle(ctx, "G10", ctx.config.blockOnBrokenLinks ? "block" : "warn", f));
 
-export const RULES: GateRule[] = [g1, g2, g10];
+export const RULES: GateRule[] = [g1, g2, g3, g10];
 
 const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 const ruleNumber = (rule: string) => Number.parseInt(rule.slice(1), 10);

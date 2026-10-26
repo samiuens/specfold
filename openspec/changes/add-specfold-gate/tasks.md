@@ -41,7 +41,7 @@ agent: implementer
 
 - [x] 3.1 Add G1, G2 and G10 over validate and the index check
   - Done when: scenarios missing-frontmatter-key, stale-index and broken-link pass in `gate-rules.test.ts`
-- [ ] 3.2 Add G3 over `openspec validate`
+- [x] 3.2 Add G3 over `openspec validate`
   - Done when: scenario invalid-delta-spec passes in `gate-rules.test.ts`
 - [ ] 3.3 Add G4 with the escape label and reason
   - Done when: scenarios code-without-change and escape-with-reason pass in `gate-rules.test.ts`
