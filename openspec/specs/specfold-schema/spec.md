@@ -52,7 +52,7 @@ The `tasks` template and instruction SHALL describe the task breakdown defined b
 - **THEN** the template shows a group with `files`, `depends`, `scenarios` and `agent`, a task with `Done when:`, a final `Knowledge` group and a `Workflow follow-up` step naming `specfold sync`
 
 ### Requirement: Shipped OpenSpec config
-The template SHALL ship `template/openspec/config.yaml` with `schema: specfold`, a `context` that points to `knowledge/index.md` and `openspec/specs/` and holds a `Stack:` placeholder line, `rules` entries for `proposal`, `specs`, `knowledge` and `tasks`, and `operations` guidance for `apply` and `archive`. OpenSpec 1.15.0 SHALL accept the file without warnings about unknown keys or artifact ids.
+The template SHALL ship `template/openspec/config.yaml` with `schema: specfold`, a `context` that points to `knowledge/index.md` and `openspec/specs/` and holds a `Stack:` placeholder line, `rules` entries for `proposal`, `specs`, `design`, `knowledge` and `tasks`, and `operations` guidance for `apply` and `archive`. OpenSpec 1.15.0 SHALL accept the file without warnings about unknown keys or artifact ids.
 
 #### Scenario: Config loads cleanly
 - **WHEN** `openspec instructions proposal --change <name>` runs in the template
@@ -64,3 +64,17 @@ In the kit repository, `openspec/schemas/specfold/` SHALL be byte-identical to `
 #### Scenario: Drifted copy
 - **WHEN** a commit changes `template/openspec/schemas/specfold/templates/brief.md` but not the kit copy
 - **THEN** the CI schema copy check fails and names the differing file
+
+### Requirement: Design template
+The `design` template SHALL end with a level-2 section `Commitments`, which lists every open deferred commitment the change touches as a bundle-absolute link followed by `: kept` or `: blocked: <reason>`, or the single line `none` when no open commitment is touched.
+
+#### Scenario: Design rendered for a change
+- **WHEN** `openspec instructions design --change <name>` runs
+- **THEN** the template ends with `## Commitments` and explains the `kept` and `blocked` entries
+
+### Requirement: Design rule
+The shipped `config.yaml` SHALL have a `design` rule that tells the agent to look up the open commitments touching the change and record each in the `Commitments` section.
+
+#### Scenario: Design rule shown
+- **WHEN** `openspec instructions design --change <name>` runs in the template
+- **THEN** the rules in the output include the instruction to record open commitments in `Commitments`
