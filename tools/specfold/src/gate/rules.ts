@@ -1,6 +1,7 @@
 import { relative, sep } from "node:path";
 import { EnvError } from "../errors.ts";
 import type { Finding } from "../findings.ts";
+import { matchesAny } from "../glob.ts";
 import { syncIndexes } from "../indexes/command.ts";
 import { generateIndexes } from "../indexes/generate.ts";
 import { locationsByConcept, scanReferences } from "../indexes/refs.ts";
@@ -38,7 +39,7 @@ export interface GateContext {
 export type GateRule = (ctx: GateContext) => GateFinding[];
 
 const LINK_RULES = new Set(["L1", "L2"]);
-const _NO_SPEC_REASON = /^No-spec reason:[ \t]*\S/m;
+const NO_SPEC_REASON = /^No-spec reason:[ \t]*\S/m;
 
 /** A bundle-relative path as a repository-relative one. */
 function inRepo(ctx: GateContext, bundleRel: string): string {
@@ -117,13 +118,38 @@ export const g3: GateRule = (ctx) => {
   }));
 };
 
+/** G4: source changes need an active or archived change, or the escape label with a reason. */
+export const g4: GateRule = (ctx) => {
+  if (!ctx.config.gate.requireChangeForSourceChanges) return [];
+  const sources = ctx.diff.files.filter((f) => matchesAny(f, ctx.config.sourceGlobs));
+  if (sources.length === 0) return [];
+  if (ctx.diff.activeChanges.length > 0 || ctx.diff.archivedChanges.length > 0) return [];
+  const label = ctx.config.gate.escapeLabel;
+  const labelled = ctx.labels.includes(label);
+  const reasoned = ctx.prBody !== undefined && NO_SPEC_REASON.test(ctx.prBody);
+  if (labelled && reasoned) return [];
+  const count = sources.length === 1 ? "1 source file" : `${sources.length} source files`;
+  return [
+    {
+      rule: "G4",
+      effect: ctx.local ? "warn" : "block",
+      path: sources[0] as string,
+      line: null,
+      message: labelled
+        ? `label '${label}' is set but the PR body has no 'No-spec reason:' line`
+        : `${count} changed without an OpenSpec change`,
+      fix: `add or update a change under openspec/changes/, or set the '${label}' label and a 'No-spec reason:' line in the PR body`,
+    },
+  ];
+};
+
 /** G10: the link rules of validate. */
 export const g10: GateRule = (ctx) =>
   validateFindings(ctx)
     .filter((f) => LINK_RULES.has(f.rule))
     .map((f) => fromBundle(ctx, "G10", ctx.config.blockOnBrokenLinks ? "block" : "warn", f));
 
-export const RULES: GateRule[] = [g1, g2, g3, g10];
+export const RULES: GateRule[] = [g1, g2, g3, g4, g10];
 
 const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 const ruleNumber = (rule: string) => Number.parseInt(rule.slice(1), 10);

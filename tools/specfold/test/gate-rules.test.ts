@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { EnvError } from "../src/errors.ts";
 import { computeDiff } from "../src/gate/diff.ts";
-import { type GateContext, type GateRule, g1, g2, g3, g10 } from "../src/gate/rules.ts";
+import { type GateContext, type GateRule, g1, g2, g3, g4, g10 } from "../src/gate/rules.ts";
 import { requireConfig } from "../src/repo.ts";
 import { commit, concept, gateRepo, write } from "./gate-helpers.ts";
 
@@ -35,7 +35,7 @@ const rules = (rule: GateRule, root: string, o?: Options) =>
 describe("gate: rules", () => {
   it("reports nothing but G3 setup for an unchanged clean repository", () => {
     const root = gateRepo();
-    for (const rule of [g1, g2, g10]) expect(rule(ctx(root))).toEqual([]);
+    for (const rule of [g1, g2, g4, g10]) expect(rule(ctx(root))).toEqual([]);
   });
 
   // spec: specfold-gate#missing-frontmatter-key
@@ -95,5 +95,37 @@ describe("gate: rules", () => {
     expect(rules(g3, root, { openspec: join(root, "no-openspec"), local: true })).toEqual([
       ["G3", "warn", null],
     ]);
+  });
+
+  // spec: specfold-gate#code-without-change
+  it("G4: blocks source changes without a change, and warns locally", () => {
+    const root = gateRepo();
+    commit(root, { "src/app.ts": "export const app = 2;\n" });
+    expect(rules(g4, root)).toEqual([["G4", "block", "src/app.ts"]]);
+    expect(rules(g4, root, { local: true })).toEqual([["G4", "warn", "src/app.ts"]]);
+  });
+
+  // spec: specfold-gate#escape-with-reason
+  it("G4: accepts the escape label with a reason, not the label alone", () => {
+    const root = gateRepo();
+    commit(root, { "src/app.ts": "export const app = 2;\n" });
+    expect(
+      g4(ctx(root, { labels: ["no-spec"], prBody: "Bump.\n\nNo-spec reason: dependency bump\n" })),
+    ).toEqual([]);
+    const [finding] = g4(ctx(root, { labels: ["no-spec"], prBody: "No-spec reason:\n" }));
+    expect(finding?.message).toContain("no 'No-spec reason:' line");
+  });
+
+  it("G4: is satisfied by a touched change and off when configured", () => {
+    const root = gateRepo();
+    commit(root, { "src/app.ts": "export const app = 2;\n", "openspec/changes/demo/brief.md": "x\n" });
+    expect(g4(ctx(root))).toEqual([]);
+    const other = gateRepo();
+    commit(other, {
+      "src/app.ts": "export const app = 2;\n",
+      "specfold.yaml":
+        "types: [Term]\nsource_globs: ['src/**']\ngate:\n  require_change_for_source_changes: false\n",
+    });
+    expect(g4(ctx(other))).toEqual([]);
   });
 });
