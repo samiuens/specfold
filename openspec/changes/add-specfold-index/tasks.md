@@ -41,13 +41,13 @@ agent: implementer
 ## 4. Check mode and output
 
 ```yaml
-files: [tools/specfold/src/indexes/command.ts, tools/specfold/test/index-check.test.ts]
-depends: [2]
+files: [tools/specfold/src/indexes/command.ts, tools/specfold/src/findings.ts, tools/specfold/test/index-check.test.ts]
+depends: [3]
 scenarios: [specfold-index#broken-concept-skipped, specfold-index#outdated-index, specfold-index#up-to-date, specfold-index#json-in-check-mode]
 agent: implementer
 ```
 
-- [ ] 4.1 Add `--check`, `--json`, unparseable-concept findings and exit codes
+- [x] 4.1 Add `--check`, `--json`, unparseable-concept findings and exit codes
   - Done when: scenarios broken-concept-skipped, outdated-index, up-to-date and json-in-check-mode pass
 
 ## 5. Dogfooding and CI

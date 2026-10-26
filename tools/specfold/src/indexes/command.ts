@@ -1,34 +1,33 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { register } from "../cli.ts";
-import { countBySeverity, type Finding, findingLine, sortFindings } from "../findings.ts";
+import { countBySeverity, findingLine, plural, sortFindings } from "../findings.ts";
 import { requireConfig, resolveBundleRoot } from "../repo.ts";
 import { generateIndexes } from "./generate.ts";
 import { locationsByConcept, scanReferences } from "./refs.ts";
 
-export interface IndexResult {
-  written: string[];
-  findings: Finding[];
-  total: number;
-}
-
-/** Regenerates every index and writes the ones that are missing or changed. Paths are repository-relative. */
-export function writeIndexes(repoRoot: string, bundleRoot: string, generated: Map<string, string>): string[] {
-  const written: string[] = [];
+/** Repository-relative paths of indexes that are missing or differ; writes them unless `check` is set. */
+export function syncIndexes(
+  repoRoot: string,
+  bundleRoot: string,
+  generated: Map<string, string>,
+  check: boolean,
+): string[] {
+  const changed: string[] = [];
   for (const [rel, content] of [...generated].sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))) {
     const abs = join(bundleRoot, rel);
     if (existsSync(abs) && readFileSync(abs, "utf8") === content) continue;
-    writeFileSync(abs, content);
-    written.push(relative(repoRoot, abs).split(sep).join("/"));
+    if (!check) writeFileSync(abs, content);
+    changed.push(relative(repoRoot, abs).split(sep).join("/"));
   }
-  return written;
+  return changed;
 }
 
 register({
   name: "index",
   summary: "generate every index.md of the knowledge bundle",
   usage: "specfold index [--check] [--bundle <dir>] [--json]",
-  options: { bundle: { type: "string" }, json: { type: "boolean" } },
+  options: { check: { type: "boolean" }, bundle: { type: "string" }, json: { type: "boolean" } },
   run: ({ io, values }) => {
     const config = requireConfig(io.cwd);
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle as string | undefined, config);
@@ -45,21 +44,25 @@ register({
         fix: "point the comment at an existing concept or create it",
       });
     }
-    const written = writeIndexes(config.root, bundleRoot, indexes);
+    const check = values.check === true;
+    const changed = syncIndexes(config.root, bundleRoot, indexes, check);
+    const written = check ? [] : changed;
+    const outdated = check ? changed : [];
     const sorted = sortFindings(findings);
     const { errors, warnings } = countBySeverity(sorted);
+    const ok = errors === 0 && outdated.length === 0;
     if (values.json) {
-      io.stdout(
-        `${JSON.stringify({ ok: errors === 0, written, outdated: [], findings: sorted }, null, 2)}\n`,
-      );
+      io.stdout(`${JSON.stringify({ ok, written, outdated, findings: sorted }, null, 2)}\n`);
     } else {
+      const counted = check ? `${outdated.length} outdated` : `${written.length} written`;
       const lines = [
         ...written.map((p) => `wrote ${p}`),
+        ...outdated.map((p) => `outdated ${p}`),
         ...sorted.filter((f) => f.severity === "error").map(findingLine),
-        `${indexes.size} indexes, ${written.length} written: ${errors} errors, ${warnings} warnings`,
+        `${plural(indexes.size, "index")}, ${counted}: ${plural(errors, "error")}, ${plural(warnings, "warning")}`,
       ];
       io.stdout(`${lines.join("\n")}\n`);
     }
-    return errors > 0 ? 1 : 0;
+    return ok ? 0 : 1;
   },
 });
