@@ -11,7 +11,7 @@ agent: implementer
 
 - [x] 1.1 Add the retro and the commitment fulfillment to sf-sync
   - Done when: `node scripts/check-skills.mjs .agents/skills template/.agents/skills` passes and the kit and sample copies equal the template
-- [ ] 1.2 Load the checklist and offer backlog items and commitments in sf-interview
+- [x] 1.2 Load the checklist and offer backlog items and commitments in sf-interview
   - Done when: the skill names both steps and the copies equal the template
 - [ ] 1.3 Report drift and the vision and commitments block in sf-lookup
   - Done when: the skill lists the `drift` flag and the copies equal the template
