@@ -35,7 +35,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 3.1 Copy the instruction files, bundle, skills and planner into the sample and link the skills
+- [x] 3.1 Copy the instruction files, bundle, skills and planner into the sample and link the skills
   - Done when: `node scripts/specfold.mjs agents sync --check` and `audit` exit 0 in `examples/sample-app`
 - [ ] 3.2 Extend the CI copy checks to every kit-owned file in the template and the sample
   - Done when: the `cli` workflow passes on the PR
