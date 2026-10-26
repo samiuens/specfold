@@ -39,6 +39,7 @@ The checks that keep knowledge and specs honest exist as separate commands (`val
 - **Human claims are checked against GitHub.** G7 compares every `human:<login>` a branch adds (to a concept's `verified` or a brief's `confirmed_by`) with the PR author and the approving reviewers ([humans verify only](/decisions/humans-verify-only.md)). Only claims missing from the merge-base version count, so existing claims never need a fresh approval. A reviewer's latest review decides, but comment reviews are skipped, as on GitHub itself ([GitHub Actions](/references/github-actions.md)). API errors stop the gate with exit 2 instead of passing; without `--pr`, G7 only warns that CI will check.
 - **One required job, one summary.** The template's `specfold-gate` workflow runs on PR events, reviews and the merge queue, with no `paths:` filter, so the check always reports. `--summary` writes one Markdown table that goes into the job summary; a separate `workflow_run` workflow posts it as one PR comment, because fork PRs only get a read-only token ([GitHub Actions](/references/github-actions.md)). In a merge queue there is no PR, so the job runs with `--local`: G4 and G7 warn there, after the PR's own run enforced them.
 - **Tests follow scenarios.** G15 blocks a scenario that a touched or archived change with `tasks.md` adds or modifies when no test cites it, and every test reference to a scenario that no longer exists; untested scenarios elsewhere warn once with their count ([specfold trace](/capabilities/specfold-trace.md)).
+- **Code changes name their knowledge.** G16 warns when a branch changes a file that a concept depends on (its resource, sources or `see knowledge:` code) and leaves the concept untouched; it blocks only with `gate.block_on_drift: true` ([specfold drift](/capabilities/specfold-drift.md)).
 - **Existing rules, new ids.** Validate, change, tasks and audit findings keep their own rule id at the start of the message (for example `T5 ...`) under the gate rule that runs them.
 - **What must be fixed comes first.** Blocking findings come first, then warnings, each sorted by rule number; JSON `counts` gives totals per effect and per rule for the workflow summary.
 
@@ -48,4 +49,5 @@ The checks that keep knowledge and specs honest exist as separate commands (`val
 - [specfold tasks](/capabilities/specfold-tasks.md)
 - [specfold audit](/capabilities/specfold-audit.md)
 - [specfold trace](/capabilities/specfold-trace.md)
+- [specfold drift](/capabilities/specfold-drift.md)
 - [specfold CLI](/architecture/specfold-cli.md)
