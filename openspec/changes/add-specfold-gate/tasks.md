@@ -3,7 +3,7 @@
 ## 1. Shared helpers
 
 ```yaml
-files: [tools/specfold/src/git.ts, tools/specfold/src/tasks/git.ts, tools/specfold/src/openspec.ts, tools/specfold/src/doctor/checks.ts, tools/specfold/src/repo.ts, tools/specfold/test/repo.test.ts, tools/specfold/src/sync/command.ts, tools/specfold/src/sync/plan.ts, specfold.yaml, template/specfold.yaml]
+files: [tools/specfold/src/git.ts, tools/specfold/src/tasks/git.ts, tools/specfold/src/openspec.ts, tools/specfold/src/doctor/checks.ts, tools/specfold/src/repo.ts, tools/specfold/test/repo.test.ts, tools/specfold/test/change-knowledge.test.ts, tools/specfold/src/sync/command.ts, tools/specfold/src/sync/plan.ts, specfold.yaml, template/specfold.yaml]
 depends: []
 scenarios: []
 agent: implementer
@@ -13,7 +13,7 @@ agent: implementer
   - Done when: `npm test -w specfold` passes with the tasks git tests unchanged
 - [x] 1.2 Share the OpenSpec binary lookup between doctor and gate
   - Done when: `npm test -w specfold` passes with the doctor tests unchanged
-- [ ] 1.3 Read the gate settings with their defaults
+- [x] 1.3 Read the gate settings with their defaults
   - Done when: `repo.test.ts` covers the defaults and configured values
 - [ ] 1.4 Extract the sync planning step as `planSync`
   - Done when: `npm test -w specfold` passes with the sync tests unchanged
