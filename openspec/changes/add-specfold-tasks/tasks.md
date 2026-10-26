@@ -33,7 +33,7 @@ scenarios: [specfold-tasks#id-from-a-delta-spec, specfold-tasks#group-without-fi
 agent: implementer
 ```
 
-- [ ] 3.1 Add known scenario ids from delta specs and main specs
+- [x] 3.1 Add known scenario ids from delta specs and main specs
   - Done when: scenario id-from-a-delta-spec passes in `tasks-rules.test.ts`
 - [ ] 3.2 Add rules T1 to T4 and T6 to T9
   - Done when: the T1-T4 and T6-T9 scenarios pass in `tasks-rules.test.ts`
