@@ -77,7 +77,7 @@ agent: implementer
 
 - [x] 6.1 Compute group states and the next open task
   - Done when: scenarios progress-per-group and ready-group-after-finished-group pass in `tasks-progress.test.ts`
-- [ ] 6.2 Add `specfold status [<change>] [--json]` and `specfold resume <change> [--json]`
+- [x] 6.2 Add `specfold status [<change>] [--json]` and `specfold resume <change> [--json]`
   - Done when: scenarios resume-a-fresh-session and all-done pass in `tasks-progress.test.ts`
 
 ## 7. Bundle
