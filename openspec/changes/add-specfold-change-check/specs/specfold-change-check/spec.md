@@ -24,6 +24,13 @@ Every finding SHALL carry a rule id, a severity, the file relative to the reposi
 - **WHEN** `brief.md` has no `Confirmation` section and `--json` is set
 - **THEN** stdout parses as JSON with `"ok": false` and a finding with `"rule": "B1"`, `"severity": "error"` and `"file"` ending in `brief.md`
 
+### Requirement: Tasks check included
+`specfold change check <change>` SHALL run the tasks check for the same change and include its findings, rule ids and exit-code effect in its own result.
+
+#### Scenario: Tasks error fails change check
+- **WHEN** a change's `knowledge.md` is valid but its `tasks.md` has a `T4` cycle
+- **THEN** `specfold change check <change>` reports the `T4` error and exits with 1
+
 ### Requirement: Skip-specs changes
 For a change whose `.openspec.yaml` sets `skip_specs: true`, the brief rules SHALL require only the `Wish` and `Confirmation` sections, and K5 SHALL not apply.
 
