@@ -84,6 +84,17 @@ The command SHALL report an error with rule `T3` when group numbers or task numb
 - **WHEN** group 2 contains a task numbered 3.1
 - **THEN** a `T3` error is reported
 
+### Requirement: Workflow follow-up section
+`tasks.md` MAY end with a level-2 section `## Workflow follow-up` after the last group, holding plain bullets for steps after archive. The command SHALL not parse it as a group and SHALL report an error with rule `T3` for any other level-2 heading that is not a group heading.
+
+#### Scenario: Follow-up section ignored
+- **WHEN** `tasks.md` ends with `## Workflow follow-up` and the bullet `- Run specfold sync add-guest-checkout after archive.`
+- **THEN** no finding is reported for that section
+
+#### Scenario: Stray heading
+- **WHEN** `tasks.md` contains `## Notes` between two groups
+- **THEN** a `T3` error is reported for that heading
+
 ### Requirement: T4 dependencies
 The command SHALL report an error with rule `T4` when `depends` names a group that does not exist, names its own group, or when the dependencies form a cycle; a cycle finding SHALL list the groups in the cycle.
 
