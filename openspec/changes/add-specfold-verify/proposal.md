@@ -23,7 +23,7 @@ Trust in the bundle rests on humans verifying what agents drafted (`/decisions/h
 
 - The PR comment command `/specfold verify` (not planned for M4).
 
-## Open points for review
+## Confirmed in review
 
 1. **Paths** may be bundle-relative (`decisions/x.md`) or repository-relative (`knowledge/decisions/x.md`); `index.md`, `log.md` and files outside the bundle are refused.
 2. **An existing `verified`** becomes a list, with the new entry appended; a second verification by the same login replaces that login's entry.
