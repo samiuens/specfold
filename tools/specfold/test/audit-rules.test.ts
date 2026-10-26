@@ -3,6 +3,8 @@ import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { auditBundle } from "../src/audit/rules.ts";
 import { requireConfig } from "../src/repo.ts";
+import { commitAt } from "./drift-helpers.ts";
+import { git } from "./gate-helpers.ts";
 import { tempDir } from "./helpers.ts";
 
 const NOW = new Date("2026-10-26T12:00:00Z");
@@ -219,5 +221,81 @@ describe("auditBundle", () => {
       }),
       expect.objectContaining({ rule: "A5", path: "openspec/specs/checkout/spec.md", line: null }),
     ]);
+  });
+
+  const promise = (keys: string) =>
+    concept(
+      `type: Deferred Commitment\nstatus: draft\n${keys}\ngenerated: { by: x/y, at: ${FRESH} }`,
+      "See [ledger](/domain/ledger.md).\n",
+    );
+
+  // spec: specfold-audit#promise-past-due
+  it("A6: reports an open commitment past its trigger date", () => {
+    const root = repo();
+    write(
+      root,
+      "knowledge/commitments/eu.md",
+      promise("state: open\ntrigger: 2020-01-01\nvision: /vision/v.md"),
+    );
+    write(
+      root,
+      "knowledge/commitments/done.md",
+      promise("state: fulfilled\ntrigger: 2020-01-01\nvision: /vision/v.md"),
+    );
+    expect(audit(root).filter((f) => f.rule === "A6")).toEqual([
+      expect.objectContaining({
+        path: "commitments/eu.md",
+        line: 5,
+        message: "commitment was due on 2020-01-01",
+      }),
+    ]);
+  });
+
+  // spec: specfold-audit#condition-trigger
+  it("A6: never reports a condition trigger or a future date", () => {
+    const root = repo();
+    write(
+      root,
+      "knowledge/commitments/a.md",
+      promise("state: open\ntrigger: before 1.0\nvision: /vision/v.md"),
+    );
+    write(
+      root,
+      "knowledge/commitments/b.md",
+      promise("state: open\ntrigger: 2099-01-01\nvision: /vision/v.md"),
+    );
+    expect(audit(root).filter((f) => f.rule === "A6")).toEqual([]);
+  });
+
+  // spec: specfold-audit#unanchored-promise
+  it("A7: reports an open commitment without a vision", () => {
+    const root = repo();
+    write(root, "knowledge/commitments/eu.md", promise("state: open\ntrigger: before 1.0"));
+    expect(rules(root).filter(([rule]) => rule === "A7")).toEqual([["A7", "commitments/eu.md"]]);
+  });
+
+  // spec: specfold-audit#old-idea
+  it("A8: reports an open backlog item last committed too long ago", () => {
+    const root = repo();
+    git(root, "init", "-q", "-b", "main");
+    const idea = (state: string) =>
+      concept(`type: Term\nstatus: draft\ngenerated: { by: x/y, at: ${FRESH} }`).replace(
+        "type: Term",
+        `type: Backlog Item\nstate: ${state}\npriority: low\norigin: human`,
+      );
+    write(root, "specfold.yaml", "types: [Term, Backlog Item]\nsource_globs: ['src/**']\n");
+    commitAt(root, "2026-04-01T00:00:00Z", {
+      "knowledge/backlog/old.md": idea("open"),
+      "knowledge/backlog/dropped.md": idea("dropped"),
+    });
+    write(root, "knowledge/backlog/new.md", idea("open"));
+    expect(audit(root).filter((f) => f.rule === "A8")).toEqual([
+      expect.objectContaining({
+        path: "backlog/old.md",
+        message: "open backlog item untouched for 208 days (limit 180)",
+      }),
+    ]);
+    write(root, "specfold.yaml", "types: [Term, Backlog Item]\naudit:\n  backlog_untouched_days: 365\n");
+    expect(audit(root).filter((f) => f.rule === "A8")).toEqual([]);
   });
 });

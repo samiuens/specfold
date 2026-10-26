@@ -6,7 +6,8 @@ import { auditBundle } from "./rules.ts";
 
 register({
   name: "audit",
-  summary: "report stale, unverified, deprecated-linked and orphaned concepts and specs without a card",
+  summary:
+    "report stale, unverified, deprecated-linked and orphaned concepts, specs without a card, overdue commitments and old backlog items",
   usage: "specfold audit [--json]",
   options: { json: { type: "boolean" } },
   run: ({ io, values, positionals }) => {

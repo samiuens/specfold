@@ -1,7 +1,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { type ParsedFile, parseFile, walk } from "../bundle.ts";
+import { hasHistory } from "../drift/drift.ts";
 import type { Finding } from "../findings.ts";
+import { dueDate, listItems } from "../future/items.ts";
+import { git } from "../git.ts";
 import { walkFiles } from "../glob.ts";
 import { scanReferences } from "../indexes/refs.ts";
 import type { Config } from "../repo.ts";
@@ -47,7 +50,7 @@ function concepts(bundleRoot: string): Map<string, Concept> {
   return out;
 }
 
-/** Rules A1-A5 over the whole bundle and the main specs, as of `now`. */
+/** Rules A1-A8 over the whole bundle and the main specs, as of `now`. */
 export function auditBundle(config: Config, bundleRoot: string, now: Date): Finding[] {
   const all = concepts(bundleRoot);
   const findings: Finding[] = [];
@@ -143,6 +146,54 @@ export function auditBundle(config: Config, bundleRoot: string, now: Date): Find
             null,
             `spec '${rel.slice(0, -"/spec.md".length)}' has no capability card`,
             `create a Capability concept with spec: ${spec}`,
+          ),
+        );
+    }
+  }
+
+  // A6 and A7: open commitments that are overdue or anchored to no vision.
+  for (const item of listItems(bundleRoot, "commitments")) {
+    if (item.data.state !== "open") continue;
+    const c = all.get(item.rel);
+    const due = dueDate(item.data.trigger);
+    if (due && due.getTime() < now.getTime())
+      findings.push(
+        finding(
+          "A6",
+          item.rel,
+          c ? line(c, "trigger") : null,
+          `commitment was due on ${String(item.data.trigger)}`,
+          "keep it with a change, or have a human withdraw it with specfold commitments withdraw",
+        ),
+      );
+    if (item.data.vision === undefined)
+      findings.push(
+        finding(
+          "A7",
+          item.rel,
+          null,
+          "commitment links to no vision",
+          "set 'vision' to the Vision concept this promise serves",
+        ),
+      );
+  }
+
+  // A8: open backlog items nobody has touched for too long.
+  if (hasHistory(config.root)) {
+    for (const item of listItems(bundleRoot, "backlog")) {
+      if (item.data.state !== "open") continue;
+      const file = relative(config.root, item.abs).split(sep).join("/");
+      const last = git(config.root, ["log", "-1", "--format=%cI", "--", file]).trim();
+      if (!last) continue;
+      const days = Math.floor((now.getTime() - Date.parse(last)) / DAY_MS);
+      if (days > config.backlogUntouchedDays)
+        findings.push(
+          finding(
+            "A8",
+            item.rel,
+            null,
+            `open backlog item untouched for ${days} days (limit ${config.backlogUntouchedDays})`,
+            "promote it with specfold backlog promote, drop it with specfold backlog drop, or update it",
           ),
         );
     }
