@@ -2,7 +2,9 @@
 
 * [specfold agents sync](specfold-agents-sync.md) - Why skills live once in .agents/skills and are linked into tool folders, and where the contract for agents sync lives.
 * [specfold audit](specfold-audit.md) - Why audit reports slow decay in the bundle, and where the contract for specfold audit lives.
+* [specfold backlog](specfold-backlog.md) - Why backlog items have their own commands, and how promoting one hands the idea to the planning interview.
 * [specfold change check](specfold-change-check.md) - Why change check is the enforcement of brief.md and knowledge.md, and where its contract lives.
+* [specfold commitments](specfold-commitments.md) - Why anyone may fulfill a deferred commitment but only a human may withdraw one, and where the contract lives.
 * [specfold doctor](specfold-doctor.md) - Why setup problems are checked in one command, and where the contract for specfold doctor lives.
 * [specfold drift](specfold-drift.md) - Why drift is computed from git alone, and where the contract for specfold drift lives.
 * [specfold gate](specfold-gate.md) - Why specfold gate gives one merge verdict, and where the contract for its rules lives.

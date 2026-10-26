@@ -20,10 +20,11 @@ OKF ships no validator, and every agent, hook and CI job needs the same verdict 
 
 Rule ids are stable (`OKF-1` to `OKF-3`, `P1` to `P11`, `L1`, `L2`), so hooks, the gate (rule G1) and agents can react to specific findings.
 
-# Choices made while specifying
+# Choices made while specifying and building
 
 - Warnings appear in human output only as a count; agents read them from `--json`.
 - Broken links follow `gate.block_on_broken_links`, and `--okf-only` ignores them, because OKF requires consumers to tolerate broken links.
+- Backlog items, deferred commitments and visions have their own key rules (P12-P14). A commitment without `committed_by` only warns, so an agent can draft a promise that a human then claims ([specfold commitments](/capabilities/specfold-commitments.md)).
 - The upstream OKF sample fails one rule by design. See [acme_retail fixture](/decisions/acme-retail-patched-fixture.md).
 
 # Related
