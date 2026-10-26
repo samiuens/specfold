@@ -37,6 +37,23 @@ The CLI does the deterministic work, but agents still need to know when to call 
 - The current Claude Code subagent frontmatter keys (`permissionMode`, `skills`, `model`, `tools`, `maxTurns`) and how `claude --agent` starts a main-session agent.
 - The current `SKILL.md` frontmatter (`name`, `description`) for Claude Code and opencode, and where opencode reads skills.
 
+## Verified before building (2026-10-26)
+
+- **Claude Code agents** (code.claude.com/docs/en/sub-agents):
+  - The frontmatter supports `name`, `description`, `tools`, `disallowedTools`, `model`, `permissionMode` (including `plan`), `maxTurns`, `skills` (preloaded), `effort` and `initialPrompt`.
+  - `claude --agent <name>` runs a definition as the main session; it takes the agent's tools and model, and CLAUDE.md still loads.
+  - AskUserQuestion is always removed from subagents, and ExitPlanMode unless `permissionMode: plan`.
+  - The docs do not say whether `permissionMode: plan` applies under `--agent`. The runbook therefore starts the planner with `claude --agent planner --permission-mode plan`.
+- **Claude Code skills** (code.claude.com/docs/en/skills):
+  - `.claude/skills/<name>/SKILL.md`, with symlinked skill folders followed.
+  - Supporting files are linked from `SKILL.md`.
+  - `description` plus `when_to_use` is cut off at 1,536 characters.
+- **opencode skills** (opencode.ai/docs/skills):
+  - It reads `.agents/skills/`, `.claude/skills/` and `.opencode/skills/`.
+  - `name` must match the folder name and `^[a-z0-9]+(-[a-z0-9]+)*$`; `description` is 1–1024 characters.
+  - The docs don't say whether symlinked folders work; opencode reads `.agents/skills/` directly anyway.
+- **Skills CLI:** running `npx skills` here was blocked by the agent's permission rules (it downloads and executes a package). A kit check script enforces the shared frontmatter rules instead (name matches the folder, description of 1–1024 characters). The `npx skills add ./ --list` check is left to the maintainer.
+
 ## Impact
 
 - New files under `template/.agents/skills/`, `template/.claude/`, and their kit copies.
