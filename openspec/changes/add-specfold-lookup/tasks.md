@@ -9,7 +9,7 @@ scenarios: [specfold-lookup#all-words-must-match, specfold-lookup#prefix-match, 
 agent: implementer
 ```
 
-- [ ] 1.1 Add matching, weighted ranking, the type filter and trust flags over a bundle's concepts
+- [x] 1.1 Add matching, weighted ranking, the type filter and trust flags over a bundle's concepts
   - Done when: the seven scenarios of this group pass in `lookup-search.test.ts`
 
 ## 2. Lookup command
