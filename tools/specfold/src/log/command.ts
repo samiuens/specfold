@@ -13,7 +13,8 @@ function isCalendarDate(text: string): boolean {
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text;
 }
 
-function localDate(now = new Date()): string {
+/** The local calendar date as YYYY-MM-DD. */
+export function localDate(now = new Date()): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
 }

@@ -29,6 +29,45 @@ export function isoWithOffset(date: Date): string {
   );
 }
 
+/** `decisions/guest-orders.md` → `Guest orders`. */
+export function titleFromPath(rel: string): string {
+  const name = rel.slice(rel.lastIndexOf("/") + 1, -3).replace(/-/g, " ");
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+export interface ConceptFields {
+  type: string;
+  title: string;
+  description: string;
+  by: string;
+  now: Date;
+}
+
+/** A new concept's text from the type's override template, or from the built-in frontmatter and body. */
+export function renderConcept(repoRoot: string, fields: ConceptFields): string {
+  const { type, title, description, by, now } = fields;
+  const placeholders = { type, title, description, by, now: isoWithOffset(now) };
+  return (
+    overrideTemplate(repoRoot, type, placeholders) ??
+    [
+      "---",
+      `type: ${scalar(type)}`,
+      `title: ${scalar(title)}`,
+      `description: ${scalar(description)}`,
+      "status: draft",
+      ...(type === "Decision" ? ["decision: accepted"] : []),
+      ...(type === "Runbook" || type === "Interface"
+        ? [`stale_after: ${isoWithOffset(new Date(now.getTime() + 90 * DAY_MS))}`]
+        : []),
+      `generated: { by: ${scalar(by)}, at: ${placeholders.now} }`,
+      ...(type === "Decision" ? ["sources: []"] : []),
+      "---",
+      "",
+      builtInBody(type),
+    ].join("\n")
+  );
+}
+
 function bundlePath(arg: string): string {
   const rel = arg.replace(/^\/+/, "");
   const segments = rel.split("/");
@@ -81,29 +120,9 @@ register({
       return 1;
     }
 
-    const now = new Date();
-    const name = rel.slice(rel.lastIndexOf("/") + 1, -3).replace(/-/g, " ");
-    const title = (values.title as string | undefined) ?? name.charAt(0).toUpperCase() + name.slice(1);
+    const title = (values.title as string | undefined) ?? titleFromPath(rel);
     const description = (values.description as string | undefined) ?? "";
-    const placeholders = { type, title, description, by, now: isoWithOffset(now) };
-    const content =
-      overrideTemplate(config.root, type, placeholders) ??
-      [
-        "---",
-        `type: ${scalar(type)}`,
-        `title: ${scalar(title)}`,
-        `description: ${scalar(description)}`,
-        "status: draft",
-        ...(type === "Decision" ? ["decision: accepted"] : []),
-        ...(type === "Runbook" || type === "Interface"
-          ? [`stale_after: ${isoWithOffset(new Date(now.getTime() + 90 * DAY_MS))}`]
-          : []),
-        `generated: { by: ${scalar(by)}, at: ${placeholders.now} }`,
-        ...(type === "Decision" ? ["sources: []"] : []),
-        "---",
-        "",
-        builtInBody(type),
-      ].join("\n");
+    const content = renderConcept(config.root, { type, title, description, by, now: new Date() });
     mkdirSync(dirname(abs), { recursive: true });
     writeFileSync(abs, content);
     io.stdout(values.json ? `${JSON.stringify({ created: shown })}\n` : `${shown}\n`);
