@@ -23,7 +23,7 @@ Commits in the kit repo follow `<type>(<scope>): <gitmoji> <subject>`:
 - One logical change per commit, matching "one task, one commit".
 - Each type has a default gitmoji and a set of allowed ones; `!` plus 💥 marks a breaking change. 🚧, 💩 and 🍻 are not allowed.
 - Scopes, the type-to-gitmoji mapping, allowed trailers and non-human author patterns live in one place: `scripts/commit-convention.json`. Gitmojis come only from the pinned npm package `gitmojis`; a new upstream gitmoji is rejected until the mapping is extended in a PR.
-- The human user's git identity is always the author; an agent that wrote or substantially changed the content adds itself as `Co-Authored-By:` with its tool's name and address, without a model name or version.
+- The human user's git identity is always the author; an agent that wrote or substantially changed the content adds itself as `Co-Authored-By:`, using the trailer its tool writes by default (a model name in it is allowed).
 
 Enforcement:
 

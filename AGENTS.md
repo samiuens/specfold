@@ -66,4 +66,4 @@ Format `<type>(<scope>): <gitmoji> <subject>`: English, lowercase (backticks for
 
 Scopes and the full mapping: `scripts/commit-convention.json`. Never 🚧 💩 🍻. Releases `chore(release): 🔖 vX.Y.Z`, merges `chore(merge): 🔀 <branch>`, dependencies `build(deps)`.
 
-**Authorship:** the human user's git identity is always the author and committer; agents never change it. An agent that wrote or substantially changed a commit adds itself as `Co-Authored-By:` with its tool's name and address, without a model name or version. Check a message with `node scripts/check-commit.mjs --message-file <file>`.
+**Authorship:** the human user's git identity is always the author and committer; agents never change it. An agent that wrote or substantially changed a commit adds itself as `Co-Authored-By:`, using the trailer its tool writes by default (a model name in it is fine). Check a message with `node scripts/check-commit.mjs --message-file <file>`.
