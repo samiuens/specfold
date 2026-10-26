@@ -44,6 +44,14 @@ jobs:
             diff -r "$skill" ".agents/skills/$name" || { echo "::error::.agents/skills/$name differs from the template; copy it over"; exit 1; }
           done
           diff template/.claude/agents/planner.md .claude/agents/planner.md
+      - name: Kit gate setup matches the template
+        run: |
+          for path in .claude/settings.json .github/workflows/specfold-gate-comment.yml .github/pull_request_template.md; do
+            diff "template/$path" "$path" || { echo "::error::$path differs from template/$path; copy it over"; exit 1; }
+          done
+          # the kit installs OpenSpec with its own npm ci; everything else is the template's workflow
+          sed 's#run: npm install --global @fission-ai/openspec@.*#run: npm ci --ignore-scripts#' template/.github/workflows/specfold-gate.yml \
+            | diff - .github/workflows/specfold-gate.yml || { echo "::error::.github/workflows/specfold-gate.yml differs from the template beyond the OpenSpec install"; exit 1; }
       - name: Skills follow the shared frontmatter rules
         run: node scripts/check-skills.mjs .agents/skills template/.agents/skills
       - name: Skill links are up to date
@@ -60,7 +68,7 @@ jobs:
         run: diff scripts/specfold.mjs template/scripts/specfold.mjs || { echo "::error::template/scripts/specfold.mjs is stale; copy scripts/specfold.mjs over"; exit 1; }
       - name: Sample app copies match the template
         run: |
-          for path in AGENTS.md CLAUDE.md scripts/specfold.mjs openspec/schemas/specfold .agents/skills .claude/skills .claude/agents knowledge/conventions/code-comments.md; do
+          for path in AGENTS.md CLAUDE.md scripts/specfold.mjs openspec/schemas/specfold .agents/skills .claude/skills .claude/agents .claude/settings.json knowledge/conventions/code-comments.md; do
             diff -r "template/$path" "examples/sample-app/$path" || { echo "::error::examples/sample-app/$path differs from template/$path"; exit 1; }
           done
       - name: Sample app passes the workflow checks
