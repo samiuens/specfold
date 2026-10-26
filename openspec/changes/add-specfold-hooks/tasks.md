@@ -49,13 +49,13 @@ agent: implementer
 ## 4. Claude hooks
 
 ```yaml
-files: [tools/specfold/src/hooks/claude.ts, tools/specfold/src/hooks/run.ts, tools/specfold/test/hooks-claude.test.ts]
+files: [tools/specfold/src/hooks/claude.ts, tools/specfold/src/hooks/base.ts, tools/specfold/src/hooks/run.ts, tools/specfold/test/hooks-claude.test.ts]
 depends: [3]
 scenarios: [specfold-hooks#context-at-start, specfold-hooks#agent-writes-a-broken-concept, specfold-hooks#unfinished-work]
 agent: implementer
 ```
 
-- [ ] 4.1 Add the Claude Code session start, post-tool-use and stop hooks
+- [x] 4.1 Add the Claude Code session start, post-tool-use and stop hooks
   - Done when: scenarios context-at-start, agent-writes-a-broken-concept and unfinished-work pass in `hooks-claude.test.ts`
 
 ## 5. Kit switch

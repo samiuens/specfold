@@ -6,12 +6,14 @@ import type { Io } from "../cli.ts";
 import { findingLine } from "../findings.ts";
 import { localGate, renderGate } from "../gate/command.ts";
 import { openspecValidate } from "../gate/openspec.ts";
-import { git, gitSucceeds } from "../git.ts";
+import { git } from "../git.ts";
 import { openspecBinary } from "../openspec.ts";
 import { type Config, resolveBundleRoot } from "../repo.ts";
 import { taskFindingLine } from "../tasks/command.ts";
 import { validate } from "../validate/index.ts";
 import { isConcept } from "../validate/okf.ts";
+import { localBase } from "./base.ts";
+import { postToolUse, sessionStart, stop } from "./claude.ts";
 
 export interface HookContext {
   config: Config;
@@ -65,19 +67,6 @@ function preCommit({ config, io }: HookContext): number {
   return 1;
 }
 
-/** The branch the local gate compares against: origin/HEAD, else origin/main; undefined when neither exists. */
-export function localBase(root: string): string | undefined {
-  try {
-    const head = git(root, ["symbolic-ref", "--quiet", "refs/remotes/origin/HEAD"]).trim();
-    if (head) return head.replace(/^refs\/remotes\//, "");
-  } catch {
-    // no origin/HEAD; try origin/main
-  }
-  return gitSucceeds(root, ["rev-parse", "--verify", "--quiet", "origin/main^{commit}"])
-    ? "origin/main"
-    : undefined;
-}
-
 /** The local gate against origin; without a base the push goes through, because CI still gates. */
 function prePush({ config, io }: HookContext): number {
   const base = localBase(config.root);
@@ -109,6 +98,9 @@ const OWN_CHECKS: Record<string, OwnHook> = {
   "pre-push": prePush,
   "post-checkout": refreshGraph,
   "post-merge": refreshGraph,
+  "claude-session-start": sessionStart,
+  "claude-post-tool-use": postToolUse,
+  "claude-stop": stop,
 };
 
 /** Runs each `hooks.extra.<name>` command with `sh -c`, the hook's arguments as `$1`, `$2`, ...; stops at the first failure. */
