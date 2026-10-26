@@ -11,7 +11,7 @@ agent: implementer
 
 - [x] 1.1 Read `audit.unverified_after_days` (default 30) and set it in the kit and template settings
   - Done when: `repo.test.ts` covers the default and a configured value
-- [ ] 1.2 Export the body link extraction of rule L1 as `bodyLinks`
+- [x] 1.2 Export the body link extraction of rule L1 as `bodyLinks`
   - Done when: `npm test -w specfold` passes with the L1 tests unchanged
 
 ## 2. Audit rules

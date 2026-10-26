@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
-import type { Finding } from "../findings.ts";
+import type { ParsedFile } from "../bundle.ts";
 import type { Rule } from "./index.ts";
 import { isConcept, isRecord } from "./okf.ts";
 import { resolveInBundle } from "./profile.ts";
@@ -8,11 +8,17 @@ import { resolveInBundle } from "./profile.ts";
 const SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 const LINK = /!?\[[^\]]*\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)/g;
 
-/** L1: bundle-absolute and relative Markdown links in a concept body resolve inside the bundle. */
-export const l1: Rule = (file, ctx) => {
-  if (!isConcept(file.rel) || !isRecord(file.frontmatter?.data)) return [];
-  const severity = ctx.config?.blockOnBrokenLinks === false ? "warning" : "error";
-  const findings: Finding[] = [];
+export interface BodyLink {
+  /** The link target as written. */
+  target: string;
+  /** Absolute path the target resolves to inside the bundle, or undefined when it leaves the bundle. */
+  abs: string | undefined;
+  line: number;
+}
+
+/** Bundle-internal Markdown links in a concept body, skipping URLs, anchors, fenced code and inline code. */
+export function bodyLinks(file: ParsedFile, bundleRoot: string): BodyLink[] {
+  const links: BodyLink[] = [];
   let fence: string | undefined;
   file.body.split("\n").forEach((text, i) => {
     const marker = /^\s*(`{3,}|~{3,})/.exec(text)?.[1];
@@ -31,19 +37,30 @@ export const l1: Rule = (file, ctx) => {
       } catch {
         // keep the raw target
       }
-      const abs = resolveInBundle(ctx.bundleRoot, file.rel, decoded);
-      if (abs && existsSync(abs)) continue;
-      findings.push({
-        rule: "L1",
-        severity,
-        path: file.rel,
+      links.push({
+        target,
+        abs: resolveInBundle(bundleRoot, file.rel, decoded),
         line: file.bodyStartLine + i,
-        message: `broken link '${target}'`,
-        fix: "point the link at an existing concept, bundle-absolute like /decisions/x.md",
       });
     }
   });
-  return findings;
+  return links;
+}
+
+/** L1: bundle-absolute and relative Markdown links in a concept body resolve inside the bundle. */
+export const l1: Rule = (file, ctx) => {
+  if (!isConcept(file.rel) || !isRecord(file.frontmatter?.data)) return [];
+  const severity = ctx.config?.blockOnBrokenLinks === false ? "warning" : "error";
+  return bodyLinks(file, ctx.bundleRoot)
+    .filter((link) => !(link.abs && existsSync(link.abs)))
+    .map((link) => ({
+      rule: "L1",
+      severity,
+      path: file.rel,
+      line: link.line,
+      message: `broken link '${link.target}'`,
+      fix: "point the link at an existing concept, bundle-absolute like /decisions/x.md",
+    }));
 };
 
 /** L2: non-URL `resource` values resolve to existing files, bundle-absolute or relative to the concept. */
