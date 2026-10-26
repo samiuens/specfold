@@ -22,7 +22,9 @@
 - Normative words in knowledge: `specfold validate` already blocks them (P9), so audit does not repeat that check.
 - Scheduled CI, G12, commitments and backlog checks (M4, M5).
 
-## Open points for review
+## Confirmed in review
+
+Confirmed by the maintainer on 2026-10-26, point by point:
 
 1. **Unverified means old:** a concept without `verified` is reported only when its `generated.at` is more than `audit.unverified_after_days` (default 30) in the past. Without that age limit every fresh draft would be a finding and exit 1 would be meaningless.
 2. **Orphan:** a concept that no other concept links to and no code references with `see knowledge:`. Links from `index.md` and `log.md` do not count, since they are generated. Capability cards are not orphans when their spec exists, and `vision/` concepts are exempt.
