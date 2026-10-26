@@ -2,13 +2,19 @@ import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "n
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { generateIndexes } from "../src/indexes/generate.ts";
+import { locationsByConcept, scanReferences } from "../src/indexes/refs.ts";
 import { loadConfig } from "../src/repo.ts";
 import { run, tempDir } from "./helpers.ts";
 
 const EXPECTED = new URL("./fixtures/index/expected/", import.meta.url).pathname;
 
 function generate(repo: string) {
-  return generateIndexes(join(repo, "knowledge"), loadConfig(repo)).indexes;
+  const config = loadConfig(repo);
+  return generateIndexes(
+    join(repo, "knowledge"),
+    config,
+    locationsByConcept(scanReferences(repo, config.sourceGlobs)),
+  ).indexes;
 }
 
 const expected = (rel: string) => readFileSync(join(EXPECTED, rel), "utf8");
