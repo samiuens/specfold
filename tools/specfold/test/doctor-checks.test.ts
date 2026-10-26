@@ -68,13 +68,27 @@ describe("doctor: checks", () => {
     });
   });
 
+  // spec: specfold-doctor#repository-local-openspec
+  it("D3 prefers a repository-local openspec binary", () => {
+    const repo = tempDir("valid");
+    const bin = join(repo, "node_modules", ".bin");
+    mkdirSync(bin, { recursive: true });
+    writeFileSync(join(bin, "openspec"), "");
+    const { "openspec --version": _, ...noPath } = healthy;
+    const d3 = check(
+      runChecks(env(repo, { ...noPath, [`${join(bin, "openspec")} --version`]: "1.15.0\n" })),
+      "D3",
+    );
+    expect(d3).toMatchObject({ status: "ok", message: "openspec 1.15.0 from node_modules/.bin (>=1.15 <2)" });
+  });
+
   // spec: specfold-doctor#version-out-of-range
   it("D3 fails when the version is outside requires.openspec", () => {
     const repo = tempDir("valid");
     writeFileSync(join(repo, "specfold.yaml"), 'types: [Term]\nrequires:\n  openspec: ">=1.15 <2"\n');
     const d3 = check(runChecks(env(repo, { ...healthy, "openspec --version": "2.0.1" })), "D3");
     expect(d3?.status).toBe("fail");
-    expect(d3?.message).toBe("openspec 2.0.1 does not satisfy >=1.15 <2");
+    expect(d3?.message).toBe("openspec 2.0.1 from PATH does not satisfy >=1.15 <2");
   });
 
   // spec: specfold-doctor#hooks-not-installed
