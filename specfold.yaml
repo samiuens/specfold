@@ -11,8 +11,8 @@ requires:
   openspec: ">=1.15 <2"
   okf: "0.2"
 
-# test fixtures are left out: they hold deliberate references to concepts that do not exist
-source_globs: ["tools/specfold/src/**", "tools/specfold/build.mjs", "scripts/**", "template/**"]
+# Test fixtures and template knowledge are left out: they hold deliberate or example references.
+source_globs: ["tools/specfold/src/**", "tools/specfold/build.mjs", "scripts/**", "template/*", "template/openspec/**"]
 
 folders:
   architecture:
