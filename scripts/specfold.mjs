@@ -4001,10 +4001,10 @@ var require_resolve_block_map = __commonJS({
       let offset = bm.offset;
       let commentEnd = null;
       for (const collItem of bm.items) {
-        const { start, key, sep: sep4, value } = collItem;
+        const { start, key, sep: sep5, value } = collItem;
         const keyProps = resolveProps.resolveProps(start, {
           indicator: "explicit-key-ind",
-          next: key ?? sep4?.[0],
+          next: key ?? sep5?.[0],
           offset,
           onError,
           parentIndent: bm.indent,
@@ -4018,7 +4018,7 @@ var require_resolve_block_map = __commonJS({
             else if ("indent" in key && key.indent !== bm.indent)
               onError(offset, "BAD_INDENT", startColMsg);
           }
-          if (!keyProps.anchor && !keyProps.tag && !sep4) {
+          if (!keyProps.anchor && !keyProps.tag && !sep5) {
             commentEnd = keyProps.end;
             if (keyProps.comment) {
               if (map.comment)
@@ -4042,7 +4042,7 @@ var require_resolve_block_map = __commonJS({
         ctx.atKey = false;
         if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
           onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
-        const valueProps = resolveProps.resolveProps(sep4 ?? [], {
+        const valueProps = resolveProps.resolveProps(sep5 ?? [], {
           indicator: "map-value-ind",
           next: value,
           offset: keyNode.range[2],
@@ -4058,7 +4058,7 @@ var require_resolve_block_map = __commonJS({
             if (ctx.options.strict && keyProps.start < valueProps.found.offset - 1024)
               onError(keyNode.range, "KEY_OVER_1024_CHARS", "The : indicator must be at most 1024 chars after the start of an implicit block mapping key");
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep4, null, valueProps, onError);
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep5, null, valueProps, onError);
           if (ctx.schema.compat)
             utilFlowIndentCheck.flowIndentCheck(bm.indent, value, onError);
           offset = valueNode.range[2];
@@ -4149,7 +4149,7 @@ var require_resolve_end = __commonJS({
       let comment = "";
       if (end) {
         let hasSpace = false;
-        let sep4 = "";
+        let sep5 = "";
         for (const token of end) {
           const { source, type } = token;
           switch (type) {
@@ -4163,13 +4163,13 @@ var require_resolve_end = __commonJS({
               if (!comment)
                 comment = cb;
               else
-                comment += sep4 + cb;
-              sep4 = "";
+                comment += sep5 + cb;
+              sep5 = "";
               break;
             }
             case "newline":
               if (comment)
-                sep4 += source;
+                sep5 += source;
               hasSpace = true;
               break;
             default:
@@ -4212,18 +4212,18 @@ var require_resolve_flow_collection = __commonJS({
       let offset = fc.offset + fc.start.source.length;
       for (let i = 0; i < fc.items.length; ++i) {
         const collItem = fc.items[i];
-        const { start, key, sep: sep4, value } = collItem;
+        const { start, key, sep: sep5, value } = collItem;
         const props = resolveProps.resolveProps(start, {
           flow: fcName,
           indicator: "explicit-key-ind",
-          next: key ?? sep4?.[0],
+          next: key ?? sep5?.[0],
           offset,
           onError,
           parentIndent: fc.indent,
           startOnNewline: false
         });
         if (!props.found) {
-          if (!props.anchor && !props.tag && !sep4 && !value) {
+          if (!props.anchor && !props.tag && !sep5 && !value) {
             if (i === 0 && props.comma)
               onError(props.comma, "UNEXPECTED_TOKEN", `Unexpected , in ${fcName}`);
             else if (i < fc.items.length - 1)
@@ -4277,8 +4277,8 @@ var require_resolve_flow_collection = __commonJS({
             }
           }
         }
-        if (!isMap && !sep4 && !props.found) {
-          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep4, null, props, onError);
+        if (!isMap && !sep5 && !props.found) {
+          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep5, null, props, onError);
           coll.items.push(valueNode);
           offset = valueNode.range[2];
           if (isBlock(value))
@@ -4290,7 +4290,7 @@ var require_resolve_flow_collection = __commonJS({
           if (isBlock(key))
             onError(keyNode.range, "BLOCK_IN_FLOW", blockMsg);
           ctx.atKey = false;
-          const valueProps = resolveProps.resolveProps(sep4 ?? [], {
+          const valueProps = resolveProps.resolveProps(sep5 ?? [], {
             flow: fcName,
             indicator: "map-value-ind",
             next: value,
@@ -4301,8 +4301,8 @@ var require_resolve_flow_collection = __commonJS({
           });
           if (valueProps.found) {
             if (!isMap && !props.found && ctx.options.strict) {
-              if (sep4)
-                for (const st of sep4) {
+              if (sep5)
+                for (const st of sep5) {
                   if (st === valueProps.found)
                     break;
                   if (st.type === "newline") {
@@ -4319,7 +4319,7 @@ var require_resolve_flow_collection = __commonJS({
             else
               onError(valueProps.start, "MISSING_CHAR", `Missing , or : between ${fcName} items`);
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep4, null, valueProps, onError) : null;
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep5, null, valueProps, onError) : null;
           if (valueNode) {
             if (isBlock(value))
               onError(valueNode.range, "BLOCK_IN_FLOW", blockMsg);
@@ -4448,13 +4448,13 @@ var require_resolve_block_scalar = __commonJS({
   "../../node_modules/yaml/dist/compose/resolve-block-scalar.js"(exports) {
     "use strict";
     var Scalar = require_Scalar();
-    function resolveBlockScalar(ctx, scalar, onError) {
-      const start = scalar.offset;
-      const header = parseBlockScalarHeader(scalar, ctx.options.strict, onError);
+    function resolveBlockScalar(ctx, scalar2, onError) {
+      const start = scalar2.offset;
+      const header = parseBlockScalarHeader(scalar2, ctx.options.strict, onError);
       if (!header)
         return { value: "", type: null, comment: "", range: [start, start, start] };
       const type = header.mode === ">" ? Scalar.Scalar.BLOCK_FOLDED : Scalar.Scalar.BLOCK_LITERAL;
-      const lines = scalar.source ? splitLines(scalar.source) : [];
+      const lines = scalar2.source ? splitLines(scalar2.source) : [];
       let chompStart = lines.length;
       for (let i = lines.length - 1; i >= 0; --i) {
         const content = lines[i][1];
@@ -4466,12 +4466,12 @@ var require_resolve_block_scalar = __commonJS({
       if (chompStart === 0) {
         const value2 = header.chomp === "+" && lines.length > 0 ? "\n".repeat(Math.max(1, lines.length - 1)) : "";
         let end2 = start + header.length;
-        if (scalar.source)
-          end2 += scalar.source.length;
+        if (scalar2.source)
+          end2 += scalar2.source.length;
         return { value: value2, type, comment: header.comment, range: [start, end2, end2] };
       }
-      let trimIndent = scalar.indent + header.indent;
-      let offset = scalar.offset + header.length;
+      let trimIndent = scalar2.indent + header.indent;
+      let offset = scalar2.offset + header.length;
       let contentStart = 0;
       for (let i = 0; i < chompStart; ++i) {
         const [indent, content] = lines[i];
@@ -4499,7 +4499,7 @@ var require_resolve_block_scalar = __commonJS({
           chompStart = i + 1;
       }
       let value = "";
-      let sep4 = "";
+      let sep5 = "";
       let prevMoreIndented = false;
       for (let i = 0; i < contentStart; ++i)
         value += lines[i][0].slice(trimIndent) + "\n";
@@ -4516,24 +4516,24 @@ var require_resolve_block_scalar = __commonJS({
           indent = "";
         }
         if (type === Scalar.Scalar.BLOCK_LITERAL) {
-          value += sep4 + indent.slice(trimIndent) + content;
-          sep4 = "\n";
+          value += sep5 + indent.slice(trimIndent) + content;
+          sep5 = "\n";
         } else if (indent.length > trimIndent || content[0] === "	") {
-          if (sep4 === " ")
-            sep4 = "\n";
-          else if (!prevMoreIndented && sep4 === "\n")
-            sep4 = "\n\n";
-          value += sep4 + indent.slice(trimIndent) + content;
-          sep4 = "\n";
+          if (sep5 === " ")
+            sep5 = "\n";
+          else if (!prevMoreIndented && sep5 === "\n")
+            sep5 = "\n\n";
+          value += sep5 + indent.slice(trimIndent) + content;
+          sep5 = "\n";
           prevMoreIndented = true;
         } else if (content === "") {
-          if (sep4 === "\n")
+          if (sep5 === "\n")
             value += "\n";
           else
-            sep4 = "\n";
+            sep5 = "\n";
         } else {
-          value += sep4 + content;
-          sep4 = " ";
+          value += sep5 + content;
+          sep5 = " ";
           prevMoreIndented = false;
         }
       }
@@ -4549,7 +4549,7 @@ var require_resolve_block_scalar = __commonJS({
         default:
           value += "\n";
       }
-      const end = start + header.length + scalar.source.length;
+      const end = start + header.length + scalar2.source.length;
       return { value, type, comment: header.comment, range: [start, end, end] };
     }
     function parseBlockScalarHeader({ offset, props }, strict, onError) {
@@ -4632,8 +4632,8 @@ var require_resolve_flow_scalar = __commonJS({
     "use strict";
     var Scalar = require_Scalar();
     var resolveEnd = require_resolve_end();
-    function resolveFlowScalar(scalar, strict, onError) {
-      const { offset, type, source, end } = scalar;
+    function resolveFlowScalar(scalar2, strict, onError) {
+      const { offset, type, source, end } = scalar2;
       let _type;
       let value;
       const _onError = (rel, code, msg) => onError(offset + rel, code, msg);
@@ -4652,7 +4652,7 @@ var require_resolve_flow_scalar = __commonJS({
           break;
         /* istanbul ignore next should not happen */
         default:
-          onError(scalar, "UNEXPECTED_TOKEN", `Expected a flow scalar value, but found: ${type}`);
+          onError(scalar2, "UNEXPECTED_TOKEN", `Expected a flow scalar value, but found: ${type}`);
           return {
             value: "",
             type: null,
@@ -4716,25 +4716,25 @@ var require_resolve_flow_scalar = __commonJS({
         trimBoth = /^[ \t]+|[ \t]+$/g;
       }
       let res = match[1].replace(trimEnd, "");
-      let sep4 = " ";
+      let sep5 = " ";
       let pos = line.lastIndex;
       while (match = line.exec(source)) {
         const lm = match[1].replace(trimBoth, "");
         if (lm === "") {
-          if (sep4 === "\n")
-            res += sep4;
+          if (sep5 === "\n")
+            res += sep5;
           else
-            sep4 = "\n";
+            sep5 = "\n";
         } else {
-          res += sep4 + lm;
-          sep4 = " ";
+          res += sep5 + lm;
+          sep5 = " ";
         }
         pos = line.lastIndex;
       }
       const last = /[ \t]*(.*)/sy;
       last.lastIndex = pos;
       match = last.exec(source);
-      return res + sep4 + (match?.[1] ?? "");
+      return res + sep5 + (match?.[1] ?? "");
     }
     function doubleQuotedValue(source, onError) {
       let res = "";
@@ -4867,26 +4867,26 @@ var require_compose_scalar = __commonJS({
         tag = findScalarTagByTest(ctx, value, token, onError);
       else
         tag = ctx.schema[identity.SCALAR];
-      let scalar;
+      let scalar2;
       try {
         const res = tag.resolve(value, (msg) => onError(tagToken ?? token, "TAG_RESOLVE_FAILED", msg), ctx.options);
-        scalar = identity.isScalar(res) ? res : new Scalar.Scalar(res);
+        scalar2 = identity.isScalar(res) ? res : new Scalar.Scalar(res);
       } catch (error) {
         const msg = error instanceof Error ? error.message : String(error);
         onError(tagToken ?? token, "TAG_RESOLVE_FAILED", msg);
-        scalar = new Scalar.Scalar(value);
+        scalar2 = new Scalar.Scalar(value);
       }
-      scalar.range = range;
-      scalar.source = value;
+      scalar2.range = range;
+      scalar2.source = value;
       if (type)
-        scalar.type = type;
+        scalar2.type = type;
       if (tagName)
-        scalar.tag = tagName;
+        scalar2.tag = tagName;
       if (tag.format)
-        scalar.format = tag.format;
+        scalar2.format = tag.format;
       if (comment)
-        scalar.comment = comment;
-      return scalar;
+        scalar2.comment = comment;
+      return scalar2;
     }
     function findScalarTagByName(schema, value, tagName, tagToken, onError) {
       if (tagName === "!")
@@ -5544,14 +5544,14 @@ var require_cst_stringify = __commonJS({
         }
       }
     }
-    function stringifyItem({ start, key, sep: sep4, value }) {
+    function stringifyItem({ start, key, sep: sep5, value }) {
       let res = "";
       for (const st of start)
         res += st.source;
       if (key)
         res += stringifyToken(key);
-      if (sep4)
-        for (const st of sep4)
+      if (sep5)
+        for (const st of sep5)
           res += st.source;
       if (value)
         res += stringifyToken(value);
@@ -6714,37 +6714,37 @@ var require_parser = __commonJS({
           };
         }
       }
-      *scalar(scalar) {
+      *scalar(scalar2) {
         if (this.type === "map-value-ind") {
           const prev = getPrevProps(this.peek(2));
           const start = getFirstKeyStartProps(prev);
-          let sep4;
-          if (scalar.end) {
-            sep4 = scalar.end;
-            sep4.push(this.sourceToken);
-            delete scalar.end;
+          let sep5;
+          if (scalar2.end) {
+            sep5 = scalar2.end;
+            sep5.push(this.sourceToken);
+            delete scalar2.end;
           } else
-            sep4 = [this.sourceToken];
+            sep5 = [this.sourceToken];
           const map = {
             type: "block-map",
-            offset: scalar.offset,
-            indent: scalar.indent,
-            items: [{ start, key: scalar, sep: sep4 }]
+            offset: scalar2.offset,
+            indent: scalar2.indent,
+            items: [{ start, key: scalar2, sep: sep5 }]
           };
           this.onKeyLine = true;
           this.stack[this.stack.length - 1] = map;
         } else
-          yield* this.lineEnd(scalar);
+          yield* this.lineEnd(scalar2);
       }
-      *blockScalar(scalar) {
+      *blockScalar(scalar2) {
         switch (this.type) {
           case "space":
           case "comment":
           case "newline":
-            scalar.props.push(this.sourceToken);
+            scalar2.props.push(this.sourceToken);
             return;
           case "scalar":
-            scalar.source = this.source;
+            scalar2.source = this.source;
             this.atNewLine = true;
             this.indent = 0;
             if (this.onNewLine) {
@@ -6882,15 +6882,15 @@ var require_parser = __commonJS({
                 } else if (isFlowToken(it.key) && !includesToken(it.sep, "newline")) {
                   const start2 = getFirstKeyStartProps(it.start);
                   const key = it.key;
-                  const sep4 = it.sep;
-                  sep4.push(this.sourceToken);
+                  const sep5 = it.sep;
+                  sep5.push(this.sourceToken);
                   delete it.key;
                   delete it.sep;
                   this.stack.push({
                     type: "block-map",
                     offset: this.offset,
                     indent: this.indent,
-                    items: [{ start: start2, key, sep: sep4 }]
+                    items: [{ start: start2, key, sep: sep5 }]
                   });
                 } else if (start.length > 0) {
                   it.sep = it.sep.concat(start, this.sourceToken);
@@ -7084,13 +7084,13 @@ var require_parser = __commonJS({
             const prev = getPrevProps(parent);
             const start = getFirstKeyStartProps(prev);
             fixFlowSeqItems(fc);
-            const sep4 = fc.end.splice(1, fc.end.length);
-            sep4.push(this.sourceToken);
+            const sep5 = fc.end.splice(1, fc.end.length);
+            sep5.push(this.sourceToken);
             const map = {
               type: "block-map",
               offset: fc.offset,
               indent: fc.indent,
-              items: [{ start, key: fc, sep: sep4 }]
+              items: [{ start, key: fc, sep: sep5 }]
             };
             this.onKeyLine = true;
             this.stack[this.stack.length - 1] = map;
@@ -7504,6 +7504,7 @@ function loadConfig(root) {
   }
   if (!isRecord(data)) throw new EnvError(`${CONFIG_FILE}: expected a mapping at the top level`);
   const gate = isRecord(data.gate) ? data.gate : {};
+  const actors = isRecord(data.actors) ? data.actors : {};
   const folders = {};
   if (isRecord(data.folders)) {
     for (const [path, info] of Object.entries(data.folders)) {
@@ -7519,7 +7520,8 @@ function loadConfig(root) {
     types: stringList(data.types, "types"),
     sourceGlobs: stringList(data.source_globs, "source_globs"),
     blockOnBrokenLinks: gate.block_on_broken_links !== false,
-    folders
+    folders,
+    agentPrefix: typeof actors.agent_prefix === "string" ? actors.agent_prefix : ""
   };
 }
 function requireConfig(cwd) {
@@ -7933,13 +7935,139 @@ register({
   }
 });
 
+// src/new/command.ts
+import { existsSync as existsSync5, mkdirSync, writeFileSync as writeFileSync3 } from "node:fs";
+import { dirname as dirname2, join as join8, relative as relative3, sep as sep3 } from "node:path";
+
+// src/new/templates.ts
+import { existsSync as existsSync4, readFileSync as readFileSync6 } from "node:fs";
+import { join as join7 } from "node:path";
+var HEADINGS = {
+  Term: ["Meaning", "Not to be confused with", "Related"],
+  "Business Rule": ["Rule", "Why", "Related"],
+  Component: ["Responsibility", "Interfaces", "Related"],
+  "Data Flow": ["Flow", "Related"],
+  Interface: ["Contract summary", "Consumers", "Related"],
+  Decision: ["Decision", "Why", "Rejected alternatives", "Related"],
+  Capability: ["Why", "Related"],
+  Convention: ["Convention", "Why", "Related"],
+  Runbook: ["When to use", "Steps", "Verify", "Related"],
+  Reference: ["Summary", "Related"],
+  Vision: ["Goals", "Non-goals", "Principles"],
+  "Deferred Commitment": ["Commitment", "Trigger", "Related"],
+  "Backlog Item": ["Idea", "Related"]
+};
+var GENERIC = ["Summary", "Related"];
+var TEMPLATE_DIR = ".agents/skills/sf-capture/templates";
+var typeSlug = (type) => type.trim().toLowerCase().replace(/\s+/g, "-");
+function builtInBody(type) {
+  return `${(HEADINGS[type] ?? GENERIC).map((h) => `# ${h}`).join("\n\n")}
+`;
+}
+function overrideTemplate(repoRoot, type, values) {
+  const path = join7(repoRoot, TEMPLATE_DIR, `${typeSlug(type)}.md`);
+  if (!existsSync4(path)) return void 0;
+  return readFileSync6(path, "utf8").replace(
+    /\{\{(type|title|description|by|now)\}\}/g,
+    (_, key) => values[key]
+  );
+}
+
+// src/new/command.ts
+var KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+var ACTOR = /^(?:process:\S+|[^\s/:]+\/\S+)$/;
+var RESERVED_WORDS = /^(?:true|false|null|yes|no|on|off|~)$/i;
+var DAY_MS = 24 * 60 * 60 * 1e3;
+function scalar(value) {
+  const plain = /^[A-Za-z0-9][A-Za-z0-9 _.,;()'/-]*$/.test(value) && !RESERVED_WORDS.test(value) && !value.endsWith(" ");
+  return plain ? value : JSON.stringify(value);
+}
+function isoWithOffset(date) {
+  const pad = (n) => String(Math.abs(n)).padStart(2, "0");
+  const offset = -date.getTimezoneOffset();
+  const sign = offset < 0 ? "-" : "+";
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}${sign}${pad(Math.trunc(offset / 60))}:${pad(offset % 60)}`;
+}
+function bundlePath(arg) {
+  const rel = arg.replace(/^\/+/, "");
+  const segments = rel.split("/");
+  const file = segments.at(-1) ?? "";
+  const valid = file.endsWith(".md") && file !== "index.md" && file !== "log.md" && segments.slice(0, -1).every((s) => KEBAB.test(s)) && KEBAB.test(file.slice(0, -3));
+  if (!valid)
+    throw new UsageError(
+      `path '${arg}' must be a kebab-case .md file inside the bundle, e.g. decisions/use-yaml.md`
+    );
+  return rel;
+}
+register({
+  name: "new",
+  summary: "create a concept from its type's template",
+  usage: "specfold new <type> <path> [--title <text>] [--description <text>] [--by <actor>] [--json]",
+  options: {
+    title: { type: "string" },
+    description: { type: "string" },
+    by: { type: "string" },
+    json: { type: "boolean" }
+  },
+  run: ({ io, values, positionals }) => {
+    if (positionals.length !== 2) throw new UsageError("expected <type> and <path>");
+    const [type = "", pathArg = ""] = positionals;
+    const config = requireConfig(io.cwd);
+    if (!config.types.includes(type)) {
+      throw new UsageError(`type '${type}' is not in specfold.yaml types: ${config.types.join(", ")}`);
+    }
+    const rel = bundlePath(pathArg);
+    const model = process.env.SPECFOLD_MODEL;
+    const by = values.by ?? (model ? `${config.agentPrefix}${model}` : "process:specfold-new");
+    if (by.startsWith("human:"))
+      throw new UsageError("human actors are added by 'specfold verify', never by 'new'");
+    if (!ACTOR.test(by))
+      throw new UsageError(`actor '${by}' must look like '<producer>/<version>' or 'process:<id>'`);
+    const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
+    const abs = join8(bundleRoot, rel);
+    const shown = relative3(config.root, abs).split(sep3).join("/");
+    if (existsSync5(abs)) {
+      if (values.json) io.stdout(`${JSON.stringify({ created: null, error: `${shown} already exists` })}
+`);
+      else io.stderr(`specfold: ${shown} already exists
+`);
+      return 1;
+    }
+    const now = /* @__PURE__ */ new Date();
+    const name = rel.slice(rel.lastIndexOf("/") + 1, -3).replace(/-/g, " ");
+    const title = values.title ?? name.charAt(0).toUpperCase() + name.slice(1);
+    const description = values.description ?? "";
+    const placeholders = { type, title, description, by, now: isoWithOffset(now) };
+    const content = overrideTemplate(config.root, type, placeholders) ?? [
+      "---",
+      `type: ${scalar(type)}`,
+      `title: ${scalar(title)}`,
+      `description: ${scalar(description)}`,
+      "status: draft",
+      ...type === "Decision" ? ["decision: accepted"] : [],
+      ...type === "Runbook" || type === "Interface" ? [`stale_after: ${isoWithOffset(new Date(now.getTime() + 90 * DAY_MS))}`] : [],
+      `generated: { by: ${scalar(by)}, at: ${placeholders.now} }`,
+      ...type === "Decision" ? ["sources: []"] : [],
+      "---",
+      "",
+      builtInBody(type)
+    ].join("\n");
+    mkdirSync(dirname2(abs), { recursive: true });
+    writeFileSync3(abs, content);
+    io.stdout(values.json ? `${JSON.stringify({ created: shown })}
+` : `${shown}
+`);
+    return 0;
+  }
+});
+
 // src/validate/index.ts
-import { existsSync as existsSync6 } from "node:fs";
-import { relative as relative4, resolve as resolve2, sep as sep3 } from "node:path";
+import { existsSync as existsSync8 } from "node:fs";
+import { relative as relative5, resolve as resolve2, sep as sep4 } from "node:path";
 
 // src/validate/links.ts
-import { existsSync as existsSync5 } from "node:fs";
-import { dirname as dirname3, join as join8 } from "node:path";
+import { existsSync as existsSync7 } from "node:fs";
+import { dirname as dirname4, join as join10 } from "node:path";
 
 // src/validate/okf.ts
 var isRecord3 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -8062,8 +8190,8 @@ var okf3Log = (file) => {
 };
 
 // src/validate/profile.ts
-import { existsSync as existsSync4 } from "node:fs";
-import { dirname as dirname2, join as join7, relative as relative3 } from "node:path";
+import { existsSync as existsSync6 } from "node:fs";
+import { dirname as dirname3, join as join9, relative as relative4 } from "node:path";
 function conceptData(file) {
   const data = file.frontmatter?.data;
   if (!isConcept(file.rel) || !isRecord3(data)) return void 0;
@@ -8144,7 +8272,7 @@ var p3 = (file) => {
     )
   ];
 };
-var ACTOR = /^(?:human:\S+|process:\S+|[^\s/:]+\/\S+)$/;
+var ACTOR2 = /^(?:human:\S+|process:\S+|[^\s/:]+\/\S+)$/;
 var p4 = (file) => {
   const data = conceptData(file);
   if (!data) return [];
@@ -8173,7 +8301,7 @@ var p4 = (file) => {
       );
       return;
     }
-    if (typeof value.by !== "string" || !ACTOR.test(value.by)) {
+    if (typeof value.by !== "string" || !ACTOR2.test(value.by)) {
       findings.push(
         finding(
           "P4",
@@ -8275,10 +8403,10 @@ var p7 = (file) => {
     )
   ];
 };
-var KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+var KEBAB2 = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 var p8 = (ctx, inSelection) => ctx.entries.filter((e) => inSelection(e.rel)).filter((e) => {
   const name = e.rel.slice(e.rel.lastIndexOf("/") + 1);
-  return e.isDir ? !KEBAB.test(name) : !(name.endsWith(".md") && KEBAB.test(name.slice(0, -3)));
+  return e.isDir ? !KEBAB2.test(name) : !(name.endsWith(".md") && KEBAB2.test(name.slice(0, -3)));
 }).map((e) => ({
   rule: "P8",
   severity: "error",
@@ -8348,7 +8476,7 @@ var p11 = (file, ctx) => {
   }
   if (data.supersedes !== void 0) {
     const target = typeof data.supersedes === "string" ? resolveInBundle(ctx.bundleRoot, file.rel, data.supersedes) : void 0;
-    if (!target || !existsSync4(target)) {
+    if (!target || !existsSync6(target)) {
       findings.push(
         finding(
           "P11",
@@ -8362,7 +8490,7 @@ var p11 = (file, ctx) => {
   }
   if (data.spec !== void 0) {
     const root = ctx.config?.root;
-    if (typeof data.spec !== "string" || !root || !existsSync4(join7(root, data.spec))) {
+    if (typeof data.spec !== "string" || !root || !existsSync6(join9(root, data.spec))) {
       findings.push(
         finding(
           "P11",
@@ -8395,8 +8523,8 @@ var p11 = (file, ctx) => {
 function resolveInBundle(bundleRoot, fromRel, target) {
   const clean = target.split("#")[0] ?? "";
   if (clean === "") return void 0;
-  const abs = clean.startsWith("/") ? join7(bundleRoot, clean) : join7(bundleRoot, dirname2(fromRel), clean);
-  const rel = relative3(bundleRoot, abs);
+  const abs = clean.startsWith("/") ? join9(bundleRoot, clean) : join9(bundleRoot, dirname3(fromRel), clean);
+  const rel = relative4(bundleRoot, abs);
   return rel.startsWith("..") ? void 0 : abs;
 }
 
@@ -8425,7 +8553,7 @@ var l1 = (file, ctx) => {
       } catch {
       }
       const abs = resolveInBundle(ctx.bundleRoot, file.rel, decoded);
-      if (abs && existsSync5(abs)) continue;
+      if (abs && existsSync7(abs)) continue;
       findings.push({
         rule: "L1",
         severity,
@@ -8451,8 +8579,8 @@ var l2 = (file, ctx) => {
   return checks.filter(({ value }) => {
     if (SCHEME.test(value) || value.trim() === "") return false;
     const path = value.split("#")[0] ?? "";
-    const abs = path.startsWith("/") ? join8(ctx.bundleRoot, path) : join8(ctx.bundleRoot, dirname3(file.rel), path);
-    return !existsSync5(abs);
+    const abs = path.startsWith("/") ? join10(ctx.bundleRoot, path) : join10(ctx.bundleRoot, dirname4(file.rel), path);
+    return !existsSync7(abs);
   }).map(({ key, value }) => ({
     rule: "L2",
     severity: "error",
@@ -8467,7 +8595,7 @@ var l2 = (file, ctx) => {
 var okfRules = [okf1, okf2, okf3Index, okf3Log];
 var profileRules = [p1, p2, p3, p4, p5, p6, p7, p9, p10, p11, l1, l2];
 var profileBundleRules = [p8];
-var toRel = (root, abs) => relative4(root, abs).split(sep3).join("/");
+var toRel = (root, abs) => relative5(root, abs).split(sep4).join("/");
 function validate(input) {
   const entries = walk(input.bundleRoot);
   const roots = input.paths.map((abs) => toRel(input.bundleRoot, abs));
@@ -8500,11 +8628,11 @@ register({
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, config);
     const paths = positionals.map((p) => {
       const abs = resolve2(io.cwd, p);
-      const rel = relative4(bundleRoot, abs);
+      const rel = relative5(bundleRoot, abs);
       if (rel.startsWith("..") || resolve2(bundleRoot, rel) !== abs) {
         throw new UsageError(`path is outside the bundle ${bundleRoot}: ${p}`);
       }
-      if (!existsSync6(abs)) throw new UsageError(`path not found: ${p}`);
+      if (!existsSync8(abs)) throw new UsageError(`path not found: ${p}`);
       return abs;
     });
     const { findings, checked } = validate({ bundleRoot, paths, okfOnly, ...config ? { config } : {} });
