@@ -101,6 +101,16 @@ describe("specfold schema", { timeout: 30_000 }, () => {
     );
   });
 
+  // spec: specfold-schema#design-rendered-for-a-change
+  it("ends the design template with the Commitments section", () => {
+    const design = json(repoWithSchema(), ["instructions", "design", "--change", "demo"]);
+    const sections = [...design.template.matchAll(/^## (.+)$/gm)].map((m) => m[1]);
+    expect(sections.at(-1)).toBe("Commitments");
+    expect(design.template).toContain(": kept");
+    expect(design.template).toContain(": blocked: ");
+    expect(design.instruction).toContain("**Commitments** (always, last)");
+  });
+
   // spec: specfold-schema#tasks-rendered-for-a-change
   it("renders the task-breakdown template", () => {
     const tasks = json(repoWithSchema(), ["instructions", "tasks", "--change", "demo"]);
