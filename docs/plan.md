@@ -142,6 +142,8 @@ specfold/
 └── .github/workflows/  # kit CI + release job that publishes template/
 ```
 
+Kit-only tooling stays outside the payload: the kit repo's commit convention (`/decisions/commit-convention.md`: `package.json`, `scripts/check-commit.mjs`, `scripts/commit-convention.json`, `.githooks/`, `.github/workflows/commit-convention.yml`) is never copied into `template/` and is not in the upgrader's kit-owned files.
+
 The release job publishes `template/` as a tarball and syncs it to a separate template repo, so "Use this template" never copies the kit's own knowledge. `BOOTSTRAP.md` and `sf-migrate` install from the same tarball.
 
 **What the kit's own bundle holds from day one:**
@@ -734,7 +736,7 @@ Specfold has **one product version** (semver, tag `vX.Y.Z`) that the updater wor
 - **Upgrade paths:** any version within the same major upgrades directly; across majors the upgrader steps through the latest release of each major in order and runs every migration on the way. Migrations are chained and idempotent.
 - **Version skew:** if `.specfold/manifest.json` was written by a newer framework version than the local CLI, the CLI refuses write commands and tells the user to run `specfold upgrade`; read-only commands still work.
 - **Channels:** `stable` gets only final releases, `next` also gets `-rc` builds. Set per repo in `specfold.yaml` (`channel:`).
-- **Release automation:** conventional commits plus release-please in the kit repo generate the changelog, the tag, the template tarball and its SHA-256. Every release candidate runs the upgrade test against fixture repos from the previous two minors and the previous major.
+- **Release automation:** conventional commits (with a type-matched gitmoji, see `/decisions/commit-convention.md`) plus release-please in the kit repo generate the changelog and release notes grouped by type, the tag, the template tarball and its SHA-256. Release commits are `chore(release): 🔖 vX.Y.Z`. The kit repo allows only rebase merges, so every granular commit reaches the changelog. Every release candidate runs the upgrade test against fixture repos from the previous two minors and the previous major.
 - **Dogfooding:** the kit repo itself records its own `kit_version` and is upgraded with the released upgrader, like any user repo.
 
 This replaces the one-line `specfold upgrade` entry in the CLI table and is milestone M9.
