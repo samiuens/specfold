@@ -7,7 +7,7 @@ For every change with a `tasks.md` that the diff touches or archives, the gate S
 - **WHEN** a touched change with `tasks.md` adds the scenario `Guest pays` and no test references it
 - **THEN** a blocking `G15` finding names the scenario id and the change's spec file
 
-#### Scenario: Change being planned
+#### Scenario: Planned change skipped
 - **WHEN** a touched change has delta specs but no `tasks.md`
 - **THEN** no `G15` finding is reported for its scenarios
 

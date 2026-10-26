@@ -43,12 +43,12 @@ agent: implementer
 ```yaml
 files: [tools/specfold/src/gate/rules.ts, tools/specfold/test/gate-rules.test.ts]
 depends: [2]
-scenarios: [specfold-gate#new-scenario-without-test, specfold-gate#change-being-planned, specfold-gate#renamed-scenario, specfold-gate#old-gaps]
+scenarios: [specfold-gate#new-scenario-without-test, specfold-gate#planned-change-skipped, specfold-gate#renamed-scenario, specfold-gate#old-gaps]
 agent: implementer
 ```
 
 - [ ] 4.1 Add G15 to the gate
-  - Done when: scenarios new-scenario-without-test, change-being-planned, renamed-scenario and old-gaps pass in `gate-rules.test.ts`
+  - Done when: scenarios new-scenario-without-test, planned-change-skipped, renamed-scenario and old-gaps pass in `gate-rules.test.ts`
 
 ## 5. Settings files
 
