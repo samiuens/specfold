@@ -28,7 +28,7 @@ Because the tools do not exist on day one, each piece is switched on for the kit
 | --- | --- |
 | M0 | hand-written knowledge (decisions, references, vision), first specs, backlog seeded from "Later" |
 | M1 | `specfold validate`, `index`, `lookup` on its own bundle; every following milestone is an OpenSpec change |
-| M2 | the `specfold` schema with `brief.md` and `knowledge.md`, `sf-sync` after each archive |
+| M2 | the `specfold` schema with `brief.md` and `knowledge.md`, task breakdown with `specfold tasks check`, `status` and `resume`, `sf-sync` after each archive |
 | M3 | all skills, including `sf-interview` for planning its own milestones |
 | M4 | `specfold-gate` as a required check on the kit repo itself |
 | M5 to M9 | migration fixtures, quality loops, parallel worktrees, upgrader, each used on the next milestone |
@@ -123,6 +123,9 @@ gate:
 types: [Term, Business Rule, Component, Data Flow, Interface, Decision, Capability, Convention, Runbook, Reference]
 actors:
   agent_prefix: "claude-code/"   # generated.by for agent writes; other tools set their own
+tasks:
+  max_files_per_task: 5          # warning only (T10)
+  max_tasks_per_group: 8         # warning only (T9)
 ```
 
 ### Dogfooding: the kit repo uses the kit
@@ -264,6 +267,9 @@ rules:
   knowledge:
     - List every concept to create, update or deprecate. An empty list needs a one-line reason.
   tasks:
+    - Break the change into task groups (`## <n>. <name>` plus a yaml block with files, depends, scenarios, agent) and tasks (`- [ ] <n>.<m>` plus a `Done when:` line); see Task breakdown.
+    - Every group owns its files; groups that may run in parallel never share files.
+    - Order groups by dependency; tests or scenarios come before or alongside the code they cover.
     - Last task group is always "Knowledge": apply knowledge.md with sf-sync after archive.
 
 operations:
@@ -350,6 +356,9 @@ Commands added by later sections (same conventions):
 | `specfold verify <paths>` | adds `verified: human:<github-login>` for the current git identity and sets `status: stable`; refuses for agents | Merge gate |
 | `specfold wt plan \| new \| setup \| clean` | overlap check across active changes, worktree creation and setup for any tool, cleanup | Subagents and parallel work |
 | `specfold parallel set <n> \| show` | personal limit for parallel subagents and change sessions | Subagents and parallel work |
+| `specfold tasks check <change> [--base <ref>]` | checks the task breakdown (rules T0-T11); also run by `change check` | Task breakdown |
+| `specfold status [<change>]` | progress per task group and the next open task | Task breakdown |
+| `specfold resume <change>` | the next open task with its group context and trailer, for a fresh session | Task breakdown |
 | `specfold trace [--change <name>]` | scenario-to-test coverage and dangling test references | Quality loops |
 | `specfold drift` | concepts possibly stale because their source files changed after verification | Quality loops |
 | `specfold backlog add \| list \| promote \| drop` | backlog items, promotion to a change | Backlog, deferred commitments and vision |
@@ -434,6 +443,7 @@ Rules added by later sections (same gate, same summary comment):
 | G15 | added or modified scenarios have at least one test reference; no dangling references | block (old gaps: warn) | Quality loops |
 | G16 | changed files whose dependent concepts were not touched or re-verified | warn (block if `block_on_drift`) | Quality loops |
 | G17 | design contradicts an open commitment; commitment withdrawn without human verification | warn / block | Backlog, deferred commitments and vision |
+| G18 | task breakdown: missing metadata, numbering errors, unknown scenarios, `depends` cycles, file overlap between parallel groups (`specfold tasks check`) | block (size limits: warn) | Task breakdown |
 
 Per the versioning policy, any rule added after `v1.0.0` ships as a warning first.
 
@@ -543,6 +553,39 @@ confirmed_at: 2026-10-26T10:00:00+00:00
 
 Skip rule: changes with `skip_specs: true` (pure refactors, tooling) may use a short brief of only Wish and Confirmation.
 
+## Task breakdown
+
+Every feature and plan is broken down into small tasks, and subagents work on task groups, never on whole changes. The contract is the `specfold-tasks` spec (OpenSpec change `add-specfold-tasks`); the rationale is `/decisions/task-breakdown.md`.
+
+**Shape of `tasks.md`:**
+
+````markdown
+## 2. Guest token
+
+```yaml
+files: [src/checkout/token/**]          # owned globs, required
+depends: [1]                             # groups merged first; empty = start right away
+scenarios: [checkout/guest-checkout#guest-pays-without-account]
+agent: implementer                       # default
+```
+
+- [ ] 2.1 Add token issuer
+  - Done when: `npm test -- token` passes
+- [ ] 2.2 Wire the issuer into checkout
+  - Done when: scenario guest-pays-without-account
+````
+
+- **Task group** = one unit a single subagent can take on. **Task** = one small, checkable step: one task is one commit with the trailer `Task: <change>#2.1`, and one verifiable outcome named in `Done when:` (a test, a command or a scenario id).
+- Size limits in `specfold.yaml` `tasks:` (`max_files_per_task: 5`, `max_tasks_per_group: 8`) are warnings, not hard rules.
+- Group order: dependencies first; tests or scenarios before or alongside the code they cover; the last group is "Knowledge".
+- The `specfold` schema's `tasks` template and instruction produce this shape by default, and `rules.tasks` in `openspec/config.yaml` repeats the rules (see OpenSpec setup).
+
+**Who does the breakdown:** `spec-writer` writes `tasks.md` in this shape. `planner` turns it into the execution plan (dependency graph, which groups run in parallel), and the breakdown is part of the plan the user approves at the end of `sf-interview`. The optional `plan-critic` also flags groups too big for one subagent, tasks without `Done when:` and hidden dependencies between groups.
+
+**How subagents use it:** see Subagents and parallel work (task packets, split instead of grow). Without parallelism (`specfold parallel set 1`, or tools without subagents) the same groups run one after another, so the breakdown works with every tool.
+
+**Checks:** `specfold tasks check <change>` (also run by `specfold change check`) reports groups without metadata, tasks without `Done when:`, numbering errors, unknown scenario ids, `depends` cycles or unknown ids, overlapping `files` between groups that may run in parallel, and size warnings; with `--base` it also matches commits and trailers to tasks. Gate rule G18 blocks on its errors. `specfold status` and `specfold resume` show progress per group and the next open task from checkboxes and trailers, so a fresh session picks up exactly where the last one stopped.
+
 ## Subagents and parallel work
 
 Parallelism follows OpenSpec boundaries: **one change = one worktree = one branch = one PR**, and inside a change only task groups with disjoint files run in parallel. Read-only work never needs a worktree. This part is Claude Code specific; other tools get the same structure sequentially plus `specfold wt` for worktrees.
@@ -559,18 +602,18 @@ The orchestrator is the main session, sitting in the change worktree. Every suba
 | --- | --- |
 | Model, effort | opus, high |
 | Tools | Read, Grep, Glob, Bash (`specfold`, `openspec`, `graphify query`), Write/Edit only under `openspec/changes/**`, `Agent(scout, spec-writer, plan-critic)` |
-| Job | runs `sf-interview` until the brief is confirmed; decides change boundaries (one or several changes); hands the brief to `spec-writer`; turns `tasks.md` into an execution plan: task groups, file ownership, dependency order, which groups may run in parallel, which pattern to use; asks the user to approve the plan |
+| Job | runs `sf-interview` until the brief is confirmed; decides change boundaries (one or several changes); hands the brief to `spec-writer`; turns `tasks.md` into an execution plan: task groups, file ownership, dependency graph, which groups may run in parallel, which pattern to use; shows the breakdown in the plan and asks the user to approve it |
 | Hands over to | the orchestrator role (same session or a new session per change) for apply |
 
-An optional **`plan-critic`** subagent (different model, read-only) reviews the brief, specs and execution plan before approval: missing scenarios, hidden assumptions, overlapping file ownership, groups that cannot really run in parallel. Its findings go back to the planner, who turns open points into interview questions instead of guessing.
+An optional **`plan-critic`** subagent (different model, read-only) reviews the brief, specs and execution plan before approval: missing scenarios, hidden assumptions, overlapping file ownership, groups that cannot really run in parallel, groups too big for one subagent, tasks without `Done when:`, hidden dependencies between groups. Its findings go back to the planner, who turns open points into interview questions instead of guessing.
 
 Roles below are the subagents the planner and the orchestrator use:
 
 | Agent | Model, effort | Tools | Isolation | Job |
 | --- | --- | --- | --- | --- |
 | `scout` | haiku or sonnet, low | Read, Grep, Glob, Bash(`specfold lookup`, `graphify query`, `openspec show`) | none (read-only) | answers one question from knowledge, code graph and specs; returns at most \~30 lines |
-| `spec-writer` | opus, high | Read, Write, Edit, Bash(`openspec`, `specfold`) | change worktree | writes proposal, delta specs, design, `knowledge.md`, `tasks.md` with file ownership per group |
-| `implementer` | sonnet, medium | full minus `Agent`, minus `git push` | `isolation: worktree` | implements one task group, runs its tests, commits on its own branch |
+| `spec-writer` | opus, high | Read, Write, Edit, Bash(`openspec`, `specfold`) | change worktree | writes proposal, delta specs, design, `knowledge.md`, and `tasks.md` in the task-breakdown shape; updates `tasks.md` when an implementer returns a split proposal |
+| `implementer` | sonnet, medium | full minus `Agent`, minus `git push` | `isolation: worktree` | implements one task group from its task packet, task by task with one commit each; returns a split proposal instead of widening its scope |
 | `verifier` | a different model than the implementer, high | Read, Grep, Bash(tests, `openspec`, `specfold gate --local`) | none (read-only) | `/opsx:verify`, full tests, gate; returns pass or a findings list |
 | `knowledge-curator` | sonnet, medium | Read, Write, Edit, Bash(`specfold`) | change worktree | sf-sync after archive, sf-audit on request |
 | `integrator` (optional) | sonnet, low | Bash(git), Read | change worktree | merges implementer branches in order, resolves only generated-file conflicts, escalates real ones |
@@ -580,7 +623,11 @@ All roles preload the matching sf skill via `skills:`, set `maxTurns`, and only 
 ### Three patterns
 
 1. **Several changes at once** (most common, biggest speed-up): one background session per change via `claude --worktree <change-name>` or agent view (`claude agents`). Each runs the full loop and opens its own PR. Before dispatching, `specfold wt plan` checks active changes for overlapping capabilities or source globs and serializes those.
-2. **One change, parallel task groups:** `spec-writer` marks each group in `tasks.md` with the files it owns (`files: [src/checkout/**]`). The orchestrator spawns one `implementer` per independent group, merges their branches, then runs `verifier` and `knowledge-curator`.
+2. **One change, parallel task groups:** every group in `tasks.md` owns its files (`files: [src/checkout/**]`, see Task breakdown). The orchestrator spawns one `implementer` per group whose dependencies are merged, merges their branches, then runs `verifier` and `knowledge-curator`.
+
+**Task packets.** The orchestrator dispatches one task group per implementer, never a whole change. Each implementer gets a compact packet: the group's tasks, its owned files, the linked scenarios, the relevant excerpt of `brief.md` and the knowledge concepts linked from the proposal. It works the tasks in order, ticks each one and makes one commit per task with the `Task:` trailer.
+
+**Split instead of grow.** If a task needs files outside the group's `files:` or clearly exceeds the size limits, the implementer stops and returns a split proposal. The orchestrator has `spec-writer` update `tasks.md` (and asks the user if the split changes scope), re-runs `specfold tasks check`, then re-dispatches. Implementers never widen their own scope.
 3. **Large mechanical changes** (renames, migrations across many files): Claude Code's `/batch` or a dynamic workflow, wrapped in one OpenSpec change with `skip_specs: true` if no behavior changes.
 
 Agent teams stay off by default: they are experimental and do not isolate teammates in worktrees.
@@ -611,7 +658,7 @@ Parallel sessions multiply token use, and what is affordable depends on each per
 
 Decided: in pattern 2 the orchestrator merges implementer branches (no PR per implementer), and agent teams are not used.
 
-New CLI commands for this part: `specfold wt plan` (overlap check), `specfold wt new <change>` (worktree + branch + setup, for tools without built-in worktrees), `specfold wt setup`, `specfold wt clean`, `specfold parallel set <n>` and `specfold parallel show`. Milestone **M8** covers the agent definitions, settings, these commands and a test run of pattern 2 on the sample app with three parallel task groups.
+New CLI commands for this part: `specfold wt plan` (overlap check), `specfold wt new <change>` (worktree + branch + setup, for tools without built-in worktrees), `specfold wt setup`, `specfold wt clean`, `specfold parallel set <n>` and `specfold parallel show`. Milestone **M8** covers the agent definitions, task packets, split instead of grow, settings, these commands and a test run of pattern 2 on the sample app with three parallel task groups from a `tasks.md` that passes `specfold tasks check`.
 
 ## Updating the framework from user repos
 
@@ -763,13 +810,13 @@ Build in this order; each milestone ends with its own PR and green CI in the kit
 | --- | --- | --- |
 | M0 | Repo skeleton with the dogfooding split (`template/` payload vs. own `knowledge/` and `openspec/`); hand-written decisions, references, vision; backlog seeded from "Later"; first specs for `specfold validate` and `index` | skeleton committed; specs reviewed by the user |
 | M1 | Knowledge profile + `specfold validate`, `index`, `lookup`, `new`, `log`, `doctor`; code-comment convention and `see knowledge:` scan | fixture tests pass; patched `acme_retail` passes `--okf-only` and the upstream copy fails with exactly the known findings; golden index files match |
-| M2 | OpenSpec integration: `specfold` schema with `brief` and `knowledge` artifacts, templates, `config.yaml`, `specfold change check`, `specfold sync` | in `examples/sample-app`, interview → propose → archive → sync leaves `specfold validate` and `openspec validate --strict` green |
+| M2 | OpenSpec integration: `specfold` schema with `brief` and `knowledge` artifacts, templates (including the task-breakdown `tasks` template and instruction), `config.yaml` (including `rules.tasks`), `specfold change check`, `specfold tasks check`, `specfold status`, `specfold resume`, `specfold sync` | in `examples/sample-app`, interview → propose → archive → sync leaves `specfold validate`, `specfold tasks check` and `openspec validate --strict` green |
 | M3 | Skills `sf-lookup`, `sf-capture`, `sf-sync`, `sf-audit`, `sf-interview`; `planner` agent with plan-mode approval; `AGENTS.md`, `CLAUDE.md`, `specfold agents sync` | the sample change works in Claude Code (native questions, plan approval) and in one other tool reading `.agents/skills` |
-| M4 | Gate G1–G17 (warn/block as specified), `specfold gate`, `specfold verify`, CI workflow, built-in git hooks and adapters, Claude Code hooks, CODEOWNERS, PR template | one test PR per blocking rule fails for the right reason; a clean PR passes; the gate is required on the kit repo |
+| M4 | Gate G1–G18 (warn/block as specified), `specfold gate`, `specfold verify`, CI workflow, built-in git hooks and adapters, Claude Code hooks, CODEOWNERS, PR template | one test PR per blocking rule fails for the right reason; a clean PR passes; the gate is required on the kit repo |
 | M5 | Quality loops (`specfold trace`, `specfold drift`, retro) and backlog, commitments, vision with their CLI commands | traceability and drift reported correctly on the sample app; a backlog item promoted to a change end to end |
 | M6 | `sf-migrate` + `BOOTSTRAP.md` | migration runs on its own branch on two fixture repos (ADRs and docs/; Cursor rules and an existing `openspec/`); rerun is idempotent; refuses on the default branch |
 | M7 | Token layer: `specfold stats`, G11 budget, graphify recipe, permission deny list | always-loaded set reported; documented before/after numbers on the sample app |
-| M8 | Subagents and parallel work: agent definitions, `specfold wt`, `specfold parallel`, worktree settings | pattern 2 runs three task groups in parallel worktrees on the sample app and merges cleanly |
+| M8 | Subagents and parallel work: agent definitions, task packets, split instead of grow, `specfold wt`, `specfold parallel`, worktree settings | pattern 2 runs three task groups from a `tasks.md` that passes `specfold tasks check` in parallel worktrees on the sample app and merges cleanly; one implementer returns a split proposal instead of widening its scope |
 | M9 | Upgrader, versioning, release automation, docs; first release `v0.1.0` | upgrading fixture repos from `0.1.0-rc` builds changes only kit-owned files and managed blocks; a locally modified kit file produces a three-way merge; the weekly workflow opens a correct PR |
 
 Names in this table follow the Naming section. Each milestone after M0 runs as an OpenSpec change in the kit repo (see Self-hosting).
