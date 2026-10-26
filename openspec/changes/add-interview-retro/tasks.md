@@ -29,7 +29,7 @@ agent: implementer
   - Done when: the item has `state: promoted` and `change: add-rename`, and the change folder exists without a brief
 - [x] 2.2 Run the interview with the user and write the confirmed brief
   - Done when: `specfold change check add-rename` reports no brief errors
-- [ ] 2.3 Write the proposal, delta spec, knowledge and tasks
+- [x] 2.3 Write the proposal, delta spec, knowledge and tasks
   - Done when: `openspec validate add-rename --strict` and `specfold tasks check add-rename` pass
 - [ ] 2.4 Implement the change with `spec:` references in its tests
   - Done when: `npm test` passes and `specfold trace --change add-rename` reports every scenario covered
