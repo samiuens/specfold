@@ -1,0 +1,11 @@
+{
+  "name": "sample-app",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Specfold worked example: a tiny to-do library with one archived change",
+  "type": "module",
+  "engines": { "node": ">=20.19" },
+  "scripts": {
+    "test": "node --test"
+  }
+}

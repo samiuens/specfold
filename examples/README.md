@@ -1,3 +1,3 @@
 # Examples
 
-`sample-app/` arrives in M2: a worked example with one archived change.
+`sample-app/`: a worked example with one archived change, set up from `template/`. See its README.
