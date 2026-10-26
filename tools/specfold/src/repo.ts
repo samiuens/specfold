@@ -29,6 +29,8 @@ export interface Config {
   unverifiedAfterDays: number;
   /** `gate.*` settings beyond `block_on_broken_links`. */
   gate: { requireChangeForSourceChanges: boolean; escapeLabel: string; blockOnStaleTouched: boolean };
+  /** `hooks.extra`: shell commands per git hook name, run after Specfold's own checks. */
+  hooksExtra: Record<string, string[]>;
 }
 
 /** The nearest directory at or above `cwd` that contains specfold.yaml. */
@@ -82,6 +84,16 @@ export function loadConfig(root: string): Config {
   const tasks = isRecord(data.tasks) ? data.tasks : {};
   const agents = isRecord(data.agents) ? data.agents : {};
   const audit = isRecord(data.audit) ? data.audit : {};
+  const hooks = isRecord(data.hooks) ? data.hooks : {};
+  const extra = hooks.extra === undefined ? {} : hooks.extra;
+  if (!isRecord(extra))
+    throw new EnvError(`${CONFIG_FILE}: 'hooks.extra' must map hook names to command lists`);
+  const hooksExtra: Record<string, string[]> = {};
+  for (const [name, commands] of Object.entries(extra)) {
+    if (!/^[a-z]+(?:-[a-z]+)*$/.test(name))
+      throw new EnvError(`${CONFIG_FILE}: '${name}' in 'hooks.extra' is not a hook name`);
+    hooksExtra[name] = stringList(commands, `hooks.extra.${name}`);
+  }
   const folders: Record<string, FolderInfo> = {};
   if (isRecord(data.folders)) {
     for (const [path, info] of Object.entries(data.folders)) {
@@ -119,6 +131,7 @@ export function loadConfig(root: string): Config {
         typeof gate.escape_label === "string" && gate.escape_label !== "" ? gate.escape_label : "no-spec",
       blockOnStaleTouched: gate.block_on_stale_touched !== false,
     },
+    hooksExtra,
   };
 }
 
