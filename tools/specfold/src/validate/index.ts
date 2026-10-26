@@ -1,10 +1,10 @@
-import { existsSync, statSync } from "node:fs";
-import { join, relative, resolve, sep } from "node:path";
+import { existsSync } from "node:fs";
+import { relative, resolve, sep } from "node:path";
 import { type Entry, type ParsedFile, parseFile, walk } from "../bundle.ts";
 import { register } from "../cli.ts";
-import { EnvError, UsageError } from "../errors.ts";
+import { UsageError } from "../errors.ts";
 import { type Finding, renderHuman, renderJson } from "../findings.ts";
-import { type Config, findRepoRoot, requireConfig } from "../repo.ts";
+import { type Config, requireConfig, resolveBundleRoot } from "../repo.ts";
 import { l1, l2 } from "./links.ts";
 import { okf1, okf2, okf3Index, okf3Log } from "./okf.ts";
 import { p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11 } from "./profile.ts";
@@ -62,23 +62,6 @@ export function validate(input: ValidateInput): ValidateResult {
   }
   if (!input.okfOnly) for (const rule of profileBundleRules) findings.push(...rule(ctx, inSelection));
   return { findings, checked: selected.size };
-}
-
-function resolveBundleRoot(cwd: string, bundle: string | undefined, config: Config | undefined): string {
-  let root: string;
-  if (bundle) {
-    root = resolve(cwd, bundle);
-  } else {
-    const repo = config?.root ?? findRepoRoot(cwd);
-    if (!repo)
-      throw new EnvError(
-        "no bundle found: pass --bundle <dir> or run inside a repository with specfold.yaml",
-      );
-    root = join(repo, "knowledge");
-  }
-  if (!existsSync(root) || !statSync(root).isDirectory())
-    throw new EnvError(`bundle root not found: ${root}`);
-  return root;
 }
 
 register({
