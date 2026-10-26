@@ -1,6 +1,10 @@
 import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { syncIndexes } from "../src/indexes/command.ts";
+import { generateIndexes } from "../src/indexes/generate.ts";
+import { locationsByConcept, scanReferences } from "../src/indexes/refs.ts";
+import { requireConfig } from "../src/repo.ts";
 import { tempDir } from "./helpers.ts";
 
 export const git = (root: string, ...args: string[]) =>
@@ -13,6 +17,14 @@ export const write = (root: string, rel: string, content: string) => {
   mkdirSync(dirname(join(root, rel)), { recursive: true });
   writeFileSync(join(root, rel), content);
 };
+
+/** Regenerates every index.md, as `specfold index` does. */
+export function writeIndexes(root: string): void {
+  const config = requireConfig(root);
+  const refs = scanReferences(root, config.sourceGlobs);
+  const bundle = join(root, "knowledge");
+  syncIndexes(root, bundle, generateIndexes(bundle, config, locationsByConcept(refs)).indexes, false);
+}
 
 export function commit(root: string, files: Record<string, string>, message = "work"): void {
   for (const [rel, content] of Object.entries(files)) write(root, rel, content);
@@ -32,17 +44,17 @@ export const concept = (type: string, body: string, extra = "") =>
 export function gateRepo(files: Record<string, string> = {}): string {
   const root = tempDir();
   git(root, "init", "-q", "-b", "main");
-  commit(
-    root,
-    {
-      "specfold.yaml": "types: [Term, Decision, Reference, Capability]\nsource_globs: ['src/**']\n",
-      "src/app.ts": "export const app = 1;\n",
-      "knowledge/domain/a.md": concept("Term", "See [b](/domain/b.md)."),
-      "knowledge/domain/b.md": concept("Term", "See [a](/domain/a.md)."),
-      ...files,
-    },
-    "base",
-  );
+  for (const [rel, content] of Object.entries({
+    ".gitignore": "node_modules/\n",
+    "specfold.yaml": "types: [Term, Decision, Reference, Capability]\nsource_globs: ['src/**']\n",
+    "src/app.ts": "export const app = 1;\n",
+    "knowledge/domain/a.md": concept("Term", "See [b](/domain/b.md)."),
+    "knowledge/domain/b.md": concept("Term", "See [a](/domain/a.md)."),
+    ...files,
+  }))
+    write(root, rel, content);
+  writeIndexes(root);
+  commit(root, {}, "base");
   git(root, "checkout", "-q", "-b", "work");
   return root;
 }
