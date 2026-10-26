@@ -1,13 +1,23 @@
+const CALENDAR_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+/** A `YYYY-MM-DD` string naming a real calendar day (rejects 2026-02-30). */
+function isCalendarDate(value) {
+  if (typeof value !== "string" || !CALENDAR_DATE.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
 /** A to-do list kept in memory. */
 export function createTodoList() {
   const items = [];
   let nextId = 1;
 
   return {
-    /** Adds an open item and returns it. */
-    add(title) {
+    /** Adds an open item, optionally with a `YYYY-MM-DD` due date, and returns it. */
+    add(title, { due = null } = {}) {
       if (typeof title !== "string" || title.trim() === "") throw new TypeError("title must be a non-empty string");
-      const item = { id: nextId++, title: title.trim(), done: false };
+      if (due !== null && !isCalendarDate(due)) throw new TypeError(`due must be a YYYY-MM-DD date, got ${due}`);
+      const item = { id: nextId++, title: title.trim(), done: false, due };
       items.push(item);
       return { ...item };
     },

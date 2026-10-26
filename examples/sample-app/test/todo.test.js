@@ -4,7 +4,7 @@ import { createTodoList } from "../src/todo.js";
 
 test("adds open items with increasing ids", () => {
   const todos = createTodoList();
-  assert.deepEqual(todos.add(" Buy milk "), { id: 1, title: "Buy milk", done: false });
+  assert.deepEqual(todos.add(" Buy milk "), { id: 1, title: "Buy milk", done: false, due: null });
   assert.equal(todos.add("Call Ana").id, 2);
 });
 
