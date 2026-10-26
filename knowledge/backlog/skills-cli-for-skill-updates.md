@@ -11,8 +11,6 @@ sources:
   - id: skills-cli
     resource: https://github.com/vercel-labs/skills
     title: vercel-labs/skills, the CLI behind skills.sh
-  - id: agents-sync-proposal
-    resource: ../../openspec/changes/add-specfold-agents-sync/proposal.md
 ---
 
 # Idea
