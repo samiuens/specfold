@@ -49,7 +49,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 4.1 Add the kit's gate workflow, the comment workflow and the PR template
+- [x] 4.1 Add the kit's gate workflow, the comment workflow and the PR template
   - Done when: this change's PR shows a `specfold-gate` check
 - [ ] 4.2 Dogfood the Claude Code settings and add CODEOWNERS
   - Done when: `.claude/settings.json` in the kit and the sample app equal the template's
