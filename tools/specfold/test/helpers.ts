@@ -11,8 +11,8 @@ export interface RunResult {
   stderr: string;
 }
 
-/** Runs the CLI in-process with captured output. */
-export async function run(argv: string[], cwd: string): Promise<RunResult> {
+/** Runs the CLI in-process with captured output and, optionally, text on stdin. */
+export async function run(argv: string[], cwd: string, stdin?: string): Promise<RunResult> {
   let stdout = "";
   let stderr = "";
   const code = await main(argv, {
@@ -23,6 +23,7 @@ export async function run(argv: string[], cwd: string): Promise<RunResult> {
     stderr: (t) => {
       stderr += t;
     },
+    ...(stdin === undefined ? {} : { readStdin: async () => stdin }),
   });
   return { code, stdout, stderr };
 }
