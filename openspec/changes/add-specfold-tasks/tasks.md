@@ -49,7 +49,7 @@ scenarios: [specfold-tasks#trailer-recognized, specfold-tasks#task-touched-too-m
 agent: implementer
 ```
 
-- [ ] 4.1 Read task commits since the merge base with their trailers and changed files
+- [x] 4.1 Read task commits since the merge base with their trailers and changed files
   - Done when: scenario trailer-recognized passes in `tasks-git.test.ts`
 - [ ] 4.2 Add rules T10 and T11
   - Done when: the T10 and T11 scenarios pass in `tasks-git.test.ts`
