@@ -8,6 +8,8 @@ export interface OpenSpecIssue {
 }
 
 interface Report {
+  /** Problems that stopped validation as a whole, such as a missing OpenSpec root. */
+  status?: { severity?: string; message?: string; fix?: string }[];
   itemFindings?: {
     id?: string;
     type?: string;
@@ -33,6 +35,9 @@ export function openspecValidate(root: string, binary: OpenSpecBinary): OpenSpec
   } catch {
     report = undefined;
   }
+  const stopped = (report?.status ?? []).filter((s) => s.severity === "error" && s.message);
+  if (stopped.length > 0)
+    return stopped.map((s) => ({ path: "openspec", message: `${s.message}${s.fix ? ` ${s.fix}` : ""}` }));
   if (!report?.itemFindings) {
     if (result.status === 0) return [];
     const first = `${result.stderr}\n${result.stdout}`.trim().split("\n")[0] || `exit code ${result.status}`;
