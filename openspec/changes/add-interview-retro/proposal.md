@@ -10,12 +10,12 @@ The interview is only as good as its questions (`/decisions/rather-ask-than-assu
   - Answers go into `knowledge/conventions/interview-checklist.md`, grouped by topic and created with `specfold new` on the first answer.
   - New ideas become backlog items (`specfold backlog add --origin retro`).
   - Every retro, answered or skipped, gets a `log.md` entry of kind `Retro`.
-  - It runs `specfold commitments fulfill` for commitments the archived change kept.
+  - It runs `specfold commitments fulfill` for a commitment the brief or proposal names as delivered by the change, after the user confirms (decided when implementation started; `kept` in a design only means not broken).
 - **sf-interview:** loads the checklist groups matching the change as extra branches of its question tree (skipped when the file is absent). It offers anything put out of scope as a backlog item or, for "not now, but before X", a deferred commitment, and writes them only after the brief is approved.
 - **sf-lookup:** reports the `drift` flag and the vision and open commitments block.
 - **Kit and sample app:** the template skills and their copies are updated; the M5 proof runs on `examples/sample-app`:
   - `specfold trace` and `specfold drift` report correctly;
-  - one backlog item is promoted with `specfold backlog promote` and carried through interview, propose, apply, archive and sync.
+  - the backlog item "Rename an item" is promoted with `specfold backlog promote` and carried through interview, propose, apply, archive and sync; the planned `add-priorities` change stays untouched.
 
 ## Capabilities
 
