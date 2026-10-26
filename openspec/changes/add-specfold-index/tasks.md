@@ -21,7 +21,7 @@ scenarios: [specfold-index#default-bundle, specfold-index#no-configuration, spec
 agent: implementer
 ```
 
-- [ ] 2.1 Add index generation for sections, log entry, type groups, deprecated and empty folders
+- [x] 2.1 Add index generation for sections, log entry, type groups, deprecated and empty folders
   - Done when: the golden files in `test/fixtures/index/expected/` match, and scenarios root-index-frontmatter, configured-folder, unconfigured-folder, log-listed, grouping-and-order, missing-title-or-description, deprecated-entry and empty-runbooks-folder pass
 - [ ] 2.2 Add the `index` command that writes changed indexes only
   - Done when: scenarios default-bundle, no-configuration, new-folder-gets-an-index, concepts-and-log-untouched, hand-edit-overwritten and two-runs-same-bytes pass

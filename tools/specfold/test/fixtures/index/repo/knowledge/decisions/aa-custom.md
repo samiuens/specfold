@@ -1,0 +1,5 @@
+---
+type: Alpha Kind
+---
+
+Body.
