@@ -15,7 +15,7 @@ agent: implementer
   - Done when: `npm test -w specfold` passes with the doctor tests unchanged
 - [x] 1.3 Read the gate settings with their defaults
   - Done when: `repo.test.ts` covers the defaults and configured values
-- [ ] 1.4 Extract the sync planning step as `planSync`
+- [x] 1.4 Extract the sync planning step as `planSync`
   - Done when: `npm test -w specfold` passes with the sync tests unchanged
 
 ## 2. Diff

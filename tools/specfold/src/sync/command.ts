@@ -1,6 +1,5 @@
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join, relative, sep } from "node:path";
-import { checkKnowledge } from "../change/knowledge.ts";
+import { existsSync, readdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { register } from "../cli.ts";
 import { EnvError, UsageError } from "../errors.ts";
 import { plural } from "../findings.ts";
@@ -11,7 +10,8 @@ import { localDate } from "../log/command.ts";
 import { insertEntry } from "../log/insert.ts";
 import { type Config, requireConfig, resolveBundleRoot } from "../repo.ts";
 import { taskFindingLine } from "../tasks/command.ts";
-import { type Action, applyWrites, planOps } from "./apply.ts";
+import { type Action, applyWrites } from "./apply.ts";
+import { planSync } from "./plan.ts";
 
 const NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const ARCHIVED = /^(\d{4}-\d{2}-\d{2})-([a-z0-9]+(?:-[a-z0-9]+)*)$/;
@@ -44,7 +44,6 @@ register({
     const config = requireConfig(io.cwd);
     const id = resolveArchived(config, positionals[0]);
     const bundleRoot = resolveBundleRoot(io.cwd, undefined, config);
-    const relDir = `openspec/changes/archive/${id}`;
     const dryRun = values["dry-run"] === true;
     const print = (ok: boolean, actions: Action[], findings: unknown[], text: string[]) =>
       io.stdout(
@@ -53,27 +52,15 @@ register({
           : `${text.join("\n")}\n`,
       );
 
-    const { findings, ops } = checkKnowledge(config, bundleRoot, join(config.root, relDir), {
-      relDir,
-      archived: true,
-    });
-    if (findings.length > 0) {
+    const { findings, ops, plan, logPath, logRel, logText, needsLog } = planSync(config, bundleRoot, id);
+    if (findings.length > 0 || !plan) {
       print(false, [], findings, [
         ...findings.map(taskFindingLine),
         `sync ${id}: ${plural(findings.length, "error")}, nothing written`,
       ]);
       return 1;
     }
-
-    const model = process.env.SPECFOLD_MODEL;
-    const by = model ? `${config.agentPrefix}${model}` : "process:specfold-sync";
-    const plan = planOps(ops, { repoRoot: config.root, bundleRoot, archivedId: id, by, now: new Date() });
     const actions = [...plan.actions];
-
-    const logPath = join(bundleRoot, "log.md");
-    const logRel = relative(config.root, logPath).split(sep).join("/");
-    const logText = existsSync(logPath) ? readFileSync(logPath, "utf8") : undefined;
-    const needsLog = !logText?.includes(id);
 
     if (!dryRun) {
       applyWrites(plan);
