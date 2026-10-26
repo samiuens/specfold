@@ -4,10 +4,10 @@ import { register } from "../cli.ts";
 import { UsageError } from "../errors.ts";
 import { plural } from "../findings.ts";
 import { openspecBinary } from "../openspec.ts";
-import { requireConfig, resolveBundleRoot } from "../repo.ts";
+import { type Config, requireConfig, resolveBundleRoot } from "../repo.ts";
 import { computeDiff } from "./diff.ts";
 import { fetchPullRequest, githubEnv } from "./github.ts";
-import { type GateFinding, runGate } from "./rules.ts";
+import { type GateContext, type GateFinding, runGate } from "./rules.ts";
 
 const location = (f: GateFinding) =>
   f.path === null ? "" : `${f.path}${f.line === null ? "" : `:${f.line}`} `;
@@ -19,6 +19,23 @@ export function countFindings(findings: GateFinding[]) {
   const block = findings.filter((f) => f.effect === "block").length;
   return { block, warn: findings.length - block, rules };
 }
+
+type ContextOptions = Pick<GateContext, "local" | "labels" | "prBody" | "pr">;
+
+function gateContext(config: Config, cwd: string, base: string, o: ContextOptions): GateContext {
+  return {
+    config,
+    bundleRoot: resolveBundleRoot(cwd, undefined, config),
+    diff: computeDiff(config.root, base, o.local),
+    ...o,
+    openspec: openspecBinary(config.root),
+    now: new Date(),
+  };
+}
+
+/** The findings of `specfold gate --base <base> --local`, as the pre-push and Claude Code stop hooks run it. */
+export const localGate = (config: Config, cwd: string, base: string): GateFinding[] =>
+  runGate(gateContext(config, cwd, base, { local: true, labels: [], prBody: undefined, pr: undefined }));
 
 register({
   name: "gate",
@@ -45,19 +62,16 @@ register({
       throw new UsageError(`--pr must be a pull request number, got '${prArg}'`);
     const config = requireConfig(io.cwd);
     const local = values.local === true;
-    const diff = computeDiff(config.root, base, local);
+    // read the PR before the diff is judged, so a missing token fails fast
     const pr = prArg === undefined ? undefined : await fetchPullRequest(githubEnv(), Number(prArg));
-    const findings = runGate({
-      config,
-      bundleRoot: resolveBundleRoot(io.cwd, undefined, config),
-      diff,
-      local,
-      labels: (values.label as unknown as string[] | undefined) ?? [],
-      prBody: bodyFile === undefined ? undefined : readFileSync(resolve(io.cwd, bodyFile), "utf8"),
-      openspec: openspecBinary(config.root),
-      pr,
-      now: new Date(),
-    });
+    const findings = runGate(
+      gateContext(config, io.cwd, base, {
+        local,
+        labels: (values.label as unknown as string[] | undefined) ?? [],
+        prBody: bodyFile === undefined ? undefined : readFileSync(resolve(io.cwd, bodyFile), "utf8"),
+        pr,
+      }),
+    );
     const counts = countFindings(findings);
     const ok = counts.block === 0;
     if (values.json) {
