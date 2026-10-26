@@ -59,7 +59,7 @@ scenarios: [specfold-gate#code-changed-concept-untouched, specfold-gate#concept-
 agent: implementer
 ```
 
-- [ ] 5.1 Add G16 to the gate
+- [x] 5.1 Add G16 to the gate
   - Done when: scenarios code-changed-concept-untouched, concept-updated-in-the-same-pr and blocking-configured pass in `gate-rules.test.ts`
 
 ## 6. Bundle
