@@ -29,7 +29,7 @@ agent: implementer
 
 - [x] 2.1 Install built-in hooks and refuse foreign hooks paths and nested repositories
   - Done when: scenarios fresh-repository, custom-hooks-folder and nested-repository pass in `hooks-install.test.ts`
-- [ ] 2.2 Add entries to lefthook, husky and pre-commit configurations
+- [x] 2.2 Add entries to lefthook, husky and pre-commit configurations
   - Done when: scenarios lefthook-in-use and husky-in-use pass in `hooks-install.test.ts`, plus a pre-commit case
 
 ## 3. Git hooks
