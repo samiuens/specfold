@@ -9,7 +9,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Add `template/specfold.yaml` with the shipped defaults
+- [x] 1.1 Add `template/specfold.yaml` with the shipped defaults
   - Done when: `node ../scripts/specfold.mjs doctor` run in `template/` reports the config as loaded
 - [ ] 1.2 Narrow the kit's `source_globs` so template knowledge is not scanned as kit code
   - Done when: `node scripts/specfold.mjs index --check` exits 0 with no I2 warning
