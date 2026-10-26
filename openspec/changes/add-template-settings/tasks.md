@@ -35,7 +35,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 3.1 Set up `examples/sample-app` from `template/` with a tiny to-do library and its tests
+- [x] 3.1 Set up `examples/sample-app` from `template/` with a tiny to-do library and its tests
   - Done when: `node --test` and `specfold validate` pass in `examples/sample-app`
 - [ ] 3.2 Plan the change `add-due-dates`: brief, proposal, spec, design, knowledge and tasks
   - Done when: `specfold change check add-due-dates` reports only the open confirmation in the sample

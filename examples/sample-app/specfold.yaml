@@ -1,0 +1,71 @@
+# Specfold settings for this repository. Upgrades keep your values; see the kit docs for every key.
+kit_version: 0.0.0          # set by `specfold upgrade`
+profile_version: 1
+channel: stable
+
+source:
+  github: samiuens/specfold
+
+requires:
+  openspec: ">=1.15 <2"
+  okf: "0.2"
+
+# Where your code lives; `specfold index` scans these files for `see knowledge:` references
+# (filled by `specfold init` or sf-migrate).
+source_globs: ["src/**"]
+
+folders:
+  architecture:
+    description: "Components, interfaces and data flows"
+  backlog:
+    description: "Ideas and work needed later but not now"
+  capabilities:
+    description: "One card per spec: why it exists and where its contract lives"
+  commitments:
+    description: "Promises made for later"
+  conventions:
+    description: "How code, tests and knowledge are written here"
+  decisions:
+    description: "Decisions, accepted and rejected"
+  domain:
+    description: "Terms and business rules"
+  references:
+    description: "Summaries of external docs, with stale_after"
+  runbooks:
+    description: "How to run recurring operational tasks"
+  vision:
+    description: "Where the project is heading"
+
+gate:
+  require_change_for_source_changes: true
+  escape_label: no-spec
+  block_on_stale_touched: true
+  block_on_broken_links: true
+  block_on_drift: false
+
+types:
+  - Term
+  - Business Rule
+  - Component
+  - Data Flow
+  - Interface
+  - Decision
+  - Capability
+  - Convention
+  - Runbook
+  - Reference
+  - Vision
+  - Deferred Commitment
+  - Backlog Item
+
+actors:
+  agent_prefix: "claude-code/"   # change for another agent, e.g. "codex/"
+
+# Size limits for task breakdowns; exceeding them only warns (specfold tasks check T9, T10).
+tasks:
+  max_files_per_task: 5
+  max_tasks_per_group: 8
+
+# Extra commands per git hook, run after Specfold's own checks.
+hooks:
+  extra: {}
