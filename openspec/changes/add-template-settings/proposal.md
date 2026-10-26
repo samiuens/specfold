@@ -28,7 +28,9 @@ A user repo created from `template/` has no `specfold.yaml`, so every command fa
 
 Confirmed by the maintainer on 2026-10-26: the sample app is plain Node with no dependencies, so CI needs no extra install and the focus stays on the workflow.
 
-## Open points for review
+## Confirmed in review
+
+Confirmed by the maintainer on 2026-10-26, point by point:
 
 1. **Sample app domain:** a tiny to-do list library with a single change, `add-due-dates`, which brings one capability, one decision and a few tasks. It is small enough to read in a minute.
 2. **How the sample app gets the template:** it is a committed copy of `template/` plus its own files. CI fails when the kit-owned files differ from `template/`, the same approach as the schema copy.

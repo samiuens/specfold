@@ -37,7 +37,9 @@ Confirmed by the maintainer on 2026-10-26:
 3. **The kit switches right after this change.** Later M2 changes carry `brief.md` and `knowledge.md`; `add-specfold-tasks` gets them added when it is implemented.
 4. **Write before, sync after.** The Knowledge task group writes concept bodies before archive, so `openspec archive` sees every task ticked. `specfold sync` runs after archive as a Workflow follow-up step in the same PR.
 
-## Open points for review
+## Confirmed in review
+
+Confirmed by the maintainer on 2026-10-26, point by point:
 
 1. **Artifact dependencies:** `brief` requires nothing, `proposal` requires `brief`, `specs` and `design` require `proposal`, `knowledge` requires `proposal` and `specs`, and `tasks` requires `specs`, `design` and `knowledge`. `design` stays optional, as in `spec-driven`.
 2. **`apply` tracks `tasks.md`**, as in `spec-driven`, so `/opsx:apply` keeps working unchanged.
