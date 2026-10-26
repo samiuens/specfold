@@ -5,13 +5,17 @@ description: Why audit reports slow decay in the bundle, and where the contract 
 status: draft
 spec: openspec/specs/specfold-audit/spec.md
 resource: ../../openspec/specs/specfold-audit/spec.md
-change: 2026-10-26-add-specfold-audit
+change: 2026-10-26-add-specfold-backlog
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:22:47+01:00 }
 sources:
   - id: proposal-2026-10-26-add-specfold-audit
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-audit/proposal.md
   - id: design-2026-10-26-add-specfold-audit
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-audit/design.md
+  - id: proposal-2026-10-26-add-specfold-backlog
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-backlog/proposal.md
+  - id: design-2026-10-26-add-specfold-backlog
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-backlog/design.md
 ---
 
 # Why

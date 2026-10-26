@@ -3,7 +3,7 @@ type: Capability
 title: specfold validate
 description: Why the kit has its own OKF and profile validator, and where its contract lives.
 status: draft
-change: 2026-10-26-add-specfold-validate
+change: 2026-10-26-add-specfold-backlog
 resource: ../../openspec/specs/specfold-validate/spec.md
 spec: openspec/specs/specfold-validate/spec.md
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T10:13:17+01:00 }
@@ -12,6 +12,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-validate/proposal.md
   - id: design
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-validate/design.md
+  - id: proposal-2026-10-26-add-specfold-backlog
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-backlog/proposal.md
+  - id: design-2026-10-26-add-specfold-backlog
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-backlog/design.md
 ---
 
 # Why
