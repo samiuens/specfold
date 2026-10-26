@@ -23,7 +23,7 @@ scenarios: []
 agent: knowledge-curator
 ```
 
-- [ ] 2.1 Update the doctor capability card and add the log entry
+- [x] 2.1 Update the doctor capability card and add the log entry
   - Done when: `node scripts/specfold.mjs validate` and `node scripts/specfold.mjs index --check` exit 0
 
 ## Workflow follow-up

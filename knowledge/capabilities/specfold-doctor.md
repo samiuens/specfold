@@ -21,6 +21,7 @@ An old Node, a missing or incompatible OpenSpec, git hooks that were never insta
 # Choices made while specifying
 
 - Only real blockers fail (old Node, broken config, missing or out-of-range OpenSpec, missing bundle); missing hooks warn, because the CI gate is the enforcement ([blocking merge gate](/decisions/blocking-merge-gate.md)); graphify is informational only.
+- D3 prefers a repository-local `node_modules/.bin/openspec` over the PATH (change `update-doctor-local-openspec`), so Node repos that pin OpenSpec as a dev dependency, like the kit itself, are checked against the version they really use.
 - Checks run against an injected environment, so every case is testable without installing tools in particular versions.
 
 # Related
