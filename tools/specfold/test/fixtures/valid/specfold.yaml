@@ -1,0 +1,4 @@
+types: [Term, Decision, Capability, Runbook, Reference]
+source_globs: ["src/**"]
+gate:
+  block_on_broken_links: true

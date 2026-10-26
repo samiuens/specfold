@@ -35,27 +35,27 @@ agent: implementer
 ## 3. Bundle reading and OKF rules
 
 ```yaml
-files: [tools/specfold/src/bundle.ts, tools/specfold/src/validate/index.ts, tools/specfold/src/validate/okf.ts, tools/specfold/test/okf.test.ts, tools/specfold/test/fixtures/valid/**]
+files: [tools/specfold/src/bundle.ts, tools/specfold/src/validate/index.ts, tools/specfold/src/validate/okf.ts, tools/specfold/test/validate.test.ts, tools/specfold/test/okf.test.ts, tools/specfold/test/fixtures/valid/**]
 depends: [2]
-scenarios: [specfold-validate#whole-bundle-by-default, specfold-validate#selected-paths, specfold-validate#path-outside-the-bundle, specfold-validate#missing-configuration, specfold-validate#deterministic-order, specfold-validate#machine-readable-result, specfold-validate#other-bundle-root, specfold-validate#only-warnings, specfold-validate#errors-present, specfold-validate#files-unchanged, specfold-validate#missing-frontmatter, specfold-validate#invalid-yaml, specfold-validate#empty-type, specfold-validate#frontmatter-in-a-folder-index, specfold-validate#extra-key-in-root-index, specfold-validate#log-out-of-order, specfold-validate#frontmatter-in-log, specfold-validate#plain-okf-bundle-passes]
+scenarios: [specfold-validate#whole-bundle-by-default, specfold-validate#selected-paths, specfold-validate#path-outside-the-bundle, specfold-validate#missing-configuration, specfold-validate#deterministic-order, specfold-validate#machine-readable-result, specfold-validate#other-bundle-root, specfold-validate#errors-present, specfold-validate#files-unchanged, specfold-validate#missing-frontmatter, specfold-validate#invalid-yaml, specfold-validate#empty-type, specfold-validate#frontmatter-in-a-folder-index, specfold-validate#extra-key-in-root-index, specfold-validate#log-out-of-order, specfold-validate#frontmatter-in-log, specfold-validate#plain-okf-bundle-passes]
 agent: implementer
 ```
 
-- [ ] 3.1 Add the bundle walk and frontmatter split with body line offsets, plus the valid fixture bundle
+- [x] 3.1 Add the bundle walk and frontmatter split with body line offsets, plus the valid fixture bundle
   - Done when: scenarios whole-bundle-by-default, selected-paths, path-outside-the-bundle and other-bundle-root pass
 - [ ] 3.2 Add the `validate` command with OKF-1 and OKF-2 and the read-only guarantee
   - Done when: scenarios missing-configuration, missing-frontmatter, invalid-yaml, empty-type, files-unchanged, deterministic-order and machine-readable-result pass
 - [ ] 3.3 Add OKF-3 for index and log files
   - Done when: the four OKF-3 scenarios pass
 - [ ] 3.4 Add `--okf-only` mode and exit codes for warnings and errors
-  - Done when: scenarios plain-okf-bundle-passes, only-warnings and errors-present pass
+  - Done when: scenarios plain-okf-bundle-passes and errors-present pass
 
 ## 4. Profile rules
 
 ```yaml
 files: [tools/specfold/src/validate/profile.ts, tools/specfold/src/validate/index.ts, tools/specfold/test/profile.test.ts]
 depends: [3]
-scenarios: [specfold-validate#error-line-and-summary, specfold-validate#unknown-type, specfold-validate#description-too-long, specfold-validate#multi-line-description, specfold-validate#missing-status, specfold-validate#neither-field, specfold-validate#bare-verified-mapping-accepted, specfold-validate#malformed-actor, specfold-validate#offset-missing, specfold-validate#z-and-numeric-offsets-accepted, specfold-validate#decision-without-sources, specfold-validate#source-without-resource, specfold-validate#runbook-without-stale-after, specfold-validate#camel-case-file-name, specfold-validate#normative-sentence-in-knowledge, specfold-validate#quoted-in-code, specfold-validate#long-concept, specfold-validate#decision-without-decision-key, specfold-validate#superseded-target-missing, specfold-validate#extra-key]
+scenarios: [specfold-validate#error-line-and-summary, specfold-validate#only-warnings, specfold-validate#unknown-type, specfold-validate#description-too-long, specfold-validate#multi-line-description, specfold-validate#missing-status, specfold-validate#neither-field, specfold-validate#bare-verified-mapping-accepted, specfold-validate#malformed-actor, specfold-validate#offset-missing, specfold-validate#z-and-numeric-offsets-accepted, specfold-validate#decision-without-sources, specfold-validate#source-without-resource, specfold-validate#runbook-without-stale-after, specfold-validate#camel-case-file-name, specfold-validate#normative-sentence-in-knowledge, specfold-validate#quoted-in-code, specfold-validate#long-concept, specfold-validate#decision-without-decision-key, specfold-validate#superseded-target-missing, specfold-validate#extra-key]
 agent: implementer
 ```
 
@@ -64,7 +64,7 @@ agent: implementer
 - [ ] 4.2 Add P5 to P8 (timestamps, sources, stale_after, file names)
   - Done when: their scenarios in `profile.test.ts` pass
 - [ ] 4.3 Add P9 to P11 and the unknown-key guarantee
-  - Done when: their scenarios in `profile.test.ts` pass
+  - Done when: their scenarios and only-warnings pass in `profile.test.ts`
 
 ## 5. Link rules
 
