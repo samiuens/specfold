@@ -21,7 +21,7 @@ scenarios: [specfold-lookup#missing-query, specfold-lookup#invalid-limit, specfo
 agent: implementer
 ```
 
-- [ ] 2.1 Add the `lookup` command with argument checks, limit, human and JSON output
+- [x] 2.1 Add the `lookup` command with argument checks, limit, human and JSON output
   - Done when: the six scenarios of this group pass in `lookup.test.ts`
 
 ## 3. Knowledge
