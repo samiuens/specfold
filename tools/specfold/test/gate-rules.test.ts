@@ -23,6 +23,7 @@ import {
   g14,
   g15,
   g16,
+  g17,
   g18,
   runGate,
 } from "../src/gate/rules.ts";
@@ -53,13 +54,23 @@ function ctx(root: string, o: Options = {}): GateContext {
   };
 }
 
+/** A commitment concept in the given state. */
+const promise = (state: string, extra = "") =>
+  concept("Term", "Promise.", extra).replace(
+    "type: Term",
+    `type: Deferred Commitment\nstate: ${state}\ntrigger: before 1.0`,
+  );
+
+/** A design whose Commitments section holds `body`; the section starts at line 5. */
+const design = (body: string) => `# Design\n\n## Commitments\n\n${body}\n`;
+
 const rules = (rule: GateRule, root: string, o?: Options) =>
   rule(ctx(root, o)).map((f) => [f.rule, f.effect, f.path]);
 
 describe("gate: rules", () => {
   it("reports nothing but G3 setup for an unchanged clean repository", () => {
     const root = gateRepo();
-    for (const rule of [g1, g2, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g15, g16, g18])
+    for (const rule of [g1, g2, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g15, g16, g17, g18])
       expect(rule(ctx(root))).toEqual([]);
   });
 
@@ -307,6 +318,72 @@ describe("gate: rules", () => {
     });
     commit(root, { "src/retry.ts": "// see knowledge: /domain/a.md\nexport const tries = 3;\n" });
     expect(rules(g16, root)).toEqual([["G16", "block", "src/retry.ts"]]);
+  });
+
+  // spec: specfold-gate#blocked-commitment
+  it("G17: warns about a design that blocks or misnames a commitment", () => {
+    const root = gateRepo({ "knowledge/commitments/eu-hosting.md": promise("open") });
+    commit(root, {
+      "openspec/changes/demo/design.md": design(
+        "- [EU hosting](/commitments/eu-hosting.md): blocked: needs a US-only queue\n- `/commitments/gone.md`: kept\n- [EU hosting](/commitments/eu-hosting.md) is fine",
+      ),
+    });
+    expect(g17(ctx(root)).map((f) => [f.effect, f.line, f.message])).toEqual([
+      ["warn", 5, "design blocks commitment /commitments/eu-hosting.md: needs a US-only queue"],
+      ["warn", 6, "/commitments/gone.md is not an open commitment"],
+      ["warn", 7, "entry for /commitments/eu-hosting.md says neither kept nor blocked"],
+    ]);
+  });
+
+  // spec: specfold-gate#section-missing
+  it("G17: warns about a design without the section while commitments are open", () => {
+    const root = gateRepo({ "knowledge/commitments/eu-hosting.md": promise("open") });
+    commit(root, { "openspec/changes/demo/design.md": "# Design\n\n## Decisions\n\n- x\n" });
+    expect(rules(g17, root)).toEqual([["G17", "warn", "openspec/changes/demo/design.md"]]);
+    commit(root, { "knowledge/commitments/eu-hosting.md": promise("fulfilled") });
+    expect(g17(ctx(root))).toEqual([]);
+  });
+
+  // spec: specfold-gate#all-kept
+  it("G17: accepts kept entries, none, and the template's comment", () => {
+    const root = gateRepo({ "knowledge/commitments/eu-hosting.md": promise("open") });
+    commit(root, {
+      "openspec/changes/demo/design.md": design(
+        "<!-- - [Title](/commitments/x.md): blocked: example -->\n- [EU hosting](/commitments/eu-hosting.md): kept",
+      ),
+      "openspec/changes/other/design.md": design("none"),
+    });
+    expect(g17(ctx(root))).toEqual([]);
+  });
+
+  // spec: specfold-gate#withdrawn-by-hand
+  it("G17: blocks a withdrawal without a human verification", () => {
+    const root = gateRepo({ "knowledge/commitments/eu-hosting.md": promise("open") });
+    commit(root, { "knowledge/commitments/eu-hosting.md": promise("withdrawn", "\nreason: market dropped") });
+    expect(g17(ctx(root))).toEqual([
+      expect.objectContaining({
+        rule: "G17",
+        effect: "block",
+        path: "knowledge/commitments/eu-hosting.md",
+        line: 3,
+        message: "commitment is withdrawn without a human verification",
+      }),
+    ]);
+  });
+
+  // spec: specfold-gate#withdrawn-with-the-command
+  it("G17: accepts a withdrawal that adds a human verification", () => {
+    const root = gateRepo({ "knowledge/commitments/eu-hosting.md": promise("open") });
+    commit(root, {
+      "knowledge/commitments/eu-hosting.md": promise(
+        "withdrawn",
+        "\nreason: market dropped\nverified: { by: human:ana, at: 2026-10-26T10:00:00+01:00 }",
+      ),
+    });
+    expect(g17(ctx(root))).toEqual([]);
+    expect(g7(ctx(root, { pr: { number: 7, author: "ben", approvers: [] } }))).toEqual([
+      expect.objectContaining({ rule: "G7", effect: "block" }),
+    ]);
   });
 
   // spec: specfold-gate#overlapping-parallel-groups
