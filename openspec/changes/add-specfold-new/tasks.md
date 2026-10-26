@@ -9,7 +9,7 @@ scenarios: [specfold-new#built-in-body, specfold-new#override-wins]
 agent: implementer
 ```
 
-- [ ] 1.1 Add built-in bodies per type, the override lookup and placeholder replacement
+- [x] 1.1 Add built-in bodies per type, the override lookup and placeholder replacement
   - Done when: scenarios built-in-body and override-wins pass in `new-templates.test.ts`
 
 ## 2. New command
