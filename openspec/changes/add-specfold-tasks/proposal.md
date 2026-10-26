@@ -8,15 +8,14 @@ Subagents work best on small, bounded units with clear owned files and a checkab
 
 - A fixed `tasks.md` shape: numbered task groups (`## 2. <name>`), each with a fenced YAML metadata block (`files`, `depends`, `scenarios`, `agent`), and numbered tasks (`- [ ] 2.1 ...`), each with a `Done when:` line.
 - A commit trailer `Task: <change>#<group>.<task>`: one task, one commit.
-- New command `specfold tasks check <change> [--base <ref>] [--json]`, also run by `specfold change check`.
+- New command `specfold tasks check <change> [--base <ref>] [--json]`. `specfold change check` will include its findings (specified in `add-specfold-change-check`).
 - New commands `specfold status [<change>] [--json]` and `specfold resume <change> [--json]`, which report progress per group and the next open task.
 - New `specfold.yaml` keys `tasks.max_files_per_task` (default 5) and `tasks.max_tasks_per_group` (default 8); both limits only warn.
-- Gate rule G18 blocks on the error findings of `tasks check`.
 
 ## Capabilities
 
 ### New Capabilities
-- `specfold-tasks`: the `tasks.md` breakdown format, its check, the task commit trailer, progress reporting (`status`, `resume`) and gate rule G18.
+- `specfold-tasks`: the `tasks.md` breakdown format, its check, the task commit trailer and progress reporting (`status`, `resume`).
 
 ### Modified Capabilities
 - none
@@ -25,7 +24,8 @@ Subagents work best on small, bounded units with clear owned files and a checkab
 
 - The `specfold` schema's `tasks` template and instruction and the `rules.tasks` lines in `openspec/config.yaml`: built with the schema in M2, described in `docs/plan.md`.
 - Task packets and split-instead-of-grow for implementers: built with the subagent roles in M8, described in `docs/plan.md` and the decision.
-- Gate wiring beyond G18's verdict (summary comment, CI workflow): M4.
+- Gate rule G18 (blocking on `tasks check` errors) and its wiring: specified with `specfold gate` in M4, decided 2026-10-26 so the archived spec only describes behavior that exists.
+- `change check` including the tasks findings: moved to `add-specfold-change-check`.
 
 ## Open points for review
 
