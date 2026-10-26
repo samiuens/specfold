@@ -75,9 +75,9 @@ scenarios: [specfold-commitments#missing-reason, specfold-commitments#due-first,
 agent: implementer
 ```
 
-- [ ] 6.1 Add `commitments list` and `commitments fulfill`
+- [x] 6.1 Add `commitments list` and `commitments fulfill`
   - Done when: scenarios missing-reason, due-first and kept-by-a-change pass in `commitments.test.ts`
-- [ ] 6.2 Add `commitments withdraw` for humans only
+- [x] 6.2 Add `commitments withdraw` for humans only
   - Done when: scenarios withdrawn-by-a-human and withdrawn-by-an-agent pass in `commitments.test.ts`
 
 ## 7. Audit rules
