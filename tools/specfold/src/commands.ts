@@ -3,6 +3,7 @@ import "./agents/command.ts";
 import "./audit/command.ts";
 import "./change/command.ts";
 import "./doctor/command.ts";
+import "./gate/command.ts";
 import "./indexes/command.ts";
 import "./log/command.ts";
 import "./lookup/command.ts";

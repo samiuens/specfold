@@ -1,4 +1,4 @@
-import { readFileSync, rmSync, writeFileSync } from "node:fs";
+import { rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -23,7 +23,7 @@ import {
   runGate,
 } from "../src/gate/rules.ts";
 import { requireConfig } from "../src/repo.ts";
-import { commit, concept, gateRepo, write } from "./gate-helpers.ts";
+import { commit, concept, demoChange, gateRepo, write } from "./gate-helpers.ts";
 
 const KIT_OPENSPEC = fileURLToPath(new URL("../../../node_modules/.bin/openspec", import.meta.url));
 
@@ -49,20 +49,6 @@ function ctx(root: string, o: Options = {}): GateContext {
 
 const rules = (rule: GateRule, root: string, o?: Options) =>
   rule(ctx(root, o)).map((f) => [f.rule, f.effect, f.path]);
-
-const FIXTURE = new URL("./fixtures/change/", import.meta.url);
-const fixture = (rel: string) => readFileSync(new URL(rel, FIXTURE), "utf8");
-
-/** The valid `demo` change of the change check fixture, with the concept its brief cites. */
-const demoChange = (): Record<string, string> => ({
-  "knowledge/decisions/receipts.md": concept("Decision", "Receipts go by mail."),
-  ...Object.fromEntries(
-    ["brief.md", "knowledge.md", "tasks.md", ".openspec.yaml", "specs/guest-checkout/spec.md"].map((f) => [
-      `openspec/changes/demo/${f}`,
-      fixture(`openspec/changes/demo/${f}`),
-    ]),
-  ),
-});
 
 describe("gate: rules", () => {
   it("reports nothing but G3 setup for an unchanged clean repository", () => {
