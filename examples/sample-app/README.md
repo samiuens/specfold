@@ -8,12 +8,12 @@ Where to look:
 - `openspec/specs/due-dates/spec.md`: the behavior contract the change added.
 - `knowledge/`: the capability card and decision the change wrote, linked by `specfold sync`.
 
-Run from this folder (the kit's bundled CLI and pinned OpenSpec live two levels up):
+Run from this folder (OpenSpec comes from the kit, two levels up):
 
 ```sh
 npm test
-node ../../scripts/specfold.mjs validate
+node scripts/specfold.mjs validate
 ../../node_modules/.bin/openspec validate --all --strict
 ```
 
-`openspec/schemas/specfold/` and `knowledge/conventions/code-comments.md` are copies of the kit's `template/`; the kit's CI fails when they drift.
+Everything the kit ships is a copy of the kit's `template/`, and the kit's CI fails when one drifts: `AGENTS.md`, `CLAUDE.md`, `scripts/specfold.mjs`, the `specfold` schema, the sf skills and their links, the planner agent and the code-comment convention.
