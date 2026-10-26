@@ -26,6 +26,7 @@ describe("repo", () => {
       blockOnBrokenLinks: false,
       folders: { decisions: { title: "Decisions", description: "Why" } },
       agentPrefix: "",
+      requires: {},
     });
   });
 
