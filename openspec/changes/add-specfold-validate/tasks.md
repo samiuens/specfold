@@ -87,7 +87,7 @@ scenarios: [specfold-validate#patched-sample-passes-upstream-sample-fails]
 agent: implementer
 ```
 
-- [ ] 6.1 Vendor `acme_retail` at commit `ad30107` as upstream and patched copies with `PATCH.md` and the license
+- [x] 6.1 Vendor `acme_retail` at commit `ad30107` as upstream and patched copies with `PATCH.md` and the license
   - Done when: scenario patched-sample-passes-upstream-sample-fails passes
 
 ## 7. Dogfooding and CI
