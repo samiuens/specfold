@@ -3,7 +3,15 @@ type: Capability
 title: specfold drift
 description: Why drift is computed from git alone, and where the contract for specfold drift lives.
 status: draft
+spec: openspec/specs/specfold-drift/spec.md
+resource: ../../openspec/specs/specfold-drift/spec.md
+change: 2026-10-26-add-specfold-drift
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T18:02:54+01:00 }
+sources:
+  - id: proposal-2026-10-26-add-specfold-drift
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-drift/proposal.md
+  - id: design-2026-10-26-add-specfold-drift
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-drift/design.md
 ---
 
 # Why
