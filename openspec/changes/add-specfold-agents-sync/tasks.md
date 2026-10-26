@@ -3,13 +3,13 @@
 ## 1. Config
 
 ```yaml
-files: [tools/specfold/src/repo.ts, tools/specfold/test/repo.test.ts, specfold.yaml, template/specfold.yaml]
+files: [tools/specfold/src/repo.ts, tools/specfold/test/repo.test.ts, tools/specfold/test/change-knowledge.test.ts, specfold.yaml, template/specfold.yaml]
 depends: []
 scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Read `agents.targets` from `specfold.yaml` with the default `[".claude/skills"]` and set it in the kit and template settings
+- [x] 1.1 Read `agents.targets` from `specfold.yaml` with the default `[".claude/skills"]` and set it in the kit and template settings
   - Done when: `repo.test.ts` covers the default, a configured list and a target outside the repository
 
 ## 2. Link planning

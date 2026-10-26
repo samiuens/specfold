@@ -23,6 +23,8 @@ export interface Config {
   requires: Record<string, string>;
   /** `tasks.max_files_per_task` and `tasks.max_tasks_per_group`; both limits only warn. */
   tasks: { maxFilesPerTask: number; maxTasksPerGroup: number };
+  /** `agents.targets`: repository-relative folders that receive one symlink per skill. */
+  agentTargets: string[];
 }
 
 /** The nearest directory at or above `cwd` that contains specfold.yaml. */
@@ -47,6 +49,14 @@ const positiveInt = (v: unknown, key: string, fallback: number): number => {
   return v;
 };
 
+/** A repository-relative folder: not absolute, no `..` segment. */
+function repoFolder(path: string, key: string): string {
+  const clean = path.replace(/\/+$/, "");
+  if (clean === "" || clean.startsWith("/") || /^[A-Za-z]:/.test(clean) || clean.split("/").includes(".."))
+    throw new EnvError(`${CONFIG_FILE}: '${key}' entry '${path}' must be a folder inside the repository`);
+  return clean;
+}
+
 const stringList = (v: unknown, key: string): string[] => {
   if (v === undefined) return [];
   if (!Array.isArray(v) || !v.every((x) => typeof x === "string")) {
@@ -66,6 +76,7 @@ export function loadConfig(root: string): Config {
   const gate = isRecord(data.gate) ? data.gate : {};
   const actors = isRecord(data.actors) ? data.actors : {};
   const tasks = isRecord(data.tasks) ? data.tasks : {};
+  const agents = isRecord(data.agents) ? data.agents : {};
   const folders: Record<string, FolderInfo> = {};
   if (isRecord(data.folders)) {
     for (const [path, info] of Object.entries(data.folders)) {
@@ -92,6 +103,10 @@ export function loadConfig(root: string): Config {
       maxFilesPerTask: positiveInt(tasks.max_files_per_task, "tasks.max_files_per_task", 5),
       maxTasksPerGroup: positiveInt(tasks.max_tasks_per_group, "tasks.max_tasks_per_group", 8),
     },
+    agentTargets:
+      agents.targets === undefined
+        ? [".claude/skills"]
+        : stringList(agents.targets, "agents.targets").map((t) => repoFolder(t, "agents.targets")),
   };
 }
 
