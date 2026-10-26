@@ -23,7 +23,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 2.1 Rebuild the bundle and tell agents in `AGENTS.md` to use `specfold log add`
+- [x] 2.1 Rebuild the bundle and tell agents in `AGENTS.md` to use `specfold log add`
   - Done when: `node scripts/specfold.mjs log add --help` prints the usage and the `cli` workflow passes
 
 ## 3. Knowledge
