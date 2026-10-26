@@ -21,7 +21,7 @@ scenarios: [specfold-change-check#missing-knowledge-delta, specfold-change-check
 agent: implementer
 ```
 
-- [ ] 2.1 Add rules K0 to K6 with an option for archived changes
+- [x] 2.1 Add rules K0 to K6 with an option for archived changes
   - Done when: the eight scenarios of this group pass in `change-knowledge.test.ts`
 
 ## 3. Change check command
