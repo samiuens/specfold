@@ -19,3 +19,4 @@
 * **Change**: 2026-10-26-add-specfold-sync: created 1, updated 1, deprecated 0
 * **Change**: 2026-10-26-add-template-settings: created 1, updated 0, deprecated 0
 * **Decision**: Specfold stays compatible with the skills CLI (skills.sh); using it for skill updates is decided in M9 (/backlog/skills-cli-for-skill-updates.md)
+* **Change**: 2026-10-26-add-specfold-agents-sync: created 1, updated 1, deprecated 0
