@@ -3,6 +3,7 @@ type: Backlog Item
 title: Evals for the framework itself
 description: Decide whether and how to evaluate Specfold's skills and agent roles with repeatable evals.
 status: draft
+verified: { by: human:octocat, at: 2026-10-26T17:30:00+01:00 }
 state: open
 origin: human
 priority: medium
