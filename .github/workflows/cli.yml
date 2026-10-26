@@ -37,6 +37,19 @@ jobs:
         run: node scripts/specfold.mjs index --check
       - name: Kit schema copy matches the template
         run: diff -r template/openspec/schemas/specfold openspec/schemas/specfold || { echo "::error::openspec/schemas/specfold differs from template/openspec/schemas/specfold; copy the template schema over"; exit 1; }
+      - name: Kit skills and planner match the template
+        run: |
+          for skill in template/.agents/skills/*/; do
+            name=$(basename "$skill")
+            diff -r "$skill" ".agents/skills/$name" || { echo "::error::.agents/skills/$name differs from the template; copy it over"; exit 1; }
+          done
+          diff template/.claude/agents/planner.md .claude/agents/planner.md
+      - name: Skills follow the shared frontmatter rules
+        run: node scripts/check-skills.mjs .agents/skills template/.agents/skills
+      - name: Skill links are up to date
+        run: |
+          node scripts/specfold.mjs agents sync --check
+          cd template && node ../scripts/specfold.mjs agents sync --check
       - name: Template bundle is valid with its own settings
         working-directory: template
         run: |
