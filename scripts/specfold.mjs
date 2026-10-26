@@ -311,26 +311,26 @@ var require_directives = __commonJS({
           this.tags = Object.assign({}, _Directives.defaultTags);
           this.atNextDocument = false;
         }
-        const parts = line.trim().split(/[ \t]+/);
-        const name = parts.shift();
+        const parts2 = line.trim().split(/[ \t]+/);
+        const name = parts2.shift();
         switch (name) {
           case "%TAG": {
-            if (parts.length !== 2) {
+            if (parts2.length !== 2) {
               onError(0, "%TAG directive should contain exactly two parts");
-              if (parts.length < 2)
+              if (parts2.length < 2)
                 return false;
             }
-            const [handle, prefix] = parts;
+            const [handle, prefix] = parts2;
             this.tags[handle] = prefix;
             return true;
           }
           case "%YAML": {
             this.yaml.explicit = true;
-            if (parts.length !== 1) {
+            if (parts2.length !== 1) {
               onError(0, "%YAML directive should contain exactly one part");
               return false;
             }
-            const [version] = parts;
+            const [version] = parts2;
             if (version === "1.1" || version === "1.2") {
               this.yaml.version = version;
               return true;
@@ -3067,9 +3067,9 @@ var require_timestamp = __commonJS({
     var stringifyNumber = require_stringifyNumber();
     function parseSexagesimal(str, asBigInt) {
       const sign = str[0];
-      const parts = sign === "-" || sign === "+" ? str.substring(1) : str;
+      const parts2 = sign === "-" || sign === "+" ? str.substring(1) : str;
       const num = (n) => asBigInt ? BigInt(n) : Number(n);
-      const res = parts.replace(/_/g, "").split(":").reduce((res2, p) => res2 * num(60) + num(p), num(0));
+      const res = parts2.replace(/_/g, "").split(":").reduce((res2, p) => res2 * num(60) + num(p), num(0));
       return sign === "-" ? num(-1) * res : res;
     }
     function stringifySexagesimal(node) {
@@ -3085,18 +3085,18 @@ var require_timestamp = __commonJS({
         value *= num(-1);
       }
       const _60 = num(60);
-      const parts = [value % _60];
+      const parts2 = [value % _60];
       if (value < 60) {
-        parts.unshift(0);
+        parts2.unshift(0);
       } else {
-        value = (value - parts[0]) / _60;
-        parts.unshift(value % _60);
+        value = (value - parts2[0]) / _60;
+        parts2.unshift(value % _60);
         if (value >= 60) {
-          value = (value - parts[0]) / _60;
-          parts.unshift(value);
+          value = (value - parts2[0]) / _60;
+          parts2.unshift(value);
         }
       }
-      return sign + parts.map((n) => String(n).padStart(2, "0")).join(":").replace(/000000\d*$/, "");
+      return sign + parts2.map((n) => String(n).padStart(2, "0")).join(":").replace(/000000\d*$/, "");
     }
     var intTime = {
       identify: (value) => typeof value === "bigint" || Number.isInteger(value),
@@ -4833,8 +4833,8 @@ var require_resolve_flow_scalar = __commonJS({
     };
     function parseCharCode(source, offset, length, onError) {
       const cc = source.substr(offset, length);
-      const ok = cc.length === length && /^[0-9a-fA-F]+$/.test(cc);
-      const code = ok ? parseInt(cc, 16) : NaN;
+      const ok2 = cc.length === length && /^[0-9a-fA-F]+$/.test(cc);
+      const code = ok2 ? parseInt(cc, 16) : NaN;
       try {
         return String.fromCodePoint(code);
       } catch {
@@ -7437,41 +7437,12 @@ Run 'specfold --help' for usage.
   }
 }
 
-// src/indexes/command.ts
-import { existsSync as existsSync2, readFileSync as readFileSync4, writeFileSync } from "node:fs";
-import { join as join5, relative as relative2, sep as sep2 } from "node:path";
+// src/doctor/command.ts
+import { execFileSync } from "node:child_process";
 
-// src/findings.ts
-var compare = (a, b) => a < b ? -1 : a > b ? 1 : 0;
-function sortFindings(findings) {
-  return [...findings].sort(
-    (a, b) => compare(a.path, b.path) || (a.line ?? 0) - (b.line ?? 0) || compare(a.rule, b.rule)
-  );
-}
-function countBySeverity(findings) {
-  const errors = findings.filter((f) => f.severity === "error").length;
-  return { errors, warnings: findings.length - errors };
-}
-function findingLine(f) {
-  return `${f.path}${f.line === null ? "" : `:${f.line}`} ${f.rule} ${f.message}`;
-}
-var plural = (n, word) => `${n} ${n === 1 ? word : word.endsWith("x") ? `${word}es` : `${word}s`}`;
-function renderHuman(findings, checked) {
-  const sorted = sortFindings(findings);
-  const { errors, warnings } = countBySeverity(sorted);
-  const lines = sorted.filter((f) => f.severity === "error").map(findingLine);
-  lines.push(
-    `${plural(checked, "file")} checked: ${plural(errors, "error")}, ${plural(warnings, "warning")}`
-  );
-  return `${lines.join("\n")}
-`;
-}
-function renderJson(findings, checked) {
-  const sorted = sortFindings(findings);
-  const { errors, warnings } = countBySeverity(sorted);
-  return `${JSON.stringify({ ok: errors === 0, checked, errors, warnings, findings: sorted }, null, 2)}
-`;
-}
+// src/doctor/checks.ts
+import { existsSync as existsSync2, readdirSync, readFileSync as readFileSync2, statSync as statSync2 } from "node:fs";
+import { join as join2 } from "node:path";
 
 // src/repo.ts
 var import_yaml = __toESM(require_dist(), 1);
@@ -7521,7 +7492,12 @@ function loadConfig(root) {
     sourceGlobs: stringList(data.source_globs, "source_globs"),
     blockOnBrokenLinks: gate.block_on_broken_links !== false,
     folders,
-    agentPrefix: typeof actors.agent_prefix === "string" ? actors.agent_prefix : ""
+    agentPrefix: typeof actors.agent_prefix === "string" ? actors.agent_prefix : "",
+    requires: Object.fromEntries(
+      Object.entries(isRecord(data.requires) ? data.requires : {}).filter(
+        (e) => typeof e[1] === "string"
+      )
+    )
   };
 }
 function requireConfig(cwd) {
@@ -7546,18 +7522,232 @@ function resolveBundleRoot(cwd, bundle, config) {
   return root;
 }
 
+// src/doctor/checks.ts
+var DEFAULT_OPENSPEC_RANGE = ">=1.15 <2";
+var MIN_NODE = "20.19.0";
+var parts = (v) => v.split(".").map((n) => Number.parseInt(n, 10) || 0);
+function compareVersions(a, b) {
+  const [x, y] = [parts(a), parts(b)];
+  for (let i = 0; i < Math.max(x.length, y.length, 3); i++) {
+    const d = (x[i] ?? 0) - (y[i] ?? 0);
+    if (d !== 0) return Math.sign(d);
+  }
+  return 0;
+}
+function satisfies(version, range) {
+  return range.trim().split(/\s+/).filter(Boolean).every((comparator) => {
+    const m = /^(>=|<=|>|<|=)?v?(\d+(?:\.\d+){0,2})$/.exec(comparator);
+    if (!m) return false;
+    const c = compareVersions(version, m[2] ?? "0");
+    switch (m[1]) {
+      case ">=":
+        return c >= 0;
+      case "<=":
+        return c <= 0;
+      case ">":
+        return c > 0;
+      case "<":
+        return c < 0;
+      default:
+        return c === 0;
+    }
+  });
+}
+var firstVersion = (text2) => text2 ? /\d+\.\d+\.\d+/.exec(text2)?.[0] : void 0;
+var ok = (id, message) => ({ id, status: "ok", message, fix: null });
+function hookManagerMentions(root) {
+  const files = ["lefthook.yml", "lefthook.yaml", ".lefthook.yml", ".pre-commit-config.yaml"].map(
+    (f) => join2(root, f)
+  );
+  const husky = join2(root, ".husky");
+  if (existsSync2(husky) && statSync2(husky).isDirectory()) {
+    for (const f of readdirSync(husky)) files.push(join2(husky, f));
+  }
+  return files.some(
+    (f) => existsSync2(f) && statSync2(f).isFile() && readFileSync2(f, "utf8").includes("specfold hook")
+  );
+}
+function runChecks(env) {
+  const checks = [];
+  checks.push(
+    compareVersions(env.nodeVersion, MIN_NODE) >= 0 ? ok("D1", `Node ${env.nodeVersion}`) : {
+      id: "D1",
+      status: "fail",
+      message: `Node ${env.nodeVersion} is older than ${MIN_NODE}`,
+      fix: `install Node ${MIN_NODE} or newer`
+    }
+  );
+  const root = findRepoRoot(env.cwd);
+  let config;
+  if (!root) {
+    checks.push({
+      id: "D2",
+      status: "fail",
+      message: "no specfold.yaml found",
+      fix: "run 'specfold init' or work inside a Specfold repository"
+    });
+  } else {
+    try {
+      config = loadConfig(root);
+      checks.push(ok("D2", `specfold.yaml in ${root}`));
+    } catch (error) {
+      checks.push({
+        id: "D2",
+        status: "fail",
+        message: error.message,
+        fix: "fix specfold.yaml so it parses"
+      });
+    }
+  }
+  const range = config?.requires.openspec ?? DEFAULT_OPENSPEC_RANGE;
+  const openspec = firstVersion(env.exec("openspec", ["--version"], env.cwd));
+  if (!openspec) {
+    checks.push({
+      id: "D3",
+      status: "fail",
+      message: "openspec is not on the PATH",
+      fix: "npm install -g @fission-ai/openspec (or the standalone binary)"
+    });
+  } else if (!satisfies(openspec, range)) {
+    checks.push({
+      id: "D3",
+      status: "fail",
+      message: `openspec ${openspec} does not satisfy ${range}`,
+      fix: `install an OpenSpec version matching ${range}`
+    });
+  } else {
+    checks.push(ok("D3", `openspec ${openspec} (${range})`));
+  }
+  const base = root ?? env.cwd;
+  const inGit = env.exec("git", ["rev-parse", "--is-inside-work-tree"], base)?.trim() === "true";
+  const hooksPath = inGit ? env.exec("git", ["config", "--get", "core.hooksPath"], base)?.trim() : void 0;
+  if (inGit && (hooksPath === ".specfold/hooks" || hookManagerMentions(base))) {
+    checks.push(
+      ok(
+        "D4",
+        hooksPath === ".specfold/hooks" ? "git hooks via core.hooksPath" : "git hooks via an existing hook manager"
+      )
+    );
+  } else {
+    checks.push({
+      id: "D4",
+      status: "warn",
+      message: inGit ? "Specfold git hooks are not installed" : "not inside a git repository",
+      fix: "specfold hooks install"
+    });
+  }
+  if (!root || !existsSync2(join2(root, "knowledge"))) {
+    checks.push({
+      id: "D5",
+      status: "fail",
+      message: "no knowledge/ bundle",
+      fix: "create knowledge/ with a root index.md, or run 'specfold init'"
+    });
+  } else if (!existsSync2(join2(root, "knowledge", "index.md"))) {
+    checks.push({
+      id: "D5",
+      status: "fail",
+      message: "knowledge/index.md is missing",
+      fix: "run 'specfold index'"
+    });
+  } else {
+    checks.push(ok("D5", "knowledge/ bundle with index.md"));
+  }
+  const graphify = firstVersion(env.exec("graphify", ["--version"], env.cwd));
+  checks.push(ok("D6", graphify ? `graphify ${graphify}` : "graphify not installed (optional)"));
+  return checks;
+}
+
+// src/doctor/command.ts
+function realEnv(cwd) {
+  return {
+    cwd,
+    nodeVersion: process.versions.node,
+    exec: (cmd, args, dir) => {
+      try {
+        return execFileSync(cmd, args, {
+          cwd: dir,
+          encoding: "utf8",
+          stdio: ["ignore", "pipe", "ignore"],
+          timeout: 1e4
+        });
+      } catch {
+        return void 0;
+      }
+    }
+  };
+}
+var exitCode = (checks) => checks.some((c) => c.status === "fail") ? 1 : 0;
+function render(checks, json) {
+  if (json) return `${JSON.stringify({ ok: exitCode(checks) === 0, checks }, null, 2)}
+`;
+  const lines = checks.flatMap((c) => [
+    `${c.id} ${c.status} ${c.message}`,
+    ...c.fix ? [`    fix: ${c.fix}`] : []
+  ]);
+  return `${lines.join("\n")}
+`;
+}
+register({
+  name: "doctor",
+  summary: "check the environment and Specfold configuration",
+  usage: "specfold doctor [--json]",
+  options: { json: { type: "boolean" } },
+  run: ({ io, values }) => {
+    const checks = runChecks(realEnv(io.cwd));
+    io.stdout(render(checks, values.json === true));
+    return exitCode(checks);
+  }
+});
+
+// src/indexes/command.ts
+import { existsSync as existsSync3, readFileSync as readFileSync5, writeFileSync } from "node:fs";
+import { join as join6, relative as relative2, sep as sep2 } from "node:path";
+
+// src/findings.ts
+var compare = (a, b) => a < b ? -1 : a > b ? 1 : 0;
+function sortFindings(findings) {
+  return [...findings].sort(
+    (a, b) => compare(a.path, b.path) || (a.line ?? 0) - (b.line ?? 0) || compare(a.rule, b.rule)
+  );
+}
+function countBySeverity(findings) {
+  const errors = findings.filter((f) => f.severity === "error").length;
+  return { errors, warnings: findings.length - errors };
+}
+function findingLine(f) {
+  return `${f.path}${f.line === null ? "" : `:${f.line}`} ${f.rule} ${f.message}`;
+}
+var plural = (n, word) => `${n} ${n === 1 ? word : word.endsWith("x") ? `${word}es` : `${word}s`}`;
+function renderHuman(findings, checked) {
+  const sorted = sortFindings(findings);
+  const { errors, warnings } = countBySeverity(sorted);
+  const lines = sorted.filter((f) => f.severity === "error").map(findingLine);
+  lines.push(
+    `${plural(checked, "file")} checked: ${plural(errors, "error")}, ${plural(warnings, "warning")}`
+  );
+  return `${lines.join("\n")}
+`;
+}
+function renderJson(findings, checked) {
+  const sorted = sortFindings(findings);
+  const { errors, warnings } = countBySeverity(sorted);
+  return `${JSON.stringify({ ok: errors === 0, checked, errors, warnings, findings: sorted }, null, 2)}
+`;
+}
+
 // src/indexes/generate.ts
 import { basename, relative, sep } from "node:path";
 
 // src/bundle.ts
 var import_yaml2 = __toESM(require_dist(), 1);
-import { readdirSync, readFileSync as readFileSync2 } from "node:fs";
-import { join as join2 } from "node:path";
+import { readdirSync as readdirSync2, readFileSync as readFileSync3 } from "node:fs";
+import { join as join3 } from "node:path";
 var RESERVED = /* @__PURE__ */ new Set(["index.md", "log.md"]);
 function walk(bundleRoot) {
   const out = [];
   const visit = (relDir) => {
-    const dirents = readdirSync(join2(bundleRoot, relDir), { withFileTypes: true }).filter((d) => !d.name.startsWith(".")).sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
+    const dirents = readdirSync2(join3(bundleRoot, relDir), { withFileTypes: true }).filter((d) => !d.name.startsWith(".")).sort((a, b) => a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
     for (const d of dirents) {
       const rel = relDir ? `${relDir}/${d.name}` : d.name;
       out.push({ rel, isDir: d.isDirectory() });
@@ -7579,7 +7769,7 @@ function keyLines(doc, counter) {
   return lines;
 }
 function parseFile(bundleRoot, rel) {
-  const text2 = readFileSync2(join2(bundleRoot, rel), "utf8").replace(/\r\n/g, "\n");
+  const text2 = readFileSync3(join3(bundleRoot, rel), "utf8").replace(/\r\n/g, "\n");
   const lines = text2.split("\n");
   if (lines[0] !== "---") return { rel, hasFrontmatter: false, body: text2, bodyStartLine: 1 };
   const end = lines.findIndex((line, i) => i > 0 && (line === "---" || line === "..."));
@@ -7713,12 +7903,12 @@ ${LOG_ENTRY}`);
 }
 
 // src/indexes/refs.ts
-import { readFileSync as readFileSync3, statSync as statSync2 } from "node:fs";
-import { join as join4 } from "node:path";
+import { readFileSync as readFileSync4, statSync as statSync3 } from "node:fs";
+import { join as join5 } from "node:path";
 
 // src/glob.ts
-import { readdirSync as readdirSync2 } from "node:fs";
-import { join as join3 } from "node:path";
+import { readdirSync as readdirSync3 } from "node:fs";
+import { join as join4 } from "node:path";
 function expandBraces(glob) {
   const open = glob.indexOf("{");
   if (open === -1) return [glob];
@@ -7773,7 +7963,7 @@ var SKIP = /* @__PURE__ */ new Set(["node_modules"]);
 function walkFiles(root) {
   const out = [];
   const visit = (rel) => {
-    for (const d of readdirSync2(join3(root, rel), { withFileTypes: true })) {
+    for (const d of readdirSync3(join4(root, rel), { withFileTypes: true })) {
       if (d.name.startsWith(".") || SKIP.has(d.name)) continue;
       const path = rel ? `${rel}/${d.name}` : d.name;
       if (d.isDirectory()) visit(path);
@@ -7793,9 +7983,9 @@ function scanReferences(repoRoot, sourceGlobs) {
   const refs = [];
   for (const file of walkFiles(repoRoot)) {
     if (!patterns.some((p) => p.test(file))) continue;
-    const abs = join4(repoRoot, file);
-    if (statSync2(abs).size > MAX_BYTES) continue;
-    const text2 = readFileSync3(abs, "utf8");
+    const abs = join5(repoRoot, file);
+    if (statSync3(abs).size > MAX_BYTES) continue;
+    const text2 = readFileSync4(abs, "utf8");
     if (text2.includes("\0")) continue;
     text2.split("\n").forEach((content, i) => {
       for (const match of content.matchAll(REFERENCE)) {
@@ -7815,8 +8005,8 @@ function locationsByConcept(refs) {
 function syncIndexes(repoRoot, bundleRoot, generated, check) {
   const changed = [];
   for (const [rel, content] of [...generated].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) {
-    const abs = join5(bundleRoot, rel);
-    if (existsSync2(abs) && readFileSync4(abs, "utf8") === content) continue;
+    const abs = join6(bundleRoot, rel);
+    if (existsSync3(abs) && readFileSync5(abs, "utf8") === content) continue;
     if (!check) writeFileSync(abs, content);
     changed.push(relative2(repoRoot, abs).split(sep2).join("/"));
   }
@@ -7849,9 +8039,9 @@ register({
     const outdated = check ? changed : [];
     const sorted = sortFindings(findings);
     const { errors, warnings } = countBySeverity(sorted);
-    const ok = errors === 0 && outdated.length === 0;
+    const ok2 = errors === 0 && outdated.length === 0;
     if (values.json) {
-      io.stdout(`${JSON.stringify({ ok, written, outdated, findings: sorted }, null, 2)}
+      io.stdout(`${JSON.stringify({ ok: ok2, written, outdated, findings: sorted }, null, 2)}
 `);
     } else {
       const counted = check ? `${outdated.length} outdated` : `${written.length} written`;
@@ -7864,13 +8054,13 @@ register({
       io.stdout(`${lines.join("\n")}
 `);
     }
-    return ok ? 0 : 1;
+    return ok2 ? 0 : 1;
   }
 });
 
 // src/log/command.ts
-import { existsSync as existsSync3, readFileSync as readFileSync5, writeFileSync as writeFileSync2 } from "node:fs";
-import { join as join6 } from "node:path";
+import { existsSync as existsSync4, readFileSync as readFileSync6, writeFileSync as writeFileSync2 } from "node:fs";
+import { join as join7 } from "node:path";
 
 // src/log/insert.ts
 var DATE_HEADING = /^## (\d{4}-\d{2}-\d{2})\s*$/;
@@ -7926,9 +8116,9 @@ register({
     const date = values.date ?? localDate();
     if (!isCalendarDate(date)) throw new UsageError(`date '${date}' is not a valid YYYY-MM-DD date`);
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, void 0);
-    const path = join6(bundleRoot, "log.md");
+    const path = join7(bundleRoot, "log.md");
     const entry = `* **${kind}**: ${message}`;
-    writeFileSync2(path, insertEntry(existsSync3(path) ? readFileSync5(path, "utf8") : void 0, date, entry));
+    writeFileSync2(path, insertEntry(existsSync4(path) ? readFileSync6(path, "utf8") : void 0, date, entry));
     io.stdout(`${entry}
 `);
     return 0;
@@ -8037,12 +8227,12 @@ register({
 });
 
 // src/new/command.ts
-import { existsSync as existsSync5, mkdirSync, writeFileSync as writeFileSync3 } from "node:fs";
-import { dirname as dirname2, join as join8, relative as relative4, sep as sep4 } from "node:path";
+import { existsSync as existsSync6, mkdirSync, writeFileSync as writeFileSync3 } from "node:fs";
+import { dirname as dirname2, join as join9, relative as relative4, sep as sep4 } from "node:path";
 
 // src/new/templates.ts
-import { existsSync as existsSync4, readFileSync as readFileSync6 } from "node:fs";
-import { join as join7 } from "node:path";
+import { existsSync as existsSync5, readFileSync as readFileSync7 } from "node:fs";
+import { join as join8 } from "node:path";
 var HEADINGS = {
   Term: ["Meaning", "Not to be confused with", "Related"],
   "Business Rule": ["Rule", "Why", "Related"],
@@ -8066,9 +8256,9 @@ function builtInBody(type) {
 `;
 }
 function overrideTemplate(repoRoot, type, values) {
-  const path = join7(repoRoot, TEMPLATE_DIR, `${typeSlug(type)}.md`);
-  if (!existsSync4(path)) return void 0;
-  return readFileSync6(path, "utf8").replace(
+  const path = join8(repoRoot, TEMPLATE_DIR, `${typeSlug(type)}.md`);
+  if (!existsSync5(path)) return void 0;
+  return readFileSync7(path, "utf8").replace(
     /\{\{(type|title|description|by|now)\}\}/g,
     (_, key) => values[key]
   );
@@ -8125,9 +8315,9 @@ register({
     if (!ACTOR.test(by))
       throw new UsageError(`actor '${by}' must look like '<producer>/<version>' or 'process:<id>'`);
     const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
-    const abs = join8(bundleRoot, rel);
+    const abs = join9(bundleRoot, rel);
     const shown = relative4(config.root, abs).split(sep4).join("/");
-    if (existsSync5(abs)) {
+    if (existsSync6(abs)) {
       if (values.json) io.stdout(`${JSON.stringify({ created: null, error: `${shown} already exists` })}
 `);
       else io.stderr(`specfold: ${shown} already exists
@@ -8163,12 +8353,12 @@ register({
 });
 
 // src/validate/index.ts
-import { existsSync as existsSync8 } from "node:fs";
+import { existsSync as existsSync9 } from "node:fs";
 import { relative as relative6, resolve as resolve2, sep as sep5 } from "node:path";
 
 // src/validate/links.ts
-import { existsSync as existsSync7 } from "node:fs";
-import { dirname as dirname4, join as join10 } from "node:path";
+import { existsSync as existsSync8 } from "node:fs";
+import { dirname as dirname4, join as join11 } from "node:path";
 
 // src/validate/okf.ts
 var isRecord4 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -8291,8 +8481,8 @@ var okf3Log = (file) => {
 };
 
 // src/validate/profile.ts
-import { existsSync as existsSync6 } from "node:fs";
-import { dirname as dirname3, join as join9, relative as relative5 } from "node:path";
+import { existsSync as existsSync7 } from "node:fs";
+import { dirname as dirname3, join as join10, relative as relative5 } from "node:path";
 function conceptData(file) {
   const data = file.frontmatter?.data;
   if (!isConcept(file.rel) || !isRecord4(data)) return void 0;
@@ -8577,7 +8767,7 @@ var p11 = (file, ctx) => {
   }
   if (data.supersedes !== void 0) {
     const target = typeof data.supersedes === "string" ? resolveInBundle(ctx.bundleRoot, file.rel, data.supersedes) : void 0;
-    if (!target || !existsSync6(target)) {
+    if (!target || !existsSync7(target)) {
       findings.push(
         finding(
           "P11",
@@ -8591,7 +8781,7 @@ var p11 = (file, ctx) => {
   }
   if (data.spec !== void 0) {
     const root = ctx.config?.root;
-    if (typeof data.spec !== "string" || !root || !existsSync6(join9(root, data.spec))) {
+    if (typeof data.spec !== "string" || !root || !existsSync7(join10(root, data.spec))) {
       findings.push(
         finding(
           "P11",
@@ -8624,7 +8814,7 @@ var p11 = (file, ctx) => {
 function resolveInBundle(bundleRoot, fromRel, target) {
   const clean = target.split("#")[0] ?? "";
   if (clean === "") return void 0;
-  const abs = clean.startsWith("/") ? join9(bundleRoot, clean) : join9(bundleRoot, dirname3(fromRel), clean);
+  const abs = clean.startsWith("/") ? join10(bundleRoot, clean) : join10(bundleRoot, dirname3(fromRel), clean);
   const rel = relative5(bundleRoot, abs);
   return rel.startsWith("..") ? void 0 : abs;
 }
@@ -8654,7 +8844,7 @@ var l1 = (file, ctx) => {
       } catch {
       }
       const abs = resolveInBundle(ctx.bundleRoot, file.rel, decoded);
-      if (abs && existsSync7(abs)) continue;
+      if (abs && existsSync8(abs)) continue;
       findings.push({
         rule: "L1",
         severity,
@@ -8680,8 +8870,8 @@ var l2 = (file, ctx) => {
   return checks.filter(({ value }) => {
     if (SCHEME.test(value) || value.trim() === "") return false;
     const path = value.split("#")[0] ?? "";
-    const abs = path.startsWith("/") ? join10(ctx.bundleRoot, path) : join10(ctx.bundleRoot, dirname4(file.rel), path);
-    return !existsSync7(abs);
+    const abs = path.startsWith("/") ? join11(ctx.bundleRoot, path) : join11(ctx.bundleRoot, dirname4(file.rel), path);
+    return !existsSync8(abs);
   }).map(({ key, value }) => ({
     rule: "L2",
     severity: "error",
@@ -8733,7 +8923,7 @@ register({
       if (rel.startsWith("..") || resolve2(bundleRoot, rel) !== abs) {
         throw new UsageError(`path is outside the bundle ${bundleRoot}: ${p}`);
       }
-      if (!existsSync8(abs)) throw new UsageError(`path not found: ${p}`);
+      if (!existsSync9(abs)) throw new UsageError(`path not found: ${p}`);
       return abs;
     });
     const { findings, checked } = validate({ bundleRoot, paths, okfOnly, ...config ? { config } : {} });
