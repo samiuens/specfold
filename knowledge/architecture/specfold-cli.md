@@ -38,3 +38,4 @@ Under Node, `yaml` resolves to its CommonJS build, so the bundle banner provides
 
 - [specfold validate](/capabilities/specfold-validate.md)
 - [Deterministic CLI](/decisions/deterministic-cli.md)
+- [TypeScript style](/conventions/typescript-style.md)
