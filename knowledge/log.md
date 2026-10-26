@@ -16,3 +16,4 @@
 * **Change**: add-specfold-schema: the specfold schema ships in template/ and the kit uses it (/capabilities/specfold-schema.md)
 * **Change**: add-specfold-tasks: tasks check, status and resume (/capabilities/specfold-tasks.md)
 * **Change**: add-specfold-change-check: change check enforces brief.md and knowledge.md (/capabilities/specfold-change-check.md)
+* **Change**: 2026-10-26-add-specfold-sync: created 1, updated 1, deprecated 0
