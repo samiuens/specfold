@@ -38,6 +38,7 @@
 - **P12-P14** are three rule functions next to P11, with findings on the offending key's line. The missing `committed_by` is the only warning.
 - **`backlog add`:**
   - the file name is the title in kebab case, and an existing file means exit 1;
+  - without `--description`, the description is the title, so the item passes P2 (found while implementing);
   - the actor is the one `new` would write, with `process:specfold-backlog` instead of `process:specfold-new`;
   - indexes are regenerated like `specfold index` does.
 - **`backlog promote`:**
