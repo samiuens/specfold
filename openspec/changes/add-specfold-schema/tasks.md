@@ -37,7 +37,7 @@ agent: implementer
 
 - [x] 3.1 Copy the schema into `openspec/schemas/specfold/` and add the CI copy check
   - Done when: `diff -r template/openspec/schemas/specfold openspec/schemas/specfold` exits 0 and fails after a one-byte change
-- [ ] 3.2 Switch the kit's `openspec/config.yaml` to `schema: specfold` with the knowledge and tasks rules
+- [x] 3.2 Switch the kit's `openspec/config.yaml` to `schema: specfold` with the knowledge and tasks rules
   - Done when: `openspec validate --all --strict` passes and `openspec instructions proposal --change <tmp>` prints no warning
 
 ## 4. Knowledge

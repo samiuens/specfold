@@ -1,4 +1,4 @@
-schema: spec-driven   # switches to the specfold schema in M2
+schema: specfold
 
 context: |
   Language: English. All artifacts are written in English; keep OpenSpec headings and SHALL/MUST in English.
@@ -13,7 +13,19 @@ rules:
     - Link the knowledge concepts and decisions this change relies on (bundle-absolute paths such as /decisions/x.md).
     - Check knowledge/decisions/ for a rejected decision covering the same idea; if one exists, say why this differs.
   specs:
-    - Observable behavior only. Rationale goes to knowledge, not into requirements.
+    - Observable behavior only. Rationale goes to the capability card via knowledge.md.
     - Keep each requirement text under 500 characters.
+  knowledge:
+    - List every concept to create, update or deprecate. An empty list needs a one-line reason.
   tasks:
-    - Last task group is always "Knowledge": record new or changed concepts in knowledge/.
+    - Every group owns its files; groups that may run in parallel never share files.
+    - Last task group is always "Knowledge"; `specfold sync <change>` goes into "Workflow follow-up".
+
+operations:
+  apply:
+    guidance:
+      - Add new findings to knowledge.md while implementing, not afterwards.
+      - When a task is ambiguous, stop and ask the user instead of guessing.
+  archive:
+    guidance:
+      - After archiving, run `specfold sync <change>` and commit its result in the same PR.
