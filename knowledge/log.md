@@ -25,3 +25,4 @@
 * **Change**: 2026-10-26-add-agent-instructions: created 1, updated 1, deprecated 0
 * **Change**: 2026-10-26-add-specfold-gate: created 1, updated 1, deprecated 0
 * **Change**: 2026-10-26-add-gate-github: created 0, updated 2, deprecated 0
+* **Change**: 2026-10-26-add-specfold-verify: created 1, updated 1, deprecated 0
