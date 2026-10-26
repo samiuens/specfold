@@ -3,7 +3,7 @@ type: Reference
 title: Claude Code features Specfold relies on
 description: Skill locations, hooks, question tool, subagent frontmatter, plan mode and worktree settings in Claude Code, as documented on 2026-10-26.
 status: draft
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T02:10:00+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:33:11+01:00 }
 stale_after: 2026-11-25T00:00:00+01:00
 sources:
   - id: skills
@@ -27,6 +27,7 @@ sources:
 # Skills and instructions
 
 - Skills load from `.claude/skills/` (project, personal, enterprise, nested, plugins), not from `.agents/skills/`. A skill entry can be a symlink to a folder elsewhere; it loads once even if several locations point at it.[^skills]
+- All `SKILL.md` frontmatter fields are optional (`name` defaults to the folder name; `description` is recommended). `description` plus `when_to_use` is cut off at 1,536 characters in the skill listing. Supporting files such as `references/` load when `SKILL.md` links them. Outside Claude Code (claude.ai, the Skills API) only `name`, `description`, `license`, `compatibility`, `metadata` and `allowed-tools` are accepted.
 - `AGENTS.md` is read natively only when no `CLAUDE.md` or `CLAUDE.local.md` exists; `@AGENTS.md` in `CLAUDE.md` loads both. `.agents/` is never read as instructions.[^memory]
 
 # Hooks
@@ -45,7 +46,8 @@ sources:
 # Subagents and plan mode
 
 - Frontmatter in `.claude/agents/*.md`: `name`, `description`, `tools`, `disallowedTools`, `model`, `permissionMode`, `maxTurns`, `skills`, `mcpServers`, `hooks`, `memory`, `background`, `effort`, `isolation` (`worktree`), `color`, `initialPrompt` and others. Unknown keys are silently ignored.[^subagents]
-- `claude --agent <name>` runs the main session with the agent's prompt, tools and model. `permissionMode` is documented only for subagents; whether it applies under `--agent` is untested.
+- `claude --agent <name>` runs the main session with the agent's prompt, tools and model; a non-empty agent prompt replaces the default system prompt, and `CLAUDE.md` still loads. `"agent": "<name>"` in `.claude/settings.json` makes it the project default. `permissionMode` is documented only for subagents, so Specfold starts the planner with `--permission-mode plan` as well (checked 2026-10-26).
+- `AskUserQuestion` is always removed from subagents, even when listed in `tools`; `ExitPlanMode` is removed unless the subagent's `permissionMode` is `plan`. That is why the planner runs as the main session.
 - Approving `ExitPlanMode` switches to auto mode or manual-approve (default) mode, chosen by the user.[^modes]
 
 # Worktrees and limits
