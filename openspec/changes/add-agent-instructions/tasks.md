@@ -51,7 +51,7 @@ scenarios: []
 agent: planner
 ```
 
-- [ ] 4.1 Plan a second sample change with the planner in Claude Code, run by the maintainer from the runbook
+- [x] 4.1 Plan a second sample change with the planner in Claude Code, run by the maintainer from the runbook
   - Done when: the change's `brief.md` is confirmed and `change check` and `openspec validate --strict` pass in the sample
 - [ ] 4.2 Run the opencode check from the runbook
   - Done when: the maintainer reports that opencode lists the sf skills and answers a lookup through `sf-lookup`
