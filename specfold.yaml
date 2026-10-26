@@ -74,7 +74,7 @@ tasks:
   max_files_per_task: 5
   max_tasks_per_group: 8
 
-# Kit repo only: run by `specfold hook commit-msg` from M4 on; until then .githooks/commit-msg runs it.
+# Kit repo only: `specfold hook commit-msg` runs these after its own checks (installed by npm run setup).
 hooks:
   extra:
     commit-msg:

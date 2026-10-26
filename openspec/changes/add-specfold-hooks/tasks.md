@@ -67,7 +67,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 5.1 Replace `.githooks/` with `specfold hooks install` in the kit
+- [x] 5.1 Replace `.githooks/` with `specfold hooks install` in the kit
   - Done when: a commit in the kit runs the commit check through `.specfold/hooks/commit-msg`
 
 ## 6. Bundle
