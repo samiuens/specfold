@@ -27,6 +27,8 @@ export interface Config {
   agentTargets: string[];
   /** `audit.unverified_after_days`: age after which a concept without `verified` is an audit finding. */
   unverifiedAfterDays: number;
+  /** `audit.backlog_untouched_days`: age of the last commit after which an open backlog item is an audit finding. */
+  backlogUntouchedDays: number;
   /** `gate.*` settings beyond `block_on_broken_links`. */
   gate: {
     requireChangeForSourceChanges: boolean;
@@ -143,6 +145,7 @@ export function loadConfig(root: string): Config {
         ? [".claude/skills"]
         : stringList(agents.targets, "agents.targets").map((t) => repoFolder(t, "agents.targets")),
     unverifiedAfterDays: positiveInt(audit.unverified_after_days, "audit.unverified_after_days", 30),
+    backlogUntouchedDays: positiveInt(audit.backlog_untouched_days, "audit.backlog_untouched_days", 180),
     gate: {
       requireChangeForSourceChanges: gate.require_change_for_source_changes !== false,
       escapeLabel:

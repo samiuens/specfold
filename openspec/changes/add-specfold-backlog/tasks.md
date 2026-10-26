@@ -9,7 +9,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Read `audit.backlog_untouched_days` with its default
+- [x] 1.1 Read `audit.backlog_untouched_days` with its default
   - Done when: `repo.test.ts` covers the default 180 and a configured value
 
 ## 2. Profile rules
