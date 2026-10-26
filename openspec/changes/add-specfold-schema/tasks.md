@@ -9,7 +9,7 @@ scenarios: [specfold-schema#schema-validates, specfold-schema#brief-comes-first,
 agent: implementer
 ```
 
-- [ ] 1.1 Fork `spec-driven` into `template/openspec/schemas/specfold/` with OpenSpec 1.15.0
+- [x] 1.1 Fork `spec-driven` into `template/openspec/schemas/specfold/` with OpenSpec 1.15.0
   - Done when: `openspec schema validate specfold` run in `template/` reports the schema as valid
 - [ ] 1.2 Add the `brief` and `knowledge` artifacts, their templates, the dependency changes and the task-breakdown `tasks` template and instruction
   - Done when: the seven scenarios of this group pass in `schema.test.ts`
