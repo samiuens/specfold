@@ -15,6 +15,7 @@ export interface Claim {
 }
 
 const BRIEF = /^openspec\/changes\/(?:archive\/)?[^/]+\/brief\.md$/;
+const ARCHIVED_BRIEF = /^openspec\/changes\/archive\/\d{4}-\d{2}-\d{2}-([^/]+)\/brief\.md$/;
 const CONFIRMED_BY = /^confirmed_by:[ \t]*(\S+)/;
 
 /** `human:` actors in a concept's `verified` (a mapping or a list of mappings), with the key's line. */
@@ -65,8 +66,15 @@ export function addedClaims(root: string, bundleRoot: string, diff: GateDiff): C
     )
       extract = verifiedClaims;
     if (!extract) continue;
-    const base = baseVersion(root, diff.mergeBase, file);
-    const before = new Set(base === undefined ? [] : extract(file, base).map((c) => c.login.toLowerCase()));
+    // an archived brief was the active change's brief at the merge base
+    const active = ARCHIVED_BRIEF.exec(file);
+    const bases = [file, ...(active ? [`openspec/changes/${active[1]}/brief.md`] : [])];
+    const before = new Set(
+      bases.flatMap((path) => {
+        const base = baseVersion(root, diff.mergeBase, path);
+        return base === undefined ? [] : extract(file, base).map((c) => c.login.toLowerCase());
+      }),
+    );
     for (const claim of extract(file, readFileSync(abs, "utf8")))
       if (!before.has(claim.login.toLowerCase())) out.push(claim);
   }

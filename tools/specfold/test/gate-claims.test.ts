@@ -2,7 +2,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { addedClaims } from "../src/gate/claims.ts";
 import { computeDiff } from "../src/gate/diff.ts";
-import { commit, concept, gateRepo } from "./gate-helpers.ts";
+import { commit, concept, gateRepo, git } from "./gate-helpers.ts";
 
 const claims = (root: string) =>
   addedClaims(root, join(root, "knowledge"), computeDiff(root, "main", false)).map((c) => [
@@ -59,6 +59,13 @@ describe("gate: claims", () => {
       ["confirmed_by", "dora", "openspec/changes/archive/2026-10-26-done/brief.md", 3],
       ["confirmed_by", "carl", "openspec/changes/demo/brief.md", 3],
     ]);
+  });
+
+  it("does not count a confirmed brief that the branch archives", () => {
+    const root = gateRepo({ "openspec/changes/demo/brief.md": BRIEF("human:ana") });
+    git(root, "rm", "-rq", "openspec/changes/demo");
+    commit(root, { "openspec/changes/archive/2026-10-26-demo/brief.md": BRIEF("human:ana") });
+    expect(claims(root)).toEqual([]);
   });
 
   it("ignores an empty confirmed_by", () => {
