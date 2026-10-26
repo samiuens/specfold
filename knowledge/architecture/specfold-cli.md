@@ -24,6 +24,7 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/repo.ts` | finds the repository root (nearest `specfold.yaml`) and loads the config |
 | `src/findings.ts` | the `Finding` shape, ordering, human and JSON rendering |
 | `src/bundle.ts` | walks a bundle and splits frontmatter from the body with line numbers |
+| `src/doctor/` | the `doctor` command: checks D1 to D6 over an injected environment, version ranges |
 | `src/glob.ts` | dependency-free glob matching (`**` also matches zero folders) and the repository file walk |
 | `src/validate/` | the `validate` command and its rule sets (OKF, profile, links) |
 | `src/indexes/` | the `index` command: index generation, `see knowledge:` scan, write and check modes |
@@ -42,6 +43,7 @@ Under Node, `yaml` resolves to its CommonJS build, so the bundle banner provides
 # Related
 
 - [specfold validate](/capabilities/specfold-validate.md)
+- [specfold doctor](/capabilities/specfold-doctor.md)
 - [specfold index](/capabilities/specfold-index.md)
 - [specfold log](/capabilities/specfold-log.md)
 - [specfold lookup](/capabilities/specfold-lookup.md)
