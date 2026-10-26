@@ -3,13 +3,13 @@
 ## 1. Due dates
 
 ```yaml
-files: [src/todo.js, test/due-dates.test.js]
+files: [src/todo.js, test/todo.test.js, test/due-dates.test.js]
 depends: []
 scenarios: [due-dates#item-with-due-date, due-dates#item-without-due-date, due-dates#impossible-date]
 agent: implementer
 ```
 
-- [ ] 1.1 Accept and validate an optional due date in `add`
+- [x] 1.1 Accept and validate an optional due date in `add`
   - Done when: scenarios item-with-due-date, item-without-due-date and impossible-date pass in `test/due-dates.test.js`
 
 ## 2. Overdue query
