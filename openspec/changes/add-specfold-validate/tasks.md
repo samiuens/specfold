@@ -63,7 +63,7 @@ agent: implementer
   - Done when: their scenarios pass in `profile.test.ts`
 - [x] 4.2 Add P5 to P8 (timestamps, sources, stale_after, file names)
   - Done when: their scenarios in `profile.test.ts` pass
-- [ ] 4.3 Add P9 to P11 and the unknown-key guarantee
+- [x] 4.3 Add P9 to P11 and the unknown-key guarantee
   - Done when: their scenarios, only-warnings and error-line-and-summary pass in `profile.test.ts`
 
 ## 5. Link rules
