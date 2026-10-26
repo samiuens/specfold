@@ -96,3 +96,45 @@ describe("validate: OKF-1 and OKF-2", () => {
     expect(parsed.findings).toEqual([expect.objectContaining({ severity: "error", rule: "OKF-1" })]);
   });
 });
+
+describe("validate: OKF-3", () => {
+  // spec: specfold-validate#frontmatter-in-a-folder-index
+  it("reports frontmatter in a folder index", async () => {
+    const repo = tempDir("valid");
+    write(repo, "decisions/index.md", '---\nokf_version: "0.2"\n---\n\n# Decision\n');
+    const out = await json(repo, "--okf-only");
+    expect(out.findings).toEqual([expect.objectContaining({ rule: "OKF-3", path: "decisions/index.md" })]);
+  });
+
+  // spec: specfold-validate#extra-key-in-root-index
+  it("reports keys other than okf_version in the root index", async () => {
+    const repo = tempDir("valid");
+    write(repo, "index.md", '---\nokf_version: "0.2"\nkit_version: 0.1.0\n---\n\n# Sections\n');
+    const out = await json(repo, "--okf-only");
+    expect(out.findings).toEqual([expect.objectContaining({ rule: "OKF-3", path: "index.md", line: 3 })]);
+    expect(out.findings[0].message).toContain("kit_version");
+  });
+
+  // spec: specfold-validate#log-out-of-order
+  it("reports log dates that are not newest first", async () => {
+    const repo = tempDir("valid");
+    write(repo, "log.md", "# Log\n\n## 2026-10-01\n\n* a\n\n## 2026-10-20\n\n* b\n");
+    const out = await json(repo, "--okf-only");
+    expect(out.findings).toEqual([expect.objectContaining({ rule: "OKF-3", path: "log.md", line: 7 })]);
+  });
+
+  it("reports log headings that are not dates", async () => {
+    const repo = tempDir("valid");
+    write(repo, "log.md", "# Log\n\n## 2026-02-30\n\n## Yesterday\n");
+    const out = await json(repo, "--okf-only");
+    expect(out.findings.map((f: { line: number }) => f.line)).toEqual([3, 5]);
+  });
+
+  // spec: specfold-validate#frontmatter-in-log
+  it("reports frontmatter in log.md", async () => {
+    const repo = tempDir("valid");
+    write(repo, "log.md", "---\ntype: Log\n---\n\n# Log\n");
+    const out = await json(repo, "--okf-only");
+    expect(out.findings).toEqual([expect.objectContaining({ rule: "OKF-3", path: "log.md", line: 1 })]);
+  });
+});
