@@ -11,6 +11,8 @@ export interface FrontmatterEdit {
   set?: Record<string, string>;
   /** Sources to append unless one with the same `resource` exists. */
   addSources?: Source[];
+  /** Keys mapped to their complete lines (`key: ...` plus continuation lines); new keys go right after `generated`. */
+  setBlock?: Record<string, string[]>;
 }
 
 export interface EditResult {
@@ -66,6 +68,18 @@ export function editFrontmatter(text: string, edit: FrontmatterEdit): EditResult
     else {
       const generated = keyRange(lines, "generated");
       lines.splice(generated ? generated[0] : lines.length, 0, line);
+    }
+    setKeys.push(key);
+  }
+
+  for (const [key, block] of Object.entries(edit.setBlock ?? {})) {
+    const range = keyRange(lines, key);
+    if (range) {
+      if (lines.slice(range[0], range[1]).join("\n") === block.join("\n")) continue;
+      lines.splice(range[0], range[1] - range[0], ...block);
+    } else {
+      const generated = keyRange(lines, "generated");
+      lines.splice(generated ? generated[1] : lines.length, 0, ...block);
     }
     setKeys.push(key);
   }

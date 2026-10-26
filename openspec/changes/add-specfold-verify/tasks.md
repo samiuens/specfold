@@ -9,7 +9,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Let `editFrontmatter` replace or insert a key's whole block
+- [x] 1.1 Let `editFrontmatter` replace or insert a key's whole block
   - Done when: `sync-frontmatter.test.ts` covers replacing a key and inserting one after `generated`
 
 ## 2. Login and entries
