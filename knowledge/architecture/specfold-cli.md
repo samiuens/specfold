@@ -3,7 +3,7 @@ type: Component
 title: specfold CLI
 description: How the specfold CLI is structured, built and shipped as one bundled file.
 status: draft
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T14:21:54+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:10:11+01:00 }
 sources:
   - id: source
     resource: ../../tools/specfold/src/cli.ts
@@ -24,6 +24,7 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/repo.ts` | finds the repository root (nearest `specfold.yaml`) and loads the config |
 | `src/findings.ts` | the `Finding` shape, ordering, human and JSON rendering |
 | `src/change/` | the `change check` command: brief rules B0 to B4, knowledge rules K0 to K6 (reused by `sync` on archived changes), combined with the tasks findings |
+| `src/agents/` | the `agents sync` command: relative symlinks from `.agents/skills/` into each `agents.targets` folder, keeping real folders and foreign links |
 | `src/bundle.ts` | walks a bundle and splits frontmatter from the body with line numbers |
 | `src/doctor/` | the `doctor` command: checks D1 to D6 over an injected environment, version ranges |
 | `src/glob.ts` | dependency-free glob matching (`**` also matches zero folders) and the repository file walk |
@@ -46,6 +47,7 @@ Under Node, `yaml` resolves to its CommonJS build, so the bundle banner provides
 # Related
 
 - [specfold validate](/capabilities/specfold-validate.md)
+- [specfold agents sync](/capabilities/specfold-agents-sync.md)
 - [specfold change check](/capabilities/specfold-change-check.md)
 - [specfold doctor](/capabilities/specfold-doctor.md)
 - [specfold index](/capabilities/specfold-index.md)

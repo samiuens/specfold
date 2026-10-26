@@ -1,5 +1,6 @@
 # Capability
 
+* [specfold agents sync](specfold-agents-sync.md) - Why skills live once in .agents/skills and are linked into tool folders, and where the contract for agents sync lives.
 * [specfold change check](specfold-change-check.md) - Why change check is the enforcement of brief.md and knowledge.md, and where its contract lives.
 * [specfold doctor](specfold-doctor.md) - Why setup problems are checked in one command, and where the contract for specfold doctor lives.
 * [specfold index](specfold-index.md) - Why bundle indexes are generated instead of written, and where the contract for specfold index lives.
