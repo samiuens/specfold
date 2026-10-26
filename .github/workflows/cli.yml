@@ -1,0 +1,35 @@
+# Lint, type-check, test and bundle the specfold CLI, then validate the kit's own knowledge with it.
+# No paths filter and no job-level if, so the check always reports.
+name: cli
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  cli:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [20, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Lint and type-check
+        run: npm run check -w specfold
+      - name: Test
+        run: npm test -w specfold
+      - name: Bundle is up to date
+        run: |
+          npm run build -w specfold
+          git diff --exit-code -- scripts/specfold.mjs || { echo "::error::scripts/specfold.mjs is stale; run 'npm run build -w specfold' and commit it"; exit 1; }
+      - name: Validate the kit's knowledge
+        run: node scripts/specfold.mjs validate
