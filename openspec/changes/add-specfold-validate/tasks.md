@@ -47,7 +47,7 @@ agent: implementer
   - Done when: scenarios missing-configuration, missing-frontmatter, invalid-yaml, empty-type, files-unchanged, deterministic-order and machine-readable-result pass
 - [x] 3.3 Add OKF-3 for index and log files
   - Done when: the four OKF-3 scenarios pass
-- [ ] 3.4 Add `--okf-only` mode and exit codes for warnings and errors
+- [x] 3.4 Add `--okf-only` mode and exit codes for warnings and errors
   - Done when: scenarios plain-okf-bundle-passes and errors-present pass
 
 ## 4. Profile rules
