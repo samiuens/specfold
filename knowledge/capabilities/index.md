@@ -6,4 +6,5 @@
 * [specfold lookup](specfold-lookup.md) - Why agents search knowledge by frontmatter first, and where the contract for specfold lookup lives.
 * [specfold new](specfold-new.md) - Why concepts are created from templates, and where the contract for specfold new lives.
 * [specfold schema](specfold-schema.md) - Why changes use the specfold OpenSpec schema with brief and knowledge artifacts, and where its contract lives.
+* [specfold tasks](specfold-tasks.md) - Why tasks.md is a checked breakdown of task groups, and where the contract for tasks check, status and resume lives.
 * [specfold validate](specfold-validate.md) - Why the kit has its own OKF and profile validator, and where its contract lives.

@@ -4,14 +4,14 @@ title: Every change is broken down into task groups, and subagents work on group
 description: tasks.md splits each change into task groups with owned files and small tasks with a done check; one implementer takes one group, never a whole change.
 status: draft
 decision: accepted
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T02:10:00+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T14:04:05+01:00 }
 sources:
   - id: plan
     resource: ../../docs/plan.md
     title: "Specfold build plan, section 'Task breakdown'"
   - id: spec
-    resource: ../../openspec/changes/add-specfold-tasks/specs/specfold-tasks/spec.md
-    title: specfold-tasks delta spec
+    resource: ../../openspec/specs/specfold-tasks/spec.md
+    title: specfold-tasks spec
 ---
 
 # Decision
@@ -32,7 +32,7 @@ Who does what:
 - **Split instead of grow:** an implementer that needs files outside its group or clearly exceeds the limits stops and returns a split proposal. The orchestrator has `spec-writer` update `tasks.md` (asking the user if scope changes) before re-dispatching. Implementers never widen their own scope.
 - Without parallelism (`specfold parallel set 1`, or tools without subagents) the same groups run one after another.
 
-Checks: `specfold tasks check` (also run by `specfold change check`) and gate rule G18, which blocks on missing metadata, numbering errors, unknown scenarios, dependency cycles and file overlap between parallel groups, and warns on size. `specfold status` and `specfold resume` show progress per group and the next open task from checkboxes and trailers.
+Checks: `specfold tasks check` and gate rule G18, which blocks on missing metadata, numbering errors, unknown scenarios, dependency cycles and file overlap between parallel groups, and warns on size. `specfold status` and `specfold resume` show progress per group and the next open task from checkboxes and trailers. `specfold change check` includes the tasks findings (built with `add-specfold-change-check`), and G18 is specified with the gate in M4, so the archived `specfold-tasks` spec only describes what exists.
 
 # Why
 
