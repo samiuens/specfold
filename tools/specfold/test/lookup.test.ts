@@ -1,6 +1,8 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { commitAt, dependent } from "./drift-helpers.ts";
+import { git, write } from "./gate-helpers.ts";
 import { run, tempDir } from "./helpers.ts";
 
 function concept(repo: string, rel: string, fm: string) {
@@ -47,6 +49,45 @@ describe("lookup: command", () => {
       stdout: "knowledge/decisions/old-checkout.md - Old checkout: Replaced. [deprecated, unverified]\n",
       stderr: "",
     });
+  });
+
+  // spec: specfold-lookup#code-changed-after-verification
+  it("flags a result whose dependent file changed after its baseline with drift", async () => {
+    const root = tempDir();
+    git(root, "init", "-q", "-b", "main");
+    write(root, "specfold.yaml", "types: [Decision]\nsource_globs: ['src/**']\n");
+    const ref = "// see knowledge: /decisions/retries.md\n";
+    const verified = "\nverified: { by: human:ana, at: 2026-10-01T00:00:00Z }";
+    commitAt(root, "2026-10-01T00:00:00Z", {
+      "src/retry.ts": ref,
+      "knowledge/decisions/retries.md": dependent(
+        `generated: { by: x/y, at: 2026-10-01T00:00:00Z }${verified}`,
+      ),
+      "knowledge/decisions/retries-draft.md": dependent("generated: { by: x/y, at: 2026-10-01T00:00:00Z }"),
+    });
+    const line = "knowledge/decisions/retries.md - Retries: Retry policy.";
+    expect((await run(["lookup", "retries"], root)).stdout).toContain(`${line}\n`);
+    commitAt(root, "2026-10-10T00:00:00Z", { "src/retry.ts": `${ref}x\n` });
+    const out = (await run(["lookup", "retries"], root)).stdout;
+    expect(out).toContain(`${line} [drift]\n`);
+    expect(out).toContain("retries-draft.md - Retries: Retry policy. [unverified]\n");
+  });
+
+  it("puts drift before unverified", async () => {
+    const root = tempDir();
+    git(root, "init", "-q", "-b", "main");
+    write(root, "specfold.yaml", "types: [Decision]\n");
+    commitAt(root, "2026-10-01T00:00:00Z", {
+      "docs/policy.md": "x\n",
+      "knowledge/decisions/retries.md": dependent(
+        "generated: { by: x/y, at: 2026-10-01T00:00:00Z }\nresource: ../../docs/policy.md",
+      ),
+    });
+    commitAt(root, "2026-10-10T00:00:00Z", { "docs/policy.md": "y\n" });
+    expect(JSON.parse((await run(["lookup", "retries", "--json"], root)).stdout).results[0].flags).toEqual([
+      "drift",
+      "unverified",
+    ]);
   });
 
   it("prints paths relative to the repository root from a subdirectory", async () => {

@@ -47,7 +47,7 @@ scenarios: [specfold-lookup#code-changed-after-verification]
 agent: implementer
 ```
 
-- [ ] 4.1 Flag possibly stale lookup results with `drift`
+- [x] 4.1 Flag possibly stale lookup results with `drift`
   - Done when: scenario code-changed-after-verification passes in `lookup.test.ts`
 
 ## 5. Gate rule G16
