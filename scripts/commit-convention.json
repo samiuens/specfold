@@ -1,0 +1,34 @@
+{
+  "$comment": "Single source for the kit repo's commit convention (see /decisions/commit-convention.md). Kit repo only, never shipped. Gitmoji codes refer to the pinned npm package gitmojis.",
+  "maxLength": 72,
+  "scopes": ["cli", "gate", "index", "validate", "schema", "skills", "agents", "hooks", "ci", "upgrade", "migrate", "knowledge", "openspec", "template", "deps", "release", "merge"],
+  "trailers": {
+    "Co-Authored-By": "^.+ <[^<>@\\s]+@[^<>\\s]+>$",
+    "Task": "^[a-z0-9]+(?:-[a-z0-9]+)*#[1-9][0-9]*\\.[1-9][0-9]*$"
+  },
+  "breaking": ":boom:",
+  "forbidden": {
+    ":construction:": "work in progress contradicts granular, complete commits",
+    ":poop:": "not allowed in this repo",
+    ":beers:": "not allowed in this repo"
+  },
+  "types": {
+    "feat": { "default": ":sparkles:", "allowed": [":tada:", ":lipstick:", ":globe_with_meridians:", ":speech_balloon:", ":chart_with_upwards_trend:", ":triangular_flag_on_post:", ":bento:", ":wheelchair:", ":children_crossing:", ":iphone:", ":dizzy:", ":egg:", ":mag:", ":passport_control:", ":necktie:", ":stethoscope:", ":safety_vest:", ":airplane:", ":thread:", ":t-rex:", ":card_file_box:", ":label:", ":goal_net:", ":loud_sound:", ":technologist:", ":money_with_wings:", ":alien:"] },
+    "fix": { "default": ":bug:", "allowed": [":ambulance:", ":lock:", ":adhesive_bandage:", ":pencil2:", ":rotating_light:", ":goal_net:", ":alien:", ":mute:", ":card_file_box:", ":wheelchair:", ":children_crossing:", ":safety_vest:"] },
+    "docs": { "default": ":memo:", "allowed": [":bulb:", ":page_facing_up:", ":busts_in_silhouette:"] },
+    "style": { "default": ":art:", "allowed": [":rotating_light:"] },
+    "refactor": { "default": ":recycle:", "allowed": [":fire:", ":truck:", ":building_construction:", ":coffin:", ":wastebasket:", ":label:", ":art:", ":safety_vest:", ":thread:"] },
+    "perf": { "default": ":zap:", "allowed": [":thread:"] },
+    "test": { "default": ":white_check_mark:", "allowed": [":test_tube:", ":clown_face:", ":camera_flash:", ":seedling:"] },
+    "build": { "default": ":package:", "allowed": [":heavy_plus_sign:", ":heavy_minus_sign:", ":arrow_up:", ":arrow_down:", ":pushpin:", ":hammer:", ":bricks:"] },
+    "ci": { "default": ":construction_worker:", "allowed": [":green_heart:", ":rocket:"] },
+    "chore": { "default": ":wrench:", "allowed": [":bookmark:", ":twisted_rightwards_arrows:", ":see_no_evil:", ":hammer:", ":closed_lock_with_key:", ":tada:", ":busts_in_silhouette:", ":page_facing_up:", ":monocle_face:", ":alembic:", ":mute:", ":loud_sound:", ":bricks:"] },
+    "revert": { "default": ":rewind:", "allowed": [] }
+  },
+  "nonHumanAuthors": [
+    "\\[bot\\]",
+    "^noreply@anthropic\\.com$",
+    "^noreply@github\\.com$",
+    "^(claude|codex|copilot|cursor|devin)(@|$)"
+  ]
+}
