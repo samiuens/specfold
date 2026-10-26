@@ -17,7 +17,7 @@ agent: implementer
 ## 2. CLI core
 
 ```yaml
-files: [tools/specfold/src/cli.ts, tools/specfold/src/errors.ts, tools/specfold/src/repo.ts, tools/specfold/src/findings.ts, tools/specfold/vitest.config.ts, tools/specfold/build.mjs, scripts/specfold.mjs, tools/specfold/test/cli.test.ts, tools/specfold/test/helpers.ts]
+files: [tools/specfold/src/cli.ts, tools/specfold/src/errors.ts, tools/specfold/src/repo.ts, tools/specfold/src/findings.ts, tools/specfold/vitest.config.ts, tools/specfold/build.mjs, scripts/specfold.mjs, tools/specfold/test/cli.test.ts, tools/specfold/test/repo.test.ts, tools/specfold/test/findings.test.ts, tools/specfold/test/helpers.ts]
 depends: [1]
 scenarios: []
 agent: implementer
@@ -25,10 +25,10 @@ agent: implementer
 
 - [x] 2.1 Add argument parsing, command dispatch and exit-code mapping with `--version` and `--help`
   - Done when: `cli.test.ts` covers unknown flags and commands exiting with 2
-- [ ] 2.2 Add repository root discovery and `specfold.yaml` loading
-  - Done when: `cli.test.ts` covers root discovery, a missing `specfold.yaml` and an unparseable one
+- [x] 2.2 Add repository root discovery and `specfold.yaml` loading
+  - Done when: `repo.test.ts` covers root discovery, a missing `specfold.yaml` and an unparseable one
 - [ ] 2.3 Add the findings model with ordering, human and JSON rendering
-  - Done when: `cli.test.ts` covers ordering, the human summary line and the JSON shape
+  - Done when: `findings.test.ts` covers ordering, the human summary line and the JSON shape
 - [ ] 2.4 Add the esbuild bundle script that writes `scripts/specfold.mjs`
   - Done when: `npm run build -w specfold` then `node scripts/specfold.mjs --version` prints the package version
 
