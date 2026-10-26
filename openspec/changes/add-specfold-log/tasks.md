@@ -11,7 +11,7 @@ agent: implementer
 
 - [x] 1.1 Add the insertion of an entry into log text: existing date section, new section in date order, new file
   - Done when: `log.test.ts` unit tests cover all three cases and leave other lines unchanged
-- [ ] 1.2 Add the `log add` command with argument checks and the entry format
+- [x] 1.2 Add the `log add` command with argument checks and the entry format
   - Done when: scenarios missing-message, invalid-date, default-kind, existing-heading, new-newest-date, back-dated-entry, first-entry and still-conformant pass
 
 ## 2. Dogfooding
