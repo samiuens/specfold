@@ -111,23 +111,26 @@ export function runChecks(env: DoctorEnv): Check[] {
   }
 
   const range = config?.requires.openspec ?? DEFAULT_OPENSPEC_RANGE;
-  const openspec = firstVersion(env.exec("openspec", ["--version"], env.cwd));
+  const local = root ? join(root, "node_modules", ".bin", "openspec") : undefined;
+  const useLocal = local !== undefined && existsSync(local);
+  const source = useLocal ? "node_modules/.bin" : "PATH";
+  const openspec = firstVersion(env.exec(useLocal ? local : "openspec", ["--version"], env.cwd));
   if (!openspec) {
     checks.push({
       id: "D3",
       status: "fail",
-      message: "openspec is not on the PATH",
-      fix: "install OpenSpec so that `openspec` is on the PATH: https://github.com/Fission-AI/OpenSpec",
+      message: useLocal ? "node_modules/.bin/openspec does not run" : "openspec is not on the PATH",
+      fix: "install OpenSpec so that `openspec` is on the PATH or in node_modules/.bin: https://github.com/Fission-AI/OpenSpec",
     });
   } else if (!satisfies(openspec, range)) {
     checks.push({
       id: "D3",
       status: "fail",
-      message: `openspec ${openspec} does not satisfy ${range}`,
+      message: `openspec ${openspec} from ${source} does not satisfy ${range}`,
       fix: `install an OpenSpec version matching ${range}`,
     });
   } else {
-    checks.push(ok("D3", `openspec ${openspec} (${range})`));
+    checks.push(ok("D3", `openspec ${openspec} from ${source} (${range})`));
   }
 
   const base = root ?? env.cwd;

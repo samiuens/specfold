@@ -9,7 +9,7 @@ scenarios: [specfold-doctor#openspec-missing, specfold-doctor#version-out-of-ran
 agent: implementer
 ```
 
-- [ ] 1.1 Prefer `node_modules/.bin/openspec` in D3 and name the binary in the message
+- [x] 1.1 Prefer `node_modules/.bin/openspec` in D3 and name the binary in the message
   - Done when: the three D3 scenarios pass in `doctor-checks.test.ts`
 - [ ] 1.2 Pin `@fission-ai/openspec` 1.15.0 as a kit dev dependency
   - Done when: `node scripts/specfold.mjs doctor` reports D3 `ok` in the kit repo
