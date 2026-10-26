@@ -3,7 +3,7 @@ type: Component
 title: specfold CLI
 description: How the specfold CLI is structured, built and shipped as one bundled file.
 status: draft
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T16:31:58+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T16:42:23+01:00 }
 sources:
   - id: source
     resource: ../../tools/specfold/src/cli.ts
@@ -27,7 +27,7 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/agents/` | the `agents sync` command: relative symlinks from `.agents/skills/` into each `agents.targets` folder, keeping real folders and foreign links |
 | `src/audit/` | the `audit` command: rules A1 to A5 over the parsed bundle, the main specs, code references and the root agent instruction files |
 | `src/bundle.ts` | walks a bundle and splits frontmatter from the body with line numbers |
-| `src/gate/` | the `gate` command: the diff against a merge base (touched and archived changes), rules G1-G6, G8-G10, G12-G14 and G18 over existing rule functions, `openspec validate`, ordering and counts |
+| `src/gate/` | the `gate` command: the diff against a merge base (touched and archived changes), rules G1-G10, G12-G14 and G18 over existing rule functions, `openspec validate`, the human claims a branch adds and the PR author and approvers from the GitHub REST API (G7), ordering and counts |
 | `src/git.ts` | runs git; failures become environment errors |
 | `src/openspec.ts` | finds the OpenSpec binary: `node_modules/.bin/openspec`, then the PATH |
 | `src/doctor/` | the `doctor` command: checks D1 to D6 over an injected environment, version ranges |
