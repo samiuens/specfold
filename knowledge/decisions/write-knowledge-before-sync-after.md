@@ -7,7 +7,7 @@ decision: accepted
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T12:37:48+01:00 }
 sources:
   - id: sync-proposal
-    resource: ../../openspec/changes/add-specfold-sync/proposal.md
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-sync/proposal.md
     title: add-specfold-sync proposal
 ---
 
