@@ -113,7 +113,7 @@ scenarios: [specfold-hooks#commitments-due]
 agent: implementer
 ```
 
-- [ ] 9.1 Print the number of commitments due within 30 days
+- [x] 9.1 Print the number of commitments due within 30 days
   - Done when: scenario commitments-due passes in `hooks-claude.test.ts`
 
 ## 10. Settings files

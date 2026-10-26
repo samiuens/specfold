@@ -26,6 +26,25 @@ describe("hook: Claude Code", () => {
     expect(result.stdout.split("\n").length).toBeLessThanOrEqual(41);
   });
 
+  // spec: specfold-hooks#commitments-due
+  it("counts the open commitments due within 30 days", async () => {
+    const root = gateRepo();
+    const day = (offset: number) => {
+      const d = new Date(Date.now() + offset * 24 * 60 * 60 * 1000);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    };
+    const promise = (keys: string) =>
+      concept("Term", "Promise.").replace("type: Term", `type: Deferred Commitment\n${keys}`);
+    write(root, "knowledge/commitments/soon.md", promise(`state: open\ntrigger: ${day(10)}`));
+    expect((await run(["hook", "claude-session-start"], root)).stdout).toContain(
+      "Commitments due within 30 days: 1 (specfold commitments list)\n",
+    );
+    write(root, "knowledge/commitments/soon.md", promise(`state: open\ntrigger: ${day(60)}`));
+    write(root, "knowledge/commitments/kept.md", promise(`state: fulfilled\ntrigger: ${day(1)}`));
+    write(root, "knowledge/commitments/later.md", promise("state: open\ntrigger: before 1.0"));
+    expect((await run(["hook", "claude-session-start"], root)).stdout).not.toContain("Commitments due");
+  });
+
   it("cuts the output to 40 lines", async () => {
     const root = gateRepo();
     for (let i = 0; i < 50; i++)
