@@ -3,14 +3,15 @@ type: Capability
 title: specfold log
 description: Why log entries are written by a command, and where the contract for specfold log add lives.
 status: draft
-change: add-specfold-log
-resource: ../../openspec/changes/add-specfold-log/specs/specfold-log/spec.md
+change: 2026-10-26-add-specfold-log
+resource: ../../openspec/specs/specfold-log/spec.md
+spec: openspec/specs/specfold-log/spec.md
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T14:00:00+01:00 }
 sources:
   - id: proposal
-    resource: ../../openspec/changes/add-specfold-log/proposal.md
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-log/proposal.md
   - id: design
-    resource: ../../openspec/changes/add-specfold-log/design.md
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-log/design.md
 ---
 
 # Why
