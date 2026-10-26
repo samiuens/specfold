@@ -1,0 +1,35 @@
+# Kit repo only: checks every commit of a PR and the PR title against the commit convention.
+# Required check; no paths filter and no job-level if, so it always reports.
+name: commit-convention
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  commit-convention:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Mapping covers every official gitmoji
+        run: node scripts/check-commit.mjs --self-check
+      - name: Commits
+        run: node scripts/check-commit.mjs --range "$BASE..$HEAD"
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+      - name: PR title
+        run: node scripts/check-commit.mjs --title "$TITLE"
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
