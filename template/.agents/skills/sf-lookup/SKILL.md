@@ -15,7 +15,10 @@ Use this before `/opsx:explore` or `/opsx:propose`, before changing code you don
 4. Answer with the concept paths you used and their flags:
    - `deprecated`: superseded; say what replaced it if the concept says so.
    - `stale`: past its review date; treat it as possibly outdated.
+   - `drift`: a file it describes changed after it was last written or verified; check it against that file (`node scripts/specfold.mjs drift <path>` names the commits).
    - `unverified`: written by an agent and not yet confirmed by a human.
+
+After the hits, lookup lists the vision and the open commitments under "vision and open commitments:". That block is context for planning, not an answer. Mention a commitment the work could affect. A vision without `verified` is still a draft.
 
 ## Rules
 
