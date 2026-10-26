@@ -9,7 +9,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Extract `renderConcept` from the `new` command and export `localDate` from the `log` command
+- [x] 1.1 Extract `renderConcept` from the `new` command and export `localDate` from the `log` command
   - Done when: `npm test -w specfold` passes unchanged
 
 ## 2. Frontmatter edits
