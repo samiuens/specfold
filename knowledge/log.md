@@ -11,3 +11,4 @@
 * **Update**: `specfold new` implemented (change `add-specfold-new`); invented `generated.at` times in earlier concepts replaced with real ones.
 * **Update**: `specfold lookup` implemented (change `add-specfold-lookup`); `AGENTS.md` now starts the lookup order with it.
 * **Update**: `specfold doctor` implemented (change `add-specfold-doctor`); all M1 commands specified in #7 are built.
+* **Update**: `specfold doctor` D3 now prefers a repository-local OpenSpec (change `update-doctor-local-openspec`); the kit pins OpenSpec 1.15.0 as a dev dependency.
