@@ -7497,6 +7497,14 @@ function repoFolder(path, key) {
     throw new EnvError(`${CONFIG_FILE}: '${key}' entry '${path}' must be a folder inside the repository`);
   return clean;
 }
+var DEFAULT_TEST_GLOBS = [
+  "**/*.test.*",
+  "**/*.spec.*",
+  "**/*_test.*",
+  "**/test/**",
+  "**/tests/**",
+  "**/spec/**"
+];
 var stringList = (v, key) => {
   if (v === void 0) return [];
   if (!Array.isArray(v) || !v.every((x) => typeof x === "string")) {
@@ -7518,6 +7526,7 @@ function loadConfig(root) {
   const agents = isRecord(data.agents) ? data.agents : {};
   const audit = isRecord(data.audit) ? data.audit : {};
   const hooks = isRecord(data.hooks) ? data.hooks : {};
+  const trace = isRecord(data.trace) ? data.trace : {};
   const extra = hooks.extra === void 0 ? {} : hooks.extra;
   if (!isRecord(extra))
     throw new EnvError(`${CONFIG_FILE}: 'hooks.extra' must map hook names to command lists`);
@@ -7560,7 +7569,8 @@ function loadConfig(root) {
       escapeLabel: typeof gate.escape_label === "string" && gate.escape_label !== "" ? gate.escape_label : "no-spec",
       blockOnStaleTouched: gate.block_on_stale_touched !== false
     },
-    hooksExtra
+    hooksExtra,
+    traceTestGlobs: trace.test_globs === void 0 ? DEFAULT_TEST_GLOBS : stringList(trace.test_globs, "trace.test_globs")
   };
 }
 function requireConfig(cwd) {
@@ -9691,7 +9701,7 @@ register({
 });
 
 // src/gate/command.ts
-import { existsSync as existsSync23, readFileSync as readFileSync16, writeFileSync as writeFileSync4 } from "node:fs";
+import { existsSync as existsSync25, readFileSync as readFileSync18, writeFileSync as writeFileSync4 } from "node:fs";
 import { resolve as resolve4 } from "node:path";
 
 // src/gate/diff.ts
@@ -9791,8 +9801,8 @@ async function fetchPullRequest(env, number) {
 }
 
 // src/gate/rules.ts
-import { existsSync as existsSync22 } from "node:fs";
-import { join as join24, relative as relative11, sep as sep10 } from "node:path";
+import { existsSync as existsSync24 } from "node:fs";
+import { join as join27, relative as relative11, sep as sep10 } from "node:path";
 
 // src/indexes/command.ts
 import { existsSync as existsSync15, readFileSync as readFileSync11, writeFileSync } from "node:fs";
@@ -10239,8 +10249,114 @@ function planSync(config, bundleRoot, id, now = /* @__PURE__ */ new Date()) {
   return { findings, ops, plan, logPath, logRel, logText, needsLog: !logText?.includes(id) };
 }
 
+// src/trace/specs.ts
+import { existsSync as existsSync20, readFileSync as readFileSync15 } from "node:fs";
+import { join as join23 } from "node:path";
+var SECTION = /^##\s+(ADDED|MODIFIED|REMOVED|RENAMED)\s+Requirements\s*$/;
+var REQUIREMENT = /^###\s+Requirement:\s*(.+?)\s*$/;
+var SCENARIO2 = /^####\s+Scenario:\s*(.+?)\s*$/;
+function parseSpec(text2, capability, spec, delta, into) {
+  let section = delta ? "ADDED" : "main";
+  let requirement = "";
+  text2.split("\n").forEach((line, i) => {
+    const s = delta ? SECTION.exec(line) : null;
+    if (s) {
+      section = s[1];
+      requirement = "";
+      return;
+    }
+    const r = REQUIREMENT.exec(line);
+    if (r) {
+      requirement = r[1];
+      if (section === "REMOVED") into.removed.add(`${capability}
+${requirement}`);
+      return;
+    }
+    const sc = SCENARIO2.exec(line);
+    if (sc)
+      into.scenarios.push({
+        id: `${capability}#${scenarioSlug(sc[1])}`,
+        capability,
+        requirement,
+        section,
+        spec,
+        line: i + 1
+      });
+  });
+}
+function parseSpecs(repoRoot, specsRel, delta) {
+  const parsed = { scenarios: [], removed: /* @__PURE__ */ new Set() };
+  const dir = join23(repoRoot, specsRel);
+  if (!existsSync20(dir)) return parsed;
+  for (const rel of walkFiles(dir)) {
+    if (!rel.endsWith("/spec.md")) continue;
+    const capability = rel.slice(0, -"/spec.md".length);
+    parseSpec(readFileSync15(join23(dir, rel), "utf8"), capability, `${specsRel}/${rel}`, delta, parsed);
+  }
+  return parsed;
+}
+var changedScenarios = (parsed) => parsed.scenarios.filter((s) => s.section === "ADDED" || s.section === "MODIFIED");
+
+// src/trace/trace.ts
+import { existsSync as existsSync21, readdirSync as readdirSync5 } from "node:fs";
+import { join as join25 } from "node:path";
+
+// src/trace/refs.ts
+import { readFileSync as readFileSync16, statSync as statSync7 } from "node:fs";
+import { join as join24 } from "node:path";
+var MAX_BYTES2 = 1024 * 1024;
+var REFERENCE2 = /(?<![\w-])spec:\s*([a-z0-9][a-z0-9/-]*#[a-z0-9-]+)/g;
+var NEVER = /^(?:knowledge|openspec)\//;
+function scanTestReferences(repoRoot, testGlobs) {
+  const patterns = testGlobs.map(globToRegExp);
+  const refs = [];
+  for (const file of walkFiles(repoRoot)) {
+    if (NEVER.test(file) || !patterns.some((p) => p.test(file))) continue;
+    const abs = join24(repoRoot, file);
+    if (statSync7(abs).size > MAX_BYTES2) continue;
+    const text2 = readFileSync16(abs, "utf8");
+    if (text2.includes("\0")) continue;
+    text2.split("\n").forEach((content, i) => {
+      for (const match of content.matchAll(REFERENCE2))
+        refs.push({ id: match[1], file, line: i + 1 });
+    });
+  }
+  return refs;
+}
+
+// src/trace/trace.ts
+var CHANGES = join25("openspec", "changes");
+var activeChangeNames = (root) => existsSync21(join25(root, CHANGES)) ? readdirSync5(join25(root, CHANGES), { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort() : [];
+var changeSpecs = (root, changeRel) => parseSpecs(root, `${changeRel}/specs`, true);
+function buildTraceIndex(config) {
+  const root = config.root;
+  const main2 = parseSpecs(root, "openspec/specs", false);
+  const active = new Map(activeChangeNames(root).map((n) => [n, changeSpecs(root, `openspec/changes/${n}`)]));
+  const removed = new Set([...active.values()].flatMap((p) => [...p.removed]));
+  const known = /* @__PURE__ */ new Map();
+  const add = (s) => {
+    if (!known.has(s.id)) known.set(s.id, s);
+  };
+  main2.scenarios.filter((s) => !removed.has(`${s.capability}
+${s.requirement}`)).forEach(add);
+  for (const p of active.values()) changedScenarios(p).forEach(add);
+  return { main: main2, active, known, refs: scanTestReferences(root, config.traceTestGlobs) };
+}
+function traceReport(index, scope) {
+  const byId = /* @__PURE__ */ new Map();
+  for (const r of index.refs) byId.set(r.id, [...byId.get(r.id) ?? [], { file: r.file, line: r.line }]);
+  const seen = /* @__PURE__ */ new Set();
+  const scenarios = [];
+  for (const s of scope ?? [...index.known.values()]) {
+    if (seen.has(s.id)) continue;
+    seen.add(s.id);
+    scenarios.push({ id: s.id, spec: s.spec, line: s.line, refs: byId.get(s.id) ?? [] });
+  }
+  return { scenarios, dangling: index.refs.filter((r) => !index.known.has(r.id)) };
+}
+
 // src/validate/index.ts
-import { existsSync as existsSync20 } from "node:fs";
+import { existsSync as existsSync22 } from "node:fs";
 import { relative as relative9, resolve as resolve3, sep as sep8 } from "node:path";
 var okfRules = [okf1, okf2, okf3Index, okf3Log];
 var profileRules = [p1, p2, p3, p4, p5, p6, p7, p9, p10, p11, l1, l2];
@@ -10282,7 +10398,7 @@ register({
       if (rel.startsWith("..") || resolve3(bundleRoot, rel) !== abs) {
         throw new UsageError(`path is outside the bundle ${bundleRoot}: ${p}`);
       }
-      if (!existsSync20(abs)) throw new UsageError(`path not found: ${p}`);
+      if (!existsSync22(abs)) throw new UsageError(`path not found: ${p}`);
       return abs;
     });
     const { findings, checked } = validate({ bundleRoot, paths, okfOnly, ...config ? { config } : {} });
@@ -10292,8 +10408,8 @@ register({
 });
 
 // src/gate/claims.ts
-import { existsSync as existsSync21, readFileSync as readFileSync15 } from "node:fs";
-import { join as join23, relative as relative10, sep as sep9 } from "node:path";
+import { existsSync as existsSync23, readFileSync as readFileSync17 } from "node:fs";
+import { join as join26, relative as relative10, sep as sep9 } from "node:path";
 var BRIEF = /^openspec\/changes\/(?:archive\/)?[^/]+\/brief\.md$/;
 var ARCHIVED_BRIEF = /^openspec\/changes\/archive\/\d{4}-\d{2}-\d{2}-([^/]+)\/brief\.md$/;
 var CONFIRMED_BY = /^confirmed_by:[ \t]*(\S+)/;
@@ -10324,8 +10440,8 @@ function addedClaims(root, bundleRoot, diff) {
   const bundlePrefix = `${relative10(root, bundleRoot).split(sep9).join("/")}/`;
   const out = [];
   for (const file of diff.files) {
-    const abs = join23(root, file);
-    if (!existsSync21(abs)) continue;
+    const abs = join26(root, file);
+    if (!existsSync23(abs)) continue;
     let extract;
     if (BRIEF.test(file)) extract = briefClaims;
     else if (file.startsWith(bundlePrefix) && file.endsWith(".md") && isConcept(file.slice(bundlePrefix.length)))
@@ -10339,7 +10455,7 @@ function addedClaims(root, bundleRoot, diff) {
         return base === void 0 ? [] : extract(file, base).map((c) => c.login.toLowerCase());
       })
     );
-    for (const claim of extract(file, readFileSync15(abs, "utf8")))
+    for (const claim of extract(file, readFileSync17(abs, "utf8")))
       if (!before.has(claim.login.toLowerCase())) out.push(claim);
   }
   return out;
@@ -10392,7 +10508,7 @@ function inRepo(ctx, bundleRel) {
 }
 function changedConcepts(ctx) {
   const prefix = `${relative11(ctx.config.root, ctx.bundleRoot).split(sep10).join("/")}/`;
-  return ctx.diff.files.filter((f) => f.startsWith(prefix) && f.endsWith(".md")).map((f) => f.slice(prefix.length)).filter((rel) => isConcept(rel) && existsSync22(join24(ctx.bundleRoot, rel)));
+  return ctx.diff.files.filter((f) => f.startsWith(prefix) && f.endsWith(".md")).map((f) => f.slice(prefix.length)).filter((rel) => isConcept(rel) && existsSync24(join27(ctx.bundleRoot, rel)));
 }
 var fromBundle = (ctx, rule, effect, f) => ({
   rule,
@@ -10484,7 +10600,7 @@ var g4 = (ctx) => {
   ];
 };
 var plannedChanges = (ctx) => ctx.diff.activeChanges.filter(
-  (change) => existsSync22(join24(ctx.config.root, "openspec", "changes", change, "tasks.md"))
+  (change) => existsSync24(join27(ctx.config.root, "openspec", "changes", change, "tasks.md"))
 );
 var touchedChanges = (ctx, changes = ctx.diff.activeChanges) => changes.map((change) => checkChange(ctx.config, ctx.bundleRoot, change));
 var g5 = (ctx) => touchedChanges(ctx, plannedChanges(ctx)).flatMap(
@@ -10496,6 +10612,55 @@ var g13 = (ctx) => touchedChanges(ctx).flatMap(
 var g18 = (ctx) => plannedChanges(ctx).flatMap(
   (change) => checkChangeTasks(ctx.config, change, ctx.diff.ref).map((f) => fromChange("G18", f))
 );
+var g15 = (ctx) => {
+  const root = ctx.config.root;
+  const index = buildTraceIndex(ctx.config);
+  const covered = new Set(index.refs.map((r) => r.id));
+  const checked = /* @__PURE__ */ new Set();
+  const findings = [];
+  const archived = ctx.diff.archivedChanges.map((id) => `openspec/changes/archive/${id}`).filter((rel) => existsSync24(join27(root, rel, "tasks.md")));
+  const changes = [
+    ...plannedChanges(ctx).map(
+      (name) => index.active.get(name) ?? changeSpecs(root, `openspec/changes/${name}`)
+    ),
+    ...archived.map((rel) => changeSpecs(root, rel))
+  ];
+  for (const s of changes.flatMap(changedScenarios)) {
+    if (checked.has(s.id)) continue;
+    checked.add(s.id);
+    if (!covered.has(s.id))
+      findings.push({
+        rule: "G15",
+        effect: "block",
+        path: s.spec,
+        line: s.line,
+        message: `scenario ${s.id} has no test reference`,
+        fix: `name it in a test with a 'spec: ${s.id}' comment`
+      });
+  }
+  for (const r of index.refs.filter((r2) => !index.known.has(r2.id)))
+    findings.push({
+      rule: "G15",
+      effect: "block",
+      path: r.file,
+      line: r.line,
+      message: `reference to unknown scenario ${r.id}`,
+      fix: "point it at an existing scenario id (see specfold trace) or remove it"
+    });
+  const gaps = new Set(
+    index.main.scenarios.filter((s) => index.known.has(s.id) && !covered.has(s.id) && !checked.has(s.id)).map((s) => s.id)
+  );
+  if (gaps.size > 0)
+    findings.push({
+      rule: "G15",
+      effect: "warn",
+      path: null,
+      line: null,
+      message: `${gaps.size === 1 ? "1 main-spec scenario has" : `${gaps.size} main-spec scenarios have`} no test reference`,
+      fix: "run specfold trace and add tests for them over time"
+    });
+  return findings;
+};
 var g6 = (ctx) => ctx.diff.archivedChanges.flatMap((id) => {
   const sync = planSync(ctx.config, ctx.bundleRoot, id, ctx.now);
   if (sync.findings.length > 0)
@@ -10577,8 +10742,8 @@ var g12 = (ctx) => auditBundle(ctx.config, ctx.bundleRoot, ctx.now).filter((f) =
 var g14 = (ctx) => {
   const changed = new Set(ctx.diff.files);
   return scanReferences(ctx.config.root, ctx.config.sourceGlobs).flatMap((ref) => {
-    const abs = join24(ctx.bundleRoot, ref.concept);
-    if (!existsSync22(abs))
+    const abs = join27(ctx.bundleRoot, ref.concept);
+    if (!existsSync24(abs))
       return [
         {
           rule: "G14",
@@ -10604,7 +10769,7 @@ var g14 = (ctx) => {
     return [];
   });
 };
-var RULES = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g18];
+var RULES = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g15, g18];
 var compare3 = (a, b) => a < b ? -1 : a > b ? 1 : 0;
 var ruleNumber = (rule) => Number.parseInt(rule.slice(1), 10);
 function sortGateFindings(findings) {
@@ -10687,7 +10852,7 @@ register({
     const base = values.base;
     if (!base) throw new UsageError("missing --base <ref>");
     const bodyFile = values["pr-body"];
-    if (bodyFile !== void 0 && !existsSync23(resolve4(io.cwd, bodyFile)))
+    if (bodyFile !== void 0 && !existsSync25(resolve4(io.cwd, bodyFile)))
       throw new UsageError(`PR body file not found: ${bodyFile}`);
     const prArg = values.pr;
     if (prArg !== void 0 && !/^[1-9]\d*$/.test(prArg))
@@ -10699,7 +10864,7 @@ register({
       gateContext(config, io.cwd, base, {
         local,
         labels: values.label ?? [],
-        prBody: bodyFile === void 0 ? void 0 : readFileSync16(resolve4(io.cwd, bodyFile), "utf8"),
+        prBody: bodyFile === void 0 ? void 0 : readFileSync18(resolve4(io.cwd, bodyFile), "utf8"),
         pr
       })
     );
@@ -10720,8 +10885,8 @@ register({
 
 // src/hooks/install.ts
 var import_yaml7 = __toESM(require_dist(), 1);
-import { chmodSync, existsSync as existsSync24, mkdirSync as mkdirSync4, readFileSync as readFileSync17, realpathSync, writeFileSync as writeFileSync5 } from "node:fs";
-import { join as join25 } from "node:path";
+import { chmodSync, existsSync as existsSync26, mkdirSync as mkdirSync4, readFileSync as readFileSync19, realpathSync, writeFileSync as writeFileSync5 } from "node:fs";
+import { join as join28 } from "node:path";
 var HOOKS_PATH = ".specfold/hooks";
 var OWN_HOOKS = ["pre-commit", "pre-push", "post-checkout", "post-merge"];
 var hookNames = (config) => [.../* @__PURE__ */ new Set([...OWN_HOOKS, ...Object.keys(config.hooksExtra)])];
@@ -10734,8 +10899,8 @@ function gitConfig(root, key) {
   }
 }
 function writeIfChanged(path, text2, mode) {
-  if (existsSync24(path) && readFileSync17(path, "utf8") === text2) return false;
-  mkdirSync4(join25(path, ".."), { recursive: true });
+  if (existsSync26(path) && readFileSync19(path, "utf8") === text2) return false;
+  mkdirSync4(join28(path, ".."), { recursive: true });
   writeFileSync5(path, text2);
   if (mode !== void 0) chmodSync(path, mode);
   return true;
@@ -10765,7 +10930,7 @@ function installBuiltIn(config) {
 # Installed by specfold hooks install; project commands go into hooks.extra in specfold.yaml.
 exec ${hookCommand(hook)} "$@"
 `;
-    if (writeIfChanged(join25(config.root, path), script, 493)) actions.push({ path, action: "write" });
+    if (writeIfChanged(join28(config.root, path), script, 493)) actions.push({ path, action: "write" });
   }
   if (current === void 0) {
     git(config.root, ["config", "core.hooksPath", HOOKS_PATH]);
@@ -10776,19 +10941,19 @@ exec ${hookCommand(hook)} "$@"
 var LEFTHOOK_FILES = ["lefthook.yml", "lefthook.yaml", ".lefthook.yml"];
 var PRE_COMMIT_FILE = ".pre-commit-config.yaml";
 function detectManager(root) {
-  const lefthook = LEFTHOOK_FILES.find((f) => existsSync24(join25(root, f)));
+  const lefthook = LEFTHOOK_FILES.find((f) => existsSync26(join28(root, f)));
   if (lefthook) return { name: "lefthook", path: lefthook };
-  if (existsSync24(join25(root, ".husky"))) return { name: "husky", path: ".husky" };
-  if (existsSync24(join25(root, PRE_COMMIT_FILE))) return { name: "pre-commit", path: PRE_COMMIT_FILE };
+  if (existsSync26(join28(root, ".husky"))) return { name: "husky", path: ".husky" };
+  if (existsSync26(join28(root, PRE_COMMIT_FILE))) return { name: "pre-commit", path: PRE_COMMIT_FILE };
   return void 0;
 }
 function readDocument(path) {
-  const doc = (0, import_yaml7.parseDocument)(existsSync24(path) ? readFileSync17(path, "utf8") : "");
+  const doc = (0, import_yaml7.parseDocument)(existsSync26(path) ? readFileSync19(path, "utf8") : "");
   if (doc.errors[0]) throw new EnvError(`${path}: ${doc.errors[0].message.split("\n")[0]}`);
   return (0, import_yaml7.isMap)(doc.contents) ? doc : new import_yaml7.Document({});
 }
 function lefthookEntries(config, file) {
-  const path = join25(config.root, file);
+  const path = join28(config.root, file);
   const doc = readDocument(path);
   const actions = [];
   for (const hook of hookNames(config)) {
@@ -10810,9 +10975,9 @@ function huskyEntries(config) {
   const actions = [];
   for (const hook of hookNames(config)) {
     const path = `.husky/${hook}`;
-    const abs = join25(config.root, path);
+    const abs = join28(config.root, path);
     const line = `${hookCommand(hook)} "$@"`;
-    const text2 = existsSync24(abs) ? readFileSync17(abs, "utf8") : "";
+    const text2 = existsSync26(abs) ? readFileSync19(abs, "utf8") : "";
     if (text2.split("\n").some((l) => l.trim() === line)) continue;
     writeIfChanged(abs, `${text2}${text2 === "" || text2.endsWith("\n") ? "" : "\n"}${line}
 `, 493);
@@ -10822,7 +10987,7 @@ function huskyEntries(config) {
 }
 var idOf = (hook) => (0, import_yaml7.isMap)(hook) ? String(hook.get("id")) : "";
 function preCommitEntries(config) {
-  const path = join25(config.root, PRE_COMMIT_FILE);
+  const path = join28(config.root, PRE_COMMIT_FILE);
   const doc = readDocument(path);
   if (!(0, import_yaml7.isSeq)(doc.get("repos"))) doc.set("repos", doc.createNode([]));
   const repos = doc.get("repos");
@@ -10885,8 +11050,8 @@ function installHooks(config) {
 
 // src/hooks/run.ts
 import { spawnSync as spawnSync2 } from "node:child_process";
-import { existsSync as existsSync26, statSync as statSync8 } from "node:fs";
-import { join as join27, relative as relative13, sep as sep12 } from "node:path";
+import { existsSync as existsSync28, statSync as statSync9 } from "node:fs";
+import { join as join30, relative as relative13, sep as sep12 } from "node:path";
 
 // src/hooks/base.ts
 function localBase(root) {
@@ -10899,19 +11064,19 @@ function localBase(root) {
 }
 
 // src/hooks/claude.ts
-import { existsSync as existsSync25, readdirSync as readdirSync5, readFileSync as readFileSync18, statSync as statSync7 } from "node:fs";
-import { isAbsolute, join as join26, relative as relative12, resolve as resolve5, sep as sep11 } from "node:path";
+import { existsSync as existsSync27, readdirSync as readdirSync6, readFileSync as readFileSync20, statSync as statSync8 } from "node:fs";
+import { isAbsolute, join as join29, relative as relative12, resolve as resolve5, sep as sep11 } from "node:path";
 var MAX_LINES = 40;
 var EDIT_TOOLS = /* @__PURE__ */ new Set(["Edit", "Write"]);
 var activeChanges = (root) => {
-  const dir = join26(root, "openspec", "changes");
-  if (!existsSync25(dir)) return [];
-  return readdirSync5(dir).filter((d) => d !== "archive" && !d.startsWith(".") && statSync7(join26(dir, d)).isDirectory()).sort();
+  const dir = join29(root, "openspec", "changes");
+  if (!existsSync27(dir)) return [];
+  return readdirSync6(dir).filter((d) => d !== "archive" && !d.startsWith(".") && statSync8(join29(dir, d)).isDirectory()).sort();
 };
 function sessionStart({ config, io }) {
   const bundleRoot = resolveBundleRoot(config.root, void 0, config);
-  const index = join26(bundleRoot, "index.md");
-  const sections = existsSync25(index) ? readFileSync18(index, "utf8").split("\n").filter((l) => /^\* \[/.test(l)) : [];
+  const index = join29(bundleRoot, "index.md");
+  const sections = existsSync27(index) ? readFileSync20(index, "utf8").split("\n").filter((l) => /^\* \[/.test(l)) : [];
   const changes = activeChanges(config.root);
   const out = [
     "Knowledge sections (look up with: node scripts/specfold.mjs lookup <words>):",
@@ -10939,11 +11104,11 @@ async function postToolUse({ config, io }) {
   const prefix = relative12(config.root, bundleRoot).split(sep11).join("/");
   let errors = [];
   if (rel.startsWith(`${prefix}/`) && rel.endsWith(".md") && isConcept(rel.slice(prefix.length + 1))) {
-    if (!existsSync25(join26(config.root, rel))) return 0;
-    errors = validate({ bundleRoot, paths: [join26(config.root, rel)], okfOnly: false, config }).findings.filter((f) => f.severity === "error").map((f) => findingLine({ ...f, path: `${prefix}/${f.path}` }));
+    if (!existsSync27(join29(config.root, rel))) return 0;
+    errors = validate({ bundleRoot, paths: [join29(config.root, rel)], okfOnly: false, config }).findings.filter((f) => f.severity === "error").map((f) => findingLine({ ...f, path: `${prefix}/${f.path}` }));
   } else {
     const change = /^openspec\/changes\/([^/]+)\//.exec(rel)?.[1];
-    if (!change || change === "archive" || !existsSync25(join26(config.root, "openspec", "changes", change)))
+    if (!change || change === "archive" || !existsSync27(join29(config.root, "openspec", "changes", change)))
       return 0;
     errors = checkPlannedChange(config, bundleRoot, change).filter((f) => f.severity === "error").map(taskFindingLine);
   }
@@ -10971,7 +11136,7 @@ function preCommit({ config, io }) {
   const bundleRoot = resolveBundleRoot(config.root, void 0, config);
   const prefix = relative13(config.root, bundleRoot).split(sep12).join("/");
   const errors = [];
-  const concepts2 = staged.filter((f) => f.startsWith(`${prefix}/`) && f.endsWith(".md") && isConcept(f.slice(prefix.length + 1))).map((f) => join27(config.root, f));
+  const concepts2 = staged.filter((f) => f.startsWith(`${prefix}/`) && f.endsWith(".md") && isConcept(f.slice(prefix.length + 1))).map((f) => join30(config.root, f));
   if (concepts2.length > 0) {
     const { findings } = validate({ bundleRoot, paths: concepts2, okfOnly: false, config });
     for (const f of findings.filter((x) => x.severity === "error"))
@@ -10980,8 +11145,8 @@ function preCommit({ config, io }) {
   const changes = new Set(
     staged.flatMap((f) => {
       const name = ACTIVE_CHANGE.exec(f)?.[1];
-      const dir = name ? join27(config.root, "openspec", "changes", name) : "";
-      return name && name !== "archive" && existsSync26(dir) && statSync8(dir).isDirectory() ? [name] : [];
+      const dir = name ? join30(config.root, "openspec", "changes", name) : "";
+      return name && name !== "archive" && existsSync28(dir) && statSync9(dir).isDirectory() ? [name] : [];
     })
   );
   for (const change of changes)
@@ -11011,7 +11176,7 @@ function prePush({ config, io }) {
   return 1;
 }
 function refreshGraph({ config }) {
-  if (!existsSync26(join27(config.root, "graphify-out", "graph.json"))) return 0;
+  if (!existsSync28(join30(config.root, "graphify-out", "graph.json"))) return 0;
   spawnSync2("graphify", ["update", "."], {
     cwd: config.root,
     env: { ...process.env, GRAPHIFY_BACKEND: "none" },
@@ -11095,8 +11260,8 @@ register({
 });
 
 // src/log/command.ts
-import { existsSync as existsSync27, readFileSync as readFileSync19, writeFileSync as writeFileSync6 } from "node:fs";
-import { join as join28 } from "node:path";
+import { existsSync as existsSync29, readFileSync as readFileSync21, writeFileSync as writeFileSync6 } from "node:fs";
+import { join as join31 } from "node:path";
 
 // src/log/insert.ts
 var DATE_HEADING = /^## (\d{4}-\d{2}-\d{2})\s*$/;
@@ -11152,9 +11317,9 @@ register({
     const date = values.date ?? localDate();
     if (!isCalendarDate2(date)) throw new UsageError(`date '${date}' is not a valid YYYY-MM-DD date`);
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, void 0);
-    const path = join28(bundleRoot, "log.md");
+    const path = join31(bundleRoot, "log.md");
     const entry = `* **${kind}**: ${message}`;
-    writeFileSync6(path, insertEntry(existsSync27(path) ? readFileSync19(path, "utf8") : void 0, date, entry));
+    writeFileSync6(path, insertEntry(existsSync29(path) ? readFileSync21(path, "utf8") : void 0, date, entry));
     io.stdout(`${entry}
 `);
     return 0;
@@ -11263,19 +11428,19 @@ register({
 });
 
 // src/sync/command.ts
-import { existsSync as existsSync28, readdirSync as readdirSync6, writeFileSync as writeFileSync7 } from "node:fs";
-import { join as join29 } from "node:path";
+import { existsSync as existsSync30, readdirSync as readdirSync7, writeFileSync as writeFileSync7 } from "node:fs";
+import { join as join32 } from "node:path";
 var NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 var ARCHIVED2 = /^(\d{4}-\d{2}-\d{2})-([a-z0-9]+(?:-[a-z0-9]+)*)$/;
 function resolveArchived(config, arg) {
   if (!arg) throw new UsageError("missing change name");
-  const archive = join29(config.root, "openspec", "changes", "archive");
-  if (ARCHIVED2.test(arg) && existsSync28(join29(archive, arg))) return arg;
+  const archive = join32(config.root, "openspec", "changes", "archive");
+  if (ARCHIVED2.test(arg) && existsSync30(join32(archive, arg))) return arg;
   if (!NAME.test(arg)) throw new UsageError(`'${arg}' is not a change name or archived change id`);
-  const ids = existsSync28(archive) ? readdirSync6(archive).filter((d) => ARCHIVED2.exec(d)?.[2] === arg).sort() : [];
+  const ids = existsSync30(archive) ? readdirSync7(archive).filter((d) => ARCHIVED2.exec(d)?.[2] === arg).sort() : [];
   const newest = ids.at(-1);
   if (newest) return newest;
-  if (existsSync28(join29(config.root, "openspec", "changes", arg)))
+  if (existsSync30(join32(config.root, "openspec", "changes", arg)))
     throw new EnvError(`change '${arg}' is not archived yet: run 'openspec archive ${arg}' first`);
   throw new EnvError(`unknown change '${arg}': no archived folder openspec/changes/archive/<date>-${arg}/`);
 }
@@ -11332,8 +11497,8 @@ register({
 });
 
 // src/tasks/progress-command.ts
-import { existsSync as existsSync29, readdirSync as readdirSync7, readFileSync as readFileSync20 } from "node:fs";
-import { join as join30 } from "node:path";
+import { existsSync as existsSync31, readdirSync as readdirSync8, readFileSync as readFileSync22 } from "node:fs";
+import { join as join33 } from "node:path";
 
 // src/tasks/progress.ts
 function progressOf(tasks) {
@@ -11357,13 +11522,13 @@ function progressOf(tasks) {
 
 // src/tasks/progress-command.ts
 function readTasks(config, change) {
-  const path = join30(changeDir(config, change), "tasks.md");
-  return existsSync29(path) ? parseTasks(readFileSync20(path, "utf8")) : void 0;
+  const path = join33(changeDir(config, change), "tasks.md");
+  return existsSync31(path) ? parseTasks(readFileSync22(path, "utf8")) : void 0;
 }
 function activeChanges2(config) {
-  const dir = join30(config.root, "openspec", "changes");
-  if (!existsSync29(dir)) return [];
-  return readdirSync7(dir, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort();
+  const dir = join33(config.root, "openspec", "changes");
+  if (!existsSync31(dir)) return [];
+  return readdirSync8(dir, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort();
 }
 function commitsByTask(config, change) {
   const out = /* @__PURE__ */ new Map();
@@ -11525,9 +11690,50 @@ register({
   }
 });
 
+// src/trace/command.ts
+register({
+  name: "trace",
+  summary: "map spec scenarios to the tests that reference them; report uncovered and dangling ones",
+  usage: "specfold trace [--change <name>] [--json]",
+  options: { change: { type: "string" }, json: { type: "boolean" } },
+  run: ({ io, values, positionals }) => {
+    if (positionals.length > 0) throw new UsageError(`unexpected argument '${positionals[0]}'`);
+    const config = requireConfig(io.cwd);
+    const change = values.change;
+    const index = buildTraceIndex(config);
+    const scope = change === void 0 ? void 0 : (changeDir(config, change), changedScenarios(
+      index.active.get(change) ?? changeSpecs(config.root, `openspec/changes/${change}`)
+    ));
+    const report = traceReport(index, scope);
+    const uncovered = report.scenarios.filter((s) => s.refs.length === 0);
+    const counts = {
+      scenarios: report.scenarios.length,
+      covered: report.scenarios.length - uncovered.length,
+      uncovered: uncovered.length,
+      dangling: report.dangling.length
+    };
+    const ok2 = counts.uncovered === 0 && counts.dangling === 0;
+    if (values.json) {
+      io.stdout(
+        `${JSON.stringify({ ok: ok2, scenarios: report.scenarios, dangling: report.dangling, counts }, null, 2)}
+`
+      );
+    } else {
+      const lines3 = [
+        ...uncovered.map((s) => `uncovered ${s.id} (${s.spec}:${s.line})`),
+        ...report.dangling.map((r) => `dangling ${r.file}:${r.line} ${r.id}`),
+        `trace: ${plural(counts.scenarios, "scenario")}, ${counts.covered} covered, ${counts.uncovered} uncovered, ${counts.dangling} dangling`
+      ];
+      io.stdout(`${lines3.join("\n")}
+`);
+    }
+    return ok2 ? 0 : 1;
+  }
+});
+
 // src/verify/command.ts
-import { existsSync as existsSync31, readFileSync as readFileSync22, statSync as statSync9, writeFileSync as writeFileSync8 } from "node:fs";
-import { join as join32, relative as relative15, resolve as resolve6, sep as sep14 } from "node:path";
+import { existsSync as existsSync33, readFileSync as readFileSync24, statSync as statSync10, writeFileSync as writeFileSync8 } from "node:fs";
+import { join as join35, relative as relative15, resolve as resolve6, sep as sep14 } from "node:path";
 
 // src/verify/apply.ts
 var flowValue = (v) => typeof v === "string" && /^[A-Za-z0-9][\w:.+/@-]*$/.test(v) ? v : JSON.stringify(v);
@@ -11549,8 +11755,8 @@ function verifyText(text2, login, at) {
 // src/verify/login.ts
 var import_yaml8 = __toESM(require_dist(), 1);
 import { execFileSync as execFileSync3 } from "node:child_process";
-import { existsSync as existsSync30, readFileSync as readFileSync21 } from "node:fs";
-import { join as join31 } from "node:path";
+import { existsSync as existsSync32, readFileSync as readFileSync23 } from "node:fs";
+import { join as join34 } from "node:path";
 var LOCAL_FILE = ".specfold/local.yaml";
 var LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$/;
 var system = {
@@ -11573,11 +11779,11 @@ var system = {
   }
 };
 function localLogin(root) {
-  const path = join31(root, LOCAL_FILE);
-  if (!existsSync30(path)) return void 0;
+  const path = join34(root, LOCAL_FILE);
+  if (!existsSync32(path)) return void 0;
   let data;
   try {
-    data = (0, import_yaml8.parse)(readFileSync21(path, "utf8"));
+    data = (0, import_yaml8.parse)(readFileSync23(path, "utf8"));
   } catch (error) {
     throw new EnvError(`${LOCAL_FILE}: ${error.message.split("\n")[0]}`);
   }
@@ -11604,7 +11810,7 @@ function agentReason() {
 }
 function check(arg, root, bundleRoot) {
   const inBundle = [resolve6(root, arg), resolve6(bundleRoot, arg)].map((abs) => relative15(bundleRoot, abs).split(sep14).join("/")).filter((rel2) => rel2 !== "" && !rel2.startsWith("..") && !rel2.startsWith("/"));
-  const rel = inBundle.find((r) => existsSync31(join32(bundleRoot, r)) && statSync9(join32(bundleRoot, r)).isFile());
+  const rel = inBundle.find((r) => existsSync33(join35(bundleRoot, r)) && statSync10(join35(bundleRoot, r)).isFile());
   if (!rel)
     return { arg, reason: inBundle.length === 0 ? "outside the bundle" : "no such file in the bundle" };
   if (!rel.endsWith(".md") || !isConcept(rel))
@@ -11636,8 +11842,8 @@ register({
     if (refused.length === 0) {
       const at = isoWithOffset(/* @__PURE__ */ new Date());
       const written = targets.map((t) => {
-        const abs = join32(bundleRoot, t.rel);
-        return { abs, text: verifyText(readFileSync22(abs, "utf8"), login, at) };
+        const abs = join35(bundleRoot, t.rel);
+        return { abs, text: verifyText(readFileSync24(abs, "utf8"), login, at) };
       });
       for (const w of written) writeFileSync8(w.abs, w.text);
       verified.push(...targets.map(shown));
