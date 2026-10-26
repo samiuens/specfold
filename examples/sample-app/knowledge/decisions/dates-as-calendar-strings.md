@@ -4,6 +4,7 @@ title: Due dates are calendar strings
 description: Due dates are YYYY-MM-DD strings, not Date objects, so no time zones are involved.
 status: draft
 decision: accepted
+change: 2026-10-26-add-due-dates
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T14:41:31+01:00 }
 sources:
   - id: code
