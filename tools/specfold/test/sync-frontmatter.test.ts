@@ -35,6 +35,31 @@ describe("editFrontmatter", () => {
     );
   });
 
+  it("inserts a block after generated and replaces it in place", () => {
+    const one = editFrontmatter(CARD, {
+      setBlock: { verified: ["verified: { by: human:ana, at: 2026-10-26T15:00:00+01:00 }"] },
+    });
+    expect(one.setKeys).toEqual(["verified"]);
+    expect(one.text).toContain(
+      "generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T14:04:00+01:00 }\nverified: { by: human:ana, at: 2026-10-26T15:00:00+01:00 }\nsources:",
+    );
+    const two = editFrontmatter(one.text, {
+      setBlock: {
+        verified: [
+          "verified:",
+          "  - { by: human:ana, at: 2026-10-26T15:00:00+01:00 }",
+          "  - { by: human:ben, at: 2026-10-26T16:00:00+01:00 }",
+        ],
+      },
+    });
+    expect(two.text).toContain(
+      "verified:\n  - { by: human:ana, at: 2026-10-26T15:00:00+01:00 }\n  - { by: human:ben, at: 2026-10-26T16:00:00+01:00 }\nsources:",
+    );
+    expect(
+      editFrontmatter(two.text, { setBlock: { verified: two.text.split("\n").slice(8, 11) } }).setKeys,
+    ).toEqual([]);
+  });
+
   it("rewrites a differing key in place", () => {
     const { text } = editFrontmatter(CARD, { set: { status: "deprecated" } });
     expect(text).toBe(CARD.replace("status: draft", "status: deprecated"));
