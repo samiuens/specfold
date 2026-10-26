@@ -3,7 +3,15 @@ type: Capability
 title: specfold sync
 description: Why sync applies the mechanical part of a knowledge delta after archive, and where its contract lives.
 status: draft
+spec: openspec/specs/specfold-sync/spec.md
+resource: ../../openspec/specs/specfold-sync/spec.md
+change: 2026-10-26-add-specfold-sync
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T14:21:37+01:00 }
+sources:
+  - id: proposal-2026-10-26-add-specfold-sync
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-sync/proposal.md
+  - id: design-2026-10-26-add-specfold-sync
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-sync/design.md
 ---
 
 # Why
