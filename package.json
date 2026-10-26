@@ -6,6 +6,9 @@
   "engines": {
     "node": ">=20.19"
   },
+  "workspaces": [
+    "tools/specfold"
+  ],
   "scripts": {
     "setup": "git config core.hooksPath .githooks",
     "prepare": "npm run setup",
@@ -13,5 +16,9 @@
   },
   "devDependencies": {
     "gitmojis": "3.15.0"
+  },
+  "allowScripts": {
+    "esbuild": false,
+    "fsevents": false
   }
 }
