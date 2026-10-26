@@ -15,7 +15,7 @@
 
 ## Decisions
 
-- **Template:** `design.md` ends with `## Commitments`, holding a comment that explains the entry format `- [Title](/commitments/x.md): kept` or `: blocked: <reason>`, and `none`. The `design` instruction gains one paragraph saying the same and pointing to `specfold commitments list`.
+- **Template:** `design.md` ends with `## Commitments`, holding a comment that explains the entry format `- [Title](/commitments/x.md): kept` or `: blocked: <reason>`, and `none`. The `design` instruction stays word for word from upstream (`/capabilities/specfold-schema.md`); the template and the config rule carry the section.
 - **Config rule:** `rules.design` in the template's `config.yaml` (and the kit's own config): "Look up the open deferred commitments this change touches (`specfold commitments list`, `specfold lookup`) and record each in `## Commitments` as kept or blocked; write `none` when none is touched."
 - **G7:** `verifiedClaims` also reads `committed_by` when it is a `human:` string; claims carry the key `committed_by`. The comparison with the merge base is unchanged, so an existing `committed_by` never needs a fresh approval.
 - **G17 for designs**, run on every touched active change with a `design.md`:
