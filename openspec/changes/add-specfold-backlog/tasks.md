@@ -125,7 +125,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 10.1 Document `audit.backlog_untouched_days` in the kit and template settings
+- [x] 10.1 Document `audit.backlog_untouched_days` in the kit and template settings
   - Done when: both files list the setting with its default and `specfold validate` still passes in both
 
 ## 11. Bundle
