@@ -1005,14 +1005,14 @@ var require_foldFlowLines = __commonJS({
     var FOLD_FLOW = "flow";
     var FOLD_BLOCK = "block";
     var FOLD_QUOTED = "quoted";
-    function foldFlowLines(text, indent, mode = "flow", { indentAtStart, lineWidth = 80, minContentWidth = 20, onFold, onOverflow } = {}) {
+    function foldFlowLines(text2, indent, mode = "flow", { indentAtStart, lineWidth = 80, minContentWidth = 20, onFold, onOverflow } = {}) {
       if (!lineWidth || lineWidth < 0)
-        return text;
+        return text2;
       if (lineWidth < minContentWidth)
         minContentWidth = 0;
       const endStep = Math.max(1 + minContentWidth, 1 + lineWidth - indent.length);
-      if (text.length <= endStep)
-        return text;
+      if (text2.length <= endStep)
+        return text2;
       const folds = [];
       const escapedFolds = {};
       let end = lineWidth - indent.length;
@@ -1029,14 +1029,14 @@ var require_foldFlowLines = __commonJS({
       let escStart = -1;
       let escEnd = -1;
       if (mode === FOLD_BLOCK) {
-        i = consumeMoreIndentedLines(text, i, indent.length);
+        i = consumeMoreIndentedLines(text2, i, indent.length);
         if (i !== -1)
           end = i + endStep;
       }
-      for (let ch; ch = text[i += 1]; ) {
+      for (let ch; ch = text2[i += 1]; ) {
         if (mode === FOLD_QUOTED && ch === "\\") {
           escStart = i;
-          switch (text[i + 1]) {
+          switch (text2[i + 1]) {
             case "x":
               i += 3;
               break;
@@ -1053,12 +1053,12 @@ var require_foldFlowLines = __commonJS({
         }
         if (ch === "\n") {
           if (mode === FOLD_BLOCK)
-            i = consumeMoreIndentedLines(text, i, indent.length);
+            i = consumeMoreIndentedLines(text2, i, indent.length);
           end = i + indent.length + endStep;
           split = void 0;
         } else {
           if (ch === " " && prev && prev !== " " && prev !== "\n" && prev !== "	") {
-            const next = text[i + 1];
+            const next = text2[i + 1];
             if (next && next !== " " && next !== "\n" && next !== "	")
               split = i;
           }
@@ -1070,12 +1070,12 @@ var require_foldFlowLines = __commonJS({
             } else if (mode === FOLD_QUOTED) {
               while (prev === " " || prev === "	") {
                 prev = ch;
-                ch = text[i += 1];
+                ch = text2[i += 1];
                 overflow = true;
               }
               const j = i > escEnd + 1 ? i - 2 : escStart - 1;
               if (escapedFolds[j])
-                return text;
+                return text2;
               folds.push(j);
               escapedFolds[j] = true;
               end = j + endStep;
@@ -1090,39 +1090,39 @@ var require_foldFlowLines = __commonJS({
       if (overflow && onOverflow)
         onOverflow();
       if (folds.length === 0)
-        return text;
+        return text2;
       if (onFold)
         onFold();
-      let res = text.slice(0, folds[0]);
+      let res = text2.slice(0, folds[0]);
       for (let i2 = 0; i2 < folds.length; ++i2) {
         const fold = folds[i2];
-        const end2 = folds[i2 + 1] || text.length;
+        const end2 = folds[i2 + 1] || text2.length;
         if (fold === 0)
           res = `
-${indent}${text.slice(0, end2)}`;
+${indent}${text2.slice(0, end2)}`;
         else {
           if (mode === FOLD_QUOTED && escapedFolds[fold])
-            res += `${text[fold]}\\`;
+            res += `${text2[fold]}\\`;
           res += `
-${indent}${text.slice(fold + 1, end2)}`;
+${indent}${text2.slice(fold + 1, end2)}`;
         }
       }
       return res;
     }
-    function consumeMoreIndentedLines(text, i, indent) {
+    function consumeMoreIndentedLines(text2, i, indent) {
       let end = i;
       let start = i + 1;
-      let ch = text[start];
+      let ch = text2[start];
       while (ch === " " || ch === "	") {
         if (i < start + indent) {
-          ch = text[++i];
+          ch = text2[++i];
         } else {
           do {
-            ch = text[++i];
+            ch = text2[++i];
           } while (ch && ch !== "\n");
           end = i;
           start = i + 1;
-          ch = text[start];
+          ch = text2[start];
         }
       }
       return end;
@@ -3971,12 +3971,12 @@ var require_util_map_includes = __commonJS({
   "../../node_modules/yaml/dist/compose/util-map-includes.js"(exports) {
     "use strict";
     var identity = require_identity();
-    function mapIncludes(ctx, items, search) {
+    function mapIncludes(ctx, items, search2) {
       const { uniqueKeys } = ctx.options;
       if (uniqueKeys === false)
         return false;
       const isEqual = typeof uniqueKeys === "function" ? uniqueKeys : (a, b) => a === b || identity.isScalar(a) && identity.isScalar(b) && a.value === b.value;
-      return items.some((pair) => isEqual(pair.key, search));
+      return items.some((pair) => isEqual(pair.key, search2));
     }
     exports.mapIncludes = mapIncludes;
   }
@@ -4001,10 +4001,10 @@ var require_resolve_block_map = __commonJS({
       let offset = bm.offset;
       let commentEnd = null;
       for (const collItem of bm.items) {
-        const { start, key, sep: sep5, value } = collItem;
+        const { start, key, sep: sep6, value } = collItem;
         const keyProps = resolveProps.resolveProps(start, {
           indicator: "explicit-key-ind",
-          next: key ?? sep5?.[0],
+          next: key ?? sep6?.[0],
           offset,
           onError,
           parentIndent: bm.indent,
@@ -4018,7 +4018,7 @@ var require_resolve_block_map = __commonJS({
             else if ("indent" in key && key.indent !== bm.indent)
               onError(offset, "BAD_INDENT", startColMsg);
           }
-          if (!keyProps.anchor && !keyProps.tag && !sep5) {
+          if (!keyProps.anchor && !keyProps.tag && !sep6) {
             commentEnd = keyProps.end;
             if (keyProps.comment) {
               if (map.comment)
@@ -4042,7 +4042,7 @@ var require_resolve_block_map = __commonJS({
         ctx.atKey = false;
         if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
           onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
-        const valueProps = resolveProps.resolveProps(sep5 ?? [], {
+        const valueProps = resolveProps.resolveProps(sep6 ?? [], {
           indicator: "map-value-ind",
           next: value,
           offset: keyNode.range[2],
@@ -4058,7 +4058,7 @@ var require_resolve_block_map = __commonJS({
             if (ctx.options.strict && keyProps.start < valueProps.found.offset - 1024)
               onError(keyNode.range, "KEY_OVER_1024_CHARS", "The : indicator must be at most 1024 chars after the start of an implicit block mapping key");
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep5, null, valueProps, onError);
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep6, null, valueProps, onError);
           if (ctx.schema.compat)
             utilFlowIndentCheck.flowIndentCheck(bm.indent, value, onError);
           offset = valueNode.range[2];
@@ -4149,7 +4149,7 @@ var require_resolve_end = __commonJS({
       let comment = "";
       if (end) {
         let hasSpace = false;
-        let sep5 = "";
+        let sep6 = "";
         for (const token of end) {
           const { source, type } = token;
           switch (type) {
@@ -4163,13 +4163,13 @@ var require_resolve_end = __commonJS({
               if (!comment)
                 comment = cb;
               else
-                comment += sep5 + cb;
-              sep5 = "";
+                comment += sep6 + cb;
+              sep6 = "";
               break;
             }
             case "newline":
               if (comment)
-                sep5 += source;
+                sep6 += source;
               hasSpace = true;
               break;
             default:
@@ -4212,18 +4212,18 @@ var require_resolve_flow_collection = __commonJS({
       let offset = fc.offset + fc.start.source.length;
       for (let i = 0; i < fc.items.length; ++i) {
         const collItem = fc.items[i];
-        const { start, key, sep: sep5, value } = collItem;
+        const { start, key, sep: sep6, value } = collItem;
         const props = resolveProps.resolveProps(start, {
           flow: fcName,
           indicator: "explicit-key-ind",
-          next: key ?? sep5?.[0],
+          next: key ?? sep6?.[0],
           offset,
           onError,
           parentIndent: fc.indent,
           startOnNewline: false
         });
         if (!props.found) {
-          if (!props.anchor && !props.tag && !sep5 && !value) {
+          if (!props.anchor && !props.tag && !sep6 && !value) {
             if (i === 0 && props.comma)
               onError(props.comma, "UNEXPECTED_TOKEN", `Unexpected , in ${fcName}`);
             else if (i < fc.items.length - 1)
@@ -4277,8 +4277,8 @@ var require_resolve_flow_collection = __commonJS({
             }
           }
         }
-        if (!isMap && !sep5 && !props.found) {
-          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep5, null, props, onError);
+        if (!isMap && !sep6 && !props.found) {
+          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep6, null, props, onError);
           coll.items.push(valueNode);
           offset = valueNode.range[2];
           if (isBlock(value))
@@ -4290,7 +4290,7 @@ var require_resolve_flow_collection = __commonJS({
           if (isBlock(key))
             onError(keyNode.range, "BLOCK_IN_FLOW", blockMsg);
           ctx.atKey = false;
-          const valueProps = resolveProps.resolveProps(sep5 ?? [], {
+          const valueProps = resolveProps.resolveProps(sep6 ?? [], {
             flow: fcName,
             indicator: "map-value-ind",
             next: value,
@@ -4301,8 +4301,8 @@ var require_resolve_flow_collection = __commonJS({
           });
           if (valueProps.found) {
             if (!isMap && !props.found && ctx.options.strict) {
-              if (sep5)
-                for (const st of sep5) {
+              if (sep6)
+                for (const st of sep6) {
                   if (st === valueProps.found)
                     break;
                   if (st.type === "newline") {
@@ -4319,7 +4319,7 @@ var require_resolve_flow_collection = __commonJS({
             else
               onError(valueProps.start, "MISSING_CHAR", `Missing , or : between ${fcName} items`);
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep5, null, valueProps, onError) : null;
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep6, null, valueProps, onError) : null;
           if (valueNode) {
             if (isBlock(value))
               onError(valueNode.range, "BLOCK_IN_FLOW", blockMsg);
@@ -4499,7 +4499,7 @@ var require_resolve_block_scalar = __commonJS({
           chompStart = i + 1;
       }
       let value = "";
-      let sep5 = "";
+      let sep6 = "";
       let prevMoreIndented = false;
       for (let i = 0; i < contentStart; ++i)
         value += lines[i][0].slice(trimIndent) + "\n";
@@ -4516,24 +4516,24 @@ var require_resolve_block_scalar = __commonJS({
           indent = "";
         }
         if (type === Scalar.Scalar.BLOCK_LITERAL) {
-          value += sep5 + indent.slice(trimIndent) + content;
-          sep5 = "\n";
+          value += sep6 + indent.slice(trimIndent) + content;
+          sep6 = "\n";
         } else if (indent.length > trimIndent || content[0] === "	") {
-          if (sep5 === " ")
-            sep5 = "\n";
-          else if (!prevMoreIndented && sep5 === "\n")
-            sep5 = "\n\n";
-          value += sep5 + indent.slice(trimIndent) + content;
-          sep5 = "\n";
+          if (sep6 === " ")
+            sep6 = "\n";
+          else if (!prevMoreIndented && sep6 === "\n")
+            sep6 = "\n\n";
+          value += sep6 + indent.slice(trimIndent) + content;
+          sep6 = "\n";
           prevMoreIndented = true;
         } else if (content === "") {
-          if (sep5 === "\n")
+          if (sep6 === "\n")
             value += "\n";
           else
-            sep5 = "\n";
+            sep6 = "\n";
         } else {
-          value += sep5 + content;
-          sep5 = " ";
+          value += sep6 + content;
+          sep6 = " ";
           prevMoreIndented = false;
         }
       }
@@ -4716,25 +4716,25 @@ var require_resolve_flow_scalar = __commonJS({
         trimBoth = /^[ \t]+|[ \t]+$/g;
       }
       let res = match[1].replace(trimEnd, "");
-      let sep5 = " ";
+      let sep6 = " ";
       let pos = line.lastIndex;
       while (match = line.exec(source)) {
         const lm = match[1].replace(trimBoth, "");
         if (lm === "") {
-          if (sep5 === "\n")
-            res += sep5;
+          if (sep6 === "\n")
+            res += sep6;
           else
-            sep5 = "\n";
+            sep6 = "\n";
         } else {
-          res += sep5 + lm;
-          sep5 = " ";
+          res += sep6 + lm;
+          sep6 = " ";
         }
         pos = line.lastIndex;
       }
       const last = /[ \t]*(.*)/sy;
       last.lastIndex = pos;
       match = last.exec(source);
-      return res + sep5 + (match?.[1] ?? "");
+      return res + sep6 + (match?.[1] ?? "");
     }
     function doubleQuotedValue(source, onError) {
       let res = "";
@@ -5544,14 +5544,14 @@ var require_cst_stringify = __commonJS({
         }
       }
     }
-    function stringifyItem({ start, key, sep: sep5, value }) {
+    function stringifyItem({ start, key, sep: sep6, value }) {
       let res = "";
       for (const st of start)
         res += st.source;
       if (key)
         res += stringifyToken(key);
-      if (sep5)
-        for (const st of sep5)
+      if (sep6)
+        for (const st of sep6)
           res += st.source;
       if (value)
         res += stringifyToken(value);
@@ -6718,18 +6718,18 @@ var require_parser = __commonJS({
         if (this.type === "map-value-ind") {
           const prev = getPrevProps(this.peek(2));
           const start = getFirstKeyStartProps(prev);
-          let sep5;
+          let sep6;
           if (scalar2.end) {
-            sep5 = scalar2.end;
-            sep5.push(this.sourceToken);
+            sep6 = scalar2.end;
+            sep6.push(this.sourceToken);
             delete scalar2.end;
           } else
-            sep5 = [this.sourceToken];
+            sep6 = [this.sourceToken];
           const map = {
             type: "block-map",
             offset: scalar2.offset,
             indent: scalar2.indent,
-            items: [{ start, key: scalar2, sep: sep5 }]
+            items: [{ start, key: scalar2, sep: sep6 }]
           };
           this.onKeyLine = true;
           this.stack[this.stack.length - 1] = map;
@@ -6882,15 +6882,15 @@ var require_parser = __commonJS({
                 } else if (isFlowToken(it.key) && !includesToken(it.sep, "newline")) {
                   const start2 = getFirstKeyStartProps(it.start);
                   const key = it.key;
-                  const sep5 = it.sep;
-                  sep5.push(this.sourceToken);
+                  const sep6 = it.sep;
+                  sep6.push(this.sourceToken);
                   delete it.key;
                   delete it.sep;
                   this.stack.push({
                     type: "block-map",
                     offset: this.offset,
                     indent: this.indent,
-                    items: [{ start: start2, key, sep: sep5 }]
+                    items: [{ start: start2, key, sep: sep6 }]
                   });
                 } else if (start.length > 0) {
                   it.sep = it.sep.concat(start, this.sourceToken);
@@ -7084,13 +7084,13 @@ var require_parser = __commonJS({
             const prev = getPrevProps(parent);
             const start = getFirstKeyStartProps(prev);
             fixFlowSeqItems(fc);
-            const sep5 = fc.end.splice(1, fc.end.length);
-            sep5.push(this.sourceToken);
+            const sep6 = fc.end.splice(1, fc.end.length);
+            sep6.push(this.sourceToken);
             const map = {
               type: "block-map",
               offset: fc.offset,
               indent: fc.indent,
-              items: [{ start, key: fc, sep: sep5 }]
+              items: [{ start, key: fc, sep: sep6 }]
             };
             this.onKeyLine = true;
             this.stack[this.stack.length - 1] = map;
@@ -7579,9 +7579,9 @@ function keyLines(doc, counter) {
   return lines;
 }
 function parseFile(bundleRoot, rel) {
-  const text = readFileSync2(join2(bundleRoot, rel), "utf8").replace(/\r\n/g, "\n");
-  const lines = text.split("\n");
-  if (lines[0] !== "---") return { rel, hasFrontmatter: false, body: text, bodyStartLine: 1 };
+  const text2 = readFileSync2(join2(bundleRoot, rel), "utf8").replace(/\r\n/g, "\n");
+  const lines = text2.split("\n");
+  if (lines[0] !== "---") return { rel, hasFrontmatter: false, body: text2, bodyStartLine: 1 };
   const end = lines.findIndex((line, i) => i > 0 && (line === "---" || line === "..."));
   if (end === -1) {
     return {
@@ -7625,8 +7625,8 @@ var oneLine = (v) => typeof v === "string" && v.trim() !== "" ? v.replace(/\s+/g
 function folderTitle(config, folder, fallbackName) {
   const configured = config.folders[folder]?.title;
   if (configured) return configured;
-  const words = fallbackName.replace(/-/g, " ");
-  return words.charAt(0).toUpperCase() + words.slice(1);
+  const words2 = fallbackName.replace(/-/g, " ");
+  return words2.charAt(0).toUpperCase() + words2.slice(1);
 }
 function generateIndexes(bundleRoot, config, refs = /* @__PURE__ */ new Map()) {
   const entries = walk(bundleRoot);
@@ -7795,9 +7795,9 @@ function scanReferences(repoRoot, sourceGlobs) {
     if (!patterns.some((p) => p.test(file))) continue;
     const abs = join4(repoRoot, file);
     if (statSync2(abs).size > MAX_BYTES) continue;
-    const text = readFileSync3(abs, "utf8");
-    if (text.includes("\0")) continue;
-    text.split("\n").forEach((content, i) => {
+    const text2 = readFileSync3(abs, "utf8");
+    if (text2.includes("\0")) continue;
+    text2.split("\n").forEach((content, i) => {
       for (const match of content.matchAll(REFERENCE)) {
         refs.push({ concept: (match[1] ?? "").slice(1), file, line: i + 1 });
       }
@@ -7874,14 +7874,14 @@ import { join as join6 } from "node:path";
 
 // src/log/insert.ts
 var DATE_HEADING = /^## (\d{4}-\d{2}-\d{2})\s*$/;
-function insertEntry(text, date, entry) {
-  if (text === void 0 || text.trim() === "") return `# Log
+function insertEntry(text2, date, entry) {
+  if (text2 === void 0 || text2.trim() === "") return `# Log
 
 ## ${date}
 
 ${entry}
 `;
-  const lines = text.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n");
+  const lines = text2.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n");
   const headings = lines.map((line, index) => ({ index, date: DATE_HEADING.exec(line)?.[1] })).filter((h) => h.date !== void 0);
   const same = headings.find((h) => h.date === date);
   if (same) {
@@ -7900,10 +7900,10 @@ ${entry}
 
 // src/log/command.ts
 var KIND = /^[A-Z][A-Za-z]*$/;
-function isCalendarDate(text) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return false;
-  const date = /* @__PURE__ */ new Date(`${text}T00:00:00Z`);
-  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text;
+function isCalendarDate(text2) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text2)) return false;
+  const date = /* @__PURE__ */ new Date(`${text2}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text2;
 }
 function localDate(now = /* @__PURE__ */ new Date()) {
   const pad = (n) => String(n).padStart(2, "0");
@@ -7915,10 +7915,10 @@ register({
   usage: "specfold log add [--kind <Kind>] [--date <YYYY-MM-DD>] [--bundle <dir>] <message...>",
   options: { kind: { type: "string" }, date: { type: "string" }, bundle: { type: "string" } },
   run: ({ io, values, positionals }) => {
-    const [sub, ...words] = positionals;
+    const [sub, ...words2] = positionals;
     if (sub !== "add")
       throw new UsageError(sub ? `unknown log subcommand '${sub}'` : "missing subcommand: specfold log add");
-    const message = words.join(" ").replace(/\s+/g, " ").trim();
+    const message = words2.join(" ").replace(/\s+/g, " ").trim();
     if (!message) throw new UsageError("missing message");
     const kind = values.kind ?? "Update";
     if (!KIND.test(kind))
@@ -7935,9 +7935,110 @@ register({
   }
 });
 
+// src/lookup/command.ts
+import { relative as relative3, sep as sep3 } from "node:path";
+
+// src/lookup/search.ts
+var WEIGHTS = { title: 3, tags: 2, description: 1, type: 1 };
+function words(text2) {
+  return text2.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+}
+var isRecord3 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
+var text = (v) => typeof v === "string" && v.trim() !== "" ? v.trim() : void 0;
+function flagsOf(data, now) {
+  const flags = [];
+  if (data.status === "deprecated") flags.push("deprecated");
+  const stale = typeof data.stale_after === "string" ? Date.parse(data.stale_after) : Number.NaN;
+  if (!Number.isNaN(stale) && stale < now) flags.push("stale");
+  const verified = Array.isArray(data.verified) ? data.verified.length > 0 : data.verified !== void 0;
+  if (!verified) flags.push("unverified");
+  return flags;
+}
+function search(bundleRoot, query, options = {}) {
+  const terms = words(query);
+  if (terms.length === 0) return [];
+  const now = options.now ?? Date.now();
+  const wanted = options.type?.toLowerCase();
+  const hits = [];
+  for (const entry of walk(bundleRoot)) {
+    const name = entry.rel.slice(entry.rel.lastIndexOf("/") + 1);
+    if (entry.isDir || !name.endsWith(".md") || RESERVED.has(name)) continue;
+    const data = parseFile(bundleRoot, entry.rel).frontmatter?.data;
+    if (!isRecord3(data)) continue;
+    const type = text(data.type);
+    if (!type || wanted !== void 0 && type.toLowerCase() !== wanted) continue;
+    const title = text(data.title) ?? name.slice(0, -3);
+    const description = text(data.description) ?? null;
+    const tags = Array.isArray(data.tags) ? data.tags.filter((t) => typeof t === "string") : text(data.tags) ? [data.tags] : [];
+    const fields = {
+      title: words(title),
+      tags: words(tags.join(" ")),
+      description: words(description ?? ""),
+      type: words(type)
+    };
+    let score = 0;
+    for (const term of terms) {
+      const best = Math.max(
+        0,
+        ...Object.keys(WEIGHTS).filter((f) => fields[f].some((w) => w.startsWith(term))).map((f) => WEIGHTS[f])
+      );
+      if (best === 0) {
+        score = 0;
+        break;
+      }
+      score += best;
+    }
+    if (score > 0) hits.push({ rel: entry.rel, title, description, type, score, flags: flagsOf(data, now) });
+  }
+  return hits.sort((a, b) => b.score - a.score || (a.rel < b.rel ? -1 : a.rel > b.rel ? 1 : 0));
+}
+
+// src/lookup/command.ts
+register({
+  name: "lookup",
+  summary: "find concepts by their frontmatter",
+  usage: "specfold lookup <query...> [--type <type>] [--limit <n>] [--bundle <dir>] [--json]",
+  options: {
+    type: { type: "string" },
+    limit: { type: "string" },
+    bundle: { type: "string" },
+    json: { type: "boolean" }
+  },
+  run: ({ io, values, positionals }) => {
+    const query = positionals.join(" ").trim();
+    if (!query) throw new UsageError("missing query");
+    const limitArg = values.limit ?? "10";
+    if (!/^[1-9]\d*$/.test(limitArg))
+      throw new UsageError(`--limit must be a positive integer, got '${limitArg}'`);
+    const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, void 0);
+    const base = findRepoRoot(io.cwd) ?? io.cwd;
+    const type = values.type;
+    const hits = search(bundleRoot, query, type ? { type } : {}).slice(0, Number(limitArg));
+    const results = hits.map((h) => ({
+      path: relative3(base, `${bundleRoot}${sep3}${h.rel}`).split(sep3).join("/"),
+      title: h.title,
+      description: h.description,
+      type: h.type,
+      score: h.score,
+      flags: h.flags
+    }));
+    if (values.json) {
+      io.stdout(`${JSON.stringify({ query, results }, null, 2)}
+`);
+    } else if (results.length === 0) {
+      io.stdout("no matches\n");
+    } else {
+      const line = (r) => `${r.path} - ${r.title}${r.description ? `: ${r.description}` : ""}${r.flags.length ? ` [${r.flags.join(", ")}]` : ""}`;
+      io.stdout(`${results.map(line).join("\n")}
+`);
+    }
+    return 0;
+  }
+});
+
 // src/new/command.ts
 import { existsSync as existsSync5, mkdirSync, writeFileSync as writeFileSync3 } from "node:fs";
-import { dirname as dirname2, join as join8, relative as relative3, sep as sep3 } from "node:path";
+import { dirname as dirname2, join as join8, relative as relative4, sep as sep4 } from "node:path";
 
 // src/new/templates.ts
 import { existsSync as existsSync4, readFileSync as readFileSync6 } from "node:fs";
@@ -8025,7 +8126,7 @@ register({
       throw new UsageError(`actor '${by}' must look like '<producer>/<version>' or 'process:<id>'`);
     const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
     const abs = join8(bundleRoot, rel);
-    const shown = relative3(config.root, abs).split(sep3).join("/");
+    const shown = relative4(config.root, abs).split(sep4).join("/");
     if (existsSync5(abs)) {
       if (values.json) io.stdout(`${JSON.stringify({ created: null, error: `${shown} already exists` })}
 `);
@@ -8063,14 +8164,14 @@ register({
 
 // src/validate/index.ts
 import { existsSync as existsSync8 } from "node:fs";
-import { relative as relative5, resolve as resolve2, sep as sep4 } from "node:path";
+import { relative as relative6, resolve as resolve2, sep as sep5 } from "node:path";
 
 // src/validate/links.ts
 import { existsSync as existsSync7 } from "node:fs";
 import { dirname as dirname4, join as join10 } from "node:path";
 
 // src/validate/okf.ts
-var isRecord3 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
+var isRecord4 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
 var baseName = (rel) => rel.slice(rel.lastIndexOf("/") + 1);
 var isConcept = (rel) => !RESERVED.has(baseName(rel));
 var okf1 = (file) => {
@@ -8092,12 +8193,12 @@ var okf1 = (file) => {
       file.frontmatterError.line
     );
   }
-  if (!isRecord3(file.frontmatter?.data)) return finding2("frontmatter is not a mapping", 1);
+  if (!isRecord4(file.frontmatter?.data)) return finding2("frontmatter is not a mapping", 1);
   return [];
 };
 var okf2 = (file) => {
   const data = file.frontmatter?.data;
-  if (!isConcept(file.rel) || !isRecord3(data)) return [];
+  if (!isConcept(file.rel) || !isRecord4(data)) return [];
   if (typeof data.type === "string" && data.type.trim() !== "") return [];
   return [
     {
@@ -8118,9 +8219,9 @@ var okf3 = (file, line, message, fix) => ({
   message,
   fix
 });
-function isCalendarDate2(text) {
-  const date = /* @__PURE__ */ new Date(`${text}T00:00:00Z`);
-  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text;
+function isCalendarDate2(text2) {
+  const date = /* @__PURE__ */ new Date(`${text2}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text2;
 }
 var okf3Index = (file) => {
   if (baseName(file.rel) !== "index.md" || !file.hasFrontmatter) return [];
@@ -8135,7 +8236,7 @@ var okf3Index = (file) => {
     ];
   }
   const data = file.frontmatter?.data;
-  if (!isRecord3(data)) {
+  if (!isRecord4(data)) {
     return [
       okf3(
         file,
@@ -8163,8 +8264,8 @@ var okf3Log = (file) => {
   }
   const findings = [];
   let previous;
-  file.body.split("\n").forEach((text, i) => {
-    const heading = /^## (.*)$/.exec(text);
+  file.body.split("\n").forEach((text2, i) => {
+    const heading = /^## (.*)$/.exec(text2);
     if (!heading) return;
     const line = file.bodyStartLine + i;
     const date = heading[1]?.trim() ?? "";
@@ -8191,10 +8292,10 @@ var okf3Log = (file) => {
 
 // src/validate/profile.ts
 import { existsSync as existsSync6 } from "node:fs";
-import { dirname as dirname3, join as join9, relative as relative4 } from "node:path";
+import { dirname as dirname3, join as join9, relative as relative5 } from "node:path";
 function conceptData(file) {
   const data = file.frontmatter?.data;
-  if (!isConcept(file.rel) || !isRecord3(data)) return void 0;
+  if (!isConcept(file.rel) || !isRecord4(data)) return void 0;
   return typeof data.type === "string" && data.type.trim() !== "" ? data : void 0;
 }
 function finding(rule, file, key, message, fix) {
@@ -8289,7 +8390,7 @@ var p4 = (file) => {
   }
   const findings = [];
   const checkStamp = (key, value) => {
-    if (!isRecord3(value) || value.by === void 0 || value.at === void 0) {
+    if (!isRecord4(value) || value.by === void 0 || value.at === void 0) {
       findings.push(
         finding(
           "P4",
@@ -8330,16 +8431,16 @@ var p5 = (file) => {
   const data = conceptData(file);
   if (!data) return [];
   const checks = [];
-  if (isRecord3(data.generated))
+  if (isRecord4(data.generated))
     checks.push({ key: "generated", label: "generated.at", value: data.generated.at });
   const verified = Array.isArray(data.verified) ? data.verified : data.verified === void 0 ? [] : [data.verified];
   for (const v of verified)
-    if (isRecord3(v)) checks.push({ key: "verified", label: "verified.at", value: v.at });
+    if (isRecord4(v)) checks.push({ key: "verified", label: "verified.at", value: v.at });
   if (data.stale_after !== void 0)
     checks.push({ key: "stale_after", label: "stale_after", value: data.stale_after });
   if (Array.isArray(data.sources)) {
     for (const s of data.sources) {
-      if (isRecord3(s) && s.last_modified !== void 0) {
+      if (isRecord4(s) && s.last_modified !== void 0) {
         checks.push({ key: "sources", label: "sources.last_modified", value: s.last_modified });
       }
     }
@@ -8379,7 +8480,7 @@ var p6 = (file) => {
       )
     ];
   }
-  return data.sources.filter((s) => !isRecord3(s) || !nonEmptyString(s.resource)).map(
+  return data.sources.filter((s) => !isRecord4(s) || !nonEmptyString(s.resource)).map(
     () => finding(
       "P6",
       file,
@@ -8420,15 +8521,15 @@ var p9 = (file) => {
   if (!conceptData(file)) return [];
   const findings = [];
   let fence;
-  file.body.split("\n").forEach((text, i) => {
-    const marker = /^\s*(`{3,}|~{3,})/.exec(text)?.[1];
+  file.body.split("\n").forEach((text2, i) => {
+    const marker = /^\s*(`{3,}|~{3,})/.exec(text2)?.[1];
     if (marker) {
       if (fence === void 0) fence = marker[0];
       else if (marker[0] === fence) fence = void 0;
       return;
     }
     if (fence !== void 0) return;
-    const word = NORMATIVE.exec(text.replace(/`[^`]*`/g, ""))?.[1];
+    const word = NORMATIVE.exec(text2.replace(/`[^`]*`/g, ""))?.[1];
     if (word) {
       findings.push({
         rule: "P9",
@@ -8504,7 +8605,7 @@ var p11 = (file, ctx) => {
   }
   if (data.not !== void 0) {
     const valid = Array.isArray(data.not) && data.not.every(
-      (n) => isRecord3(n) && nonEmptyString(n.term) && nonEmptyString(n.why) && nonEmptyString(n.instead)
+      (n) => isRecord4(n) && nonEmptyString(n.term) && nonEmptyString(n.why) && nonEmptyString(n.instead)
     );
     if (!valid) {
       findings.push(
@@ -8524,7 +8625,7 @@ function resolveInBundle(bundleRoot, fromRel, target) {
   const clean = target.split("#")[0] ?? "";
   if (clean === "") return void 0;
   const abs = clean.startsWith("/") ? join9(bundleRoot, clean) : join9(bundleRoot, dirname3(fromRel), clean);
-  const rel = relative4(bundleRoot, abs);
+  const rel = relative5(bundleRoot, abs);
   return rel.startsWith("..") ? void 0 : abs;
 }
 
@@ -8532,19 +8633,19 @@ function resolveInBundle(bundleRoot, fromRel, target) {
 var SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 var LINK = /!?\[[^\]]*\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)/g;
 var l1 = (file, ctx) => {
-  if (!isConcept(file.rel) || !isRecord3(file.frontmatter?.data)) return [];
+  if (!isConcept(file.rel) || !isRecord4(file.frontmatter?.data)) return [];
   const severity = ctx.config?.blockOnBrokenLinks === false ? "warning" : "error";
   const findings = [];
   let fence;
-  file.body.split("\n").forEach((text, i) => {
-    const marker = /^\s*(`{3,}|~{3,})/.exec(text)?.[1];
+  file.body.split("\n").forEach((text2, i) => {
+    const marker = /^\s*(`{3,}|~{3,})/.exec(text2)?.[1];
     if (marker) {
       if (fence === void 0) fence = marker[0];
       else if (marker[0] === fence) fence = void 0;
       return;
     }
     if (fence !== void 0) return;
-    for (const match of text.replace(/`[^`]*`/g, "").matchAll(LINK)) {
+    for (const match of text2.replace(/`[^`]*`/g, "").matchAll(LINK)) {
       const target = match[1] ?? "";
       if (SCHEME.test(target) || target.startsWith("#")) continue;
       let decoded = target;
@@ -8568,12 +8669,12 @@ var l1 = (file, ctx) => {
 };
 var l2 = (file, ctx) => {
   const data = file.frontmatter?.data;
-  if (!isConcept(file.rel) || !isRecord3(data)) return [];
+  if (!isConcept(file.rel) || !isRecord4(data)) return [];
   const checks = [];
   if (typeof data.resource === "string") checks.push({ key: "resource", value: data.resource });
   if (Array.isArray(data.sources)) {
     for (const s of data.sources) {
-      if (isRecord3(s) && typeof s.resource === "string") checks.push({ key: "sources", value: s.resource });
+      if (isRecord4(s) && typeof s.resource === "string") checks.push({ key: "sources", value: s.resource });
     }
   }
   return checks.filter(({ value }) => {
@@ -8595,7 +8696,7 @@ var l2 = (file, ctx) => {
 var okfRules = [okf1, okf2, okf3Index, okf3Log];
 var profileRules = [p1, p2, p3, p4, p5, p6, p7, p9, p10, p11, l1, l2];
 var profileBundleRules = [p8];
-var toRel = (root, abs) => relative5(root, abs).split(sep4).join("/");
+var toRel = (root, abs) => relative6(root, abs).split(sep5).join("/");
 function validate(input) {
   const entries = walk(input.bundleRoot);
   const roots = input.paths.map((abs) => toRel(input.bundleRoot, abs));
@@ -8628,7 +8729,7 @@ register({
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, config);
     const paths = positionals.map((p) => {
       const abs = resolve2(io.cwd, p);
-      const rel = relative5(bundleRoot, abs);
+      const rel = relative6(bundleRoot, abs);
       if (rel.startsWith("..") || resolve2(bundleRoot, rel) !== abs) {
         throw new UsageError(`path is outside the bundle ${bundleRoot}: ${p}`);
       }
@@ -8644,6 +8745,6 @@ register({
 // src/bin.ts
 process.exitCode = await main(process.argv.slice(2), {
   cwd: process.cwd(),
-  stdout: (text) => process.stdout.write(text),
-  stderr: (text) => process.stderr.write(text)
+  stdout: (text2) => process.stdout.write(text2),
+  stderr: (text2) => process.stderr.write(text2)
 });
