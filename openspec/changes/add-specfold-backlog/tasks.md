@@ -101,7 +101,7 @@ scenarios: [specfold-lookup#vision-always-shown, specfold-lookup#matching-commit
 agent: implementer
 ```
 
-- [ ] 8.1 Append the vision and open commitments to lookup
+- [x] 8.1 Append the vision and open commitments to lookup
   - Done when: scenarios vision-always-shown, matching-commitment and machine-readable-hits pass in `lookup.test.ts`
 
 ## 9. Session start

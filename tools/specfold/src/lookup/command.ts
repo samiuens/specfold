@@ -4,7 +4,7 @@ import { conceptDependencies } from "../drift/deps.ts";
 import { driftOf, hasHistory } from "../drift/drift.ts";
 import { UsageError } from "../errors.ts";
 import { findRepoRoot, loadConfig, resolveBundleRoot } from "../repo.ts";
-import { type Hit, search } from "./search.ts";
+import { contextConcepts, type Hit, search } from "./search.ts";
 
 /** Bundle-relative paths of the hits that are possibly stale; empty outside a git repository. */
 function drifted(repoRoot: string | undefined, bundleRoot: string, hits: Hit[]): Set<string> {
@@ -51,23 +51,25 @@ register({
     const base = repoRoot ?? io.cwd;
     const type = values.type as string | undefined;
     const hits = search(bundleRoot, query, type ? { type } : {}).slice(0, Number(limitArg));
-    const stale = drifted(repoRoot, bundleRoot, hits);
-    const results = hits.map((h) => ({
+    const extra = contextConcepts(bundleRoot, query, new Set(hits.map((h) => h.rel)));
+    const stale = drifted(repoRoot, bundleRoot, [...hits, ...extra]);
+    const shape = (h: Hit) => ({
       path: relative(base, `${bundleRoot}${sep}${h.rel}`).split(sep).join("/"),
       title: h.title,
       description: h.description,
       type: h.type,
-      score: h.score,
       flags: stale.has(h.rel) ? withDrift(h.flags) : h.flags,
-    }));
+    });
+    const results = hits.map((h) => ({ ...shape(h), score: h.score }));
+    const context = extra.map(shape);
     if (values.json) {
-      io.stdout(`${JSON.stringify({ query, results }, null, 2)}\n`);
-    } else if (results.length === 0) {
-      io.stdout("no matches\n");
+      io.stdout(`${JSON.stringify({ query, results, context }, null, 2)}\n`);
     } else {
-      const line = (r: (typeof results)[number]) =>
+      const line = (r: ReturnType<typeof shape>) =>
         `${r.path} - ${r.title}${r.description ? `: ${r.description}` : ""}${r.flags.length ? ` [${r.flags.join(", ")}]` : ""}`;
-      io.stdout(`${results.map(line).join("\n")}\n`);
+      const lines = results.length === 0 ? ["no matches"] : results.map(line);
+      if (context.length > 0) lines.push("vision and open commitments:", ...context.map(line));
+      io.stdout(`${lines.join("\n")}\n`);
     }
     return 0;
   },
