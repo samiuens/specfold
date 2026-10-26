@@ -21,7 +21,7 @@ scenarios: [specfold-agents-sync#two-targets, specfold-agents-sync#nested-target
 agent: implementer
 ```
 
-- [ ] 2.1 Plan and apply link, relink, unlink and kept actions per target
+- [x] 2.1 Plan and apply link, relink, unlink and kept actions per target
   - Done when: the four scenarios of this group pass in `agents-sync.test.ts`
 
 ## 3. Agents sync command
