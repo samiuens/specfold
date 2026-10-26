@@ -24,5 +24,5 @@ none
 
 ## Confirmation
 
-confirmed_by:
-confirmed_at:
+confirmed_by: human:samiuens
+confirmed_at: 2026-10-26T16:05:19+01:00
