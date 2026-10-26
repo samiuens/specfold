@@ -6,7 +6,7 @@ import { EnvError, UsageError } from "../errors.ts";
 import { type Finding, renderHuman, renderJson } from "../findings.ts";
 import { type Config, findRepoRoot, requireConfig } from "../repo.ts";
 import { okf1, okf2, okf3Index, okf3Log } from "./okf.ts";
-import { p1, p2, p3, p4 } from "./profile.ts";
+import { p1, p2, p3, p4, p5, p6, p7, p8 } from "./profile.ts";
 
 export interface RuleContext {
   bundleRoot: string;
@@ -17,9 +17,13 @@ export interface RuleContext {
 /** A rule inspects one Markdown file and returns findings; rules never throw. */
 export type Rule = (file: ParsedFile, ctx: RuleContext) => Finding[];
 
+/** A rule over the whole bundle tree, limited to entries inside the selected paths. */
+export type BundleRule = (ctx: RuleContext, inSelection: (rel: string) => boolean) => Finding[];
+
 const okfRules: Rule[] = [okf1, okf2, okf3Index, okf3Log];
 /** Profile and link rules; they only run without --okf-only. */
-const profileRules: Rule[] = [p1, p2, p3, p4];
+const profileRules: Rule[] = [p1, p2, p3, p4, p5, p6, p7];
+const profileBundleRules: BundleRule[] = [p8];
 
 export interface ValidateInput {
   bundleRoot: string;
@@ -38,16 +42,12 @@ const toRel = (root: string, abs: string) => relative(root, abs).split(sep).join
 
 export function validate(input: ValidateInput): ValidateResult {
   const entries = walk(input.bundleRoot);
-  const selected = new Set<string>();
-  const markdown = entries.filter((e) => !e.isDir && e.rel.endsWith(".md")).map((e) => e.rel);
-  if (input.paths.length === 0) {
-    for (const rel of markdown) selected.add(rel);
-  } else {
-    for (const abs of input.paths) {
-      const rel = toRel(input.bundleRoot, abs);
-      for (const m of markdown) if (rel === "" || m === rel || m.startsWith(`${rel}/`)) selected.add(m);
-    }
-  }
+  const roots = input.paths.map((abs) => toRel(input.bundleRoot, abs));
+  const inSelection = (rel: string) =>
+    roots.length === 0 || roots.some((r) => r === "" || rel === r || rel.startsWith(`${r}/`));
+  const selected = new Set(
+    entries.filter((e) => !e.isDir && e.rel.endsWith(".md") && inSelection(e.rel)).map((e) => e.rel),
+  );
   const ctx: RuleContext = {
     bundleRoot: input.bundleRoot,
     entries,
@@ -59,6 +59,7 @@ export function validate(input: ValidateInput): ValidateResult {
     const file = parseFile(input.bundleRoot, rel);
     for (const rule of rules) findings.push(...rule(file, ctx));
   }
+  if (!input.okfOnly) for (const rule of profileBundleRules) findings.push(...rule(ctx, inSelection));
   return { findings, checked: selected.size };
 }
 
