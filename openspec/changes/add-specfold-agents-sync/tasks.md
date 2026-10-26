@@ -45,7 +45,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 4.1 Rebuild the bundled CLI
+- [x] 4.1 Rebuild the bundled CLI
   - Done when: `npm run build -w specfold` leaves no diff and `node scripts/specfold.mjs agents sync --check` exits 0 in the kit
 
 ## 5. Knowledge
