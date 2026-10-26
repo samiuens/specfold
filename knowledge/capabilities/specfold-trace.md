@@ -3,7 +3,15 @@ type: Capability
 title: specfold trace
 description: Why scenarios carry stable ids that tests cite, and where the contract for specfold trace lives.
 status: draft
+spec: openspec/specs/specfold-trace/spec.md
+resource: ../../openspec/specs/specfold-trace/spec.md
+change: 2026-10-26-add-specfold-trace
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:53:55+01:00 }
+sources:
+  - id: proposal-2026-10-26-add-specfold-trace
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-trace/proposal.md
+  - id: design-2026-10-26-add-specfold-trace
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-trace/design.md
 ---
 
 # Why

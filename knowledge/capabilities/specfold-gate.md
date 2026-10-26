@@ -5,7 +5,7 @@ description: Why specfold gate gives one merge verdict, and where the contract f
 status: draft
 spec: openspec/specs/specfold-gate/spec.md
 resource: ../../openspec/specs/specfold-gate/spec.md
-change: 2026-10-26-add-gate-workflow
+change: 2026-10-26-add-specfold-trace
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:21:50+01:00 }
 sources:
   - id: proposal-2026-10-26-add-specfold-gate
@@ -20,6 +20,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-10-26-add-gate-workflow/proposal.md
   - id: design-2026-10-26-add-gate-workflow
     resource: ../../openspec/changes/archive/2026-10-26-add-gate-workflow/design.md
+  - id: proposal-2026-10-26-add-specfold-trace
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-trace/proposal.md
+  - id: design-2026-10-26-add-specfold-trace
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-trace/design.md
 ---
 
 # Why
