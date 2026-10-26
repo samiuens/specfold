@@ -9,7 +9,7 @@ scenarios: [rename#title-changed, rename#done-item-renamed, rename#empty-title, 
 agent: implementer
 ```
 
-- [ ] 1.1 Add `rename(id, title)` with the title rules of `add`
+- [x] 1.1 Add `rename(id, title)` with the title rules of `add`
   - Done when: the four scenarios pass in `test/rename.test.js` and `npm test` passes
 
 ## 2. Knowledge
