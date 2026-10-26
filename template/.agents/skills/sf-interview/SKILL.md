@@ -26,7 +26,7 @@ Use this at the start of every change, inside `/opsx:explore` or before `/opsx:p
    - the proposed change boundaries.
 
    In Claude Code use plan approval (`ExitPlanMode`); elsewhere show it as text and wait for an explicit "approve". Corrections start another round.
-7. **Write `brief.md` only after approval,** from the schema template (`openspec instructions brief --change <name>`). Fill `Confirmation` with the user's `human:<login>` and the approval time in ISO 8601 with offset, and only because they approved.
+7. **Write `brief.md` only after approval,** from the schema template (`openspec instructions brief --change <name>`). Fill `Confirmation` with `human:<login>` and the approval time in ISO 8601 with offset, and only because they approved. Ask the user to state their login as part of approving; never take it from earlier briefs or the git config.
 
 Then run `node scripts/specfold.mjs change check <change>`. Only the brief rules matter at this point.
 

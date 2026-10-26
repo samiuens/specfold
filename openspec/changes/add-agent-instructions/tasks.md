@@ -65,7 +65,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 5.1 Make the planner, `sf-interview` and `sf-plan` ask the user to state their login when approving, never take it from earlier files (found in the Claude Code run)
+- [x] 5.1 Make the planner, `sf-interview` and `sf-plan` ask the user to state their login when approving, never take it from earlier files (found in the Claude Code run)
   - Done when: the three files say so in the template, and the kit and sample copies match it
 
 ## 6. Knowledge
