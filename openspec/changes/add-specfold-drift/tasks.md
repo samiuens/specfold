@@ -35,7 +35,7 @@ scenarios: [specfold-drift#nothing-drifted, specfold-drift#json-report]
 agent: implementer
 ```
 
-- [ ] 3.1 Add `specfold drift` with human and JSON output
+- [x] 3.1 Add `specfold drift` with human and JSON output
   - Done when: scenarios nothing-drifted and json-report pass in `drift-command.test.ts`
 
 ## 4. Lookup flag
