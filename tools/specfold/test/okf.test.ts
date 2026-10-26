@@ -138,3 +138,35 @@ describe("validate: OKF-3", () => {
     expect(out.findings).toEqual([expect.objectContaining({ rule: "OKF-3", path: "log.md", line: 1 })]);
   });
 });
+
+describe("validate: OKF-only mode", () => {
+  // spec: specfold-validate#plain-okf-bundle-passes
+  it("accepts a plain OKF bundle without specfold.yaml", async () => {
+    const dir = tempDir();
+    writeFileSync(
+      join(dir, "metric.md"),
+      "---\ntype: Metric Of Unknown Kind\nowner: data\n---\n\nSee [missing](/nowhere.md).\n",
+    );
+    writeFileSync(join(dir, "index.md"), "# Metrics\n\n* [Metric](metric.md)\n");
+    const result = await run(["validate", "--okf-only", "--bundle", "."], dir);
+    expect(result).toMatchObject({ code: 0, stdout: "2 files checked: 0 errors, 0 warnings\n" });
+  });
+
+  it("does not read specfold.yaml", async () => {
+    const repo = tempDir("valid");
+    writeFileSync(join(repo, "specfold.yaml"), "types: [unclosed\n");
+    expect((await run(["validate", "--okf-only"], repo)).code).toBe(0);
+    expect((await run(["validate"], repo)).code).toBe(2);
+  });
+
+  // spec: specfold-validate#errors-present
+  it("exits with 1 when an error is found", async () => {
+    const repo = tempDir("valid");
+    write(repo, "decisions/term.md", "# Term\n");
+    const result = await run(["validate", "--okf-only"], repo);
+    expect(result.code).toBe(1);
+    expect(result.stdout).toBe(
+      "decisions/term.md:1 OKF-1 missing YAML frontmatter\n9 files checked: 1 error, 0 warnings\n",
+    );
+  });
+});

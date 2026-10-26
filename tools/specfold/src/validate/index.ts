@@ -17,6 +17,8 @@ export interface RuleContext {
 export type Rule = (file: ParsedFile, ctx: RuleContext) => Finding[];
 
 const okfRules: Rule[] = [okf1, okf2, okf3Index, okf3Log];
+/** Profile and link rules; they only run without --okf-only. */
+const profileRules: Rule[] = [];
 
 export interface ValidateInput {
   bundleRoot: string;
@@ -50,7 +52,7 @@ export function validate(input: ValidateInput): ValidateResult {
     entries,
     ...(input.config ? { config: input.config } : {}),
   };
-  const rules = okfRules;
+  const rules = input.okfOnly ? okfRules : [...okfRules, ...profileRules];
   const findings: Finding[] = [];
   for (const rel of [...selected].sort()) {
     const file = parseFile(input.bundleRoot, rel);
