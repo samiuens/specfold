@@ -27,7 +27,7 @@ scenarios: [specfold-gate#uncommitted-file-counts-locally]
 agent: implementer
 ```
 
-- [ ] 2.1 Compute changed files, touched changes and archived changes against a base
+- [x] 2.1 Compute changed files, touched changes and archived changes against a base
   - Done when: scenario uncommitted-file-counts-locally passes in `gate-diff.test.ts`
 
 ## 3. Rules

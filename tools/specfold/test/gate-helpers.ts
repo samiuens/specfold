@@ -1,0 +1,48 @@
+import { execFileSync } from "node:child_process";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { tempDir } from "./helpers.ts";
+
+export const git = (root: string, ...args: string[]) =>
+  execFileSync("git", ["-c", "user.name=Test", "-c", "user.email=test@example.com", ...args], {
+    cwd: root,
+    encoding: "utf8",
+  });
+
+export const write = (root: string, rel: string, content: string) => {
+  mkdirSync(dirname(join(root, rel)), { recursive: true });
+  writeFileSync(join(root, rel), content);
+};
+
+export function commit(root: string, files: Record<string, string>, message = "work"): void {
+  for (const [rel, content] of Object.entries(files)) write(root, rel, content);
+  git(root, "add", "-A");
+  git(root, "commit", "-q", "--allow-empty", "-m", message);
+}
+
+export const FRESH = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().replace(/\.\d+Z$/, "Z");
+
+export const concept = (type: string, body: string, extra = "") =>
+  `---\ntype: ${type}\ntitle: ${type}\ndescription: A ${type.toLowerCase()}.\nstatus: draft\ngenerated: { by: x/y, at: ${FRESH} }${extra}\n---\n\n${body}\n`;
+
+/**
+ * A repository on branch `work`, branched from `main`, with a clean bundle of two linked
+ * concepts and generated indexes. `src/**` are source files.
+ */
+export function gateRepo(files: Record<string, string> = {}): string {
+  const root = tempDir();
+  git(root, "init", "-q", "-b", "main");
+  commit(
+    root,
+    {
+      "specfold.yaml": "types: [Term, Decision, Reference, Capability]\nsource_globs: ['src/**']\n",
+      "src/app.ts": "export const app = 1;\n",
+      "knowledge/domain/a.md": concept("Term", "See [b](/domain/b.md)."),
+      "knowledge/domain/b.md": concept("Term", "See [a](/domain/a.md)."),
+      ...files,
+    },
+    "base",
+  );
+  git(root, "checkout", "-q", "-b", "work");
+  return root;
+}
