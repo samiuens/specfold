@@ -47,6 +47,7 @@ function setup(knowledge: string | undefined) {
     requires: {},
     tasks: { maxFilesPerTask: 5, maxTasksPerGroup: 8 },
     agentTargets: [".claude/skills"],
+    unverifiedAfterDays: 30,
   };
   return { root, dir, config };
 }
