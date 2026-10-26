@@ -90,6 +90,48 @@ describe("lookup: command", () => {
     ]);
   });
 
+  // spec: specfold-lookup#vision-always-shown
+  it("appends every vision after the results", async () => {
+    const repo = tempDir("valid");
+    concept(repo, "vision/product.md", "type: Vision\ntitle: Product\ndescription: Where it goes.");
+    const out = (await run(["lookup", "rotate"], repo)).stdout.split("\n");
+    expect(out.slice(-3)).toEqual([
+      "vision and open commitments:",
+      "knowledge/vision/product.md - Product: Where it goes. [unverified]",
+      "",
+    ]);
+    expect((await run(["lookup", "nothing-matches-this"], repo)).stdout).toBe(
+      "no matches\nvision and open commitments:\nknowledge/vision/product.md - Product: Where it goes. [unverified]\n",
+    );
+  });
+
+  // spec: specfold-lookup#matching-commitment
+  it("adds open commitments any query word matches, never twice", async () => {
+    const repo = tempDir("valid");
+    concept(
+      repo,
+      "commitments/eu.md",
+      "type: Deferred Commitment\ntitle: Keep checkout EU-hostable\nstate: open",
+    );
+    concept(
+      repo,
+      "commitments/old.md",
+      "type: Deferred Commitment\ntitle: Checkout in cash\nstate: withdrawn",
+    );
+    concept(repo, "commitments/sso.md", "type: Deferred Commitment\ntitle: Single sign-on\nstate: open");
+    const block = async (q: string) =>
+      JSON.parse((await run(["lookup", ...q.split(" "), "--json"], repo)).stdout) as {
+        results: { path: string }[];
+        context: { path: string }[];
+      };
+    const one = await block("checkout");
+    expect(one.results.map((r) => r.path)).toContain("knowledge/commitments/eu.md");
+    expect(one.context).toEqual([]);
+    const two = await block("rotate hostable");
+    expect(two.results).toEqual([]);
+    expect(two.context.map((r) => r.path)).toEqual(["knowledge/commitments/eu.md"]);
+  });
+
   it("prints paths relative to the repository root from a subdirectory", async () => {
     const repo = tempDir("valid");
     const result = await run(["lookup", "rotate"], join(repo, "knowledge", "runbooks"));
@@ -128,6 +170,7 @@ describe("lookup: command", () => {
           flags: [],
         },
       ],
+      context: [],
     });
   });
 });
