@@ -7,6 +7,8 @@ export interface Io {
   cwd: string;
   stdout: (text: string) => void;
   stderr: (text: string) => void;
+  /** Reads all of stdin; absent when the caller has none to offer. */
+  readStdin?: () => Promise<string>;
 }
 
 export interface CommandContext {

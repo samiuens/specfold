@@ -9,7 +9,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Give commands an optional stdin reader
+- [x] 1.1 Give commands an optional stdin reader
   - Done when: `npm test -w specfold` passes with `run()` accepting stdin
 - [ ] 1.2 Read `hooks.extra` from the settings
   - Done when: `repo.test.ts` covers an empty and a configured `hooks.extra`
