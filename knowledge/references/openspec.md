@@ -3,7 +3,7 @@ type: Reference
 title: OpenSpec 1.15
 description: How OpenSpec 1.15.0 init, custom schemas, config and archive behave, as tested hands-on on 2026-10-26.
 status: draft
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T02:10:00+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T12:51:43+01:00 }
 stale_after: 2026-11-25T00:00:00+01:00
 sources:
   - id: customization
@@ -34,6 +34,9 @@ Tested with `@fission-ai/openspec` 1.15.0 on Node 24. Node floor is 20.19; 1.15.
 - `requires` is advisory: `status` shows artifacts as blocked, but `instructions` still renders them with a warning. An artifact counts as done once its file exists. The order of `artifacts:` breaks ties between ready artifacts.
 - A custom first artifact (`brief`, `requires: []`) works; `proposal` then shows `blocked by: brief`.
 - `openspec validate --strict` ignores custom artifacts.
+- Every change pins its schema in `.openspec.yaml` (`schema` is required; without it `status` and `instructions` fail with "Invalid metadata"). `openspec new change <name>` writes the config's default schema, so switching `schema:` in `config.yaml` leaves existing changes on their old schema.
+- `status` and `instructions` work but are not listed in `openspec --help`.
+- The fork lands in the nearest folder holding `openspec/`, so running it inside `template/` writes `template/openspec/schemas/<name>/`.
 
 # Config
 
