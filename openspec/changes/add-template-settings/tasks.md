@@ -37,7 +37,7 @@ agent: implementer
 
 - [x] 3.1 Set up `examples/sample-app` from `template/` with a tiny to-do library and its tests
   - Done when: `node --test` and `specfold validate` pass in `examples/sample-app`
-- [ ] 3.2 Plan the change `add-due-dates`: brief, proposal, spec, design, knowledge and tasks
+- [x] 3.2 Plan the change `add-due-dates`: brief, proposal, spec, design, knowledge and tasks
   - Done when: `specfold change check add-due-dates` reports only the open confirmation in the sample
 - [ ] 3.3 Apply `add-due-dates` task by task, then archive and sync it
   - Done when: `specfold validate`, `openspec validate --all --strict` and `node --test` pass and `specfold sync add-due-dates --dry-run` reports nothing to change
