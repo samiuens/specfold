@@ -51,7 +51,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 4.1 Link the template's skills with `specfold agents sync`
+- [x] 4.1 Link the template's skills with `specfold agents sync`
   - Done when: `node ../scripts/specfold.mjs agents sync --check` exits 0 in `template/`
 - [ ] 4.2 Copy the skills and the planner into the kit and link them
   - Done when: `node scripts/specfold.mjs agents sync --check` exits 0 and `diff -r` finds no difference to the template
