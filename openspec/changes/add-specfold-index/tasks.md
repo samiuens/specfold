@@ -9,7 +9,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Add the glob matcher and the repository file walk
+- [x] 1.1 Add the glob matcher and the repository file walk
   - Done when: `glob.test.ts` covers `**` matching zero segments, `*`, `?`, braces and the skipped folders
 
 ## 2. Index generation
