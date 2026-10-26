@@ -3,7 +3,7 @@ type: Convention
 title: Test fixtures and spec traceability
 description: How CLI tests use one valid fixture with a single mutation per test, pinned vendored samples, and spec scenario references.
 status: draft
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T11:30:00+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T10:12:57+01:00 }
 sources:
   - id: helpers
     resource: ../../tools/specfold/test/helpers.ts

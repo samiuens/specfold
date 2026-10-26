@@ -6,7 +6,7 @@ status: draft
 change: 2026-10-26-add-specfold-validate
 resource: ../../openspec/specs/specfold-validate/spec.md
 spec: openspec/specs/specfold-validate/spec.md
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T11:30:00+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T10:13:17+01:00 }
 sources:
   - id: proposal
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-validate/proposal.md

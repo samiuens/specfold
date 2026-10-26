@@ -3,7 +3,7 @@ type: Component
 title: specfold CLI
 description: How the specfold CLI is structured, built and shipped as one bundled file.
 status: draft
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T13:00:00+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T11:35:58+01:00 }
 sources:
   - id: source
     resource: ../../tools/specfold/src/cli.ts
