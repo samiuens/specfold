@@ -35,7 +35,7 @@ scenarios: [specfold-trace#fully-covered, specfold-trace#unknown-change, specfol
 agent: implementer
 ```
 
-- [ ] 3.1 Add `specfold trace` with human and JSON output
+- [x] 3.1 Add `specfold trace` with human and JSON output
   - Done when: scenarios fully-covered, unknown-change and json-report pass in `trace-command.test.ts`
 
 ## 4. Gate rule G15
