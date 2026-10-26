@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { openspecBinary } from "../openspec.ts";
 import { type Config, findRepoRoot, loadConfig } from "../repo.ts";
 
 export type Status = "ok" | "warn" | "fail";
@@ -111,10 +112,10 @@ export function runChecks(env: DoctorEnv): Check[] {
   }
 
   const range = config?.requires.openspec ?? DEFAULT_OPENSPEC_RANGE;
-  const local = root ? join(root, "node_modules", ".bin", "openspec") : undefined;
-  const useLocal = local !== undefined && existsSync(local);
-  const source = useLocal ? "node_modules/.bin" : "PATH";
-  const openspec = firstVersion(env.exec(useLocal ? local : "openspec", ["--version"], env.cwd));
+  const binary = openspecBinary(root);
+  const useLocal = binary.source === "node_modules/.bin";
+  const source = binary.source;
+  const openspec = firstVersion(env.exec(binary.command, ["--version"], env.cwd));
   if (!openspec) {
     checks.push({
       id: "D3",

@@ -11,7 +11,7 @@ agent: implementer
 
 - [x] 1.1 Move the git runner to `src/git.ts`
   - Done when: `npm test -w specfold` passes with the tasks git tests unchanged
-- [ ] 1.2 Share the OpenSpec binary lookup between doctor and gate
+- [x] 1.2 Share the OpenSpec binary lookup between doctor and gate
   - Done when: `npm test -w specfold` passes with the doctor tests unchanged
 - [ ] 1.3 Read the gate settings with their defaults
   - Done when: `repo.test.ts` covers the defaults and configured values
