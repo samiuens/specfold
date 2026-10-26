@@ -34,5 +34,11 @@ export function createTodoList() {
     list({ done } = {}) {
       return items.filter((i) => done === undefined || i.done === done).map((i) => ({ ...i }));
     },
+
+    /** Open items due strictly before `today` (`YYYY-MM-DD`), in insertion order. */
+    overdue(today) {
+      if (!isCalendarDate(today)) throw new TypeError(`today must be a YYYY-MM-DD date, got ${today}`);
+      return items.filter((i) => !i.done && i.due !== null && i.due < today).map((i) => ({ ...i }));
+    },
   };
 }

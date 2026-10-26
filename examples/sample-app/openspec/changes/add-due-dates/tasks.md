@@ -21,7 +21,7 @@ scenarios: [due-dates#overdue-items, due-dates#done-items-are-not-overdue, due-d
 agent: implementer
 ```
 
-- [ ] 2.1 Add `overdue(today)`
+- [x] 2.1 Add `overdue(today)`
   - Done when: the three scenarios of this group pass in `test/overdue.test.js`
 
 ## 3. Knowledge
