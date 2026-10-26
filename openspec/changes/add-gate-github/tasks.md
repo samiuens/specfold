@@ -3,13 +3,13 @@
 ## 1. Claims
 
 ```yaml
-files: [tools/specfold/src/gate/claims.ts, tools/specfold/test/gate-claims.test.ts]
+files: [tools/specfold/src/gate/claims.ts, tools/specfold/src/bundle.ts, tools/specfold/test/gate-claims.test.ts]
 depends: []
 scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Find the human claims a branch adds to concepts and briefs
+- [x] 1.1 Find the human claims a branch adds to concepts and briefs
   - Done when: `gate-claims.test.ts` covers added, unchanged and list-form `verified` claims and `confirmed_by`
 
 ## 2. GitHub
