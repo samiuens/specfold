@@ -4001,10 +4001,10 @@ var require_resolve_block_map = __commonJS({
       let offset = bm.offset;
       let commentEnd = null;
       for (const collItem of bm.items) {
-        const { start, key, sep: sep11, value } = collItem;
+        const { start, key, sep: sep12, value } = collItem;
         const keyProps = resolveProps.resolveProps(start, {
           indicator: "explicit-key-ind",
-          next: key ?? sep11?.[0],
+          next: key ?? sep12?.[0],
           offset,
           onError,
           parentIndent: bm.indent,
@@ -4018,7 +4018,7 @@ var require_resolve_block_map = __commonJS({
             else if ("indent" in key && key.indent !== bm.indent)
               onError(offset, "BAD_INDENT", startColMsg);
           }
-          if (!keyProps.anchor && !keyProps.tag && !sep11) {
+          if (!keyProps.anchor && !keyProps.tag && !sep12) {
             commentEnd = keyProps.end;
             if (keyProps.comment) {
               if (map.comment)
@@ -4042,7 +4042,7 @@ var require_resolve_block_map = __commonJS({
         ctx.atKey = false;
         if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
           onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
-        const valueProps = resolveProps.resolveProps(sep11 ?? [], {
+        const valueProps = resolveProps.resolveProps(sep12 ?? [], {
           indicator: "map-value-ind",
           next: value,
           offset: keyNode.range[2],
@@ -4058,7 +4058,7 @@ var require_resolve_block_map = __commonJS({
             if (ctx.options.strict && keyProps.start < valueProps.found.offset - 1024)
               onError(keyNode.range, "KEY_OVER_1024_CHARS", "The : indicator must be at most 1024 chars after the start of an implicit block mapping key");
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep11, null, valueProps, onError);
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep12, null, valueProps, onError);
           if (ctx.schema.compat)
             utilFlowIndentCheck.flowIndentCheck(bm.indent, value, onError);
           offset = valueNode.range[2];
@@ -4149,7 +4149,7 @@ var require_resolve_end = __commonJS({
       let comment = "";
       if (end) {
         let hasSpace = false;
-        let sep11 = "";
+        let sep12 = "";
         for (const token of end) {
           const { source, type } = token;
           switch (type) {
@@ -4163,13 +4163,13 @@ var require_resolve_end = __commonJS({
               if (!comment)
                 comment = cb;
               else
-                comment += sep11 + cb;
-              sep11 = "";
+                comment += sep12 + cb;
+              sep12 = "";
               break;
             }
             case "newline":
               if (comment)
-                sep11 += source;
+                sep12 += source;
               hasSpace = true;
               break;
             default:
@@ -4212,18 +4212,18 @@ var require_resolve_flow_collection = __commonJS({
       let offset = fc.offset + fc.start.source.length;
       for (let i = 0; i < fc.items.length; ++i) {
         const collItem = fc.items[i];
-        const { start, key, sep: sep11, value } = collItem;
+        const { start, key, sep: sep12, value } = collItem;
         const props = resolveProps.resolveProps(start, {
           flow: fcName,
           indicator: "explicit-key-ind",
-          next: key ?? sep11?.[0],
+          next: key ?? sep12?.[0],
           offset,
           onError,
           parentIndent: fc.indent,
           startOnNewline: false
         });
         if (!props.found) {
-          if (!props.anchor && !props.tag && !sep11 && !value) {
+          if (!props.anchor && !props.tag && !sep12 && !value) {
             if (i === 0 && props.comma)
               onError(props.comma, "UNEXPECTED_TOKEN", `Unexpected , in ${fcName}`);
             else if (i < fc.items.length - 1)
@@ -4277,8 +4277,8 @@ var require_resolve_flow_collection = __commonJS({
             }
           }
         }
-        if (!isMap2 && !sep11 && !props.found) {
-          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep11, null, props, onError);
+        if (!isMap2 && !sep12 && !props.found) {
+          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep12, null, props, onError);
           coll.items.push(valueNode);
           offset = valueNode.range[2];
           if (isBlock(value))
@@ -4290,7 +4290,7 @@ var require_resolve_flow_collection = __commonJS({
           if (isBlock(key))
             onError(keyNode.range, "BLOCK_IN_FLOW", blockMsg);
           ctx.atKey = false;
-          const valueProps = resolveProps.resolveProps(sep11 ?? [], {
+          const valueProps = resolveProps.resolveProps(sep12 ?? [], {
             flow: fcName,
             indicator: "map-value-ind",
             next: value,
@@ -4301,8 +4301,8 @@ var require_resolve_flow_collection = __commonJS({
           });
           if (valueProps.found) {
             if (!isMap2 && !props.found && ctx.options.strict) {
-              if (sep11)
-                for (const st of sep11) {
+              if (sep12)
+                for (const st of sep12) {
                   if (st === valueProps.found)
                     break;
                   if (st.type === "newline") {
@@ -4319,7 +4319,7 @@ var require_resolve_flow_collection = __commonJS({
             else
               onError(valueProps.start, "MISSING_CHAR", `Missing , or : between ${fcName} items`);
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep11, null, valueProps, onError) : null;
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep12, null, valueProps, onError) : null;
           if (valueNode) {
             if (isBlock(value))
               onError(valueNode.range, "BLOCK_IN_FLOW", blockMsg);
@@ -4499,7 +4499,7 @@ var require_resolve_block_scalar = __commonJS({
           chompStart = i + 1;
       }
       let value = "";
-      let sep11 = "";
+      let sep12 = "";
       let prevMoreIndented = false;
       for (let i = 0; i < contentStart; ++i)
         value += lines2[i][0].slice(trimIndent) + "\n";
@@ -4516,24 +4516,24 @@ var require_resolve_block_scalar = __commonJS({
           indent = "";
         }
         if (type === Scalar.Scalar.BLOCK_LITERAL) {
-          value += sep11 + indent.slice(trimIndent) + content;
-          sep11 = "\n";
+          value += sep12 + indent.slice(trimIndent) + content;
+          sep12 = "\n";
         } else if (indent.length > trimIndent || content[0] === "	") {
-          if (sep11 === " ")
-            sep11 = "\n";
-          else if (!prevMoreIndented && sep11 === "\n")
-            sep11 = "\n\n";
-          value += sep11 + indent.slice(trimIndent) + content;
-          sep11 = "\n";
+          if (sep12 === " ")
+            sep12 = "\n";
+          else if (!prevMoreIndented && sep12 === "\n")
+            sep12 = "\n\n";
+          value += sep12 + indent.slice(trimIndent) + content;
+          sep12 = "\n";
           prevMoreIndented = true;
         } else if (content === "") {
-          if (sep11 === "\n")
+          if (sep12 === "\n")
             value += "\n";
           else
-            sep11 = "\n";
+            sep12 = "\n";
         } else {
-          value += sep11 + content;
-          sep11 = " ";
+          value += sep12 + content;
+          sep12 = " ";
           prevMoreIndented = false;
         }
       }
@@ -4716,25 +4716,25 @@ var require_resolve_flow_scalar = __commonJS({
         trimBoth = /^[ \t]+|[ \t]+$/g;
       }
       let res = match[1].replace(trimEnd, "");
-      let sep11 = " ";
+      let sep12 = " ";
       let pos = line.lastIndex;
       while (match = line.exec(source)) {
         const lm = match[1].replace(trimBoth, "");
         if (lm === "") {
-          if (sep11 === "\n")
-            res += sep11;
+          if (sep12 === "\n")
+            res += sep12;
           else
-            sep11 = "\n";
+            sep12 = "\n";
         } else {
-          res += sep11 + lm;
-          sep11 = " ";
+          res += sep12 + lm;
+          sep12 = " ";
         }
         pos = line.lastIndex;
       }
       const last = /[ \t]*(.*)/sy;
       last.lastIndex = pos;
       match = last.exec(source);
-      return res + sep11 + (match?.[1] ?? "");
+      return res + sep12 + (match?.[1] ?? "");
     }
     function doubleQuotedValue(source, onError) {
       let res = "";
@@ -5544,14 +5544,14 @@ var require_cst_stringify = __commonJS({
         }
       }
     }
-    function stringifyItem({ start, key, sep: sep11, value }) {
+    function stringifyItem({ start, key, sep: sep12, value }) {
       let res = "";
       for (const st of start)
         res += st.source;
       if (key)
         res += stringifyToken(key);
-      if (sep11)
-        for (const st of sep11)
+      if (sep12)
+        for (const st of sep12)
           res += st.source;
       if (value)
         res += stringifyToken(value);
@@ -6718,18 +6718,18 @@ var require_parser = __commonJS({
         if (this.type === "map-value-ind") {
           const prev = getPrevProps(this.peek(2));
           const start = getFirstKeyStartProps(prev);
-          let sep11;
+          let sep12;
           if (scalar2.end) {
-            sep11 = scalar2.end;
-            sep11.push(this.sourceToken);
+            sep12 = scalar2.end;
+            sep12.push(this.sourceToken);
             delete scalar2.end;
           } else
-            sep11 = [this.sourceToken];
+            sep12 = [this.sourceToken];
           const map = {
             type: "block-map",
             offset: scalar2.offset,
             indent: scalar2.indent,
-            items: [{ start, key: scalar2, sep: sep11 }]
+            items: [{ start, key: scalar2, sep: sep12 }]
           };
           this.onKeyLine = true;
           this.stack[this.stack.length - 1] = map;
@@ -6882,15 +6882,15 @@ var require_parser = __commonJS({
                 } else if (isFlowToken(it.key) && !includesToken(it.sep, "newline")) {
                   const start2 = getFirstKeyStartProps(it.start);
                   const key = it.key;
-                  const sep11 = it.sep;
-                  sep11.push(this.sourceToken);
+                  const sep12 = it.sep;
+                  sep12.push(this.sourceToken);
                   delete it.key;
                   delete it.sep;
                   this.stack.push({
                     type: "block-map",
                     offset: this.offset,
                     indent: this.indent,
-                    items: [{ start: start2, key, sep: sep11 }]
+                    items: [{ start: start2, key, sep: sep12 }]
                   });
                 } else if (start.length > 0) {
                   it.sep = it.sep.concat(start, this.sourceToken);
@@ -7084,13 +7084,13 @@ var require_parser = __commonJS({
             const prev = getPrevProps(parent);
             const start = getFirstKeyStartProps(prev);
             fixFlowSeqItems(fc);
-            const sep11 = fc.end.splice(1, fc.end.length);
-            sep11.push(this.sourceToken);
+            const sep12 = fc.end.splice(1, fc.end.length);
+            sep12.push(this.sourceToken);
             const map = {
               type: "block-map",
               offset: fc.offset,
               indent: fc.indent,
-              items: [{ start, key: fc, sep: sep11 }]
+              items: [{ start, key: fc, sep: sep12 }]
             };
             this.onKeyLine = true;
             this.stack[this.stack.length - 1] = map;
@@ -7723,7 +7723,10 @@ function keyLines(doc, counter) {
   return lines2;
 }
 function parseFile(bundleRoot, rel) {
-  const text2 = readFileSync2(join3(bundleRoot, rel), "utf8").replace(/\r\n/g, "\n");
+  return parseText(rel, readFileSync2(join3(bundleRoot, rel), "utf8"));
+}
+function parseText(rel, raw) {
+  const text2 = raw.replace(/\r\n/g, "\n");
   const lines2 = text2.split("\n");
   if (lines2[0] !== "---") return { rel, hasFrontmatter: false, body: text2, bodyStartLine: 1 };
   const end = lines2.findIndex((line, i) => i > 0 && (line === "---" || line === "..."));
@@ -9673,7 +9676,7 @@ register({
 });
 
 // src/gate/command.ts
-import { existsSync as existsSync22, readFileSync as readFileSync15 } from "node:fs";
+import { existsSync as existsSync23, readFileSync as readFileSync16 } from "node:fs";
 import { resolve as resolve4 } from "node:path";
 
 // src/gate/diff.ts
@@ -9718,9 +9721,63 @@ function computeDiff(root, ref, local) {
   };
 }
 
+// src/gate/github.ts
+var PAGE = 100;
+var IGNORED = /* @__PURE__ */ new Set(["COMMENTED", "PENDING"]);
+var githubEnv = (env = process.env) => ({
+  token: env.GITHUB_TOKEN,
+  repository: env.GITHUB_REPOSITORY,
+  apiUrl: env.GITHUB_API_URL
+});
+function approvers(reviews) {
+  const latest = /* @__PURE__ */ new Map();
+  for (const r of reviews) {
+    const login = r.user?.login;
+    if (typeof login !== "string" || typeof r.state !== "string" || IGNORED.has(r.state)) continue;
+    latest.set(login.toLowerCase(), r.state);
+  }
+  return [...latest].filter(([, state]) => state === "APPROVED").map(([login]) => login);
+}
+async function fetchPullRequest(env, number) {
+  if (!env.token) throw new EnvError("GITHUB_TOKEN is required for --pr");
+  if (!env.repository || !/^[^/\s]+\/[^/\s]+$/.test(env.repository))
+    throw new EnvError("GITHUB_REPOSITORY (owner/repo) is required for --pr");
+  const base = (env.apiUrl || "https://api.github.com").replace(/\/+$/, "");
+  const get = async (path) => {
+    let response;
+    try {
+      response = await fetch(`${base}${path}`, {
+        headers: {
+          Accept: "application/vnd.github+json",
+          Authorization: `Bearer ${env.token}`,
+          "X-GitHub-Api-Version": "2022-11-28",
+          "User-Agent": "specfold-gate"
+        }
+      });
+    } catch (error) {
+      throw new EnvError(`GitHub request GET ${path} failed: ${error.message}`);
+    }
+    if (!response.ok)
+      throw new EnvError(`GitHub request GET ${path} failed: ${response.status} ${response.statusText}`);
+    return response.json();
+  };
+  const pull = await get(`/repos/${env.repository}/pulls/${number}`);
+  const author = pull.user?.login;
+  if (typeof author !== "string") throw new EnvError(`GitHub returned no author for pull request ${number}`);
+  const reviews = [];
+  for (let page = 1; ; page++) {
+    const batch = await get(`/repos/${env.repository}/pulls/${number}/reviews?per_page=${PAGE}&page=${page}`);
+    if (!Array.isArray(batch))
+      throw new EnvError(`GitHub returned no review list for pull request ${number}`);
+    reviews.push(...batch);
+    if (batch.length < PAGE) break;
+  }
+  return { number, author: author.toLowerCase(), approvers: approvers(reviews) };
+}
+
 // src/gate/rules.ts
-import { existsSync as existsSync21 } from "node:fs";
-import { join as join23, relative as relative10, sep as sep9 } from "node:path";
+import { existsSync as existsSync22 } from "node:fs";
+import { join as join24, relative as relative11, sep as sep10 } from "node:path";
 
 // src/indexes/command.ts
 import { existsSync as existsSync15, readFileSync as readFileSync11, writeFileSync } from "node:fs";
@@ -10208,6 +10265,53 @@ register({
   }
 });
 
+// src/gate/claims.ts
+import { existsSync as existsSync21, readFileSync as readFileSync15 } from "node:fs";
+import { join as join23, relative as relative10, sep as sep9 } from "node:path";
+var BRIEF = /^openspec\/changes\/(?:archive\/)?[^/]+\/brief\.md$/;
+var CONFIRMED_BY = /^confirmed_by:[ \t]*(\S+)/;
+function verifiedClaims(file, text2) {
+  const fm = parseText(file, text2).frontmatter;
+  if (!fm || !isRecord2(fm.data)) return [];
+  const verified = fm.data.verified;
+  const entries = Array.isArray(verified) ? verified : verified === void 0 ? [] : [verified];
+  return entries.flatMap(
+    (e) => isRecord2(e) && typeof e.by === "string" && e.by.startsWith("human:") ? [{ login: e.by.slice("human:".length), file, line: fm.lineOf("verified"), key: "verified" }] : []
+  );
+}
+function briefClaims(file, text2) {
+  const lines2 = text2.split(/\r?\n/);
+  return lines2.flatMap((l, i) => {
+    const by = CONFIRMED_BY.exec(l)?.[1];
+    return by?.startsWith("human:") ? [{ login: by.slice("human:".length), file, line: i + 1, key: "confirmed_by" }] : [];
+  });
+}
+function baseVersion(root, mergeBase, file) {
+  try {
+    return git(root, ["show", `${mergeBase}:./${file}`]);
+  } catch {
+    return void 0;
+  }
+}
+function addedClaims(root, bundleRoot, diff) {
+  const bundlePrefix = `${relative10(root, bundleRoot).split(sep9).join("/")}/`;
+  const out = [];
+  for (const file of diff.files) {
+    const abs = join23(root, file);
+    if (!existsSync21(abs)) continue;
+    let extract;
+    if (BRIEF.test(file)) extract = briefClaims;
+    else if (file.startsWith(bundlePrefix) && file.endsWith(".md") && isConcept(file.slice(bundlePrefix.length)))
+      extract = verifiedClaims;
+    if (!extract) continue;
+    const base = baseVersion(root, diff.mergeBase, file);
+    const before = new Set(base === void 0 ? [] : extract(file, base).map((c) => c.login.toLowerCase()));
+    for (const claim of extract(file, readFileSync15(abs, "utf8")))
+      if (!before.has(claim.login.toLowerCase())) out.push(claim);
+  }
+  return out;
+}
+
 // src/gate/openspec.ts
 import { spawnSync } from "node:child_process";
 function openspecValidate(root, binary) {
@@ -10247,12 +10351,12 @@ ${result.stdout}`.trim().split("\n")[0] || `exit code ${result.status}`;
 var LINK_RULES = /* @__PURE__ */ new Set(["L1", "L2"]);
 var NO_SPEC_REASON = /^No-spec reason:[ \t]*\S/m;
 function inRepo(ctx, bundleRel) {
-  const prefix = relative10(ctx.config.root, ctx.bundleRoot).split(sep9).join("/");
+  const prefix = relative11(ctx.config.root, ctx.bundleRoot).split(sep10).join("/");
   return prefix ? `${prefix}/${bundleRel}` : bundleRel;
 }
 function changedConcepts(ctx) {
-  const prefix = `${relative10(ctx.config.root, ctx.bundleRoot).split(sep9).join("/")}/`;
-  return ctx.diff.files.filter((f) => f.startsWith(prefix) && f.endsWith(".md")).map((f) => f.slice(prefix.length)).filter((rel) => isConcept(rel) && existsSync21(join23(ctx.bundleRoot, rel)));
+  const prefix = `${relative11(ctx.config.root, ctx.bundleRoot).split(sep10).join("/")}/`;
+  return ctx.diff.files.filter((f) => f.startsWith(prefix) && f.endsWith(".md")).map((f) => f.slice(prefix.length)).filter((rel) => isConcept(rel) && existsSync22(join24(ctx.bundleRoot, rel)));
 }
 var fromBundle = (ctx, rule, effect, f) => ({
   rule,
@@ -10344,7 +10448,7 @@ var g4 = (ctx) => {
   ];
 };
 var plannedChanges = (ctx) => ctx.diff.activeChanges.filter(
-  (change) => existsSync21(join23(ctx.config.root, "openspec", "changes", change, "tasks.md"))
+  (change) => existsSync22(join24(ctx.config.root, "openspec", "changes", change, "tasks.md"))
 );
 var touchedChanges = (ctx, changes = ctx.diff.activeChanges) => changes.map((change) => checkChange(ctx.config, ctx.bundleRoot, change));
 var g5 = (ctx) => touchedChanges(ctx, plannedChanges(ctx)).flatMap(
@@ -10372,6 +10476,31 @@ var g6 = (ctx) => ctx.diff.archivedChanges.flatMap((id) => {
     fix: `run specfold sync ${name} and commit the result`
   }));
 });
+var g7 = (ctx) => {
+  const claims = addedClaims(ctx.config.root, ctx.bundleRoot, ctx.diff);
+  if (claims.length === 0) return [];
+  const { pr } = ctx;
+  if (!pr)
+    return [
+      {
+        rule: "G7",
+        effect: "warn",
+        path: null,
+        line: null,
+        message: `${claims.length === 1 ? "1 human claim" : `${claims.length} human claims`} added (${claims.map((c) => `human:${c.login}`).join(", ")}); CI checks them against the PR with --pr`,
+        fix: "nothing to do locally; make sure the named people author or approve the PR"
+      }
+    ];
+  const allowed = /* @__PURE__ */ new Set([pr.author, ...pr.approvers]);
+  return claims.filter((c) => !allowed.has(c.login.toLowerCase())).map((c) => ({
+    rule: "G7",
+    effect: "block",
+    path: c.file,
+    line: c.line,
+    message: `${c.key} names human:${c.login}, who is neither the author of PR #${pr.number} nor an approving reviewer`,
+    fix: `have ${c.login} approve the PR, or remove the claim`
+  }));
+};
 function changedData(ctx) {
   return changedConcepts(ctx).flatMap((rel) => {
     const file = parseFile(ctx.bundleRoot, rel);
@@ -10412,8 +10541,8 @@ var g12 = (ctx) => auditBundle(ctx.config, ctx.bundleRoot, ctx.now).filter((f) =
 var g14 = (ctx) => {
   const changed = new Set(ctx.diff.files);
   return scanReferences(ctx.config.root, ctx.config.sourceGlobs).flatMap((ref) => {
-    const abs = join23(ctx.bundleRoot, ref.concept);
-    if (!existsSync21(abs))
+    const abs = join24(ctx.bundleRoot, ref.concept);
+    if (!existsSync22(abs))
       return [
         {
           rule: "G14",
@@ -10439,7 +10568,7 @@ var g14 = (ctx) => {
     return [];
   });
 };
-var RULES = [g1, g2, g3, g4, g5, g6, g8, g9, g10, g12, g13, g14, g18];
+var RULES = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g18];
 var compare3 = (a, b) => a < b ? -1 : a > b ? 1 : 0;
 var ruleNumber = (rule) => Number.parseInt(rule.slice(1), 10);
 function sortGateFindings(findings) {
@@ -10460,31 +10589,38 @@ function countFindings(findings) {
 register({
   name: "gate",
   summary: "decide whether a branch may merge: run the merge-gate rules on its diff",
-  usage: "specfold gate --base <ref> [--local] [--label <name>]... [--pr-body <file>] [--json]",
+  usage: "specfold gate --base <ref> [--local] [--pr <number>] [--label <name>]... [--pr-body <file>] [--json]",
   options: {
     base: { type: "string" },
     local: { type: "boolean" },
+    pr: { type: "string" },
     label: { type: "string", multiple: true },
     "pr-body": { type: "string" },
     json: { type: "boolean" }
   },
-  run: ({ io, values, positionals }) => {
+  run: async ({ io, values, positionals }) => {
     if (positionals.length > 0) throw new UsageError(`unexpected argument '${positionals[0]}'`);
     const base = values.base;
     if (!base) throw new UsageError("missing --base <ref>");
     const bodyFile = values["pr-body"];
-    if (bodyFile !== void 0 && !existsSync22(resolve4(io.cwd, bodyFile)))
+    if (bodyFile !== void 0 && !existsSync23(resolve4(io.cwd, bodyFile)))
       throw new UsageError(`PR body file not found: ${bodyFile}`);
+    const prArg = values.pr;
+    if (prArg !== void 0 && !/^[1-9]\d*$/.test(prArg))
+      throw new UsageError(`--pr must be a pull request number, got '${prArg}'`);
     const config = requireConfig(io.cwd);
     const local = values.local === true;
+    const diff = computeDiff(config.root, base, local);
+    const pr = prArg === void 0 ? void 0 : await fetchPullRequest(githubEnv(), Number(prArg));
     const findings = runGate({
       config,
       bundleRoot: resolveBundleRoot(io.cwd, void 0, config),
-      diff: computeDiff(config.root, base, local),
+      diff,
       local,
       labels: values.label ?? [],
-      prBody: bodyFile === void 0 ? void 0 : readFileSync15(resolve4(io.cwd, bodyFile), "utf8"),
+      prBody: bodyFile === void 0 ? void 0 : readFileSync16(resolve4(io.cwd, bodyFile), "utf8"),
       openspec: openspecBinary(config.root),
+      pr,
       now: /* @__PURE__ */ new Date()
     });
     const counts = countFindings(findings);
@@ -10510,8 +10646,8 @@ register({
 });
 
 // src/log/command.ts
-import { existsSync as existsSync23, readFileSync as readFileSync16, writeFileSync as writeFileSync4 } from "node:fs";
-import { join as join24 } from "node:path";
+import { existsSync as existsSync24, readFileSync as readFileSync17, writeFileSync as writeFileSync4 } from "node:fs";
+import { join as join25 } from "node:path";
 
 // src/log/insert.ts
 var DATE_HEADING = /^## (\d{4}-\d{2}-\d{2})\s*$/;
@@ -10567,9 +10703,9 @@ register({
     const date = values.date ?? localDate();
     if (!isCalendarDate2(date)) throw new UsageError(`date '${date}' is not a valid YYYY-MM-DD date`);
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, void 0);
-    const path = join24(bundleRoot, "log.md");
+    const path = join25(bundleRoot, "log.md");
     const entry = `* **${kind}**: ${message}`;
-    writeFileSync4(path, insertEntry(existsSync23(path) ? readFileSync16(path, "utf8") : void 0, date, entry));
+    writeFileSync4(path, insertEntry(existsSync24(path) ? readFileSync17(path, "utf8") : void 0, date, entry));
     io.stdout(`${entry}
 `);
     return 0;
@@ -10577,7 +10713,7 @@ register({
 });
 
 // src/lookup/command.ts
-import { relative as relative11, sep as sep10 } from "node:path";
+import { relative as relative12, sep as sep11 } from "node:path";
 
 // src/lookup/search.ts
 var WEIGHTS = { title: 3, tags: 2, description: 1, type: 1 };
@@ -10656,7 +10792,7 @@ register({
     const type = values.type;
     const hits = search(bundleRoot, query, type ? { type } : {}).slice(0, Number(limitArg));
     const results = hits.map((h) => ({
-      path: relative11(base, `${bundleRoot}${sep10}${h.rel}`).split(sep10).join("/"),
+      path: relative12(base, `${bundleRoot}${sep11}${h.rel}`).split(sep11).join("/"),
       title: h.title,
       description: h.description,
       type: h.type,
@@ -10678,19 +10814,19 @@ register({
 });
 
 // src/sync/command.ts
-import { existsSync as existsSync24, readdirSync as readdirSync5, writeFileSync as writeFileSync5 } from "node:fs";
-import { join as join25 } from "node:path";
+import { existsSync as existsSync25, readdirSync as readdirSync5, writeFileSync as writeFileSync5 } from "node:fs";
+import { join as join26 } from "node:path";
 var NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 var ARCHIVED2 = /^(\d{4}-\d{2}-\d{2})-([a-z0-9]+(?:-[a-z0-9]+)*)$/;
 function resolveArchived(config, arg) {
   if (!arg) throw new UsageError("missing change name");
-  const archive = join25(config.root, "openspec", "changes", "archive");
-  if (ARCHIVED2.test(arg) && existsSync24(join25(archive, arg))) return arg;
+  const archive = join26(config.root, "openspec", "changes", "archive");
+  if (ARCHIVED2.test(arg) && existsSync25(join26(archive, arg))) return arg;
   if (!NAME.test(arg)) throw new UsageError(`'${arg}' is not a change name or archived change id`);
-  const ids = existsSync24(archive) ? readdirSync5(archive).filter((d) => ARCHIVED2.exec(d)?.[2] === arg).sort() : [];
+  const ids = existsSync25(archive) ? readdirSync5(archive).filter((d) => ARCHIVED2.exec(d)?.[2] === arg).sort() : [];
   const newest = ids.at(-1);
   if (newest) return newest;
-  if (existsSync24(join25(config.root, "openspec", "changes", arg)))
+  if (existsSync25(join26(config.root, "openspec", "changes", arg)))
     throw new EnvError(`change '${arg}' is not archived yet: run 'openspec archive ${arg}' first`);
   throw new EnvError(`unknown change '${arg}': no archived folder openspec/changes/archive/<date>-${arg}/`);
 }
@@ -10747,8 +10883,8 @@ register({
 });
 
 // src/tasks/progress-command.ts
-import { existsSync as existsSync25, readdirSync as readdirSync6, readFileSync as readFileSync17 } from "node:fs";
-import { join as join26 } from "node:path";
+import { existsSync as existsSync26, readdirSync as readdirSync6, readFileSync as readFileSync18 } from "node:fs";
+import { join as join27 } from "node:path";
 
 // src/tasks/progress.ts
 function progressOf(tasks) {
@@ -10772,12 +10908,12 @@ function progressOf(tasks) {
 
 // src/tasks/progress-command.ts
 function readTasks(config, change) {
-  const path = join26(changeDir(config, change), "tasks.md");
-  return existsSync25(path) ? parseTasks(readFileSync17(path, "utf8")) : void 0;
+  const path = join27(changeDir(config, change), "tasks.md");
+  return existsSync26(path) ? parseTasks(readFileSync18(path, "utf8")) : void 0;
 }
 function activeChanges(config) {
-  const dir = join26(config.root, "openspec", "changes");
-  if (!existsSync25(dir)) return [];
+  const dir = join27(config.root, "openspec", "changes");
+  if (!existsSync26(dir)) return [];
   return readdirSync6(dir, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort();
 }
 function commitsByTask(config, change) {
