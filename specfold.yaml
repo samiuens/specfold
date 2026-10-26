@@ -37,3 +37,9 @@ types:
 
 actors:
   agent_prefix: "claude-code/"
+
+# Kit repo only: run by `specfold hook commit-msg` from M4 on; until then .githooks/commit-msg runs it.
+hooks:
+  extra:
+    commit-msg:
+      - node scripts/check-commit.mjs --message-file "$1"

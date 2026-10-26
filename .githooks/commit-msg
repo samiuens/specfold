@@ -1,0 +1,3 @@
+#!/bin/sh
+# Interim kit-repo hook until `specfold hook` ships (M4); then specfold.yaml hooks.extra runs the same check.
+exec node scripts/check-commit.mjs --message-file "$1"
