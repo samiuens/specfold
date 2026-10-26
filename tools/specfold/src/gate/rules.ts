@@ -1,4 +1,7 @@
-import { relative, sep } from "node:path";
+import { existsSync } from "node:fs";
+import { join, relative, sep } from "node:path";
+import { auditBundle } from "../audit/rules.ts";
+import { parseFile } from "../bundle.ts";
 import { checkChange } from "../change/command.ts";
 import { EnvError } from "../errors.ts";
 import type { Finding } from "../findings.ts";
@@ -12,6 +15,8 @@ import { planSync } from "../sync/plan.ts";
 import { checkChangeTasks } from "../tasks/command.ts";
 import type { TaskFinding } from "../tasks/rules.ts";
 import { validate } from "../validate/index.ts";
+import { isConcept, isRecord } from "../validate/okf.ts";
+import { isTimestamp } from "../validate/profile.ts";
 import type { GateDiff } from "./diff.ts";
 import { openspecValidate } from "./openspec.ts";
 
@@ -49,6 +54,15 @@ const NO_SPEC_REASON = /^No-spec reason:[ \t]*\S/m;
 function inRepo(ctx: GateContext, bundleRel: string): string {
   const prefix = relative(ctx.config.root, ctx.bundleRoot).split(sep).join("/");
   return prefix ? `${prefix}/${bundleRel}` : bundleRel;
+}
+
+/** Bundle-relative paths of changed concepts that still exist. */
+function changedConcepts(ctx: GateContext): string[] {
+  const prefix = `${relative(ctx.config.root, ctx.bundleRoot).split(sep).join("/")}/`;
+  return ctx.diff.files
+    .filter((f) => f.startsWith(prefix) && f.endsWith(".md"))
+    .map((f) => f.slice(prefix.length))
+    .filter((rel) => isConcept(rel) && existsSync(join(ctx.bundleRoot, rel)));
 }
 
 const fromBundle = (ctx: GateContext, rule: string, effect: Effect, f: Finding): GateFinding => ({
@@ -196,13 +210,94 @@ export const g6: GateRule = (ctx) =>
     }));
   });
 
+/** Frontmatter of every changed concept. */
+function changedData(ctx: GateContext) {
+  return changedConcepts(ctx).flatMap((rel) => {
+    const file = parseFile(ctx.bundleRoot, rel);
+    const data = file.frontmatter?.data;
+    return isRecord(data) ? [{ rel, data, lineOf: (k: string) => file.frontmatter?.lineOf(k) ?? null }] : [];
+  });
+}
+
+/** G8: no changed concept names a human as its generator. */
+export const g8: GateRule = (ctx) =>
+  changedData(ctx).flatMap(({ rel, data, lineOf }) => {
+    const by = isRecord(data.generated) ? data.generated.by : undefined;
+    if (typeof by !== "string" || !by.startsWith("human:")) return [];
+    return [
+      {
+        rule: "G8",
+        effect: "block" as const,
+        path: inRepo(ctx, rel),
+        line: lineOf("generated"),
+        message: `generated.by is the human actor '${by}'`,
+        fix: "set generated.by to the agent or process that wrote it; humans record review with specfold verify",
+      },
+    ];
+  });
+
+/** G9: no changed concept is past its stale_after. */
+export const g9: GateRule = (ctx) =>
+  changedData(ctx).flatMap(({ rel, data, lineOf }) => {
+    const stale = data.stale_after;
+    if (!isTimestamp(stale) || Date.parse(stale as string) >= ctx.now.getTime()) return [];
+    return [
+      {
+        rule: "G9",
+        effect: ctx.config.gate.blockOnStaleTouched ? ("block" as const) : ("warn" as const),
+        path: inRepo(ctx, rel),
+        line: lineOf("stale_after"),
+        message: `edited concept is stale since ${stale}`,
+        fix: "review it against its sources, then move stale_after forward",
+      },
+    ];
+  });
+
 /** G10: the link rules of validate. */
 export const g10: GateRule = (ctx) =>
   validateFindings(ctx)
     .filter((f) => LINK_RULES.has(f.rule))
     .map((f) => fromBundle(ctx, "G10", ctx.config.blockOnBrokenLinks ? "block" : "warn", f));
 
-export const RULES: GateRule[] = [g1, g2, g3, g4, g5, g6, g10, g13, g18];
+/** G12: audit rules A1 and A2 over the whole bundle, as warnings. */
+export const g12: GateRule = (ctx) =>
+  auditBundle(ctx.config, ctx.bundleRoot, ctx.now)
+    .filter((f) => f.rule === "A1" || f.rule === "A2")
+    .map((f) => fromBundle(ctx, "G12", "warn", f));
+
+/** G14: `see knowledge:` references resolve; missing targets block in changed files. */
+export const g14: GateRule = (ctx) => {
+  const changed = new Set(ctx.diff.files);
+  return scanReferences(ctx.config.root, ctx.config.sourceGlobs).flatMap((ref) => {
+    const abs = join(ctx.bundleRoot, ref.concept);
+    if (!existsSync(abs))
+      return [
+        {
+          rule: "G14",
+          effect: changed.has(ref.file) ? ("block" as const) : ("warn" as const),
+          path: ref.file,
+          line: ref.line,
+          message: `reference to missing concept /${ref.concept}`,
+          fix: "point the comment at an existing concept or create it",
+        },
+      ];
+    const data = parseFile(ctx.bundleRoot, ref.concept).frontmatter?.data;
+    if (isRecord(data) && data.status === "deprecated")
+      return [
+        {
+          rule: "G14",
+          effect: "warn" as const,
+          path: ref.file,
+          line: ref.line,
+          message: `reference to deprecated concept /${ref.concept}`,
+          fix: "point the comment at the concept that replaced it",
+        },
+      ];
+    return [];
+  });
+};
+
+export const RULES: GateRule[] = [g1, g2, g3, g4, g5, g6, g8, g9, g10, g12, g13, g14, g18];
 
 const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 const ruleNumber = (rule: string) => Number.parseInt(rule.slice(1), 10);
