@@ -94,10 +94,10 @@ specfold/
 │   └── sf-{lookup,capture,sync,audit,migrate}/SKILL.md (+ references/, templates/)
 ├── .claude/
 │   ├── settings.json             # hooks
-│   ├── skills/                   # mirror of .agents/skills, written by `specfold agents sync`
+│   ├── skills/                   # symlinks into .agents/skills, written by `specfold agents sync`
 │   ├── agents/knowledge-curator.md
 │   └── hooks/*.sh                # thin wrappers around scripts/specfold.mjs
-├── lefthook.yml                  # git hooks for every tool (pre-commit, pre-push, post-checkout)
+├── .specfold/hooks/              # git hook scripts (core.hooksPath), each one line calling the CLI
 ├── .github/
 │   ├── workflows/specfold-gate.yml
 │   ├── pull_request_template.md  # Change: / Knowledge: fields
@@ -131,7 +131,7 @@ The kit repo runs its own workflow, so building it is the first real test. That 
 
 ```text
 specfold/
-├── AGENTS.md, CLAUDE.md, specfold.yaml, lefthook.yml   # the kit's own setup
+├── AGENTS.md, CLAUDE.md, specfold.yaml, .specfold/hooks/   # the kit's own setup
 ├── knowledge/          # the kit's own OKF bundle (never shipped)
 ├── openspec/           # the kit's own specs and changes (never shipped)
 ├── template/           # the payload: everything in the layout above, with an empty bundle
@@ -145,8 +145,8 @@ The release job publishes `template/` as a tarball and syncs it to a separate te
 
 | Folder | Content |
 | --- | --- |
-| `decisions/` | the decisions in this plan as `Decision` concepts: separate bundle, specs vs knowledge, custom schema, blocking gate, lefthook, English only, graphify code-only, dogfooding split |
-| `references/` | mirrored summaries of the OKF spec, OpenSpec docs, graphify and lefthook docs, each with `sources`, `last_modified` and a short `stale_after`, because all four move fast |
+| `decisions/` | the decisions in this plan as `Decision` concepts: separate bundle, specs vs knowledge, custom schema, blocking gate, built-in git hooks, English only, graphify code-only, dogfooding split |
+| `references/` | mirrored summaries of the OKF spec, OpenSpec docs, Claude Code docs, graphify, git hook managers and the GitHub API, each with `sources` (with `last_modified` per source, as OKF defines it) and a 30-day `stale_after`, because all of them move fast |
 | `architecture/` | specfold CLI modules, gate pipeline, release flow |
 | `conventions/` | TypeScript style, test fixtures, skill writing rules (short SKILL.md, details in `references/`) |
 | `capabilities/` | one card per kit spec |
@@ -315,6 +315,8 @@ empty_reason: ""          # required when ops is empty
 Free text for the reviewer.
 ````
 
+**What OpenSpec does not enforce** (verified with OpenSpec 1.15.0): `requires` is advisory. `openspec instructions` still renders an artifact whose dependencies are missing (with a warning), an artifact counts as done as soon as its file exists, `openspec validate --strict` ignores custom artifacts, and the CLI `archive` checks only `tasks.md` checkboxes, not schema artifacts (the `/opsx:archive` skill warns and asks). So `specfold change check` and the gate (G5, G6, G13) are the only enforcement of `brief.md` and `knowledge.md`. Explore cannot be pointed at a skill through `config.yaml` (`rules.explore` and `operations.explore` are rejected as unknown keys); the interview is triggered by the `brief` artifact's instruction and by `AGENTS.md`. OpenSpec's `verify` workflow is not in the default profile and is enabled with `openspec config profile`.
+
 Rejected changes: `sf-capture` writes a `Decision` with `decision: rejected` and the change folder is deleted, so OpenSpec never shows it again but agents still find it.
 
 ## specfold CLI
@@ -325,7 +327,7 @@ Everything that must be correct is deterministic code, so every agent, hook and 
 
 | Command | Does | Used by |
 | --- | --- | --- |
-| `specfold init` | fills `specfold.yaml`, `openspec/config.yaml` context, runs `openspec init`, `specfold agents sync`, `runs lefthook install` | template users |
+| `specfold init` | fills `specfold.yaml`, `openspec/config.yaml` context, runs `openspec init`, `specfold agents sync`, `specfold hooks install` | template users |
 | `specfold validate [paths]` | OKF conformance (3 rules) + profile rules + link check, only errors printed | hooks, gate |
 | `specfold index` | regenerates every `index.md` and the root `okf_version`; `--check` fails if out of date | sf-sync, gate |
 | `specfold log add <msg>` | appends a dated entry to `knowledge/log.md` | sf-sync, sf-migrate |
@@ -336,8 +338,9 @@ Everything that must be correct is deterministic code, so every agent, hook and 
 | `specfold audit` | stale, unverified, deprecated-but-linked, orphans, specs without capability card, SHALL in knowledge | sf-audit, scheduled CI |
 | `specfold gate --base <sha>` | runs all merge-gate rules on a diff (see next sections) | CI, pre-push |
 | `specfold stats` | token estimate per file and for the always-loaded set (AGENTS.md, config context, skill descriptions) | token budget check |
-| `specfold agents sync` | mirrors `.agents/skills/` to `.claude/skills/` and other tool folders listed in config | init, upgrade |
-| `specfold doctor` | checks openspec version, node, lefthook installed, optional graphify, config drift | humans, bootstrap |
+| `specfold agents sync` | symlinks each `.agents/skills/<name>` into `.claude/skills/` and other tool folders listed in config (Claude Code does not read `.agents/skills/` itself) | init, upgrade |
+| `specfold doctor` | checks openspec version, node, git hooks installed, optional graphify, config drift | humans, bootstrap |
+| `specfold hooks install` / `specfold hook <name>` | sets `core.hooksPath` to `.specfold/hooks/`, or adds one entry to an existing hook manager; `hook <name>` runs the checks for one git hook | init, sf-migrate, git |
 | `specfold upgrade --to <ver>` | three-way updates kit-owned files, never touches `knowledge/` content | humans |
 
 Commands added by later sections (same conventions):
@@ -354,7 +357,7 @@ Commands added by later sections (same conventions):
 
 Still open for the build: exact flags and `--json` output shapes per command. Claude Code should write them as the kit's own OpenSpec specs in M0/M1 (one capability per command group), so the CLI contract is reviewed before it is implemented.
 
-Tests: fixture bundles (valid, each rule broken once), the OKF sample bundle `acme_retail` must pass `validate` without the profile (`--okf-only`), and golden-file tests for `index`.
+Tests: fixture bundles (valid, each rule broken once), golden-file tests for `index`, and the OKF sample bundle `acme_retail` as two pinned fixtures: a patched copy (frontmatter removed from `log.md`, leading `/` added to bundle paths, patch documented) that must pass `--okf-only`, and the unpatched upstream copy that must fail with exactly those findings. OKF ships no validator of its own, so `specfold validate` is the reference check for the kit.
 
 ## Agent layer
 
@@ -369,7 +372,7 @@ The tool-neutral base works with any agent that reads `AGENTS.md` and `.agents/s
 5. When OpenSpec is not needed (no behavior change): use `skip_specs: true` or the `no-spec` label with a reason.
 6. Never write `human:` actors; never edit `index.md`/`log.md` by hand.
 
-`CLAUDE.md` contains `@AGENTS.md` plus Claude-only notes (hooks, subagent, slash command names).
+`CLAUDE.md` contains `@AGENTS.md` plus Claude-only notes (hooks, subagent, slash command names). Claude Code reads `AGENTS.md` natively only when no `CLAUDE.md` exists, so the import stays.
 
 **Skills** (canonical in `.agents/skills/`, each `SKILL.md` short with details in `references/`):
 
@@ -387,39 +390,19 @@ The tool-neutral base works with any agent that reads `AGENTS.md` and `.agents/s
 | --- | --- |
 | `SessionStart` hook | prints the root `knowledge/index.md` section list (not the whole file) and `openspec list --json` names, max \~40 lines |
 | `PostToolUse` hook on Edit/Write under `knowledge/` or `openspec/changes/` | runs `specfold validate <file>` or `specfold change check`; prints errors only, exit 2 so Claude fixes them immediately |
-| `Stop` hook | runs `specfold gate --base origin/<default> --local`; on failure returns the findings so Claude keeps working instead of stopping |
+| `Stop` hook | runs `specfold gate --base origin/<default> --local`; on failure exits 2 with the findings on stderr so Claude keeps working instead of stopping; Claude Code overrides the block after 8 consecutive ones, so the hook reports and the CI gate stays the enforcement |
 | Subagent `knowledge-curator` | runs `sf-sync` and `sf-audit` in its own context on a cheaper model (Sonnet or Haiku), returns only a summary |
 | Permissions | `deny` reads of build output, lockfiles, vendored code, `graphify-out/graph.json` (query it, don't read it) |
 
-**Git hooks via lefthook.** Every tool and every human gets the same local safety net through `lefthook.yml`; `specfold init` and `sf-migrate` run `lefthook install` (lefthook comes as an npm dev dependency, with brew or the standalone binary as fallback). Other hook managers (husky, a custom `core.hooksPath`, graphify's own `graphify hook install`) are replaced by entries in this file, so there is exactly one owner of `.git/hooks`.
+**Git hooks, built in.** Every tool and every human gets the same local safety net without an extra hook manager. `specfold hooks install` (run by `specfold init` and `sf-migrate`) sets `git config core.hooksPath .specfold/hooks`. Each script there is one line, `node scripts/specfold.mjs hook <name> "$@"`; the CLI works out staged files and globs itself, so there is no second glob syntax to get wrong. Git config is shared by all worktrees, and the scripts resolve per worktree.
 
-```yaml
-# lefthook.yml
-pre-commit:
-  parallel: true
-  commands:
-    specfold-validate:
-      glob: "knowledge/**/*.md"
-      run: node scripts/specfold.mjs validate {staged_files}
-    specfold-change:
-      glob: "openspec/changes/**"
-      run: node scripts/specfold.mjs change check --staged
-    openspec-validate:
-      glob: "openspec/**"
-      run: openspec validate --all --strict
-pre-push:
-  commands:
-    specfold-gate:
-      run: node scripts/specfold.mjs gate --base origin/HEAD --local
-post-checkout:
-  commands:
-    graph-refresh:
-      run: command -v graphify >/dev/null && graphify update . || true
-post-merge:
-  commands:
-    graph-refresh:
-      run: command -v graphify >/dev/null && graphify update . || true
-```
+| Git hook | `specfold hook` runs |
+| --- | --- |
+| `pre-commit` | `validate` on staged `knowledge/**/*.md` (including files directly under `knowledge/`), `change check --staged` on staged `openspec/changes/**`, `openspec validate --all --strict` when `openspec/**` is staged |
+| `pre-push` | `gate --base origin/HEAD --local` |
+| `post-checkout`, `post-merge` | `graphify update .` if graphify is installed, never fails |
+
+Project-specific commands go into `specfold.yaml` under `hooks.extra.<git-hook>` (a list of shell commands), which `specfold hook` runs after its own checks. **Adapters:** if a repo already uses a hook manager (lefthook, husky, pre-commit/prek), `specfold hooks install` and `sf-migrate` do not touch `core.hooksPath`; they add one entry per hook to that manager that calls `specfold hook <name>`. So there is still exactly one owner of the git hooks: the existing manager, or Specfold when there is none. graphify's own `graphify hook install` is never used.
 
 Hooks are a convenience; the CI gate stays the real enforcement, because local hooks can be skipped with `--no-verify`.
 
@@ -458,6 +441,8 @@ Per the versioning policy, any rule added after `v1.0.0` ships as a warning firs
 
 **Verification flow without forging trust:** agents write `status: draft`. After review, a human runs `specfold verify <paths>` locally (adds `verified` with their own git identity mapped to `human:<github-login>`, flips to `stable`) or comments `/specfold verify` on the PR, which a small workflow turns into a commit by the commenter's identity. G7 ensures nobody else's name appears.
 
+**G7 on GitHub** (verified 2026-10-26): reading reviews needs only `pull-requests: read` and works for fork PRs. The gate workflow triggers on `pull_request`, `pull_request_review` (`submitted`, `dismissed`) and `merge_group`, with one job name for all of them, no `paths:` filter (a filtered-out required check stays pending) and no job-level `if:` (a skipped job counts as passing); the job always runs and decides inside its steps. Only each reviewer's latest review counts. In `merge_group` runs there is no review context, so G7 relies on the PR-time result. Fork PRs cannot get comments from the default token, so the summary goes into the check run, and a separate `workflow_run` workflow posts the comment; `pull_request_target` is not used. Still to test in M4: whether a newer passing run replaces an older failed one under the same check name.
+
 ## Migration assistant and bootstrap prompt
 
 `sf-migrate` brings an existing repo into the kit in one reviewable PR. It is resumable (state in `.specfold/migration/state.json`), never deletes original docs, and stops for a human checkpoint after planning.
@@ -467,7 +452,7 @@ Per the versioning policy, any rule added after `v1.0.0` ships as a warning firs
 1. **Preflight.** Clean working tree, new branch `specfold/migration`, `specfold doctor`. Detect stack, package layout, CI system, default branch.
 2. **Inventory.** Find existing knowledge sources: `README*`, `docs/`, ADR folders, `CONTRIBUTING`, wiki exports, agent rule files (`AGENTS.md`, `CLAUDE.md`, `.cursor/rules`, `.github/copilot-instructions.md`), other spec tools (`openspec/`, `.specify/`, `.kiro/specs/`). Size each in tokens.
 3. **Plan (checkpoint).** Write `.specfold/migration/plan.md`: proposed capability domains, a mapping table *source → concept type and path / AGENTS.md section / keep as is / ignore*, and what the gate will enforce from when. Stop and ask the human to approve or edit the plan.
-4. **Install.** Copy kit files from the pinned release; merge, don't overwrite, an existing `AGENTS.md`/`CLAUDE.md` (old content moves into a marked section or into `Convention` concepts); `openspec init` (or keep an existing `openspec/` and add the schema); `lefthook install`; CI workflow.
+4. **Install.** Copy kit files from the pinned release; merge, don't overwrite, an existing `AGENTS.md`/`CLAUDE.md` (old content moves into a marked section or into `Convention` concepts); `openspec init` (or keep an existing `openspec/` and add the schema); `specfold hooks install` (adapter entry if a hook manager exists); CI workflow.
 5. **Convert.** Per plan row: create OKF concepts with `sources` pointing at the original file, `status: draft`, `generated` set. ADRs become `Decision`. Agent rule files become `Convention`. Other spec tools: no bulk conversion; write capability cards that point to them and note them as migration candidates.
 6. **Seed from code (capped).** Architecture components and interfaces from the code structure, or from the graphify report if present; glossary terms from domain names. Hard cap (default 30 concepts) to avoid a bundle nobody reviews.
 7. **No retroactive specs.** OpenSpec explicitly advises against back-filling; specs grow with real changes.
@@ -497,12 +482,12 @@ The kit recommends **graphify** for code navigation and builds the rest of its t
 
 **graphify** (recommended, optional; the gate never requires it). Open source, `pip` package `graphifyy` (v0.9.95 on PyPI), parses about 40 languages locally with tree-sitter into `graphify-out/graph.json` plus `GRAPH_REPORT.md`, and supports Claude Code, Codex, Cursor, Copilot and generic `.agents/skills`. Kit guidance:
 
-- Install: `uv tool install graphifyy`, then `graphify install --project --platform agents` (and the Claude Code platform for its PreToolUse guard that nudges Claude to query the graph before broad Grep/Glob).
-- **Code-only by default** (`--code-only` or `GRAPHIFY_BACKEND=none`): free, deterministic, nothing leaves the machine. The semantic pass over docs would send content to an LLM and duplicate what `knowledge/` already provides.
+- Install: `uv tool install graphifyy`, then `graphify install --project --platform agents`, which writes only the skill (`.agents/skills/graphify/`). For Claude Code, `specfold init` registers graphify's PreToolUse guard (`graphify hook-guard` on `Bash|Grep` and `Read|Glob`) in `.claude/settings.json` itself. `graphify claude install` and `graphify agents install` are not used, because they write their own `## graphify` section into `CLAUDE.md`/`AGENTS.md`.
+- **Code-only by default** (`GRAPHIFY_BACKEND=none` for every command, `graphify extract --code-only` for the first build): free, deterministic, nothing leaves the machine. The semantic pass over docs would send content to an LLM and duplicate what `knowledge/` already provides.
 - Exclude `knowledge/`, `openspec/`, build output and vendored code via `.graphifyignore`.
-- Refresh through lefthook (`post-checkout`, `post-merge`) instead of `graphify hook install`.
+- Refresh with `graphify update .` from Specfold's `post-checkout` and `post-merge` hooks instead of `graphify hook install`.
 - Do not commit `graphify-out/` by default (it reveals architecture and grows large); teams may commit `GRAPH_REPORT.md` only.
-- One instruction block only: `AGENTS.md` defines the lookup order above; graphify's installer must not add a second, competing block (its own docs warn about this). `sf-migrate` merges it.
+- One instruction block only: `AGENTS.md` defines the lookup order above. If a repo already has a `## graphify` section from graphify's installers, `sf-migrate` merges it into that one block.
 - Published savings vary by repo (reports range from about 70% to about 70x on large codebases); small repos gain little. `specfold stats` plus a before/after task run is the honest measure.
 
 **Further measures built into the kit:**
@@ -608,10 +593,10 @@ Agent teams stay off by default: they are experimental and do not isolate teamma
 | Location | default `.claude/worktrees/`, added to `.gitignore`; `specfold wt` uses the same folder for other tools |
 | Gitignored files | `.worktreeinclude`: `.env*`, local config, and `graphify-out/` so each worktree starts with the code graph and only updates it incrementally |
 | Dependencies | a `SessionStart` hook runs `specfold wt setup` when it detects a fresh worktree: install with the shared package cache, nothing else |
-| Git hooks | lefthook lives in the shared `.git`, installed once; it applies in every worktree |
+| Git hooks | `core.hooksPath` lives in the shared git config, installed once; it applies in every worktree |
 | Parallel test runs | `specfold wt setup` assigns `SPECFOLD_WT_INDEX`; test config derives ports and database names from it |
 | Generated files | `knowledge/**/index.md` and `log.md` are never merged by hand: `.gitattributes` marks `log.md` as `merge=union`, and indexes are regenerated with `specfold index` after each merge |
-| Archive | only one change archives at a time, after rebasing on the default branch (OpenSpec warns on drift since 1.14); a GitHub merge queue enforces the order |
+| Archive | only one change archives at a time, after rebasing on the default branch (OpenSpec's archive aborts on scenario drift in MODIFIED requirements); a GitHub merge queue enforces the order |
 | Cleanup | Claude Code removes clean subagent worktrees itself; `specfold wt clean` removes merged ones for other tools |
 
 ### Limits
@@ -636,8 +621,8 @@ Any repo using the kit updates itself with one command, `specfold upgrade`, or w
 
 | Class | Examples | On upgrade |
 | --- | --- | --- |
-| Kit-owned | `scripts/specfold.mjs`, `.agents/skills/sf-*`, `openspec/schemas/specfold/`, `.claude/hooks/*.sh`, `.github/workflows/specfold-gate.yml`, `.claude/agents/*` | replaced if unchanged locally; if changed, three-way merge against the old shipped version, conflicts left for review |
-| Managed blocks | sections between `<!-- specfold:begin -->` / `<!-- specfold:end -->` in `AGENTS.md` and `CLAUDE.md`; kit keys in `openspec/config.yaml`, `.claude/settings.json`, `lefthook.yml` | only the managed part is replaced; everything outside stays |
+| Kit-owned | `scripts/specfold.mjs`, `.specfold/hooks/*`, `.agents/skills/sf-*`, `openspec/schemas/specfold/`, `.claude/hooks/*.sh`, `.github/workflows/specfold-gate.yml`, `.claude/agents/*` | replaced if unchanged locally; if changed, three-way merge against the old shipped version, conflicts left for review |
+| Managed blocks | sections between `<!-- specfold:begin -->` / `<!-- specfold:end -->` in `AGENTS.md` and `CLAUDE.md`; kit keys in `openspec/config.yaml`, `.claude/settings.json`, and the Specfold entry in an existing hook manager's config | only the managed part is replaced; everything outside stays |
 | Project-owned | `knowledge/` content, `openspec/specs/`, `openspec/changes/`, values in `specfold.yaml`, `.specfold/local.yaml` | never touched; content migrations only produce a report and suggested edits |
 
 **`specfold upgrade` flow:**
@@ -646,7 +631,7 @@ Any repo using the kit updates itself with one command, `specfold upgrade`, or w
 2. `specfold upgrade [--to <version>]`: creates branch `specfold/upgrade-<version>`, downloads the release tarball, verifies its SHA-256 against the release, and runs **the new version's** upgrader from the tarball. This avoids the old CLI having to understand future formats.
 3. Dry-run plan first: files to add, replace, merge, remove, plus config migrations. `--yes` applies it.
 4. Apply: replace and merge files per class, run versioned migrations (`migrations/<version>.mjs`, idempotent) for `specfold.yaml`, schema and profile changes, then update `.specfold/manifest.json` and `kit_version`.
-5. Follow-ups: `openspec update`, `specfold agents sync`, `lefthook install`, `specfold index`, `specfold validate`, `specfold gate --local`.
+5. Follow-ups: `openspec update`, `specfold agents sync`, `specfold hooks install`, `specfold index`, `specfold validate`, `specfold gate --local`.
 6. Report: `.specfold/upgrade-report.md` with what changed, conflicts, and manual steps from the release's upgrade notes. Commit and open a PR.
 
 Rollback is `git revert` of the upgrade PR, because nothing happens outside git.
@@ -772,15 +757,15 @@ Optional later: two-way sync of backlog items with GitHub Issues. The kit repo i
 
 ## Milestones
 
-Build in this order; each milestone ends with its own PR and green CI in the kit repo. **M0 comes first:** create the repo skeleton with the dogfooding split, seed `knowledge/decisions/` and `knowledge/references/` from this plan by hand (no CLI yet), and write the first specs for `specfold-validate` and `specfold-index`. From M1 on, every milestone runs as an OpenSpec change in the kit repo itself.
+Build in this order; each milestone ends with its own PR and green CI in the kit repo. **M0 comes first:** create the repo skeleton with the dogfooding split, seed `knowledge/decisions/` and `knowledge/references/` from this plan by hand (no CLI yet), and write the first specs for `specfold-validate` and `specfold-index` as OpenSpec changes (`add-specfold-validate`, `add-specfold-index`) that M1 implements and archives, so `openspec/specs/` only ever describes behavior that exists. From M1 on, every milestone runs as an OpenSpec change in the kit repo itself.
 
 | # | Milestone | Done when |
 | --- | --- | --- |
 | M0 | Repo skeleton with the dogfooding split (`template/` payload vs. own `knowledge/` and `openspec/`); hand-written decisions, references, vision; backlog seeded from "Later"; first specs for `specfold validate` and `index` | skeleton committed; specs reviewed by the user |
-| M1 | Knowledge profile + `specfold validate`, `index`, `lookup`, `new`, `log`, `doctor`; code-comment convention and `see knowledge:` scan | fixture tests pass; OKF sample `acme_retail` passes `--okf-only`; golden index files match |
+| M1 | Knowledge profile + `specfold validate`, `index`, `lookup`, `new`, `log`, `doctor`; code-comment convention and `see knowledge:` scan | fixture tests pass; patched `acme_retail` passes `--okf-only` and the upstream copy fails with exactly the known findings; golden index files match |
 | M2 | OpenSpec integration: `specfold` schema with `brief` and `knowledge` artifacts, templates, `config.yaml`, `specfold change check`, `specfold sync` | in `examples/sample-app`, interview → propose → archive → sync leaves `specfold validate` and `openspec validate --strict` green |
 | M3 | Skills `sf-lookup`, `sf-capture`, `sf-sync`, `sf-audit`, `sf-interview`; `planner` agent with plan-mode approval; `AGENTS.md`, `CLAUDE.md`, `specfold agents sync` | the sample change works in Claude Code (native questions, plan approval) and in one other tool reading `.agents/skills` |
-| M4 | Gate G1–G17 (warn/block as specified), `specfold gate`, `specfold verify`, CI workflow, lefthook, Claude Code hooks, CODEOWNERS, PR template | one test PR per blocking rule fails for the right reason; a clean PR passes; the gate is required on the kit repo |
+| M4 | Gate G1–G17 (warn/block as specified), `specfold gate`, `specfold verify`, CI workflow, built-in git hooks and adapters, Claude Code hooks, CODEOWNERS, PR template | one test PR per blocking rule fails for the right reason; a clean PR passes; the gate is required on the kit repo |
 | M5 | Quality loops (`specfold trace`, `specfold drift`, retro) and backlog, commitments, vision with their CLI commands | traceability and drift reported correctly on the sample app; a backlog item promoted to a change end to end |
 | M6 | `sf-migrate` + `BOOTSTRAP.md` | migration runs on its own branch on two fixture repos (ADRs and docs/; Cursor rules and an existing `openspec/`); rerun is idempotent; refuses on the default branch |
 | M7 | Token layer: `specfold stats`, G11 budget, graphify recipe, permission deny list | always-loaded set reported; documented before/after numbers on the sample app |
@@ -795,30 +780,32 @@ Ideas agreed on but deliberately not in the first build:
 
 - **`Pitfall` knowledge type:** recurring agent mistakes in a repo, always returned by `sf-lookup` for matching areas.
 - **General code conventions:** style, naming and patterns in `knowledge/conventions/`, with linters as enforcement where possible.
-- Evals for the framework itself and a secrets guard (`gitleaks` via lefthook and CI) are still open (undecided). They are carried over into the new repo as open backlog items in M0, so the decision is made there through the normal workflow.
+- Evals for the framework itself and a secrets guard (`gitleaks` via the git hooks and CI) are still open (undecided). They are carried over into the new repo as open backlog items in M0, so the decision is made there through the normal workflow.
 
-## Verify before building
+## Verified before building
 
-These points were researched on 2026-10-25/26 but move fast. Claude Code should check each against current docs before relying on it:
+The points below were checked against current docs and, for OpenSpec and lefthook, with the real CLIs on 2026-10-26. The summaries live in the kit's own `knowledge/references/` with a 30-day `stale_after`; this list records what changed in the plan.
 
-- [ ] OpenSpec schema format: exact `requires` semantics, whether `/opsx:archive` tolerates the extra `knowledge` artifact, and how `openspec instructions knowledge` renders a custom artifact.
-- [ ] OpenSpec `--tools agents` output paths and whether Claude Code also needs `--tools claude` for slash commands.
-- [ ] Claude Code: does it read `.agents/skills/` directly? If yes, drop the `.claude/skills/` mirror. Current hook event names and the exit-code contract for `PostToolUse` and `Stop`.
-- [ ] OKF: latest `SPEC.md` revision (pre-1.0), especially index frontmatter and timestamp offset rules.
-- [ ] graphify: flag names (`--code-only`, `--project`, `--platform agents`), `.graphifyignore` syntax, and whether `graphify update .` is the right refresh command.
-- [ ] lefthook: current config keys (`glob`, `{staged_files}`, `parallel`) and the recommended install route for non-Node repos.
-- [ ] GitHub API access for G7 (approver check) under the default `GITHUB_TOKEN` permissions.
-
-* [ ] Claude Code's structured question tool for interviews: current name and limits; fallback to plain numbered questions in other tools.
-* [ ] OpenSpec: a custom first artifact (`brief`) before `proposal`, and whether `/opsx:explore` can be pointed at the `sf-interview` skill via `config.yaml` rules.
-
-- [ ] Claude Code: `permissionMode: plan` on a main-session agent (`claude --agent planner`), and that `ExitPlanMode` approval switches to a write-capable mode so the planner can write `brief.md`.
+| Topic | Result | Plan consequence |
+| --- | --- | --- |
+| OpenSpec schema (1.15.0) | fork, custom `knowledge` and first artifact `brief` work; `requires` is advisory; archive does not check schema artifacts | `specfold change check` and the gate are the only enforcement (see OpenSpec setup) |
+| OpenSpec `--tools agents,claude` | `agents` writes skills only (`.agents/skills/openspec-*`); `claude` adds `/opsx:*` commands; `--language English` exists | holds as planned |
+| OpenSpec explore | no config hook for skills | interview triggered by `brief` instruction and `AGENTS.md` |
+| Claude Code skills | `.agents/skills/` is not read; symlinked skill folders are supported | `specfold agents sync` writes symlinks |
+| Claude Code hooks | `SessionStart` stdout goes to context; `PostToolUse`/`Stop` exit 2 feed stderr back; 10,000-char output cap; `Stop` block cap of 8 | holds; Stop hook is feedback, not enforcement |
+| Claude Code `AGENTS.md` | read natively only without `CLAUDE.md` | keep `@AGENTS.md` in `CLAUDE.md` |
+| `AskUserQuestion` | 1-4 questions, 2-4 options, header ≤ 12 chars, `multiSelect`, automatic "Other"; `askUserQuestionTimeout` (off by default) lets Claude continue on its own | holds; never set the timeout, re-ask on timeout |
+| `claude --agent` + `permissionMode: plan` | `--agent` runs the main session with the agent's tools and model; frontmatter `permissionMode` is documented for subagents only; `ExitPlanMode` approval switches to auto or manual-approve | test in M3 before relying on it |
+| OKF | SPEC v0.2 current; only the root `index.md` may carry frontmatter (`okf_version`); timestamps need an explicit offset (`Z` allowed); `last_modified` lives in `sources[]` entries; no official validator; okf.md is an unofficial site | profile and references adjusted; okf.md dropped from sources |
+| OKF `acme_retail` | at `bundles/acme_retail/`; violates the spec (`log.md` frontmatter, paths without leading `/`) | patched fixture plus upstream copy (see specfold CLI tests) |
+| graphify 0.9.95 | `install --project --platform agents` is skill-only; `graphify claude install` writes a CLAUDE.md section plus the PreToolUse guard; `--code-only` belongs to `extract`; `GRAPHIFY_BACKEND=none` | skill plus guard registered by Specfold, no instruction blocks |
+| lefthook 2.2.2 | keys valid; `**` does not match zero folders by default; npm shim breaks across worktrees (#1398) | replaced by built-in hooks with adapters |
+| GitHub API for G7 | works with `pull-requests: read`, also for forks; several traps | see Merge gate |
 
 ## Sources
 
 - [OKF SPEC.md v0.2 (GoogleCloudPlatform/open-knowledge-format)](https://github.com/GoogleCloudPlatform/open-knowledge-format)
 - [Google Cloud Blog: OKF v0.2 adds trust signals](https://cloud.google.com/blog/products/data-analytics/okf-v0-2-adds-trust-signals)
-- [okf.md FAQ](https://okf.md/faq/), [okf.md spec guide](https://okf.md/spec/)
 - [Fission-AI/OpenSpec](https://github.com/Fission-AI/OpenSpec): `docs/customization.md`, `docs/cli.md`, `docs/supported-tools.md`, `schemas/spec-driven/schema.yaml`
 - [OpenSpec release notes](https://releasebot.io/updates/fission-ai/openspec)
 - [Graphify-Labs/graphify](https://github.com/Graphify-Labs/graphify) (README in the `graphifyy` 0.9.95 package)
