@@ -9691,7 +9691,7 @@ register({
 });
 
 // src/gate/command.ts
-import { existsSync as existsSync23, readFileSync as readFileSync16 } from "node:fs";
+import { existsSync as existsSync23, readFileSync as readFileSync16, writeFileSync as writeFileSync4 } from "node:fs";
 import { resolve as resolve4 } from "node:path";
 
 // src/gate/diff.ts
@@ -10360,6 +10360,9 @@ function openspecValidate(root, binary) {
   } catch {
     report = void 0;
   }
+  const stopped = (report?.status ?? []).filter((s) => s.severity === "error" && s.message);
+  if (stopped.length > 0)
+    return stopped.map((s) => ({ path: "openspec", message: `${s.message}${s.fix ? ` ${s.fix}` : ""}` }));
   if (!report?.itemFindings) {
     if (result.status === 0) return [];
     const first = `${result.stderr}
@@ -10611,6 +10614,27 @@ function sortGateFindings(findings) {
 }
 var runGate = (ctx) => sortGateFindings(RULES.flatMap((rule) => rule(ctx)));
 
+// src/gate/summary.ts
+var cell = (text2) => text2.replace(/\r?\n/g, " ").replace(/\|/g, "\\|");
+function renderSummary(findings, verdict2) {
+  const lines3 = [`## specfold gate: ${verdict2}`, ""];
+  if (findings.length > 0) {
+    lines3.push("| Rule | Effect | Path | Message | Fix |", "| --- | --- | --- | --- | --- |");
+    for (const f of findings) {
+      const path = f.path === null ? "" : `\`${cell(f.path)}${f.line === null ? "" : `:${f.line}`}\``;
+      lines3.push(`| ${f.rule} | ${f.effect} | ${path} | ${cell(f.message)} | ${cell(f.fix)} |`);
+    }
+    lines3.push("");
+  }
+  const warnings = /* @__PURE__ */ new Map();
+  for (const f of findings) if (f.effect === "warn") warnings.set(f.rule, (warnings.get(f.rule) ?? 0) + 1);
+  lines3.push(
+    `Warnings: ${warnings.size === 0 ? "none" : [...warnings].map(([rule, n]) => `${rule} ${n}`).join(", ")}`
+  );
+  return `${lines3.join("\n")}
+`;
+}
+
 // src/gate/command.ts
 var location = (f) => f.path === null ? "" : `${f.path}${f.line === null ? "" : `:${f.line}`} `;
 function countFindings(findings) {
@@ -10631,29 +10655,31 @@ function gateContext(config, cwd, base, o) {
 }
 var localGate = (config, cwd, base) => runGate(gateContext(config, cwd, base, { local: true, labels: [], prBody: void 0, pr: void 0 }));
 function renderGate(findings) {
-  const counts = countFindings(findings);
   const lines3 = findings.flatMap((f) => [
     `${f.effect} ${f.rule} ${location(f)}${f.message}`,
     ...f.effect === "block" ? [`    fix: ${f.fix}`] : []
   ]);
-  const blocking = [...new Set(findings.filter((f) => f.effect === "block").map((f) => f.rule))];
-  const warnings = plural(counts.warn, "warning");
-  lines3.push(
-    counts.block === 0 ? `gate: passed, ${warnings}` : `gate: blocked by ${blocking.join(", ")} (${plural(counts.block, "blocking finding")}, ${warnings})`
-  );
+  lines3.push(`gate: ${verdict(findings)}`);
   return `${lines3.join("\n")}
 `;
+}
+function verdict(findings) {
+  const counts = countFindings(findings);
+  const blocking = [...new Set(findings.filter((f) => f.effect === "block").map((f) => f.rule))];
+  const warnings = plural(counts.warn, "warning");
+  return counts.block === 0 ? `passed, ${warnings}` : `blocked by ${blocking.join(", ")} (${plural(counts.block, "blocking finding")}, ${warnings})`;
 }
 register({
   name: "gate",
   summary: "decide whether a branch may merge: run the merge-gate rules on its diff",
-  usage: "specfold gate --base <ref> [--local] [--pr <number>] [--label <name>]... [--pr-body <file>] [--json]",
+  usage: "specfold gate --base <ref> [--local] [--pr <number>] [--label <name>]... [--pr-body <file>] [--summary <file>] [--json]",
   options: {
     base: { type: "string" },
     local: { type: "boolean" },
     pr: { type: "string" },
     label: { type: "string", multiple: true },
     "pr-body": { type: "string" },
+    summary: { type: "string" },
     json: { type: "boolean" }
   },
   run: async ({ io, values, positionals }) => {
@@ -10677,6 +10703,9 @@ register({
         pr
       })
     );
+    const summary = values.summary;
+    if (summary !== void 0)
+      writeFileSync4(resolve4(io.cwd, summary), renderSummary(findings, verdict(findings)));
     const counts = countFindings(findings);
     const ok2 = counts.block === 0;
     if (values.json) {
@@ -10691,7 +10720,7 @@ register({
 
 // src/hooks/install.ts
 var import_yaml7 = __toESM(require_dist(), 1);
-import { chmodSync, existsSync as existsSync24, mkdirSync as mkdirSync4, readFileSync as readFileSync17, realpathSync, writeFileSync as writeFileSync4 } from "node:fs";
+import { chmodSync, existsSync as existsSync24, mkdirSync as mkdirSync4, readFileSync as readFileSync17, realpathSync, writeFileSync as writeFileSync5 } from "node:fs";
 import { join as join25 } from "node:path";
 var HOOKS_PATH = ".specfold/hooks";
 var OWN_HOOKS = ["pre-commit", "pre-push", "post-checkout", "post-merge"];
@@ -10707,7 +10736,7 @@ function gitConfig(root, key) {
 function writeIfChanged(path, text2, mode) {
   if (existsSync24(path) && readFileSync17(path, "utf8") === text2) return false;
   mkdirSync4(join25(path, ".."), { recursive: true });
-  writeFileSync4(path, text2);
+  writeFileSync5(path, text2);
   if (mode !== void 0) chmodSync(path, mode);
   return true;
 }
@@ -10774,7 +10803,7 @@ function lefthookEntries(config, file) {
     }
     actions.push({ path: file, action: `add specfold to ${hook}` });
   }
-  if (actions.length > 0) writeFileSync4(path, String(doc));
+  if (actions.length > 0) writeFileSync5(path, String(doc));
   return actions;
 }
 function huskyEntries(config) {
@@ -10834,7 +10863,7 @@ function preCommitEntries(config) {
     doc.set("default_install_hook_types", doc.createNode([...types, ...added], { flow: true }));
     actions.push({ path: PRE_COMMIT_FILE, action: `install hook types ${added.join(", ")}` });
   }
-  if (actions.length > 0) writeFileSync4(path, String(doc));
+  if (actions.length > 0) writeFileSync5(path, String(doc));
   return actions;
 }
 function installHooks(config) {
@@ -11066,7 +11095,7 @@ register({
 });
 
 // src/log/command.ts
-import { existsSync as existsSync27, readFileSync as readFileSync19, writeFileSync as writeFileSync5 } from "node:fs";
+import { existsSync as existsSync27, readFileSync as readFileSync19, writeFileSync as writeFileSync6 } from "node:fs";
 import { join as join28 } from "node:path";
 
 // src/log/insert.ts
@@ -11125,7 +11154,7 @@ register({
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, void 0);
     const path = join28(bundleRoot, "log.md");
     const entry = `* **${kind}**: ${message}`;
-    writeFileSync5(path, insertEntry(existsSync27(path) ? readFileSync19(path, "utf8") : void 0, date, entry));
+    writeFileSync6(path, insertEntry(existsSync27(path) ? readFileSync19(path, "utf8") : void 0, date, entry));
     io.stdout(`${entry}
 `);
     return 0;
@@ -11234,7 +11263,7 @@ register({
 });
 
 // src/sync/command.ts
-import { existsSync as existsSync28, readdirSync as readdirSync6, writeFileSync as writeFileSync6 } from "node:fs";
+import { existsSync as existsSync28, readdirSync as readdirSync6, writeFileSync as writeFileSync7 } from "node:fs";
 import { join as join29 } from "node:path";
 var NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 var ARCHIVED2 = /^(\d{4}-\d{2}-\d{2})-([a-z0-9]+(?:-[a-z0-9]+)*)$/;
@@ -11284,7 +11313,7 @@ register({
       if (needsLog) {
         const count = (kind) => ops.filter((o) => o.op === kind).length;
         const entry = `* **Change**: ${id}: created ${count("create")}, updated ${count("update")}, deprecated ${count("deprecate")}`;
-        writeFileSync6(logPath, insertEntry(logText, localDate(), entry));
+        writeFileSync7(logPath, insertEntry(logText, localDate(), entry));
       }
     }
     if (needsLog) actions.push({ path: logRel, action: "add log entry" });
@@ -11497,7 +11526,7 @@ register({
 });
 
 // src/verify/command.ts
-import { existsSync as existsSync31, readFileSync as readFileSync22, statSync as statSync9, writeFileSync as writeFileSync7 } from "node:fs";
+import { existsSync as existsSync31, readFileSync as readFileSync22, statSync as statSync9, writeFileSync as writeFileSync8 } from "node:fs";
 import { join as join32, relative as relative15, resolve as resolve6, sep as sep14 } from "node:path";
 
 // src/verify/apply.ts
@@ -11610,7 +11639,7 @@ register({
         const abs = join32(bundleRoot, t.rel);
         return { abs, text: verifyText(readFileSync22(abs, "utf8"), login, at) };
       });
-      for (const w of written) writeFileSync7(w.abs, w.text);
+      for (const w of written) writeFileSync8(w.abs, w.text);
       verified.push(...targets.map(shown));
     }
     const ok2 = refused.length === 0;
