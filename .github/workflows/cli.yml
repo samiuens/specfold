@@ -35,3 +35,5 @@ jobs:
         run: node scripts/specfold.mjs validate
       - name: Knowledge indexes are up to date
         run: node scripts/specfold.mjs index --check
+      - name: Kit schema copy matches the template
+        run: diff -r template/openspec/schemas/specfold openspec/schemas/specfold || { echo "::error::openspec/schemas/specfold differs from template/openspec/schemas/specfold; copy the template schema over"; exit 1; }
