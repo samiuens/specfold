@@ -23,7 +23,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 2.1 Add `template/knowledge/conventions/code-comments.md` and generate the template's indexes
+- [x] 2.1 Add `template/knowledge/conventions/code-comments.md` and generate the template's indexes
   - Done when: `validate` and `index --check` exit 0 in `template/`
 
 ## 3. Sample app
