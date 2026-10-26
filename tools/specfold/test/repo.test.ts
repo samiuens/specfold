@@ -28,6 +28,7 @@ describe("repo", () => {
       agentPrefix: "",
       requires: {},
       tasks: { maxFilesPerTask: 5, maxTasksPerGroup: 8 },
+      agentTargets: [".claude/skills"],
     });
   });
 
@@ -66,5 +67,22 @@ describe("repo", () => {
     const root = tempDir();
     writeFileSync(join(root, "specfold.yaml"), "tasks:\n  max_files_per_task: 0\n");
     expect(() => requireConfig(root)).toThrow(EnvError);
+  });
+
+  it("reads the agent skill targets", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "specfold.yaml"),
+      "agents:\n  targets: [.claude/skills, .config/tool/skills/]\n",
+    );
+    expect(requireConfig(root).agentTargets).toEqual([".claude/skills", ".config/tool/skills"]);
+  });
+
+  it("fails with an environment error on a target outside the repository", () => {
+    const root = tempDir();
+    for (const target of ["../skills", "/tmp/skills", "a/../../b"]) {
+      writeFileSync(join(root, "specfold.yaml"), `agents:\n  targets: ['${target}']\n`);
+      expect(() => requireConfig(root), target).toThrow(EnvError);
+    }
   });
 });

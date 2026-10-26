@@ -61,6 +61,10 @@ types:
 actors:
   agent_prefix: "claude-code/"
 
+# Folders that get one symlink per skill in .agents/skills/ (specfold agents sync).
+agents:
+  targets: [".claude/skills"]
+
 # Size limits for task breakdowns; exceeding them only warns (specfold tasks check T9, T10).
 tasks:
   max_files_per_task: 5
