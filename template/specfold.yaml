@@ -74,6 +74,10 @@ tasks:
   max_files_per_task: 5
   max_tasks_per_group: 8
 
+# Files whose `spec: <capability>#<scenario>` comments count as tests (specfold trace, gate G15).
+trace:
+  test_globs: ["**/*.test.*", "**/*.spec.*", "**/*_test.*", "**/test/**", "**/tests/**", "**/spec/**"]
+
 # Extra commands per git hook, run after Specfold's own checks.
 hooks:
   extra: {}

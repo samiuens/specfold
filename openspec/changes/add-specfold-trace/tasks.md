@@ -59,7 +59,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 5.1 Add `trace.test_globs` to the kit and template settings
+- [x] 5.1 Add `trace.test_globs` to the kit and template settings
   - Done when: `node scripts/specfold.mjs trace` in the kit reports no dangling reference
 
 ## 6. Bundle
