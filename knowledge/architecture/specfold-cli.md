@@ -27,11 +27,12 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/agents/` | the `agents sync` command: relative symlinks from `.agents/skills/` into each `agents.targets` folder, keeping real folders and foreign links |
 | `src/audit/` | the `audit` command: rules A1 to A5 over the parsed bundle, the main specs, code references and the root agent instruction files |
 | `src/bundle.ts` | walks a bundle and splits frontmatter from the body with line numbers |
-| `src/gate/` | the `gate` command: the diff against a merge base (touched and archived changes), rules G1-G10, G12-G14 and G18 over existing rule functions, `openspec validate`, the human claims a branch adds and the PR author and approvers from the GitHub REST API (G7), ordering and counts |
+| `src/gate/` | the `gate` command: the diff against a merge base (touched and archived changes), rules G1-G10, G12-G15 and G18 over existing rule functions, `openspec validate`, the human claims a branch adds and the PR author and approvers from the GitHub REST API (G7), ordering and counts |
 | `src/git.ts` | runs git; failures become environment errors |
 | `src/openspec.ts` | finds the OpenSpec binary: `node_modules/.bin/openspec`, then the PATH |
 | `src/doctor/` | the `doctor` command: checks D1 to D6 over an injected environment, version ranges |
 | `src/glob.ts` | dependency-free glob matching (`**` also matches zero folders) and the repository file walk |
+| `src/trace/` | the `trace` command: scenario ids from main and delta specs (sections, removed requirements), the `spec:` reference scan over `trace.test_globs`, and the report gate rule G15 shares |
 | `src/verify/` | the `verify` command: agent guard, login from `gh` or `.specfold/local.yaml`, path checks, line-level `verified` entries |
 | `src/validate/` | the `validate` command and its rule sets (OKF, profile, links) |
 | `src/hooks/` | the `hooks install` and `hook` commands: built-in hooks or hook-manager entries (lefthook, husky, pre-commit), the pre-commit, pre-push and graph checks, `hooks.extra`, and the Claude Code session, edit and stop hooks |
@@ -54,6 +55,7 @@ Under Node, `yaml` resolves to its CommonJS build, so the bundle banner provides
 
 - [specfold validate](/capabilities/specfold-validate.md)
 - [specfold verify](/capabilities/specfold-verify.md)
+- [specfold trace](/capabilities/specfold-trace.md)
 - [specfold agents sync](/capabilities/specfold-agents-sync.md)
 - [specfold audit](/capabilities/specfold-audit.md)
 - [specfold change check](/capabilities/specfold-change-check.md)
