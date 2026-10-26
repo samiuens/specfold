@@ -21,7 +21,7 @@ scenarios: [specfold-doctor#only-warnings, specfold-doctor#a-failure, specfold-d
 agent: implementer
 ```
 
-- [ ] 2.1 Add the `doctor` command with the real environment, exit codes, human and JSON output
+- [x] 2.1 Add the `doctor` command with the real environment, exit codes, human and JSON output
   - Done when: the three scenarios of this group pass in `doctor.test.ts`
 
 ## 3. Knowledge
