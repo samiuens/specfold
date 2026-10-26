@@ -19,12 +19,14 @@ agent: implementer
 ```yaml
 files: [tools/specfold/src/audit/rules.ts, tools/specfold/test/audit-rules.test.ts]
 depends: [1]
-scenarios: [specfold-audit#expired-reference, specfold-audit#old-draft, specfold-audit#fresh-draft, specfold-audit#link-to-deprecated-decision, specfold-audit#unlinked-term, specfold-audit#referenced-from-code, specfold-audit#missing-card]
+scenarios: [specfold-audit#expired-reference, specfold-audit#old-draft, specfold-audit#fresh-draft, specfold-audit#link-to-deprecated-decision, specfold-audit#unlinked-term, specfold-audit#referenced-from-code, specfold-audit#missing-card, specfold-audit#named-in-agents-md, specfold-audit#backlog-item]
 agent: implementer
 ```
 
 - [x] 2.1 Add rules A1 to A5 over the parsed bundle with an injected current time
   - Done when: the seven scenarios of this group pass in `audit-rules.test.ts`
+- [ ] 2.2 Count mentions in the root AGENTS.md and CLAUDE.md for A4 and exempt `backlog/`
+  - Done when: scenarios named-in-agents-md and backlog-item pass in `audit-rules.test.ts`
 
 ## 3. Audit command
 
@@ -53,7 +55,7 @@ agent: implementer
 ## 5. Knowledge
 
 ```yaml
-files: [knowledge/**]
+files: [knowledge/**, AGENTS.md]
 depends: [4]
 scenarios: []
 agent: knowledge-curator
@@ -61,6 +63,8 @@ agent: knowledge-curator
 
 - [ ] 5.1 Write the concepts listed in `knowledge.md`
   - Done when: `node scripts/specfold.mjs validate` exits 0
+- [ ] 5.2 Link the kit's orphaned decisions and the code-comment convention
+  - Done when: `node scripts/specfold.mjs audit` exits 0 in the kit
 
 ## Workflow follow-up
 

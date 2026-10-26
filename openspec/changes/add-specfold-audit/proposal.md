@@ -27,7 +27,7 @@
 Confirmed by the maintainer on 2026-10-26, point by point:
 
 1. **Unverified means old:** a concept without `verified` is reported only when its `generated.at` is more than `audit.unverified_after_days` (default 30) in the past. Without that age limit every fresh draft would be a finding and exit 1 would be meaningless.
-2. **Orphan:** a concept that no other concept links to and no code references with `see knowledge:`. Links from `index.md` and `log.md` do not count, since they are generated. Capability cards are not orphans when their spec exists, and `vision/` concepts are exempt.
+2. **Orphan:** a concept that no other concept links to, no code references with `see knowledge:`, and the root `AGENTS.md` and `CLAUDE.md` do not name. Links from `index.md` and `log.md` do not count, since they are generated. Capability cards are not orphans when their spec exists, and `vision/` and `backlog/` concepts are exempt. AGENTS.md mentions and the backlog exemption were added on 2026-10-26, after the first audit run on the kit, the template and the sample app.
 3. **Deprecated but linked:** reported on the linking concept, not the deprecated one, because the fix is in the linking concept. Links between two deprecated concepts are not reported.
 4. **Spec without card:** a main spec `openspec/specs/<cap>/spec.md` without a Capability concept whose `spec` key names it.
 5. **All findings are warnings** in severity (the bundle still validates), but any finding makes the exit code 1, as decided.

@@ -8,6 +8,9 @@ One command reports what is rotting in the knowledge bundle: stale or long-unver
 | --- | --- | --- | --- |
 | Q1 | When is `specfold audit` built? | In M3, as its own change, so sf-audit calls the CLI | user |
 | Q2 | Which exit code on findings? | 1 on any finding | user |
+| Q3 | Are backlog items orphans? | No; `backlog/` is exempt like `vision/` | user |
+| Q4 | Do mentions in AGENTS.md and CLAUDE.md count as incoming? | Yes; a bundle-absolute path named there counts | user |
+| Q5 | What happens to the kit's own orphaned decisions? | They get links from related concepts in this change | user |
 
 ## Out of scope
 

@@ -46,7 +46,7 @@ The command SHALL report rule `A3` on every concept that is not deprecated and l
 - **THEN** an `A3` finding on `capabilities/checkout.md` names the link target
 
 ### Requirement: A4 orphaned concept
-The command SHALL report rule `A4` for every concept that no other concept links to and no `see knowledge:` reference in `source_globs` names, not counting links from `index.md` and `log.md`. Capability cards whose `spec` exists and concepts under `vision/` SHALL be exempt.
+The command SHALL report rule `A4` for every concept that nothing points to: no other concept links to it, no `see knowledge:` reference in `source_globs` names it, and the repository's root `AGENTS.md` and `CLAUDE.md` do not name its bundle-absolute path. Links from `index.md` and `log.md` SHALL not count. Capability cards whose `spec` exists and concepts under `vision/` and `backlog/` SHALL be exempt.
 
 #### Scenario: Unlinked term
 - **WHEN** `domain/ledger.md` is linked only from `domain/index.md`
@@ -54,6 +54,14 @@ The command SHALL report rule `A4` for every concept that no other concept links
 
 #### Scenario: Referenced from code
 - **WHEN** no concept links to `decisions/retries.md` but `src/client.ts` contains `// see knowledge: /decisions/retries.md`
+- **THEN** no `A4` finding is reported for it
+
+#### Scenario: Named in AGENTS.md
+- **WHEN** no concept links to `conventions/code-comments.md` but `AGENTS.md` mentions `/conventions/code-comments.md`
+- **THEN** no `A4` finding is reported for it
+
+#### Scenario: Backlog item
+- **WHEN** `backlog/dark-mode.md` has no incoming links
 - **THEN** no `A4` finding is reported for it
 
 ### Requirement: A5 spec without capability card
