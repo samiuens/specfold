@@ -985,13 +985,13 @@ var require_Collection = __commonJS({
 var require_stringifyComment = __commonJS({
   "../../node_modules/yaml/dist/stringify/stringifyComment.js"(exports) {
     "use strict";
-    var stringifyComment = (str) => str.replace(/^(?!$)(?: $)?/gm, "#");
+    var stringifyComment = (str3) => str3.replace(/^(?!$)(?: $)?/gm, "#");
     function indentComment(comment, indent) {
       if (/^\n+$/.test(comment))
         return comment.substring(1);
       return indent ? comment.replace(/^(?! *$)/gm, indent) : comment;
     }
-    var lineComment = (str, indent, comment) => str.endsWith("\n") ? indentComment(comment, indent) : comment.includes("\n") ? "\n" + indentComment(comment, indent) : (str.endsWith(" ") ? "" : " ") + comment;
+    var lineComment = (str3, indent, comment) => str3.endsWith("\n") ? indentComment(comment, indent) : comment.includes("\n") ? "\n" + indentComment(comment, indent) : (str3.endsWith(" ") ? "" : " ") + comment;
     exports.indentComment = indentComment;
     exports.lineComment = lineComment;
     exports.stringifyComment = stringifyComment;
@@ -1005,14 +1005,14 @@ var require_foldFlowLines = __commonJS({
     var FOLD_FLOW = "flow";
     var FOLD_BLOCK = "block";
     var FOLD_QUOTED = "quoted";
-    function foldFlowLines(text2, indent, mode = "flow", { indentAtStart, lineWidth = 80, minContentWidth = 20, onFold, onOverflow } = {}) {
+    function foldFlowLines(text3, indent, mode = "flow", { indentAtStart, lineWidth = 80, minContentWidth = 20, onFold, onOverflow } = {}) {
       if (!lineWidth || lineWidth < 0)
-        return text2;
+        return text3;
       if (lineWidth < minContentWidth)
         minContentWidth = 0;
       const endStep = Math.max(1 + minContentWidth, 1 + lineWidth - indent.length);
-      if (text2.length <= endStep)
-        return text2;
+      if (text3.length <= endStep)
+        return text3;
       const folds = [];
       const escapedFolds = {};
       let end = lineWidth - indent.length;
@@ -1029,14 +1029,14 @@ var require_foldFlowLines = __commonJS({
       let escStart = -1;
       let escEnd = -1;
       if (mode === FOLD_BLOCK) {
-        i = consumeMoreIndentedLines(text2, i, indent.length);
+        i = consumeMoreIndentedLines(text3, i, indent.length);
         if (i !== -1)
           end = i + endStep;
       }
-      for (let ch; ch = text2[i += 1]; ) {
+      for (let ch; ch = text3[i += 1]; ) {
         if (mode === FOLD_QUOTED && ch === "\\") {
           escStart = i;
-          switch (text2[i + 1]) {
+          switch (text3[i + 1]) {
             case "x":
               i += 3;
               break;
@@ -1053,12 +1053,12 @@ var require_foldFlowLines = __commonJS({
         }
         if (ch === "\n") {
           if (mode === FOLD_BLOCK)
-            i = consumeMoreIndentedLines(text2, i, indent.length);
+            i = consumeMoreIndentedLines(text3, i, indent.length);
           end = i + indent.length + endStep;
           split = void 0;
         } else {
           if (ch === " " && prev && prev !== " " && prev !== "\n" && prev !== "	") {
-            const next = text2[i + 1];
+            const next = text3[i + 1];
             if (next && next !== " " && next !== "\n" && next !== "	")
               split = i;
           }
@@ -1070,12 +1070,12 @@ var require_foldFlowLines = __commonJS({
             } else if (mode === FOLD_QUOTED) {
               while (prev === " " || prev === "	") {
                 prev = ch;
-                ch = text2[i += 1];
+                ch = text3[i += 1];
                 overflow = true;
               }
               const j = i > escEnd + 1 ? i - 2 : escStart - 1;
               if (escapedFolds[j])
-                return text2;
+                return text3;
               folds.push(j);
               escapedFolds[j] = true;
               end = j + endStep;
@@ -1090,39 +1090,39 @@ var require_foldFlowLines = __commonJS({
       if (overflow && onOverflow)
         onOverflow();
       if (folds.length === 0)
-        return text2;
+        return text3;
       if (onFold)
         onFold();
-      let res = text2.slice(0, folds[0]);
+      let res = text3.slice(0, folds[0]);
       for (let i2 = 0; i2 < folds.length; ++i2) {
         const fold = folds[i2];
-        const end2 = folds[i2 + 1] || text2.length;
+        const end2 = folds[i2 + 1] || text3.length;
         if (fold === 0)
           res = `
-${indent}${text2.slice(0, end2)}`;
+${indent}${text3.slice(0, end2)}`;
         else {
           if (mode === FOLD_QUOTED && escapedFolds[fold])
-            res += `${text2[fold]}\\`;
+            res += `${text3[fold]}\\`;
           res += `
-${indent}${text2.slice(fold + 1, end2)}`;
+${indent}${text3.slice(fold + 1, end2)}`;
         }
       }
       return res;
     }
-    function consumeMoreIndentedLines(text2, i, indent) {
+    function consumeMoreIndentedLines(text3, i, indent) {
       let end = i;
       let start = i + 1;
-      let ch = text2[start];
+      let ch = text3[start];
       while (ch === " " || ch === "	") {
         if (i < start + indent) {
-          ch = text2[++i];
+          ch = text3[++i];
         } else {
           do {
-            ch = text2[++i];
+            ch = text3[++i];
           } while (ch && ch !== "\n");
           end = i;
           start = i + 1;
-          ch = text2[start];
+          ch = text3[start];
         }
       }
       return end;
@@ -1145,16 +1145,16 @@ var require_stringifyString = __commonJS({
       lineWidth: ctx.options.lineWidth,
       minContentWidth: ctx.options.minContentWidth
     });
-    var containsDocumentMarker = (str) => /^(%|---|\.\.\.)/m.test(str);
-    function lineLengthOverLimit(str, lineWidth, indentLength) {
+    var containsDocumentMarker = (str3) => /^(%|---|\.\.\.)/m.test(str3);
+    function lineLengthOverLimit(str3, lineWidth, indentLength) {
       if (!lineWidth || lineWidth < 0)
         return false;
       const limit = lineWidth - indentLength;
-      const strLen = str.length;
+      const strLen = str3.length;
       if (strLen <= limit)
         return false;
       for (let i = 0, start = 0; i < strLen; ++i) {
-        if (str[i] === "\n") {
+        if (str3[i] === "\n") {
           if (i - start > limit)
             return true;
           start = i + 1;
@@ -1171,11 +1171,11 @@ var require_stringifyString = __commonJS({
       const { implicitKey } = ctx;
       const minMultiLineLength = ctx.options.doubleQuotedMinMultiLineLength;
       const indent = ctx.indent || (containsDocumentMarker(value) ? "  " : "");
-      let str = "";
+      let str3 = "";
       let start = 0;
       for (let i = 0, ch = json[i]; ch; ch = json[++i]) {
         if (ch === " " && json[i + 1] === "\\" && json[i + 2] === "n") {
-          str += json.slice(start, i) + "\\ ";
+          str3 += json.slice(start, i) + "\\ ";
           i += 1;
           start = i;
           ch = "\\";
@@ -1184,38 +1184,38 @@ var require_stringifyString = __commonJS({
           switch (json[i + 1]) {
             case "u":
               {
-                str += json.slice(start, i);
+                str3 += json.slice(start, i);
                 const code = json.substr(i + 2, 4);
                 switch (code) {
                   case "0000":
-                    str += "\\0";
+                    str3 += "\\0";
                     break;
                   case "0007":
-                    str += "\\a";
+                    str3 += "\\a";
                     break;
                   case "000b":
-                    str += "\\v";
+                    str3 += "\\v";
                     break;
                   case "001b":
-                    str += "\\e";
+                    str3 += "\\e";
                     break;
                   case "0085":
-                    str += "\\N";
+                    str3 += "\\N";
                     break;
                   case "00a0":
-                    str += "\\_";
+                    str3 += "\\_";
                     break;
                   case "2028":
-                    str += "\\L";
+                    str3 += "\\L";
                     break;
                   case "2029":
-                    str += "\\P";
+                    str3 += "\\P";
                     break;
                   default:
                     if (code.substr(0, 2) === "00")
-                      str += "\\x" + code.substr(2);
+                      str3 += "\\x" + code.substr(2);
                     else
-                      str += json.substr(i, 6);
+                      str3 += json.substr(i, 6);
                 }
                 i += 5;
                 start = i + 1;
@@ -1225,14 +1225,14 @@ var require_stringifyString = __commonJS({
               if (implicitKey || json[i + 2] === '"' || json.length < minMultiLineLength) {
                 i += 1;
               } else {
-                str += json.slice(start, i) + "\n\n";
+                str3 += json.slice(start, i) + "\n\n";
                 while (json[i + 2] === "\\" && json[i + 3] === "n" && json[i + 4] !== '"') {
-                  str += "\n";
+                  str3 += "\n";
                   i += 2;
                 }
-                str += indent;
+                str3 += indent;
                 if (json[i + 2] === " ")
-                  str += "\\";
+                  str3 += "\\";
                 i += 1;
                 start = i + 1;
               }
@@ -1241,8 +1241,8 @@ var require_stringifyString = __commonJS({
               i += 1;
           }
       }
-      str = start ? str + json.slice(start) : json;
-      return implicitKey ? str : foldFlowLines.foldFlowLines(str, indent, foldFlowLines.FOLD_QUOTED, getFoldOptions(ctx, false));
+      str3 = start ? str3 + json.slice(start) : json;
+      return implicitKey ? str3 : foldFlowLines.foldFlowLines(str3, indent, foldFlowLines.FOLD_QUOTED, getFoldOptions(ctx, false));
     }
     function singleQuotedString(value, ctx) {
       if (ctx.options.singleQuote === false || ctx.implicitKey && value.includes("\n") || /[ \t]\n|\n[ \t]/.test(value))
@@ -1370,15 +1370,15 @@ ${indent}${start}${value}${end}`;
           return quotedString(value, ctx);
         }
       }
-      const str = value.replace(/\n+/g, `$&
+      const str3 = value.replace(/\n+/g, `$&
 ${indent}`);
       if (actualString) {
-        const test = (tag) => tag.default && tag.tag !== "tag:yaml.org,2002:str" && tag.test?.test(str);
+        const test = (tag) => tag.default && tag.tag !== "tag:yaml.org,2002:str" && tag.test?.test(str3);
         const { compat, tags } = ctx.doc.schema;
         if (tags.some(test) || compat?.some(test))
           return quotedString(value, ctx);
       }
-      return implicitKey ? str : foldFlowLines.foldFlowLines(str, indent, foldFlowLines.FOLD_FLOW, getFoldOptions(ctx, false));
+      return implicitKey ? str3 : foldFlowLines.foldFlowLines(str3, indent, foldFlowLines.FOLD_FLOW, getFoldOptions(ctx, false));
     }
     function stringifyString(item, ctx, onComment, onChompKeep) {
       const { implicitKey, inFlow } = ctx;
@@ -1530,11 +1530,11 @@ var require_stringify = __commonJS({
       const props = stringifyProps(node, tagObj, ctx);
       if (props.length > 0)
         ctx.indentAtStart = (ctx.indentAtStart ?? 0) + props.length + 1;
-      const str = typeof tagObj.stringify === "function" ? tagObj.stringify(node, ctx, onComment, onChompKeep) : identity.isScalar(node) ? stringifyString.stringifyString(node, ctx, onComment, onChompKeep) : node.toString(ctx, onComment, onChompKeep);
+      const str3 = typeof tagObj.stringify === "function" ? tagObj.stringify(node, ctx, onComment, onChompKeep) : identity.isScalar(node) ? stringifyString.stringifyString(node, ctx, onComment, onChompKeep) : node.toString(ctx, onComment, onChompKeep);
       if (!props)
-        return str;
-      return identity.isScalar(node) || str[0] === "{" || str[0] === "[" ? `${props} ${str}` : `${props}
-${ctx.indent}${str}`;
+        return str3;
+      return identity.isScalar(node) || str3[0] === "{" || str3[0] === "[" ? `${props} ${str3}` : `${props}
+${ctx.indent}${str3}`;
     }
     exports.createStringifyContext = createStringifyContext;
     exports.stringify = stringify2;
@@ -1569,8 +1569,8 @@ var require_stringifyPair = __commonJS({
       });
       let keyCommentDone = false;
       let chompKeep = false;
-      let str = stringify2.stringify(key, ctx, () => keyCommentDone = true, () => chompKeep = true);
-      if (!explicitKey && !ctx.inFlow && str.length > 1024) {
+      let str3 = stringify2.stringify(key, ctx, () => keyCommentDone = true, () => chompKeep = true);
+      if (!explicitKey && !ctx.inFlow && str3.length > 1024) {
         if (simpleKeys)
           throw new Error("With simple keys, single line scalar must not span more than 1024 characters");
         explicitKey = true;
@@ -1579,27 +1579,27 @@ var require_stringifyPair = __commonJS({
         if (allNullValues || value == null) {
           if (keyCommentDone && onComment)
             onComment();
-          return str === "" ? "?" : explicitKey ? `? ${str}` : str;
+          return str3 === "" ? "?" : explicitKey ? `? ${str3}` : str3;
         }
       } else if (allNullValues && !simpleKeys || value == null && explicitKey) {
-        str = `? ${str}`;
+        str3 = `? ${str3}`;
         if (keyComment && !keyCommentDone) {
-          str += stringifyComment.lineComment(str, ctx.indent, commentString(keyComment));
+          str3 += stringifyComment.lineComment(str3, ctx.indent, commentString(keyComment));
         } else if (chompKeep && onChompKeep)
           onChompKeep();
-        return str;
+        return str3;
       }
       if (keyCommentDone)
         keyComment = null;
       if (explicitKey) {
         if (keyComment)
-          str += stringifyComment.lineComment(str, ctx.indent, commentString(keyComment));
-        str = `? ${str}
+          str3 += stringifyComment.lineComment(str3, ctx.indent, commentString(keyComment));
+        str3 = `? ${str3}
 ${indent}:`;
       } else {
-        str = `${str}:`;
+        str3 = `${str3}:`;
         if (keyComment)
-          str += stringifyComment.lineComment(str, ctx.indent, commentString(keyComment));
+          str3 += stringifyComment.lineComment(str3, ctx.indent, commentString(keyComment));
       }
       let vsb, vcb, valueComment;
       if (identity.isNode(value)) {
@@ -1615,7 +1615,7 @@ ${indent}:`;
       }
       ctx.implicitKey = false;
       if (!explicitKey && !keyComment && identity.isScalar(value))
-        ctx.indentAtStart = str.length + 1;
+        ctx.indentAtStart = str3.length + 1;
       chompKeep = false;
       if (!indentSeq && indentStep.length >= 2 && !ctx.inFlow && !explicitKey && identity.isSeq(value) && !value.flow && !value.tag && !value.anchor) {
         ctx.indent = ctx.indent.substring(2);
@@ -1659,16 +1659,16 @@ ${ctx.indent}`;
       } else if (valueStr === "" || valueStr[0] === "\n") {
         ws = "";
       }
-      str += ws + valueStr;
+      str3 += ws + valueStr;
       if (ctx.inFlow) {
         if (valueCommentDone && onComment)
           onComment();
       } else if (valueComment && !valueCommentDone) {
-        str += stringifyComment.lineComment(str, ctx.indent, commentString(valueComment));
+        str3 += stringifyComment.lineComment(str3, ctx.indent, commentString(valueComment));
       } else if (chompKeep && onChompKeep) {
         onChompKeep();
       }
-      return str;
+      return str3;
     }
     exports.stringifyPair = stringifyPair;
   }
@@ -1895,31 +1895,31 @@ var require_stringifyCollection = __commonJS({
           }
         }
         chompKeep = false;
-        let str2 = stringify2.stringify(item, itemCtx, () => comment2 = null, () => chompKeep = true);
+        let str4 = stringify2.stringify(item, itemCtx, () => comment2 = null, () => chompKeep = true);
         if (comment2)
-          str2 += stringifyComment.lineComment(str2, itemIndent, commentString(comment2));
+          str4 += stringifyComment.lineComment(str4, itemIndent, commentString(comment2));
         if (chompKeep && comment2)
           chompKeep = false;
-        lines3.push(blockItemPrefix + str2);
+        lines3.push(blockItemPrefix + str4);
       }
-      let str;
+      let str3;
       if (lines3.length === 0) {
-        str = flowChars.start + flowChars.end;
+        str3 = flowChars.start + flowChars.end;
       } else {
-        str = lines3[0];
+        str3 = lines3[0];
         for (let i = 1; i < lines3.length; ++i) {
           const line = lines3[i];
-          str += line ? `
+          str3 += line ? `
 ${indent}${line}` : "\n";
         }
       }
       if (comment) {
-        str += "\n" + stringifyComment.indentComment(commentString(comment), indent);
+        str3 += "\n" + stringifyComment.indentComment(commentString(comment), indent);
         if (onComment)
           onComment();
       } else if (chompKeep && onChompKeep)
         onChompKeep();
-      return str;
+      return str3;
     }
     function stringifyFlowCollection({ items }, ctx, { flowChars, itemIndent }) {
       const { indent, indentStep, flowCollectionPadding: fcPadding, options: { commentString } } = ctx;
@@ -1962,21 +1962,21 @@ ${indent}${line}` : "\n";
         }
         if (comment)
           reqNewline = true;
-        let str = stringify2.stringify(item, itemCtx, () => comment = null);
-        reqNewline || (reqNewline = lines3.length > linesAtValue || str.includes("\n"));
+        let str3 = stringify2.stringify(item, itemCtx, () => comment = null);
+        reqNewline || (reqNewline = lines3.length > linesAtValue || str3.includes("\n"));
         if (i < items.length - 1) {
-          str += ",";
+          str3 += ",";
         } else if (ctx.options.trailingComma) {
           if (ctx.options.lineWidth > 0) {
-            reqNewline || (reqNewline = lines3.reduce((sum, line) => sum + line.length + 2, 2) + (str.length + 2) > ctx.options.lineWidth);
+            reqNewline || (reqNewline = lines3.reduce((sum, line) => sum + line.length + 2, 2) + (str3.length + 2) > ctx.options.lineWidth);
           }
           if (reqNewline) {
-            str += ",";
+            str3 += ",";
           }
         }
         if (comment)
-          str += stringifyComment.lineComment(str, itemIndent, commentString(comment));
-        lines3.push(str);
+          str3 += stringifyComment.lineComment(str3, itemIndent, commentString(comment));
+        lines3.push(str3);
         linesAtValue = lines3.length;
       }
       const { start, end } = flowChars;
@@ -1988,11 +1988,11 @@ ${indent}${line}` : "\n";
           reqNewline = ctx.options.lineWidth > 0 && len > ctx.options.lineWidth;
         }
         if (reqNewline) {
-          let str = start;
+          let str3 = start;
           for (const line of lines3)
-            str += line ? `
+            str3 += line ? `
 ${indentStep}${indent}${line}` : "\n";
-          return `${str}
+          return `${str3}
 ${indent}${end}`;
         } else {
           return `${start}${fcPadding}${lines3.join(" ")}${fcPadding}${end}`;
@@ -2324,7 +2324,7 @@ var require_string = __commonJS({
       identify: (value) => typeof value === "string",
       default: true,
       tag: "tag:yaml.org,2002:str",
-      resolve: (str) => str,
+      resolve: (str3) => str3,
       stringify(item, ctx, onComment, onChompKeep) {
         ctx = Object.assign({ actualString: true }, ctx);
         return stringifyString.stringifyString(item, ctx, onComment, onChompKeep);
@@ -2362,7 +2362,7 @@ var require_bool = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:bool",
       test: /^(?:[Tt]rue|TRUE|[Ff]alse|FALSE)$/,
-      resolve: (str) => new Scalar.Scalar(str[0] === "t" || str[0] === "T"),
+      resolve: (str3) => new Scalar.Scalar(str3[0] === "t" || str3[0] === "T"),
       stringify({ source, value }, ctx) {
         if (source && boolTag.test.test(source)) {
           const sv = source[0] === "t" || source[0] === "T";
@@ -2414,7 +2414,7 @@ var require_float = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:float",
       test: /^(?:[-+]?\.(?:inf|Inf|INF)|\.nan|\.NaN|\.NAN)$/,
-      resolve: (str) => str.slice(-3).toLowerCase() === "nan" ? NaN : str[0] === "-" ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
+      resolve: (str3) => str3.slice(-3).toLowerCase() === "nan" ? NaN : str3[0] === "-" ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
       stringify: stringifyNumber.stringifyNumber
     };
     var floatExp = {
@@ -2423,7 +2423,7 @@ var require_float = __commonJS({
       tag: "tag:yaml.org,2002:float",
       format: "EXP",
       test: /^[-+]?(?:\.[0-9]+|[0-9]+(?:\.[0-9]*)?)[eE][-+]?[0-9]+$/,
-      resolve: (str) => parseFloat(str),
+      resolve: (str3) => parseFloat(str3),
       stringify(node) {
         const num = Number(node.value);
         return isFinite(num) ? num.toExponential() : stringifyNumber.stringifyNumber(node);
@@ -2434,11 +2434,11 @@ var require_float = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:float",
       test: /^[-+]?(?:\.[0-9]+|[0-9]+\.[0-9]*)$/,
-      resolve(str) {
-        const node = new Scalar.Scalar(parseFloat(str));
-        const dot = str.indexOf(".");
-        if (dot !== -1 && str[str.length - 1] === "0")
-          node.minFractionDigits = str.length - dot - 1;
+      resolve(str3) {
+        const node = new Scalar.Scalar(parseFloat(str3));
+        const dot = str3.indexOf(".");
+        if (dot !== -1 && str3[str3.length - 1] === "0")
+          node.minFractionDigits = str3.length - dot - 1;
         return node;
       },
       stringify: stringifyNumber.stringifyNumber
@@ -2455,7 +2455,7 @@ var require_int = __commonJS({
     "use strict";
     var stringifyNumber = require_stringifyNumber();
     var intIdentify = (value) => typeof value === "bigint" || Number.isInteger(value);
-    var intResolve = (str, offset, radix, { intAsBigInt }) => intAsBigInt ? BigInt(str) : parseInt(str.substring(offset), radix);
+    var intResolve = (str3, offset, radix, { intAsBigInt }) => intAsBigInt ? BigInt(str3) : parseInt(str3.substring(offset), radix);
     function intStringify(node, radix, prefix) {
       const { value } = node;
       if (intIdentify(value) && value >= 0)
@@ -2468,7 +2468,7 @@ var require_int = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "OCT",
       test: /^0o[0-7]+$/,
-      resolve: (str, _onError, opt) => intResolve(str, 2, 8, opt),
+      resolve: (str3, _onError, opt) => intResolve(str3, 2, 8, opt),
       stringify: (node) => intStringify(node, 8, "0o")
     };
     var int = {
@@ -2476,7 +2476,7 @@ var require_int = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:int",
       test: /^[-+]?[0-9]+$/,
-      resolve: (str, _onError, opt) => intResolve(str, 0, 10, opt),
+      resolve: (str3, _onError, opt) => intResolve(str3, 0, 10, opt),
       stringify: stringifyNumber.stringifyNumber
     };
     var intHex = {
@@ -2485,7 +2485,7 @@ var require_int = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "HEX",
       test: /^0x[0-9a-fA-F]+$/,
-      resolve: (str, _onError, opt) => intResolve(str, 2, 16, opt),
+      resolve: (str3, _onError, opt) => intResolve(str3, 2, 16, opt),
       stringify: (node) => intStringify(node, 16, "0x")
     };
     exports.int = int;
@@ -2538,7 +2538,7 @@ var require_schema2 = __commonJS({
         identify: (value) => typeof value === "string",
         default: true,
         tag: "tag:yaml.org,2002:str",
-        resolve: (str) => str,
+        resolve: (str3) => str3,
         stringify: stringifyJSON
       },
       {
@@ -2555,7 +2555,7 @@ var require_schema2 = __commonJS({
         default: true,
         tag: "tag:yaml.org,2002:bool",
         test: /^true$|^false$/,
-        resolve: (str) => str === "true",
+        resolve: (str3) => str3 === "true",
         stringify: stringifyJSON
       },
       {
@@ -2563,7 +2563,7 @@ var require_schema2 = __commonJS({
         default: true,
         tag: "tag:yaml.org,2002:int",
         test: /^-?(?:0|[1-9][0-9]*)$/,
-        resolve: (str, _onError, { intAsBigInt }) => intAsBigInt ? BigInt(str) : parseInt(str, 10),
+        resolve: (str3, _onError, { intAsBigInt }) => intAsBigInt ? BigInt(str3) : parseInt(str3, 10),
         stringify: ({ value }) => intIdentify(value) ? value.toString() : JSON.stringify(value)
       },
       {
@@ -2571,7 +2571,7 @@ var require_schema2 = __commonJS({
         default: true,
         tag: "tag:yaml.org,2002:float",
         test: /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]*)?(?:[eE][-+]?[0-9]+)?$/,
-        resolve: (str) => parseFloat(str),
+        resolve: (str3) => parseFloat(str3),
         stringify: stringifyJSON
       }
     ];
@@ -2579,9 +2579,9 @@ var require_schema2 = __commonJS({
       default: true,
       tag: "",
       test: /^/,
-      resolve(str, onError) {
-        onError(`Unresolved plain scalar ${JSON.stringify(str)}`);
-        return str;
+      resolve(str3, onError) {
+        onError(`Unresolved plain scalar ${JSON.stringify(str3)}`);
+        return str3;
       }
     };
     var schema = [map.map, seq.seq].concat(jsonScalars, jsonError);
@@ -2613,10 +2613,10 @@ var require_binary = __commonJS({
         if (typeof node_buffer.Buffer === "function") {
           return node_buffer.Buffer.from(src, "base64");
         } else if (typeof atob === "function") {
-          const str = atob(src.replace(/[\n\r]/g, ""));
-          const buffer = new Uint8Array(str.length);
-          for (let i = 0; i < str.length; ++i)
-            buffer[i] = str.charCodeAt(i);
+          const str3 = atob(src.replace(/[\n\r]/g, ""));
+          const buffer = new Uint8Array(str3.length);
+          for (let i = 0; i < str3.length; ++i)
+            buffer[i] = str3.charCodeAt(i);
           return buffer;
         } else {
           onError("This environment does not support reading binary tags; either Buffer or atob is required");
@@ -2627,28 +2627,28 @@ var require_binary = __commonJS({
         if (!value)
           return "";
         const buf = value;
-        let str;
+        let str3;
         if (typeof node_buffer.Buffer === "function") {
-          str = buf instanceof node_buffer.Buffer ? buf.toString("base64") : node_buffer.Buffer.from(buf.buffer).toString("base64");
+          str3 = buf instanceof node_buffer.Buffer ? buf.toString("base64") : node_buffer.Buffer.from(buf.buffer).toString("base64");
         } else if (typeof btoa === "function") {
           let s = "";
           for (let i = 0; i < buf.length; ++i)
             s += String.fromCharCode(buf[i]);
-          str = btoa(s);
+          str3 = btoa(s);
         } else {
           throw new Error("This environment does not support writing binary tags; either Buffer or btoa is required");
         }
         type ?? (type = Scalar.Scalar.BLOCK_LITERAL);
         if (type !== Scalar.Scalar.QUOTE_DOUBLE) {
           const lineWidth = Math.max(ctx.options.lineWidth - ctx.indent.length, ctx.options.minContentWidth);
-          const n = Math.ceil(str.length / lineWidth);
+          const n = Math.ceil(str3.length / lineWidth);
           const lines3 = new Array(n);
           for (let i = 0, o = 0; i < n; ++i, o += lineWidth) {
-            lines3[i] = str.substr(o, lineWidth);
+            lines3[i] = str3.substr(o, lineWidth);
           }
-          str = lines3.join(type === Scalar.Scalar.BLOCK_LITERAL ? "\n" : " ");
+          str3 = lines3.join(type === Scalar.Scalar.BLOCK_LITERAL ? "\n" : " ");
         }
-        return stringifyString.stringifyString({ comment, type, value: str }, ctx, onComment, onChompKeep);
+        return stringifyString.stringifyString({ comment, type, value: str3 }, ctx, onComment, onChompKeep);
       }
     };
     exports.binary = binary;
@@ -2854,7 +2854,7 @@ var require_float2 = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:float",
       test: /^(?:[-+]?\.(?:inf|Inf|INF)|\.nan|\.NaN|\.NAN)$/,
-      resolve: (str) => str.slice(-3).toLowerCase() === "nan" ? NaN : str[0] === "-" ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
+      resolve: (str3) => str3.slice(-3).toLowerCase() === "nan" ? NaN : str3[0] === "-" ? Number.NEGATIVE_INFINITY : Number.POSITIVE_INFINITY,
       stringify: stringifyNumber.stringifyNumber
     };
     var floatExp = {
@@ -2863,7 +2863,7 @@ var require_float2 = __commonJS({
       tag: "tag:yaml.org,2002:float",
       format: "EXP",
       test: /^[-+]?(?:[0-9][0-9_]*)?(?:\.[0-9_]*)?[eE][-+]?[0-9]+$/,
-      resolve: (str) => parseFloat(str.replace(/_/g, "")),
+      resolve: (str3) => parseFloat(str3.replace(/_/g, "")),
       stringify(node) {
         const num = Number(node.value);
         return isFinite(num) ? num.toExponential() : stringifyNumber.stringifyNumber(node);
@@ -2874,11 +2874,11 @@ var require_float2 = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:float",
       test: /^[-+]?(?:[0-9][0-9_]*)?\.[0-9_]*$/,
-      resolve(str) {
-        const node = new Scalar.Scalar(parseFloat(str.replace(/_/g, "")));
-        const dot = str.indexOf(".");
+      resolve(str3) {
+        const node = new Scalar.Scalar(parseFloat(str3.replace(/_/g, "")));
+        const dot = str3.indexOf(".");
         if (dot !== -1) {
-          const f = str.substring(dot + 1).replace(/_/g, "");
+          const f = str3.substring(dot + 1).replace(/_/g, "");
           if (f[f.length - 1] === "0")
             node.minFractionDigits = f.length;
         }
@@ -2898,34 +2898,34 @@ var require_int2 = __commonJS({
     "use strict";
     var stringifyNumber = require_stringifyNumber();
     var intIdentify = (value) => typeof value === "bigint" || Number.isInteger(value);
-    function intResolve(str, offset, radix, { intAsBigInt }) {
-      const sign = str[0];
+    function intResolve(str3, offset, radix, { intAsBigInt }) {
+      const sign = str3[0];
       if (sign === "-" || sign === "+")
         offset += 1;
-      str = str.substring(offset).replace(/_/g, "");
+      str3 = str3.substring(offset).replace(/_/g, "");
       if (intAsBigInt) {
         switch (radix) {
           case 2:
-            str = `0b${str}`;
+            str3 = `0b${str3}`;
             break;
           case 8:
-            str = `0o${str}`;
+            str3 = `0o${str3}`;
             break;
           case 16:
-            str = `0x${str}`;
+            str3 = `0x${str3}`;
             break;
         }
-        const n2 = BigInt(str);
+        const n2 = BigInt(str3);
         return sign === "-" ? BigInt(-1) * n2 : n2;
       }
-      const n = parseInt(str, radix);
+      const n = parseInt(str3, radix);
       return sign === "-" ? -1 * n : n;
     }
     function intStringify(node, radix, prefix) {
       const { value } = node;
       if (intIdentify(value)) {
-        const str = value.toString(radix);
-        return value < 0 ? "-" + prefix + str.substr(1) : prefix + str;
+        const str3 = value.toString(radix);
+        return value < 0 ? "-" + prefix + str3.substr(1) : prefix + str3;
       }
       return stringifyNumber.stringifyNumber(node);
     }
@@ -2935,7 +2935,7 @@ var require_int2 = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "BIN",
       test: /^[-+]?0b[0-1_]+$/,
-      resolve: (str, _onError, opt) => intResolve(str, 2, 2, opt),
+      resolve: (str3, _onError, opt) => intResolve(str3, 2, 2, opt),
       stringify: (node) => intStringify(node, 2, "0b")
     };
     var intOct = {
@@ -2944,7 +2944,7 @@ var require_int2 = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "OCT",
       test: /^[-+]?0[0-7_]+$/,
-      resolve: (str, _onError, opt) => intResolve(str, 1, 8, opt),
+      resolve: (str3, _onError, opt) => intResolve(str3, 1, 8, opt),
       stringify: (node) => intStringify(node, 8, "0")
     };
     var int = {
@@ -2952,7 +2952,7 @@ var require_int2 = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:int",
       test: /^[-+]?[0-9][0-9_]*$/,
-      resolve: (str, _onError, opt) => intResolve(str, 0, 10, opt),
+      resolve: (str3, _onError, opt) => intResolve(str3, 0, 10, opt),
       stringify: stringifyNumber.stringifyNumber
     };
     var intHex = {
@@ -2961,7 +2961,7 @@ var require_int2 = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "HEX",
       test: /^[-+]?0x[0-9a-fA-F_]+$/,
-      resolve: (str, _onError, opt) => intResolve(str, 2, 16, opt),
+      resolve: (str3, _onError, opt) => intResolve(str3, 2, 16, opt),
       stringify: (node) => intStringify(node, 16, "0x")
     };
     exports.int = int;
@@ -3065,9 +3065,9 @@ var require_timestamp = __commonJS({
   "../../node_modules/yaml/dist/schema/yaml-1.1/timestamp.js"(exports) {
     "use strict";
     var stringifyNumber = require_stringifyNumber();
-    function parseSexagesimal(str, asBigInt) {
-      const sign = str[0];
-      const parts2 = sign === "-" || sign === "+" ? str.substring(1) : str;
+    function parseSexagesimal(str3, asBigInt) {
+      const sign = str3[0];
+      const parts2 = sign === "-" || sign === "+" ? str3.substring(1) : str3;
       const num = (n) => asBigInt ? BigInt(n) : Number(n);
       const res = parts2.replace(/_/g, "").split(":").reduce((res2, p) => res2 * num(60) + num(p), num(0));
       return sign === "-" ? num(-1) * res : res;
@@ -3104,7 +3104,7 @@ var require_timestamp = __commonJS({
       tag: "tag:yaml.org,2002:int",
       format: "TIME",
       test: /^[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+$/,
-      resolve: (str, _onError, { intAsBigInt }) => parseSexagesimal(str, intAsBigInt),
+      resolve: (str3, _onError, { intAsBigInt }) => parseSexagesimal(str3, intAsBigInt),
       stringify: stringifySexagesimal
     };
     var floatTime = {
@@ -3113,7 +3113,7 @@ var require_timestamp = __commonJS({
       tag: "tag:yaml.org,2002:float",
       format: "TIME",
       test: /^[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\.[0-9_]*$/,
-      resolve: (str) => parseSexagesimal(str, false),
+      resolve: (str3) => parseSexagesimal(str3, false),
       stringify: stringifySexagesimal
     };
     var timestamp = {
@@ -3124,8 +3124,8 @@ var require_timestamp = __commonJS({
       // may be omitted altogether, resulting in a date format. In such a case, the time part is
       // assumed to be 00:00:00Z (start of day, UTC).
       test: RegExp("^([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})(?:(?:t|T|[ \\t]+)([0-9]{1,2}):([0-9]{1,2}):([0-9]{1,2}(\\.[0-9]+)?)(?:[ \\t]*(Z|[-+][012]?[0-9](?::[0-9]{2})?))?)?$"),
-      resolve(str) {
-        const match = str.match(timestamp.test);
+      resolve(str3) {
+        const match = str3.match(timestamp.test);
         if (!match)
           throw new Error("!!timestamp expects a date, starting with yyyy-mm-dd");
         const [, year, month, day, hour, minute, second] = match.map(Number);
@@ -4001,10 +4001,10 @@ var require_resolve_block_map = __commonJS({
       let offset = bm.offset;
       let commentEnd = null;
       for (const collItem of bm.items) {
-        const { start, key, sep: sep17, value } = collItem;
+        const { start, key, sep: sep21, value } = collItem;
         const keyProps = resolveProps.resolveProps(start, {
           indicator: "explicit-key-ind",
-          next: key ?? sep17?.[0],
+          next: key ?? sep21?.[0],
           offset,
           onError,
           parentIndent: bm.indent,
@@ -4018,7 +4018,7 @@ var require_resolve_block_map = __commonJS({
             else if ("indent" in key && key.indent !== bm.indent)
               onError(offset, "BAD_INDENT", startColMsg);
           }
-          if (!keyProps.anchor && !keyProps.tag && !sep17) {
+          if (!keyProps.anchor && !keyProps.tag && !sep21) {
             commentEnd = keyProps.end;
             if (keyProps.comment) {
               if (map.comment)
@@ -4042,7 +4042,7 @@ var require_resolve_block_map = __commonJS({
         ctx.atKey = false;
         if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
           onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
-        const valueProps = resolveProps.resolveProps(sep17 ?? [], {
+        const valueProps = resolveProps.resolveProps(sep21 ?? [], {
           indicator: "map-value-ind",
           next: value,
           offset: keyNode.range[2],
@@ -4058,7 +4058,7 @@ var require_resolve_block_map = __commonJS({
             if (ctx.options.strict && keyProps.start < valueProps.found.offset - 1024)
               onError(keyNode.range, "KEY_OVER_1024_CHARS", "The : indicator must be at most 1024 chars after the start of an implicit block mapping key");
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep17, null, valueProps, onError);
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep21, null, valueProps, onError);
           if (ctx.schema.compat)
             utilFlowIndentCheck.flowIndentCheck(bm.indent, value, onError);
           offset = valueNode.range[2];
@@ -4149,7 +4149,7 @@ var require_resolve_end = __commonJS({
       let comment = "";
       if (end) {
         let hasSpace = false;
-        let sep17 = "";
+        let sep21 = "";
         for (const token of end) {
           const { source, type } = token;
           switch (type) {
@@ -4163,13 +4163,13 @@ var require_resolve_end = __commonJS({
               if (!comment)
                 comment = cb;
               else
-                comment += sep17 + cb;
-              sep17 = "";
+                comment += sep21 + cb;
+              sep21 = "";
               break;
             }
             case "newline":
               if (comment)
-                sep17 += source;
+                sep21 += source;
               hasSpace = true;
               break;
             default:
@@ -4212,18 +4212,18 @@ var require_resolve_flow_collection = __commonJS({
       let offset = fc.offset + fc.start.source.length;
       for (let i = 0; i < fc.items.length; ++i) {
         const collItem = fc.items[i];
-        const { start, key, sep: sep17, value } = collItem;
+        const { start, key, sep: sep21, value } = collItem;
         const props = resolveProps.resolveProps(start, {
           flow: fcName,
           indicator: "explicit-key-ind",
-          next: key ?? sep17?.[0],
+          next: key ?? sep21?.[0],
           offset,
           onError,
           parentIndent: fc.indent,
           startOnNewline: false
         });
         if (!props.found) {
-          if (!props.anchor && !props.tag && !sep17 && !value) {
+          if (!props.anchor && !props.tag && !sep21 && !value) {
             if (i === 0 && props.comma)
               onError(props.comma, "UNEXPECTED_TOKEN", `Unexpected , in ${fcName}`);
             else if (i < fc.items.length - 1)
@@ -4277,8 +4277,8 @@ var require_resolve_flow_collection = __commonJS({
             }
           }
         }
-        if (!isMap3 && !sep17 && !props.found) {
-          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep17, null, props, onError);
+        if (!isMap3 && !sep21 && !props.found) {
+          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep21, null, props, onError);
           coll.items.push(valueNode);
           offset = valueNode.range[2];
           if (isBlock(value))
@@ -4290,7 +4290,7 @@ var require_resolve_flow_collection = __commonJS({
           if (isBlock(key))
             onError(keyNode.range, "BLOCK_IN_FLOW", blockMsg);
           ctx.atKey = false;
-          const valueProps = resolveProps.resolveProps(sep17 ?? [], {
+          const valueProps = resolveProps.resolveProps(sep21 ?? [], {
             flow: fcName,
             indicator: "map-value-ind",
             next: value,
@@ -4301,8 +4301,8 @@ var require_resolve_flow_collection = __commonJS({
           });
           if (valueProps.found) {
             if (!isMap3 && !props.found && ctx.options.strict) {
-              if (sep17)
-                for (const st of sep17) {
+              if (sep21)
+                for (const st of sep21) {
                   if (st === valueProps.found)
                     break;
                   if (st.type === "newline") {
@@ -4319,7 +4319,7 @@ var require_resolve_flow_collection = __commonJS({
             else
               onError(valueProps.start, "MISSING_CHAR", `Missing , or : between ${fcName} items`);
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep17, null, valueProps, onError) : null;
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep21, null, valueProps, onError) : null;
           if (valueNode) {
             if (isBlock(value))
               onError(valueNode.range, "BLOCK_IN_FLOW", blockMsg);
@@ -4499,7 +4499,7 @@ var require_resolve_block_scalar = __commonJS({
           chompStart = i + 1;
       }
       let value = "";
-      let sep17 = "";
+      let sep21 = "";
       let prevMoreIndented = false;
       for (let i = 0; i < contentStart; ++i)
         value += lines3[i][0].slice(trimIndent) + "\n";
@@ -4516,24 +4516,24 @@ var require_resolve_block_scalar = __commonJS({
           indent = "";
         }
         if (type === Scalar.Scalar.BLOCK_LITERAL) {
-          value += sep17 + indent.slice(trimIndent) + content;
-          sep17 = "\n";
+          value += sep21 + indent.slice(trimIndent) + content;
+          sep21 = "\n";
         } else if (indent.length > trimIndent || content[0] === "	") {
-          if (sep17 === " ")
-            sep17 = "\n";
-          else if (!prevMoreIndented && sep17 === "\n")
-            sep17 = "\n\n";
-          value += sep17 + indent.slice(trimIndent) + content;
-          sep17 = "\n";
+          if (sep21 === " ")
+            sep21 = "\n";
+          else if (!prevMoreIndented && sep21 === "\n")
+            sep21 = "\n\n";
+          value += sep21 + indent.slice(trimIndent) + content;
+          sep21 = "\n";
           prevMoreIndented = true;
         } else if (content === "") {
-          if (sep17 === "\n")
+          if (sep21 === "\n")
             value += "\n";
           else
-            sep17 = "\n";
+            sep21 = "\n";
         } else {
-          value += sep17 + content;
-          sep17 = " ";
+          value += sep21 + content;
+          sep21 = " ";
           prevMoreIndented = false;
         }
       }
@@ -4716,25 +4716,25 @@ var require_resolve_flow_scalar = __commonJS({
         trimBoth = /^[ \t]+|[ \t]+$/g;
       }
       let res = match[1].replace(trimEnd, "");
-      let sep17 = " ";
+      let sep21 = " ";
       let pos = line.lastIndex;
       while (match = line.exec(source)) {
         const lm = match[1].replace(trimBoth, "");
         if (lm === "") {
-          if (sep17 === "\n")
-            res += sep17;
+          if (sep21 === "\n")
+            res += sep21;
           else
-            sep17 = "\n";
+            sep21 = "\n";
         } else {
-          res += sep17 + lm;
-          sep17 = " ";
+          res += sep21 + lm;
+          sep21 = " ";
         }
         pos = line.lastIndex;
       }
       const last = /[ \t]*(.*)/sy;
       last.lastIndex = pos;
       match = last.exec(source);
-      return res + sep17 + (match?.[1] ?? "");
+      return res + sep21 + (match?.[1] ?? "");
     }
     function doubleQuotedValue(source, onError) {
       let res = "";
@@ -5544,14 +5544,14 @@ var require_cst_stringify = __commonJS({
         }
       }
     }
-    function stringifyItem({ start, key, sep: sep17, value }) {
+    function stringifyItem({ start, key, sep: sep21, value }) {
       let res = "";
       for (const st of start)
         res += st.source;
       if (key)
         res += stringifyToken(key);
-      if (sep17)
-        for (const st of sep17)
+      if (sep21)
+        for (const st of sep21)
           res += st.source;
       if (value)
         res += stringifyToken(value);
@@ -6718,18 +6718,18 @@ var require_parser = __commonJS({
         if (this.type === "map-value-ind") {
           const prev = getPrevProps(this.peek(2));
           const start = getFirstKeyStartProps(prev);
-          let sep17;
+          let sep21;
           if (scalar2.end) {
-            sep17 = scalar2.end;
-            sep17.push(this.sourceToken);
+            sep21 = scalar2.end;
+            sep21.push(this.sourceToken);
             delete scalar2.end;
           } else
-            sep17 = [this.sourceToken];
+            sep21 = [this.sourceToken];
           const map = {
             type: "block-map",
             offset: scalar2.offset,
             indent: scalar2.indent,
-            items: [{ start, key: scalar2, sep: sep17 }]
+            items: [{ start, key: scalar2, sep: sep21 }]
           };
           this.onKeyLine = true;
           this.stack[this.stack.length - 1] = map;
@@ -6882,15 +6882,15 @@ var require_parser = __commonJS({
                 } else if (isFlowToken(it.key) && !includesToken(it.sep, "newline")) {
                   const start2 = getFirstKeyStartProps(it.start);
                   const key = it.key;
-                  const sep17 = it.sep;
-                  sep17.push(this.sourceToken);
+                  const sep21 = it.sep;
+                  sep21.push(this.sourceToken);
                   delete it.key;
                   delete it.sep;
                   this.stack.push({
                     type: "block-map",
                     offset: this.offset,
                     indent: this.indent,
-                    items: [{ start: start2, key, sep: sep17 }]
+                    items: [{ start: start2, key, sep: sep21 }]
                   });
                 } else if (start.length > 0) {
                   it.sep = it.sep.concat(start, this.sourceToken);
@@ -7084,13 +7084,13 @@ var require_parser = __commonJS({
             const prev = getPrevProps(parent);
             const start = getFirstKeyStartProps(prev);
             fixFlowSeqItems(fc);
-            const sep17 = fc.end.splice(1, fc.end.length);
-            sep17.push(this.sourceToken);
+            const sep21 = fc.end.splice(1, fc.end.length);
+            sep21.push(this.sourceToken);
             const map = {
               type: "block-map",
               offset: fc.offset,
               indent: fc.indent,
-              items: [{ start, key: fc, sep: sep17 }]
+              items: [{ start, key: fc, sep: sep21 }]
             };
             this.onKeyLine = true;
             this.stack[this.stack.length - 1] = map;
@@ -7564,6 +7564,7 @@ function loadConfig(root) {
     },
     agentTargets: agents.targets === void 0 ? [".claude/skills"] : stringList(agents.targets, "agents.targets").map((t) => repoFolder(t, "agents.targets")),
     unverifiedAfterDays: positiveInt(audit.unverified_after_days, "audit.unverified_after_days", 30),
+    backlogUntouchedDays: positiveInt(audit.backlog_untouched_days, "audit.backlog_untouched_days", 180),
     gate: {
       requireChangeForSourceChanges: gate.require_change_for_source_changes !== false,
       escapeLabel: typeof gate.escape_label === "string" && gate.escape_label !== "" ? gate.escape_label : "no-spec",
@@ -7712,8 +7713,8 @@ register({
 });
 
 // src/audit/rules.ts
-import { existsSync as existsSync5, readFileSync as readFileSync4 } from "node:fs";
-import { join as join8, relative as relative3, sep as sep2 } from "node:path";
+import { existsSync as existsSync9, readFileSync as readFileSync7 } from "node:fs";
+import { join as join13, relative as relative6, sep as sep6 } from "node:path";
 
 // src/bundle.ts
 var import_yaml2 = __toESM(require_dist(), 1);
@@ -7748,9 +7749,9 @@ function parseFile(bundleRoot, rel) {
   return parseText(rel, readFileSync2(join3(bundleRoot, rel), "utf8"));
 }
 function parseText(rel, raw) {
-  const text2 = raw.replace(/\r\n/g, "\n");
-  const lines3 = text2.split("\n");
-  if (lines3[0] !== "---") return { rel, hasFrontmatter: false, body: text2, bodyStartLine: 1 };
+  const text3 = raw.replace(/\r\n/g, "\n");
+  const lines3 = text3.split("\n");
+  if (lines3[0] !== "---") return { rel, hasFrontmatter: false, body: text3, bodyStartLine: 1 };
   const end = lines3.findIndex((line, i) => i > 0 && (line === "---" || line === "..."));
   if (end === -1) {
     return {
@@ -7785,6 +7786,153 @@ function parseText(rel, raw) {
     bodyStartLine
   };
 }
+
+// src/git.ts
+import { execFileSync } from "node:child_process";
+function git(repoRoot, args) {
+  try {
+    return execFileSync("git", args, { cwd: repoRoot, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+  } catch (error) {
+    const stderr = String(error.stderr ?? "").trim().split("\n")[0];
+    throw new EnvError(`git ${args[0]} failed${stderr ? `: ${stderr}` : ""}`);
+  }
+}
+function gitSucceeds(repoRoot, args) {
+  try {
+    execFileSync("git", args, { cwd: repoRoot, stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// src/validate/okf.ts
+var isRecord2 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
+var baseName = (rel) => rel.slice(rel.lastIndexOf("/") + 1);
+var isConcept = (rel) => !RESERVED.has(baseName(rel));
+var okf1 = (file) => {
+  if (!isConcept(file.rel)) return [];
+  const finding3 = (message, line) => [
+    {
+      rule: "OKF-1",
+      severity: "error",
+      path: file.rel,
+      line,
+      message,
+      fix: "start the file with a YAML frontmatter block between --- lines"
+    }
+  ];
+  if (!file.hasFrontmatter) return finding3("missing YAML frontmatter", 1);
+  if (file.frontmatterError) {
+    return finding3(
+      `frontmatter is not valid YAML: ${file.frontmatterError.message}`,
+      file.frontmatterError.line
+    );
+  }
+  if (!isRecord2(file.frontmatter?.data)) return finding3("frontmatter is not a mapping", 1);
+  return [];
+};
+var okf2 = (file) => {
+  const data = file.frontmatter?.data;
+  if (!isConcept(file.rel) || !isRecord2(data)) return [];
+  if (typeof data.type === "string" && data.type.trim() !== "") return [];
+  return [
+    {
+      rule: "OKF-2",
+      severity: "error",
+      path: file.rel,
+      line: file.frontmatter?.lineOf("type") ?? 1,
+      message: "frontmatter has no non-empty 'type'",
+      fix: "add a 'type', for example 'type: Decision'"
+    }
+  ];
+};
+var okf3 = (file, line, message, fix) => ({
+  rule: "OKF-3",
+  severity: "error",
+  path: file.rel,
+  line,
+  message,
+  fix
+});
+function isCalendarDate(text3) {
+  const date = /* @__PURE__ */ new Date(`${text3}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text3;
+}
+var okf3Index = (file) => {
+  if (baseName(file.rel) !== "index.md" || !file.hasFrontmatter) return [];
+  if (file.rel !== "index.md") {
+    return [
+      okf3(
+        file,
+        1,
+        "folder index has frontmatter",
+        "remove the frontmatter; only the bundle-root index may carry okf_version"
+      )
+    ];
+  }
+  const data = file.frontmatter?.data;
+  if (!isRecord2(data)) {
+    return [
+      okf3(
+        file,
+        1,
+        "root index frontmatter is not a mapping",
+        `keep only 'okf_version: "0.2"' in the frontmatter`
+      )
+    ];
+  }
+  return Object.keys(data).filter((key) => key !== "okf_version").map(
+    (key) => okf3(
+      file,
+      file.frontmatter?.lineOf(key) ?? 1,
+      `root index frontmatter has '${key}'`,
+      `remove '${key}'; only okf_version is allowed`
+    )
+  );
+};
+var okf3Log = (file) => {
+  if (baseName(file.rel) !== "log.md") return [];
+  if (file.hasFrontmatter) {
+    return [
+      okf3(file, 1, "log.md has frontmatter", "remove the frontmatter; log.md starts with an H1 title")
+    ];
+  }
+  const findings = [];
+  let previous;
+  file.body.split("\n").forEach((text3, i) => {
+    const heading = /^## (.*)$/.exec(text3);
+    if (!heading) return;
+    const line = file.bodyStartLine + i;
+    const date = heading[1]?.trim() ?? "";
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !isCalendarDate(date)) {
+      findings.push(
+        okf3(file, line, `log heading '${date}' is not a YYYY-MM-DD date`, "use '## YYYY-MM-DD' headings")
+      );
+      return;
+    }
+    if (previous !== void 0 && date >= previous) {
+      findings.push(
+        okf3(
+          file,
+          line,
+          `log date ${date} is not older than ${previous}`,
+          "order log dates newest first, one heading per date"
+        )
+      );
+    }
+    previous = date;
+  });
+  return findings;
+};
+
+// src/drift/deps.ts
+import { existsSync as existsSync5 } from "node:fs";
+import { dirname as dirname4, join as join8, relative as relative3, sep as sep3 } from "node:path";
+
+// src/indexes/refs.ts
+import { readFileSync as readFileSync3, statSync as statSync3 } from "node:fs";
+import { join as join5 } from "node:path";
 
 // src/glob.ts
 import { readdirSync as readdirSync3 } from "node:fs";
@@ -7858,8 +8006,6 @@ function walkFiles(root) {
 }
 
 // src/indexes/refs.ts
-import { readFileSync as readFileSync3, statSync as statSync3 } from "node:fs";
-import { join as join5 } from "node:path";
 var MAX_BYTES = 1024 * 1024;
 var REFERENCE = /see knowledge:\s+(\/[^\s"'`)]+\.md)\b/g;
 function scanReferences(repoRoot, sourceGlobs) {
@@ -7870,9 +8016,9 @@ function scanReferences(repoRoot, sourceGlobs) {
     if (!patterns.some((p) => p.test(file))) continue;
     const abs = join5(repoRoot, file);
     if (statSync3(abs).size > MAX_BYTES) continue;
-    const text2 = readFileSync3(abs, "utf8");
-    if (text2.includes("\0")) continue;
-    text2.split("\n").forEach((content, i) => {
+    const text3 = readFileSync3(abs, "utf8");
+    if (text3.includes("\0")) continue;
+    text3.split("\n").forEach((content, i) => {
       for (const match of content.matchAll(REFERENCE)) {
         refs.push({ concept: (match[1] ?? "").slice(1), file, line: i + 1 });
       }
@@ -7890,129 +8036,9 @@ function locationsByConcept(refs) {
 import { existsSync as existsSync4 } from "node:fs";
 import { dirname as dirname3, join as join7 } from "node:path";
 
-// src/validate/okf.ts
-var isRecord2 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
-var baseName = (rel) => rel.slice(rel.lastIndexOf("/") + 1);
-var isConcept = (rel) => !RESERVED.has(baseName(rel));
-var okf1 = (file) => {
-  if (!isConcept(file.rel)) return [];
-  const finding3 = (message, line) => [
-    {
-      rule: "OKF-1",
-      severity: "error",
-      path: file.rel,
-      line,
-      message,
-      fix: "start the file with a YAML frontmatter block between --- lines"
-    }
-  ];
-  if (!file.hasFrontmatter) return finding3("missing YAML frontmatter", 1);
-  if (file.frontmatterError) {
-    return finding3(
-      `frontmatter is not valid YAML: ${file.frontmatterError.message}`,
-      file.frontmatterError.line
-    );
-  }
-  if (!isRecord2(file.frontmatter?.data)) return finding3("frontmatter is not a mapping", 1);
-  return [];
-};
-var okf2 = (file) => {
-  const data = file.frontmatter?.data;
-  if (!isConcept(file.rel) || !isRecord2(data)) return [];
-  if (typeof data.type === "string" && data.type.trim() !== "") return [];
-  return [
-    {
-      rule: "OKF-2",
-      severity: "error",
-      path: file.rel,
-      line: file.frontmatter?.lineOf("type") ?? 1,
-      message: "frontmatter has no non-empty 'type'",
-      fix: "add a 'type', for example 'type: Decision'"
-    }
-  ];
-};
-var okf3 = (file, line, message, fix) => ({
-  rule: "OKF-3",
-  severity: "error",
-  path: file.rel,
-  line,
-  message,
-  fix
-});
-function isCalendarDate(text2) {
-  const date = /* @__PURE__ */ new Date(`${text2}T00:00:00Z`);
-  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text2;
-}
-var okf3Index = (file) => {
-  if (baseName(file.rel) !== "index.md" || !file.hasFrontmatter) return [];
-  if (file.rel !== "index.md") {
-    return [
-      okf3(
-        file,
-        1,
-        "folder index has frontmatter",
-        "remove the frontmatter; only the bundle-root index may carry okf_version"
-      )
-    ];
-  }
-  const data = file.frontmatter?.data;
-  if (!isRecord2(data)) {
-    return [
-      okf3(
-        file,
-        1,
-        "root index frontmatter is not a mapping",
-        `keep only 'okf_version: "0.2"' in the frontmatter`
-      )
-    ];
-  }
-  return Object.keys(data).filter((key) => key !== "okf_version").map(
-    (key) => okf3(
-      file,
-      file.frontmatter?.lineOf(key) ?? 1,
-      `root index frontmatter has '${key}'`,
-      `remove '${key}'; only okf_version is allowed`
-    )
-  );
-};
-var okf3Log = (file) => {
-  if (baseName(file.rel) !== "log.md") return [];
-  if (file.hasFrontmatter) {
-    return [
-      okf3(file, 1, "log.md has frontmatter", "remove the frontmatter; log.md starts with an H1 title")
-    ];
-  }
-  const findings = [];
-  let previous;
-  file.body.split("\n").forEach((text2, i) => {
-    const heading = /^## (.*)$/.exec(text2);
-    if (!heading) return;
-    const line = file.bodyStartLine + i;
-    const date = heading[1]?.trim() ?? "";
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !isCalendarDate(date)) {
-      findings.push(
-        okf3(file, line, `log heading '${date}' is not a YYYY-MM-DD date`, "use '## YYYY-MM-DD' headings")
-      );
-      return;
-    }
-    if (previous !== void 0 && date >= previous) {
-      findings.push(
-        okf3(
-          file,
-          line,
-          `log date ${date} is not older than ${previous}`,
-          "order log dates newest first, one heading per date"
-        )
-      );
-    }
-    previous = date;
-  });
-  return findings;
-};
-
 // src/validate/profile.ts
 import { existsSync as existsSync3 } from "node:fs";
-import { dirname as dirname2, join as join6, relative as relative2 } from "node:path";
+import { dirname as dirname2, join as join6, relative as relative2, sep as sep2 } from "node:path";
 function conceptData(file) {
   const data = file.frontmatter?.data;
   if (!isConcept(file.rel) || !isRecord2(data)) return void 0;
@@ -8241,15 +8267,15 @@ var p9 = (file) => {
   if (!conceptData(file)) return [];
   const findings = [];
   let fence;
-  file.body.split("\n").forEach((text2, i) => {
-    const marker = /^\s*(`{3,}|~{3,})/.exec(text2)?.[1];
+  file.body.split("\n").forEach((text3, i) => {
+    const marker = /^\s*(`{3,}|~{3,})/.exec(text3)?.[1];
     if (marker) {
       if (fence === void 0) fence = marker[0];
       else if (marker[0] === fence) fence = void 0;
       return;
     }
     if (fence !== void 0) return;
-    const word = NORMATIVE.exec(text2.replace(/`[^`]*`/g, ""))?.[1];
+    const word = NORMATIVE.exec(text3.replace(/`[^`]*`/g, ""))?.[1];
     if (word) {
       findings.push({
         rule: "P9",
@@ -8341,6 +8367,93 @@ var p11 = (file, ctx) => {
   }
   return findings;
 };
+var BACKLOG_STATES = ["open", "promoted", "dropped"];
+var PRIORITIES = ["low", "medium", "high"];
+var COMMITMENT_STATES = ["open", "fulfilled", "withdrawn"];
+var HUMAN = /^human:\S+$/;
+var p12 = (file) => {
+  const data = conceptData(file);
+  if (data?.type !== "Backlog Item") return [];
+  const findings = [];
+  const add = (key, message, fix) => findings.push(finding("P12", file, key, message, fix));
+  if (!BACKLOG_STATES.includes(data.state))
+    add(
+      "state",
+      `state '${String(data.state ?? "")}' is not allowed`,
+      `set 'state' to ${BACKLOG_STATES.join(", ")}`
+    );
+  if (!PRIORITIES.includes(data.priority))
+    add(
+      "priority",
+      `priority '${String(data.priority ?? "")}' is not allowed`,
+      `set 'priority' to ${PRIORITIES.join(", ")}`
+    );
+  if (!nonEmptyString(data.origin))
+    add(
+      "origin",
+      "a Backlog Item needs 'origin'",
+      "name where the idea came from: interview, retro, a change id or human"
+    );
+  if (data.state === "promoted" && !nonEmptyString(data.change))
+    add("state", "a promoted item needs 'change'", "set 'change' to the change it was promoted to");
+  if (data.state === "dropped" && !nonEmptyString(data.reason))
+    add("state", "a dropped item needs 'reason'", "say in 'reason' why it was dropped");
+  return findings;
+};
+var p13 = (file, ctx) => {
+  const data = conceptData(file);
+  if (data?.type !== "Deferred Commitment") return [];
+  const findings = [];
+  const add = (key, message, fix) => findings.push(finding("P13", file, key, message, fix));
+  if (!COMMITMENT_STATES.includes(data.state))
+    add(
+      "state",
+      `state '${String(data.state ?? "")}' is not allowed`,
+      `set 'state' to ${COMMITMENT_STATES.join(", ")}`
+    );
+  if (!nonEmptyString(data.trigger))
+    add(
+      "trigger",
+      "a Deferred Commitment needs 'trigger'",
+      "set 'trigger' to a date (2027-01-31) or a condition (before 1.0)"
+    );
+  if (data.committed_by === void 0)
+    findings.push({
+      ...finding(
+        "P13",
+        file,
+        null,
+        "no human has committed to this yet (no 'committed_by')",
+        "the person who commits runs specfold new or adds committed_by: human:<login>"
+      ),
+      severity: "warning"
+    });
+  else if (typeof data.committed_by !== "string" || !HUMAN.test(data.committed_by))
+    add(
+      "committed_by",
+      `committed_by '${String(data.committed_by)}' is not a human:<login> actor`,
+      "only a human commits; write committed_by: human:<login>"
+    );
+  if (data.vision !== void 0) {
+    const target = typeof data.vision === "string" ? resolveInBundle(ctx.bundleRoot, file.rel, data.vision) : void 0;
+    const linked = target !== void 0 && existsSync3(target) ? parseFile(ctx.bundleRoot, relative2(ctx.bundleRoot, target).split(sep2).join("/")).frontmatter?.data : void 0;
+    const isVision = isRecord2(linked) && linked.type === "Vision";
+    if (!isVision)
+      add(
+        "vision",
+        `vision '${String(data.vision)}' is not an existing Vision concept`,
+        "link a Vision concept, e.g. /vision/product.md"
+      );
+  }
+  if (data.state === "withdrawn" && !nonEmptyString(data.reason))
+    add("state", "a withdrawn commitment needs 'reason'", "say in 'reason' why it was withdrawn");
+  return findings;
+};
+var p14 = (file) => {
+  const data = conceptData(file);
+  if (data?.type !== "Vision" || data.horizon === void 0 || typeof data.horizon === "string") return [];
+  return [finding("P14", file, "horizon", "horizon must be a string", 'quote it, e.g. horizon: "2027"')];
+};
 function resolveInBundle(bundleRoot, fromRel, target) {
   const clean = target.split("#")[0] ?? "";
   if (clean === "") return void 0;
@@ -8355,15 +8468,15 @@ var LINK = /!?\[[^\]]*\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)/g;
 function bodyLinks(file, bundleRoot) {
   const links = [];
   let fence;
-  file.body.split("\n").forEach((text2, i) => {
-    const marker = /^\s*(`{3,}|~{3,})/.exec(text2)?.[1];
+  file.body.split("\n").forEach((text3, i) => {
+    const marker = /^\s*(`{3,}|~{3,})/.exec(text3)?.[1];
     if (marker) {
       if (fence === void 0) fence = marker[0];
       else if (marker[0] === fence) fence = void 0;
       return;
     }
     if (fence !== void 0) return;
-    for (const match of text2.replace(/`[^`]*`/g, "").matchAll(LINK)) {
+    for (const match of text3.replace(/`[^`]*`/g, "").matchAll(LINK)) {
       const target = match[1] ?? "";
       if (SCHEME.test(target) || target.startsWith("#")) continue;
       let decoded = target;
@@ -8417,14 +8530,416 @@ var l2 = (file, ctx) => {
   }));
 };
 
-// src/audit/rules.ts
+// src/drift/deps.ts
+var toRepo = (repoRoot, abs) => {
+  const rel = relative3(repoRoot, abs).split(sep3).join("/");
+  return rel === "" || rel.startsWith("../") || rel === ".." ? void 0 : rel;
+};
+function resourcePaths(repoRoot, bundleRoot, rel, data) {
+  const values = [data.resource];
+  if (Array.isArray(data.sources)) {
+    for (const s of data.sources) if (isRecord2(s)) values.push(s.resource);
+  }
+  return values.flatMap((value) => {
+    if (typeof value !== "string" || value.trim() === "" || SCHEME.test(value)) return [];
+    const path = value.split("#")[0] ?? "";
+    const abs = path.startsWith("/") ? join8(bundleRoot, path) : join8(bundleRoot, dirname4(rel), path);
+    const inRepo2 = existsSync5(abs) ? toRepo(repoRoot, abs) : void 0;
+    return inRepo2 ? [inRepo2] : [];
+  });
+}
+function conceptDependencies(repoRoot, bundleRoot, sourceGlobs) {
+  const code = /* @__PURE__ */ new Map();
+  for (const ref of scanReferences(repoRoot, sourceGlobs))
+    code.set(ref.concept, [...code.get(ref.concept) ?? [], ref.file]);
+  const out = [];
+  for (const entry of walk(bundleRoot)) {
+    const name = entry.rel.slice(entry.rel.lastIndexOf("/") + 1);
+    if (entry.isDir || !name.endsWith(".md") || RESERVED.has(name)) continue;
+    const data = parseFile(bundleRoot, entry.rel).frontmatter?.data;
+    if (!isRecord2(data)) continue;
+    const file = toRepo(repoRoot, join8(bundleRoot, entry.rel)) ?? entry.rel;
+    const paths = /* @__PURE__ */ new Set([
+      ...resourcePaths(repoRoot, bundleRoot, entry.rel, data),
+      ...code.get(entry.rel) ?? []
+    ]);
+    paths.delete(file);
+    out.push({ rel: entry.rel, file, data, paths: [...paths].sort() });
+  }
+  return out;
+}
+var coveredBy = (file, path) => file === path || file.startsWith(`${path}/`);
+
+// src/drift/drift.ts
+function trustTime(data) {
+  const verified = Array.isArray(data.verified) ? data.verified : data.verified === void 0 ? [] : [data.verified];
+  const times = verified.map((v) => isRecord2(v) && typeof v.at === "string" ? v.at : void 0).filter((t) => t !== void 0 && !Number.isNaN(Date.parse(t)));
+  if (times.length > 0) return times.reduce((a, b) => Date.parse(b) > Date.parse(a) ? b : a);
+  const at = isRecord2(data.generated) ? data.generated.at : void 0;
+  return typeof at === "string" && !Number.isNaN(Date.parse(at)) ? at : void 0;
+}
+var hasHistory = (repoRoot) => gitSucceeds(repoRoot, ["rev-parse", "--verify", "--quiet", "HEAD"]);
+function baselineOf(repoRoot, concept) {
+  const committed = git(repoRoot, ["log", "-1", "--format=%cI", "--", concept.file]).trim() || void 0;
+  const trusted = trustTime(concept.data);
+  if (!committed || !trusted) return committed ?? trusted;
+  return Date.parse(committed) > Date.parse(trusted) ? committed : trusted;
+}
+function driftOf(repoRoot, concept) {
+  if (concept.paths.length === 0) return void 0;
+  const baseline = baselineOf(repoRoot, concept);
+  if (!baseline) return void 0;
+  const after = Date.parse(baseline);
+  const log = git(repoRoot, [
+    "log",
+    "--relative",
+    "--name-only",
+    "--format=%x00%h%x09%cI%x09%s",
+    `--since=${baseline}`,
+    "--",
+    ...concept.paths
+  ]);
+  const commits = [];
+  for (const chunk of log.split("\0").slice(1)) {
+    const [head = "", ...files] = chunk.split("\n");
+    const [hash = "", date = "", ...subject] = head.split("	");
+    if (Date.parse(date) <= after) continue;
+    const paths = concept.paths.filter((p) => files.some((f) => f !== "" && coveredBy(f, p)));
+    if (paths.length > 0) commits.push({ hash, date, subject: subject.join("	"), paths });
+  }
+  return commits.length > 0 ? { path: concept.file, baseline, commits } : void 0;
+}
+
+// src/future/items.ts
+import { readFileSync as readFileSync6, writeFileSync as writeFileSync2 } from "node:fs";
+import { join as join12, relative as relative5, sep as sep5 } from "node:path";
+
+// src/sync/frontmatter.ts
+var import_yaml4 = __toESM(require_dist(), 1);
+
+// src/new/command.ts
+import { existsSync as existsSync8, mkdirSync as mkdirSync2, writeFileSync } from "node:fs";
+import { dirname as dirname5, join as join11, relative as relative4, sep as sep4 } from "node:path";
+
+// src/verify/login.ts
+var import_yaml3 = __toESM(require_dist(), 1);
+import { execFileSync as execFileSync2 } from "node:child_process";
+import { existsSync as existsSync6, readFileSync as readFileSync4 } from "node:fs";
+import { join as join9 } from "node:path";
+var LOCAL_FILE = ".specfold/local.yaml";
+var LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$/;
+var system = {
+  /** The login `gh api user` reports, or undefined when gh is missing or not logged in. */
+  ghLogin(cwd) {
+    try {
+      return execFileSync2("gh", ["api", "user", "--jq", ".login"], {
+        cwd,
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+        timeout: 1e4
+      }).trim();
+    } catch {
+      return void 0;
+    }
+  },
+  /** stdin is a terminal, so a person can be at the keyboard. */
+  isInteractive() {
+    return process.stdin.isTTY === true;
+  }
+};
+var AGENT_VARIABLES = ["CLAUDECODE", "SPECFOLD_MODEL"];
+function agentReason() {
+  const variable = AGENT_VARIABLES.find((v) => process.env[v]);
+  if (variable) return `${variable} is set`;
+  if (!system.isInteractive()) return "stdin is not a terminal";
+  return void 0;
+}
+function localLogin(root) {
+  const path = join9(root, LOCAL_FILE);
+  if (!existsSync6(path)) return void 0;
+  let data;
+  try {
+    data = (0, import_yaml3.parse)(readFileSync4(path, "utf8"));
+  } catch (error) {
+    throw new EnvError(`${LOCAL_FILE}: ${error.message.split("\n")[0]}`);
+  }
+  const login = data?.actors?.github_login;
+  return typeof login === "string" ? login : void 0;
+}
+function resolveLogin(root) {
+  const login = system.ghLogin(root) || localLogin(root);
+  if (!login)
+    throw new EnvError(
+      `no GitHub login found: log in with 'gh auth login', or set actors.github_login in ${LOCAL_FILE}`
+    );
+  if (!LOGIN.test(login)) throw new EnvError(`'${login}' is not a GitHub login`);
+  return login;
+}
+
+// src/new/templates.ts
+import { existsSync as existsSync7, readFileSync as readFileSync5 } from "node:fs";
+import { join as join10 } from "node:path";
+var HEADINGS = {
+  Term: ["Meaning", "Not to be confused with", "Related"],
+  "Business Rule": ["Rule", "Why", "Related"],
+  Component: ["Responsibility", "Interfaces", "Related"],
+  "Data Flow": ["Flow", "Related"],
+  Interface: ["Contract summary", "Consumers", "Related"],
+  Decision: ["Decision", "Why", "Rejected alternatives", "Related"],
+  Capability: ["Why", "Related"],
+  Convention: ["Convention", "Why", "Related"],
+  Runbook: ["When to use", "Steps", "Verify", "Related"],
+  Reference: ["Summary", "Related"],
+  Vision: ["Goals", "Non-goals", "Principles"],
+  "Deferred Commitment": ["Commitment", "Trigger", "Related"],
+  "Backlog Item": ["Idea", "Related"]
+};
+var GENERIC = ["Summary", "Related"];
+var TEMPLATE_DIR = ".agents/skills/sf-capture/templates";
+var typeSlug = (type) => type.trim().toLowerCase().replace(/\s+/g, "-");
+function builtInBody(type) {
+  return `${(HEADINGS[type] ?? GENERIC).map((h) => `# ${h}`).join("\n\n")}
+`;
+}
+function overrideTemplate(repoRoot, type, values) {
+  const path = join10(repoRoot, TEMPLATE_DIR, `${typeSlug(type)}.md`);
+  if (!existsSync7(path)) return void 0;
+  return readFileSync5(path, "utf8").replace(
+    /\{\{(type|title|description|by|now)\}\}/g,
+    (_, key) => values[key]
+  );
+}
+
+// src/new/command.ts
+var KEBAB2 = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+var ACTOR2 = /^(?:process:\S+|[^\s/:]+\/\S+)$/;
+var RESERVED_WORDS = /^(?:true|false|null|yes|no|on|off|~)$/i;
 var DAY_MS = 24 * 60 * 60 * 1e3;
+function scalar(value) {
+  const plain = /^[A-Za-z0-9][A-Za-z0-9 _.,;()'/-]*$/.test(value) && !RESERVED_WORDS.test(value) && !value.endsWith(" ");
+  return plain ? value : JSON.stringify(value);
+}
+function isoWithOffset(date) {
+  const pad = (n) => String(Math.abs(n)).padStart(2, "0");
+  const offset = -date.getTimezoneOffset();
+  const sign = offset < 0 ? "-" : "+";
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}${sign}${pad(Math.trunc(offset / 60))}:${pad(offset % 60)}`;
+}
+function titleFromPath(rel) {
+  const name = rel.slice(rel.lastIndexOf("/") + 1, -3).replace(/-/g, " ");
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+function renderConcept(repoRoot, fields) {
+  const { type, title, description, by, now, origin, committedBy } = fields;
+  const placeholders = { type, title, description, by, now: isoWithOffset(now) };
+  return overrideTemplate(repoRoot, type, placeholders) ?? [
+    "---",
+    `type: ${scalar(type)}`,
+    `title: ${scalar(title)}`,
+    `description: ${scalar(description)}`,
+    "status: draft",
+    ...type === "Decision" ? ["decision: accepted"] : [],
+    ...type === "Runbook" || type === "Interface" ? [`stale_after: ${isoWithOffset(new Date(now.getTime() + 90 * DAY_MS))}`] : [],
+    ...type === "Backlog Item" ? ["state: open", "priority: medium", `origin: ${scalar(origin ?? by)}`] : [],
+    ...type === "Deferred Commitment" ? ["state: open", 'trigger: ""', ...committedBy ? [`committed_by: human:${committedBy}`] : []] : [],
+    `generated: { by: ${scalar(by)}, at: ${placeholders.now} }`,
+    ...type === "Decision" ? ["sources: []"] : [],
+    "---",
+    "",
+    builtInBody(type)
+  ].join("\n");
+}
+function humanLogin(root) {
+  if (agentReason()) return void 0;
+  try {
+    return resolveLogin(root);
+  } catch {
+    return void 0;
+  }
+}
+function bundlePath(arg) {
+  const rel = arg.replace(/^\/+/, "");
+  const segments = rel.split("/");
+  const file = segments.at(-1) ?? "";
+  const valid = file.endsWith(".md") && file !== "index.md" && file !== "log.md" && segments.slice(0, -1).every((s) => KEBAB2.test(s)) && KEBAB2.test(file.slice(0, -3));
+  if (!valid)
+    throw new UsageError(
+      `path '${arg}' must be a kebab-case .md file inside the bundle, e.g. decisions/use-yaml.md`
+    );
+  return rel;
+}
+register({
+  name: "new",
+  summary: "create a concept from its type's template",
+  usage: "specfold new <type> <path> [--title <text>] [--description <text>] [--by <actor>] [--json]",
+  options: {
+    title: { type: "string" },
+    description: { type: "string" },
+    by: { type: "string" },
+    json: { type: "boolean" }
+  },
+  run: ({ io, values, positionals }) => {
+    if (positionals.length !== 2) throw new UsageError("expected <type> and <path>");
+    const [type = "", pathArg = ""] = positionals;
+    const config = requireConfig(io.cwd);
+    if (!config.types.includes(type)) {
+      throw new UsageError(`type '${type}' is not in specfold.yaml types: ${config.types.join(", ")}`);
+    }
+    const rel = bundlePath(pathArg);
+    const model = process.env.SPECFOLD_MODEL;
+    const by = values.by ?? (model ? `${config.agentPrefix}${model}` : "process:specfold-new");
+    if (by.startsWith("human:"))
+      throw new UsageError("human actors are added by 'specfold verify', never by 'new'");
+    if (!ACTOR2.test(by))
+      throw new UsageError(`actor '${by}' must look like '<producer>/<version>' or 'process:<id>'`);
+    const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
+    const abs = join11(bundleRoot, rel);
+    const shown = relative4(config.root, abs).split(sep4).join("/");
+    if (existsSync8(abs)) {
+      if (values.json) io.stdout(`${JSON.stringify({ created: null, error: `${shown} already exists` })}
+`);
+      else io.stderr(`specfold: ${shown} already exists
+`);
+      return 1;
+    }
+    const title = values.title ?? titleFromPath(rel);
+    const description = values.description ?? "";
+    const committedBy = type === "Deferred Commitment" ? humanLogin(config.root) : void 0;
+    const content = renderConcept(config.root, {
+      type,
+      title,
+      description,
+      by,
+      now: /* @__PURE__ */ new Date(),
+      ...committedBy ? { committedBy } : {}
+    });
+    mkdirSync2(dirname5(abs), { recursive: true });
+    writeFileSync(abs, content);
+    io.stdout(values.json ? `${JSON.stringify({ created: shown })}
+` : `${shown}
+`);
+    return 0;
+  }
+});
+
+// src/sync/frontmatter.ts
+var yamlValue = (value) => /^[A-Za-z0-9._/][A-Za-z0-9._/-]*$/.test(value) && /[A-Za-z]/.test(value) && !/^(?:true|false|null|yes|no|on|off)$/i.test(value) ? value : scalar(value);
+var TOP_KEY = /^([A-Za-z_][\w-]*):(?:\s|$)/;
+function keyRange(lines3, key) {
+  const start = lines3.findIndex((l) => TOP_KEY.exec(l)?.[1] === key);
+  if (start === -1) return void 0;
+  let end = start + 1;
+  while (end < lines3.length && /^(?:\s|-|$)/.test(lines3[end])) end++;
+  while (end > start + 1 && lines3[end - 1].trim() === "") end--;
+  return [start, end];
+}
+function editFrontmatter(text3, edit) {
+  const unchanged = { text: text3, setKeys: [], addedSources: [] };
+  const all = text3.split("\n");
+  if (all[0] !== "---") return unchanged;
+  const close = all.findIndex((l, i) => i > 0 && (l === "---" || l === "..."));
+  if (close === -1) return unchanged;
+  const lines3 = all.slice(1, close);
+  let data;
+  try {
+    data = (0, import_yaml4.parse)(lines3.join("\n"), { schema: "core" }) ?? {};
+  } catch {
+    return unchanged;
+  }
+  const setKeys2 = [];
+  for (const [key, value] of Object.entries(edit.set ?? {})) {
+    if (data[key] === value) continue;
+    const line = `${key}: ${yamlValue(value)}`;
+    const range = keyRange(lines3, key);
+    if (range) lines3.splice(range[0], range[1] - range[0], line);
+    else {
+      const generated = keyRange(lines3, "generated");
+      lines3.splice(generated ? generated[0] : lines3.length, 0, line);
+    }
+    setKeys2.push(key);
+  }
+  for (const [key, block] of Object.entries(edit.setBlock ?? {})) {
+    const range = keyRange(lines3, key);
+    if (range) {
+      if (lines3.slice(range[0], range[1]).join("\n") === block.join("\n")) continue;
+      lines3.splice(range[0], range[1] - range[0], ...block);
+    } else {
+      const generated = keyRange(lines3, "generated");
+      lines3.splice(generated ? generated[1] : lines3.length, 0, ...block);
+    }
+    setKeys2.push(key);
+  }
+  const addedSources = [];
+  const linked = new Set(
+    (Array.isArray(data.sources) ? data.sources : []).map((s) => s?.resource)
+  );
+  for (const source of edit.addSources ?? []) {
+    if (linked.has(source.resource)) continue;
+    linked.add(source.resource);
+    const entry = [`  - id: ${yamlValue(source.id)}`, `    resource: ${yamlValue(source.resource)}`];
+    const range = keyRange(lines3, "sources");
+    if (!range) lines3.push("sources:", ...entry);
+    else if (range[1] - range[0] > 1) lines3.splice(range[1], 0, ...entry);
+    else {
+      const old = Array.isArray(data.sources) ? data.sources : [];
+      const block = old.length > 0 ? (0, import_yaml4.stringify)(old, { lineWidth: 0 }).trimEnd().split("\n").map((l) => `  ${l}`) : [];
+      lines3.splice(range[0], 1, "sources:", ...block, ...entry);
+    }
+    addedSources.push(source.id);
+  }
+  if (setKeys2.length === 0 && addedSources.length === 0) return unchanged;
+  return { text: ["---", ...lines3, ...all.slice(close)].join("\n"), setKeys: setKeys2, addedSources };
+}
+
+// src/future/items.ts
+var KINDS = {
+  backlog: { folder: "backlog", type: "Backlog Item", noun: "backlog item" },
+  commitments: { folder: "commitments", type: "Deferred Commitment", noun: "commitment" }
+};
+var text = (v) => typeof v === "string" ? v : "";
+function conceptsOfType(bundleRoot, type) {
+  const items = [];
+  for (const entry of walk(bundleRoot)) {
+    const name = entry.rel.slice(entry.rel.lastIndexOf("/") + 1);
+    if (entry.isDir || !name.endsWith(".md") || RESERVED.has(name)) continue;
+    const data = parseFile(bundleRoot, entry.rel).frontmatter?.data;
+    if (!isRecord2(data) || data.type !== type) continue;
+    items.push({ rel: entry.rel, abs: join12(bundleRoot, entry.rel), title: text(data.title) || name, data });
+  }
+  return items;
+}
+var listItems = (bundleRoot, kind) => conceptsOfType(bundleRoot, KINDS[kind].type).filter((i) => i.rel.startsWith(`${KINDS[kind].folder}/`));
+function findItem(repoRoot, bundleRoot, kind, arg) {
+  const { folder, noun } = KINDS[kind];
+  const prefix = `${relative5(repoRoot, bundleRoot).split(sep5).join("/")}/`;
+  let rel = arg.replace(/^\/+/, "");
+  if (rel.startsWith(prefix)) rel = rel.slice(prefix.length);
+  if (!rel.startsWith(`${folder}/`)) rel = `${folder}/${rel}`;
+  if (!rel.endsWith(".md")) rel = `${rel}.md`;
+  const item = listItems(bundleRoot, kind).find((i) => i.rel === rel);
+  if (!item) throw new UsageError(`unknown ${noun} '${arg}': no ${KINDS[kind].type} at ${prefix}${rel}`);
+  return item;
+}
+function dueDate(trigger) {
+  if (typeof trigger !== "string") return void 0;
+  const day = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trigger.trim());
+  if (day) return new Date(Number(day[1]), Number(day[2]) - 1, Number(day[3]));
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(trigger.trim())) return void 0;
+  const ms = Date.parse(trigger);
+  return Number.isNaN(ms) ? void 0 : new Date(ms);
+}
+function setKeys(abs, keys) {
+  writeFileSync2(abs, editFrontmatter(readFileSync6(abs, "utf8"), { set: keys }).text);
+}
+
+// src/audit/rules.ts
+var DAY_MS2 = 24 * 60 * 60 * 1e3;
 var INSTRUCTION_FILES = ["AGENTS.md", "CLAUDE.md"];
 var EXEMPT_FOLDERS = ["vision/", "backlog/"];
 var MENTION = /(?:^|[\s(`[])\/([a-z0-9][a-z0-9/-]*\.md)\b/g;
 function instructionMentions(repoRoot) {
-  return INSTRUCTION_FILES.filter((f) => existsSync5(join8(repoRoot, f))).flatMap(
-    (f) => [...readFileSync4(join8(repoRoot, f), "utf8").matchAll(MENTION)].map((m) => m[1])
+  return INSTRUCTION_FILES.filter((f) => existsSync9(join13(repoRoot, f))).flatMap(
+    (f) => [...readFileSync7(join13(repoRoot, f), "utf8").matchAll(MENTION)].map((m) => m[1])
   );
 }
 var finding2 = (rule, path, line, message, fix) => ({
@@ -8449,7 +8964,7 @@ function auditBundle(config, bundleRoot, now) {
   const all = concepts(bundleRoot);
   const findings = [];
   const line = (c, key) => c.file.frontmatter?.lineOf(key) ?? null;
-  const toRel2 = (abs) => relative3(bundleRoot, abs).split(sep2).join("/");
+  const toRel2 = (abs) => relative6(bundleRoot, abs).split(sep6).join("/");
   const incoming = /* @__PURE__ */ new Set();
   for (const [rel, c] of all) {
     const stale = c.data.stale_after;
@@ -8465,7 +8980,7 @@ function auditBundle(config, bundleRoot, now) {
       );
     const at = isRecord2(c.data.generated) ? c.data.generated.at : void 0;
     if (c.data.verified === void 0 && isTimestamp(at)) {
-      const days = Math.floor((now.getTime() - Date.parse(at)) / DAY_MS);
+      const days = Math.floor((now.getTime() - Date.parse(at)) / DAY_MS2);
       if (days > config.unverifiedAfterDays)
         findings.push(
           finding2(
@@ -8500,7 +9015,7 @@ function auditBundle(config, bundleRoot, now) {
   for (const [rel, c] of all) {
     if (incoming.has(rel) || EXEMPT_FOLDERS.some((f) => rel.startsWith(f))) continue;
     const spec = c.data.spec;
-    if (c.data.type === "Capability" && typeof spec === "string" && existsSync5(join8(config.root, spec)))
+    if (c.data.type === "Capability" && typeof spec === "string" && existsSync9(join13(config.root, spec)))
       continue;
     findings.push(
       finding2(
@@ -8515,8 +9030,8 @@ function auditBundle(config, bundleRoot, now) {
   const carded = new Set(
     [...all.values()].filter((c) => c.data.type === "Capability" && typeof c.data.spec === "string").map((c) => c.data.spec)
   );
-  const specsDir = join8(config.root, "openspec", "specs");
-  if (existsSync5(specsDir)) {
+  const specsDir = join13(config.root, "openspec", "specs");
+  if (existsSync9(specsDir)) {
     for (const rel of walkFiles(specsDir)) {
       if (!rel.endsWith("/spec.md")) continue;
       const spec = `openspec/specs/${rel}`;
@@ -8532,13 +9047,57 @@ function auditBundle(config, bundleRoot, now) {
         );
     }
   }
+  for (const item of listItems(bundleRoot, "commitments")) {
+    if (item.data.state !== "open") continue;
+    const c = all.get(item.rel);
+    const due = dueDate(item.data.trigger);
+    if (due && due.getTime() < now.getTime())
+      findings.push(
+        finding2(
+          "A6",
+          item.rel,
+          c ? line(c, "trigger") : null,
+          `commitment was due on ${String(item.data.trigger)}`,
+          "keep it with a change, or have a human withdraw it with specfold commitments withdraw"
+        )
+      );
+    if (item.data.vision === void 0)
+      findings.push(
+        finding2(
+          "A7",
+          item.rel,
+          null,
+          "commitment links to no vision",
+          "set 'vision' to the Vision concept this promise serves"
+        )
+      );
+  }
+  if (hasHistory(config.root)) {
+    for (const item of listItems(bundleRoot, "backlog")) {
+      if (item.data.state !== "open") continue;
+      const file = relative6(config.root, item.abs).split(sep6).join("/");
+      const last = git(config.root, ["log", "-1", "--format=%cI", "--", file]).trim();
+      if (!last) continue;
+      const days = Math.floor((now.getTime() - Date.parse(last)) / DAY_MS2);
+      if (days > config.backlogUntouchedDays)
+        findings.push(
+          finding2(
+            "A8",
+            item.rel,
+            null,
+            `open backlog item untouched for ${days} days (limit ${config.backlogUntouchedDays})`,
+            "promote it with specfold backlog promote, drop it with specfold backlog drop, or update it"
+          )
+        );
+    }
+  }
   return findings;
 }
 
 // src/audit/command.ts
 register({
   name: "audit",
-  summary: "report stale, unverified, deprecated-linked and orphaned concepts and specs without a card",
+  summary: "report stale, unverified, deprecated-linked and orphaned concepts, specs without a card, overdue commitments and old backlog items",
   usage: "specfold audit [--json]",
   options: { json: { type: "boolean" } },
   run: ({ io, values, positionals }) => {
@@ -8563,33 +9122,356 @@ register({
   }
 });
 
+// src/backlog/command.ts
+import { execFileSync as execFileSync3 } from "node:child_process";
+import { existsSync as existsSync12, mkdirSync as mkdirSync3, writeFileSync as writeFileSync4 } from "node:fs";
+import { dirname as dirname6, join as join16, relative as relative9, sep as sep9 } from "node:path";
+
+// src/indexes/command.ts
+import { existsSync as existsSync10, readFileSync as readFileSync8, writeFileSync as writeFileSync3 } from "node:fs";
+import { join as join14, relative as relative8, sep as sep8 } from "node:path";
+
+// src/indexes/generate.ts
+import { basename, relative as relative7, sep as sep7 } from "node:path";
+var LOG_ENTRY = "* [Log](log.md) - Dated record of changes to this bundle";
+var byCodeUnit = (a, b) => a < b ? -1 : a > b ? 1 : 0;
+var isRecord3 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
+var oneLine = (v) => typeof v === "string" && v.trim() !== "" ? v.replace(/\s+/g, " ").trim() : void 0;
+function folderTitle(config, folder, fallbackName) {
+  const configured = config.folders[folder]?.title;
+  if (configured) return configured;
+  const words2 = fallbackName.replace(/-/g, " ");
+  return words2.charAt(0).toUpperCase() + words2.slice(1);
+}
+function generateIndexes(bundleRoot, config, refs = /* @__PURE__ */ new Map()) {
+  const entries = walk(bundleRoot);
+  const folders = ["", ...entries.filter((e) => e.isDir).map((e) => e.rel)];
+  const repoRel = (rel) => relative7(config.root, `${bundleRoot}${sep7}${rel}`).split(sep7).join("/");
+  const findings = [];
+  const concepts2 = /* @__PURE__ */ new Set();
+  const indexes = /* @__PURE__ */ new Map();
+  const typeOrder = (t) => {
+    const i = config.types.indexOf(t);
+    return i === -1 ? config.types.length : i;
+  };
+  for (const folder of folders) {
+    const prefix = folder ? `${folder}/` : "";
+    const children = entries.filter(
+      (e) => e.rel.startsWith(prefix) && !e.rel.slice(prefix.length).includes("/")
+    );
+    const subfolders = children.filter((e) => e.isDir).map((e) => e.rel);
+    const items = [];
+    for (const child of children) {
+      const name = child.rel.slice(prefix.length);
+      if (child.isDir || !name.endsWith(".md") || RESERVED.has(name)) continue;
+      const parsed = parseFile(bundleRoot, child.rel);
+      const data = parsed.frontmatter?.data;
+      const type = isRecord3(data) ? oneLine(data.type) : void 0;
+      if (!isRecord3(data) || type === void 0) {
+        const why = parsed.frontmatterError ? `invalid frontmatter: ${parsed.frontmatterError.message}` : "no frontmatter or no 'type'";
+        findings.push({
+          rule: "I1",
+          severity: "error",
+          path: repoRel(child.rel),
+          line: parsed.frontmatterError?.line ?? 1,
+          message: `left out of the index: ${why}`,
+          fix: "fix the frontmatter; 'specfold validate' shows the details"
+        });
+        continue;
+      }
+      concepts2.add(child.rel);
+      items.push({
+        file: name,
+        type,
+        title: oneLine(data.title) ?? name.slice(0, -3),
+        description: oneLine(data.description),
+        deprecated: data.status === "deprecated"
+      });
+    }
+    const blocks = [];
+    if (subfolders.length > 0) {
+      const lines3 = subfolders.map((sub) => {
+        const name = sub.slice(prefix.length);
+        const description = config.folders[sub]?.description;
+        return `* [${folderTitle(config, sub, name)}](${name}/)${description ? ` - ${description}` : ""}`;
+      });
+      blocks.push(["# Sections", "", ...lines3].join("\n"));
+    }
+    const types = [...new Set(items.map((i) => i.type))].sort(
+      (a, b) => typeOrder(a) - typeOrder(b) || byCodeUnit(a, b)
+    );
+    for (const type of types) {
+      const group = items.filter((i) => i.type === type).sort(
+        (a, b) => byCodeUnit(a.title.toLowerCase(), b.title.toLowerCase()) || byCodeUnit(a.file, b.file)
+      );
+      const lines3 = group.flatMap((i) => [
+        `* [${i.title}](${i.file})${i.deprecated ? " (deprecated)" : ""}${i.description ? ` - ${i.description}` : ""}`,
+        ...(refs.get(`${prefix}${i.file}`) ?? []).map((loc) => `  * Referenced from code: ${loc}`)
+      ]);
+      blocks.push([`# ${type}`, "", ...lines3].join("\n"));
+    }
+    const hasLog = folder === "" && entries.some((e) => !e.isDir && e.rel === "log.md");
+    if (blocks.length === 0) {
+      const title = folder ? folderTitle(config, folder, folder.slice(folder.lastIndexOf("/") + 1)) : folderTitle(config, "", basename(bundleRoot));
+      blocks.push(`# ${title}
+
+No concepts yet.`);
+    }
+    if (hasLog) blocks.push(`# Log
+
+${LOG_ENTRY}`);
+    if (folder === "") blocks.unshift('---\nokf_version: "0.2"\n---');
+    indexes.set(`${prefix}index.md`, `${blocks.join("\n\n")}
+`);
+  }
+  return { indexes, findings, concepts: concepts2 };
+}
+
+// src/indexes/command.ts
+function syncIndexes(repoRoot, bundleRoot, generated, check2) {
+  const changed = [];
+  for (const [rel, content] of [...generated].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) {
+    const abs = join14(bundleRoot, rel);
+    if (existsSync10(abs) && readFileSync8(abs, "utf8") === content) continue;
+    if (!check2) writeFileSync3(abs, content);
+    changed.push(relative8(repoRoot, abs).split(sep8).join("/"));
+  }
+  return changed;
+}
+register({
+  name: "index",
+  summary: "generate every index.md of the knowledge bundle",
+  usage: "specfold index [--check] [--bundle <dir>] [--json]",
+  options: { check: { type: "boolean" }, bundle: { type: "string" }, json: { type: "boolean" } },
+  run: ({ io, values }) => {
+    const config = requireConfig(io.cwd);
+    const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, config);
+    const refs = scanReferences(config.root, config.sourceGlobs);
+    const { indexes, findings, concepts: concepts2 } = generateIndexes(bundleRoot, config, locationsByConcept(refs));
+    for (const ref of refs) {
+      if (concepts2.has(ref.concept)) continue;
+      findings.push({
+        rule: "I2",
+        severity: "warning",
+        path: ref.file,
+        line: ref.line,
+        message: `reference to missing concept /${ref.concept}`,
+        fix: "point the comment at an existing concept or create it"
+      });
+    }
+    const check2 = values.check === true;
+    const changed = syncIndexes(config.root, bundleRoot, indexes, check2);
+    const written = check2 ? [] : changed;
+    const outdated = check2 ? changed : [];
+    const sorted = sortFindings(findings);
+    const { errors, warnings } = countBySeverity(sorted);
+    const ok2 = errors === 0 && outdated.length === 0;
+    if (values.json) {
+      io.stdout(`${JSON.stringify({ ok: ok2, written, outdated, findings: sorted }, null, 2)}
+`);
+    } else {
+      const counted = check2 ? `${outdated.length} outdated` : `${written.length} written`;
+      const lines3 = [
+        ...written.map((p) => `wrote ${p}`),
+        ...outdated.map((p) => `outdated ${p}`),
+        ...sorted.filter((f) => f.severity === "error").map(findingLine),
+        `${plural(indexes.size, "index")}, ${counted}: ${plural(errors, "error")}, ${plural(warnings, "warning")}`
+      ];
+      io.stdout(`${lines3.join("\n")}
+`);
+    }
+    return ok2 ? 0 : 1;
+  }
+});
+
+// src/openspec.ts
+import { existsSync as existsSync11 } from "node:fs";
+import { join as join15 } from "node:path";
+function openspecBinary(root) {
+  const local = root ? join15(root, "node_modules", ".bin", "openspec") : void 0;
+  return local !== void 0 && existsSync11(local) ? { command: local, source: "node_modules/.bin" } : { command: "openspec", source: "PATH" };
+}
+
+// src/backlog/command.ts
+var STATES = ["open", "promoted", "dropped"];
+var PRIORITIES2 = ["low", "medium", "high"];
+var CHANGE_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+var kebab = (title) => title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+var str = (v) => typeof v === "string" ? v : "";
+function writeIndexes(config, bundleRoot) {
+  const refs = scanReferences(config.root, config.sourceGlobs);
+  const { indexes } = generateIndexes(bundleRoot, config, locationsByConcept(refs));
+  return syncIndexes(config.root, bundleRoot, indexes, false);
+}
+function newChange(root, name) {
+  const bin = openspecBinary(root);
+  try {
+    execFileSync3(bin.command, ["new", "change", name], {
+      cwd: root,
+      stdio: ["ignore", "pipe", "pipe"],
+      env: { ...process.env, NO_COLOR: "1" }
+    });
+  } catch (error) {
+    const e = error;
+    if (e.code === "ENOENT") throw new EnvError(`openspec is not installed (looked for ${bin.command})`);
+    const reason = String(e.stderr ?? "").trim().split("\n").at(-1);
+    throw new EnvError(`openspec new change ${name} failed${reason ? `: ${reason}` : ""}`);
+  }
+}
+register({
+  name: "backlog",
+  summary: "add, list, promote and drop backlog items",
+  usage: "specfold backlog add <title> [--priority <p>] [--origin <text>] [--description <text>] | list [--state <state>] | promote <item> [--name <change>] | drop <item> --reason <text>  [--json]",
+  options: {
+    priority: { type: "string" },
+    origin: { type: "string" },
+    description: { type: "string" },
+    state: { type: "string" },
+    name: { type: "string" },
+    reason: { type: "string" },
+    json: { type: "boolean" }
+  },
+  run: ({ io, values, positionals }) => {
+    const [sub, ...args] = positionals;
+    const config = requireConfig(io.cwd);
+    const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
+    const shown = (abs) => relative9(config.root, abs).split(sep9).join("/");
+    const print = (lines3, json) => io.stdout(values.json ? `${JSON.stringify(json, null, 2)}
+` : `${lines3.join("\n")}
+`);
+    const refuse = (item, message) => {
+      if (values.json)
+        io.stdout(`${JSON.stringify({ ok: false, item: shown(item.abs), error: message }, null, 2)}
+`);
+      else io.stderr(`specfold: ${shown(item.abs)}: ${message}
+`);
+      return 1;
+    };
+    const one = (what) => {
+      if (args.length !== 1) throw new UsageError(`expected one ${what}`);
+      return findItem(config.root, bundleRoot, "backlog", args[0]);
+    };
+    switch (sub) {
+      case "add": {
+        const title = args.join(" ").trim();
+        const slug = kebab(title);
+        if (!slug) throw new UsageError("missing title: specfold backlog add <title>");
+        const priority = values.priority ?? "medium";
+        if (!PRIORITIES2.includes(priority))
+          throw new UsageError(`priority must be one of ${PRIORITIES2.join(", ")}, got '${priority}'`);
+        const abs = join16(bundleRoot, "backlog", `${slug}.md`);
+        if (existsSync12(abs)) {
+          io.stderr(`specfold: ${shown(abs)} already exists
+`);
+          return 1;
+        }
+        const model = process.env.SPECFOLD_MODEL;
+        const by = model ? `${config.agentPrefix}${model}` : "process:specfold-backlog";
+        const origin = values.origin;
+        mkdirSync3(dirname6(abs), { recursive: true });
+        writeFileSync4(
+          abs,
+          renderConcept(config.root, {
+            type: "Backlog Item",
+            title,
+            // a concept needs a description; the title is a valid start
+            description: values.description ?? title,
+            by,
+            now: /* @__PURE__ */ new Date(),
+            ...origin ? { origin } : {}
+          })
+        );
+        if (priority !== "medium") setKeys(abs, { priority });
+        const indexes = writeIndexes(config, bundleRoot);
+        print([`created ${shown(abs)}`, ...indexes.map((p) => `updated ${p}`)], {
+          ok: true,
+          created: shown(abs),
+          indexes
+        });
+        return 0;
+      }
+      case "list": {
+        if (args.length > 0) throw new UsageError(`unexpected argument '${args[0]}'`);
+        const state = values.state ?? "open";
+        if (state !== "all" && !STATES.includes(state))
+          throw new UsageError(`state must be one of ${[...STATES, "all"].join(", ")}, got '${state}'`);
+        const rank = (i) => {
+          const at = PRIORITIES2.indexOf(str(i.data.priority));
+          return at === -1 ? PRIORITIES2.length : PRIORITIES2.length - 1 - at;
+        };
+        const items = listItems(bundleRoot, "backlog").filter((i) => state === "all" || i.data.state === state).sort((a, b) => rank(a) - rank(b) || (a.rel < b.rel ? -1 : 1));
+        const rows = items.map((i) => [str(i.data.state), str(i.data.priority), shown(i.abs), i.title]);
+        const widths = [0, 1, 2].map((c) => Math.max(0, ...rows.map((r) => r[c].length)));
+        print(
+          rows.length === 0 ? [`no ${state === "all" ? "" : `${state} `}backlog items`] : rows.map(
+            (r) => r.map((cell2, c) => c < 3 ? cell2.padEnd(widths[c]) : cell2).join("  ")
+          ),
+          {
+            items: items.map((i) => ({
+              path: shown(i.abs),
+              title: i.title,
+              state: i.data.state ?? null,
+              priority: i.data.priority ?? null,
+              origin: i.data.origin ?? null,
+              change: i.data.change ?? null
+            }))
+          }
+        );
+        return 0;
+      }
+      case "promote": {
+        const item = one("item: specfold backlog promote <item> [--name <change>]");
+        const name = values.name ?? item.rel.slice(item.rel.lastIndexOf("/") + 1, -3);
+        if (!CHANGE_NAME.test(name) || name === "archive")
+          throw new UsageError(`'${name}' is not a change name (kebab-case)`);
+        if (item.data.state !== "open")
+          return refuse(item, `state is '${str(item.data.state)}'; only open items are promoted`);
+        const changeDir2 = join16(config.root, "openspec", "changes", name);
+        if (existsSync12(changeDir2)) return refuse(item, `change '${name}' already exists`);
+        newChange(config.root, name);
+        setKeys(item.abs, { state: "promoted", change: name });
+        const next = `run the planning interview (sf-interview) for ${name}, seeded with ${shown(item.abs)}`;
+        print(
+          [
+            `created ${shown(changeDir2)}/`,
+            `${shown(item.abs)}: state promoted, change ${name}`,
+            `next: ${next}`
+          ],
+          {
+            ok: true,
+            item: shown(item.abs),
+            change: name,
+            next
+          }
+        );
+        return 0;
+      }
+      case "drop": {
+        const item = one("item: specfold backlog drop <item> --reason <text>");
+        const reason = (values.reason ?? "").trim();
+        if (!reason) throw new UsageError("missing --reason: say why the item is dropped");
+        if (item.data.state !== "open")
+          return refuse(item, `state is '${str(item.data.state)}'; only open items are dropped`);
+        setKeys(item.abs, { state: "dropped", reason });
+        print([`${shown(item.abs)}: state dropped`], { ok: true, item: shown(item.abs), reason });
+        return 0;
+      }
+      default:
+        throw new UsageError(
+          sub ? `unknown backlog subcommand '${sub}'` : "missing subcommand: add, list, promote or drop"
+        );
+    }
+  }
+});
+
 // src/change/command.ts
-var import_yaml5 = __toESM(require_dist(), 1);
-import { existsSync as existsSync11, readFileSync as readFileSync9 } from "node:fs";
-import { join as join14 } from "node:path";
+var import_yaml7 = __toESM(require_dist(), 1);
+import { existsSync as existsSync18, readFileSync as readFileSync13 } from "node:fs";
+import { join as join22 } from "node:path";
 
 // src/tasks/command.ts
-import { existsSync as existsSync8, readFileSync as readFileSync6, statSync as statSync4 } from "node:fs";
-import { join as join11 } from "node:path";
-
-// src/git.ts
-import { execFileSync } from "node:child_process";
-function git(repoRoot, args) {
-  try {
-    return execFileSync("git", args, { cwd: repoRoot, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
-  } catch (error) {
-    const stderr = String(error.stderr ?? "").trim().split("\n")[0];
-    throw new EnvError(`git ${args[0]} failed${stderr ? `: ${stderr}` : ""}`);
-  }
-}
-function gitSucceeds(repoRoot, args) {
-  try {
-    execFileSync("git", args, { cwd: repoRoot, stdio: "ignore" });
-    return true;
-  } catch {
-    return false;
-  }
-}
+import { existsSync as existsSync15, readFileSync as readFileSync10, statSync as statSync4 } from "node:fs";
+import { join as join19 } from "node:path";
 
 // src/tasks/git.ts
 var RECORD = "";
@@ -8691,21 +9573,21 @@ function checkTrailers(tasks, commits, ctx) {
 }
 
 // src/tasks/parse.ts
-var import_yaml3 = __toESM(require_dist(), 1);
+var import_yaml5 = __toESM(require_dist(), 1);
 var FOLLOW_UP = "Workflow follow-up";
 var GROUP = /^## (\d+)\. (.+?)\s*$/;
 var H2 = /^## (.*?)\s*$/;
 var TASK = /^- \[([ xX])\] (\d+)\.(\d+)(?: (.*))?$/;
 var DONE = /^\s+- Done when:(.*)$/;
-var isRecord3 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
+var isRecord4 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
 function parseMeta(source) {
   let data;
   try {
-    data = (0, import_yaml3.parse)(source);
+    data = (0, import_yaml5.parse)(source);
   } catch (error) {
     return { error: `metadata is not valid YAML: ${error.message.split("\n")[0]}` };
   }
-  if (!isRecord3(data)) return { error: "metadata must be a mapping" };
+  if (!isRecord4(data)) return { error: "metadata must be a mapping" };
   const strings = (v) => Array.isArray(v) && v.every((x) => typeof x === "string");
   if (data.files === void 0) return { error: "metadata has no 'files'" };
   if (!strings(data.files)) return { error: "'files' must be a list of globs" };
@@ -8719,8 +9601,8 @@ function parseMeta(source) {
   if (typeof agent !== "string" || agent === "") return { error: "'agent' must be a role name" };
   return { meta: { files: data.files, depends, scenarios, agent } };
 }
-function parseTasks(text2) {
-  const lines3 = text2.split(/\r?\n/);
+function parseTasks(text3) {
+  const lines3 = text3.split(/\r?\n/);
   const result = { groups: [], strayHeadings: [], orphanTasks: [] };
   let current;
   let inFollowUp = false;
@@ -8784,8 +9666,8 @@ function parseTasks(text2) {
 }
 
 // src/tasks/rules.ts
-import { existsSync as existsSync6 } from "node:fs";
-import { join as join9 } from "node:path";
+import { existsSync as existsSync13 } from "node:fs";
+import { join as join17 } from "node:path";
 
 // src/tasks/overlap.ts
 var WILDCARD = /[*?{[]/;
@@ -8987,7 +9869,7 @@ function checkStatic(tasks, ctx) {
         );
     }
     const agent = group.meta?.agent;
-    if (agent && agent !== DEFAULT_AGENT && !existsSync6(join9(ctx.repoRoot, ".claude", "agents", `${agent}.md`))) {
+    if (agent && agent !== DEFAULT_AGENT && !existsSync13(join17(ctx.repoRoot, ".claude", "agents", `${agent}.md`))) {
       add(
         "T7",
         "warning",
@@ -9069,43 +9951,43 @@ function checkStatic(tasks, ctx) {
 }
 
 // src/tasks/scenarios.ts
-import { existsSync as existsSync7, readFileSync as readFileSync5 } from "node:fs";
-import { join as join10 } from "node:path";
+import { existsSync as existsSync14, readFileSync as readFileSync9 } from "node:fs";
+import { join as join18 } from "node:path";
 var SCENARIO = /^#### Scenario:\s*(.+?)\s*$/gm;
 var scenarioSlug = (title) => title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 function collect(specsDir, into) {
-  if (!existsSync7(specsDir)) return;
+  if (!existsSync14(specsDir)) return;
   for (const rel of walkFiles(specsDir)) {
     if (!rel.endsWith("/spec.md")) continue;
     const capability = rel.slice(0, -"/spec.md".length);
-    for (const m of readFileSync5(join10(specsDir, rel), "utf8").matchAll(SCENARIO)) {
+    for (const m of readFileSync9(join18(specsDir, rel), "utf8").matchAll(SCENARIO)) {
       into.add(`${capability}#${scenarioSlug(m[1])}`);
     }
   }
 }
 function knownScenarioIds(repoRoot, changeDir2) {
   const ids = /* @__PURE__ */ new Set();
-  collect(join10(changeDir2, "specs"), ids);
-  collect(join10(repoRoot, "openspec", "specs"), ids);
+  collect(join18(changeDir2, "specs"), ids);
+  collect(join18(repoRoot, "openspec", "specs"), ids);
   return ids;
 }
 
 // src/tasks/command.ts
-var CHANGE_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+var CHANGE_NAME2 = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 function changeDir(config, change) {
   if (!change) throw new UsageError("missing change name");
-  if (!CHANGE_NAME.test(change) || change === "archive")
+  if (!CHANGE_NAME2.test(change) || change === "archive")
     throw new UsageError(`'${change}' is not a change name (kebab-case)`);
-  const dir = join11(config.root, "openspec", "changes", change);
-  if (!existsSync8(dir) || !statSync4(dir).isDirectory())
+  const dir = join19(config.root, "openspec", "changes", change);
+  if (!existsSync15(dir) || !statSync4(dir).isDirectory())
     throw new EnvError(`unknown change '${change}': no folder openspec/changes/${change}/`);
   return dir;
 }
 function checkChangeTasks(config, change, base) {
   const dir = changeDir(config, change);
   const file = `openspec/changes/${change}/tasks.md`;
-  const path = join11(dir, "tasks.md");
-  if (!existsSync8(path)) {
+  const path = join19(dir, "tasks.md");
+  if (!existsSync15(path)) {
     return [
       {
         rule: "T0",
@@ -9119,7 +10001,7 @@ function checkChangeTasks(config, change, base) {
       }
     ];
   }
-  const tasks = parseTasks(readFileSync6(path, "utf8"));
+  const tasks = parseTasks(readFileSync10(path, "utf8"));
   const findings = checkStatic(tasks, {
     repoRoot: config.root,
     file,
@@ -9170,23 +10052,23 @@ register({
 });
 
 // src/change/brief.ts
-import { existsSync as existsSync9, readFileSync as readFileSync7 } from "node:fs";
-import { join as join12 } from "node:path";
+import { existsSync as existsSync16, readFileSync as readFileSync11 } from "node:fs";
+import { join as join20 } from "node:path";
 var BRIEF_SECTIONS = ["Wish", "Decisions", "Out of scope", "Open questions", "Confirmation"];
 var SHORT_SECTIONS = ["Wish", "Confirmation"];
-var HUMAN = /^human:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$/;
+var HUMAN2 = /^human:[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?$/;
 var OWNED = /\(owner:\s*[^)\s][^)]*\)\s*\S/;
 var SOURCE = /^(?:user|delegated|knowledge:\/([a-z0-9][a-z0-9/-]*\.md))$/;
-function splitSections(text2) {
-  const clean = text2.replace(/<!--[\s\S]*?-->/g, (c) => "\n".repeat(c.split("\n").length - 1));
+function splitSections(text3) {
+  const clean = text3.replace(/<!--[\s\S]*?-->/g, (c) => "\n".repeat(c.split("\n").length - 1));
   const sections = /* @__PURE__ */ new Map();
   let current;
-  clean.split(/\r?\n/).forEach((text3, i) => {
-    const heading = /^## (.+?)\s*$/.exec(text3);
+  clean.split(/\r?\n/).forEach((text4, i) => {
+    const heading = /^## (.+?)\s*$/.exec(text4);
     if (heading) {
       current = { line: i + 1, lines: [] };
       if (!sections.has(heading[1])) sections.set(heading[1], current);
-    } else current?.lines.push({ text: text3, line: i + 1 });
+    } else current?.lines.push({ text: text4, line: i + 1 });
   });
   return sections;
 }
@@ -9195,8 +10077,8 @@ function checkBrief(bundleRoot, dir, change, skipSpecs) {
   const file = `openspec/changes/${change}/brief.md`;
   const out = [];
   const add = (rule, line, message, fix, severity = "error") => out.push({ rule, severity, file, group: null, task: null, line, message, fix });
-  const path = join12(dir, "brief.md");
-  if (!existsSync9(path)) {
+  const path = join20(dir, "brief.md");
+  if (!existsSync16(path)) {
     add(
       "B0",
       null,
@@ -9205,7 +10087,7 @@ function checkBrief(bundleRoot, dir, change, skipSpecs) {
     );
     return out;
   }
-  const sections = splitSections(readFileSync7(path, "utf8"));
+  const sections = splitSections(readFileSync11(path, "utf8"));
   for (const name of skipSpecs ? SHORT_SECTIONS : BRIEF_SECTIONS) {
     if (!sections.has(name))
       add(
@@ -9228,7 +10110,7 @@ function checkBrief(bundleRoot, dir, change, skipSpecs) {
       };
     };
     const by = value("confirmed_by");
-    if (!HUMAN.test(by.text))
+    if (!HUMAN2.test(by.text))
       add(
         "B2",
         by.line,
@@ -9246,13 +10128,13 @@ function checkBrief(bundleRoot, dir, change, skipSpecs) {
   }
   const questions = sections.get("Open questions");
   for (const item of questions ? filled(questions) : []) {
-    const text2 = item.text.trim();
-    if (!/^[-*] /.test(text2) || /^[-*] none$/i.test(text2)) continue;
-    if (!OWNED.test(text2))
+    const text3 = item.text.trim();
+    if (!/^[-*] /.test(text3) || /^[-*] none$/i.test(text3)) continue;
+    if (!OWNED.test(text3))
       add(
         "B3",
         item.line,
-        `open question without owner and reason: ${text2.slice(2)}`,
+        `open question without owner and reason: ${text3.slice(2)}`,
         "append '(owner: <actor>) <why it does not block the spec>' or resolve it now"
       );
   }
@@ -9278,22 +10160,22 @@ function checkBrief(bundleRoot, dir, change, skipSpecs) {
         `decision ${label} has source '${source}'`,
         "use user, delegated or knowledge:/<path>.md"
       );
-    else if (m[1] && !existsSync9(join12(bundleRoot, m[1])))
+    else if (m[1] && !existsSync16(join20(bundleRoot, m[1])))
       add("B4", row.line, `decision ${label} cites missing concept /${m[1]}`, "point at an existing concept");
   }
   return out;
 }
 
 // src/change/knowledge.ts
-var import_yaml4 = __toESM(require_dist(), 1);
-import { existsSync as existsSync10, readFileSync as readFileSync8 } from "node:fs";
-import { join as join13 } from "node:path";
+var import_yaml6 = __toESM(require_dist(), 1);
+import { existsSync as existsSync17, readFileSync as readFileSync12 } from "node:fs";
+import { join as join21 } from "node:path";
 var OPS = /* @__PURE__ */ new Set(["create", "update", "deprecate"]);
 var BUNDLE_PATH = /^(?!\/)(?!(?:.*\/)?\.\.(?:\/|$))\S+\.md$/;
 var MAX_SUMMARY = 160;
 function deltaCapabilities(dir) {
-  const specs = join13(dir, "specs");
-  if (!existsSync10(specs)) return [];
+  const specs = join21(dir, "specs");
+  if (!existsSync17(specs)) return [];
   return walkFiles(specs).filter((rel) => rel.endsWith("/spec.md")).map((rel) => rel.slice(0, -"/spec.md".length));
 }
 function conceptType(bundleRoot, path) {
@@ -9305,12 +10187,12 @@ function checkKnowledge(config, bundleRoot, dir, options) {
   const file = `${options.relDir}/knowledge.md`;
   const findings = [];
   const add = (rule, line, message, fix) => findings.push({ rule, severity: "error", file, group: null, task: null, line, message, fix });
-  const path = join13(dir, "knowledge.md");
-  if (!existsSync10(path)) {
+  const path = join21(dir, "knowledge.md");
+  if (!existsSync17(path)) {
     add("K0", null, "the change has no knowledge.md", "write knowledge.md from the schema template");
     return { findings, ops: [] };
   }
-  const lines3 = readFileSync8(path, "utf8").split(/\r?\n/);
+  const lines3 = readFileSync12(path, "utf8").split(/\r?\n/);
   const start = lines3.findIndex((l) => /^## Delta\s*$/.test(l));
   if (start === -1) {
     add(
@@ -9340,8 +10222,8 @@ function checkKnowledge(config, bundleRoot, dir, options) {
     return { findings, ops: [] };
   }
   const block = blocks[0];
-  const counter = new import_yaml4.LineCounter();
-  const doc = (0, import_yaml4.parseDocument)(block.source, { lineCounter: counter });
+  const counter = new import_yaml6.LineCounter();
+  const doc = (0, import_yaml6.parseDocument)(block.source, { lineCounter: counter });
   const lineAt = (offset) => offset === void 0 ? block.fence : block.fence + counter.linePos(offset).line;
   if (doc.errors.length > 0) {
     const error = doc.errors[0];
@@ -9354,8 +10236,8 @@ function checkKnowledge(config, bundleRoot, dir, options) {
     return { findings, ops: [] };
   }
   const root = doc.contents;
-  const opsNode = (0, import_yaml4.isMap)(root) ? root.get("ops", true) : void 0;
-  if (!(0, import_yaml4.isSeq)(opsNode)) {
+  const opsNode = (0, import_yaml6.isMap)(root) ? root.get("ops", true) : void 0;
+  if (!(0, import_yaml6.isSeq)(opsNode)) {
     add(
       "K1",
       block.fence,
@@ -9368,7 +10250,7 @@ function checkKnowledge(config, bundleRoot, dir, options) {
   for (const item of opsNode.items) {
     const line = lineAt(item.range?.[0]);
     const value = item.toJSON?.();
-    if (!(0, import_yaml4.isMap)(item) || !value) {
+    if (!(0, import_yaml6.isMap)(item) || !value) {
       add("K2", line, "op is not a mapping", "write op, path, type and summary keys");
       continue;
     }
@@ -9399,7 +10281,7 @@ function checkKnowledge(config, bundleRoot, dir, options) {
         line
       });
   }
-  const reason = (0, import_yaml4.isMap)(root) ? root.get("empty_reason") : void 0;
+  const reason = (0, import_yaml6.isMap)(root) ? root.get("empty_reason") : void 0;
   if (opsNode.items.length === 0 && (typeof reason !== "string" || reason.trim() === "")) {
     add(
       "K3",
@@ -9415,7 +10297,7 @@ function checkKnowledge(config, bundleRoot, dir, options) {
     seen.add(op.path);
   }
   for (const op of ops) {
-    const exists = existsSync10(join13(bundleRoot, op.path));
+    const exists = existsSync17(join21(bundleRoot, op.path));
     if (!exists) {
       if (op.op !== "create")
         add("K4", op.line, `${op.op} names missing concept ${op.path}`, "fix the path or use op: create");
@@ -9432,7 +10314,7 @@ function checkKnowledge(config, bundleRoot, dir, options) {
   }
   for (const cap of deltaCapabilities(dir)) {
     const card = `capabilities/${cap}.md`;
-    const exists = existsSync10(join13(config.root, "openspec", "specs", cap, "spec.md"));
+    const exists = existsSync17(join21(config.root, "openspec", "specs", cap, "spec.md"));
     const expected = options.archived && exists ? ["create", "update"] : [exists ? "update" : "create"];
     const op = ops.find((o) => o.path === card && o.type === "Capability");
     if (!op || !expected.includes(op.op)) {
@@ -9449,10 +10331,10 @@ function checkKnowledge(config, bundleRoot, dir, options) {
 
 // src/change/command.ts
 function skipsSpecs(dir) {
-  const path = join14(dir, ".openspec.yaml");
-  if (!existsSync11(path)) return false;
+  const path = join22(dir, ".openspec.yaml");
+  if (!existsSync18(path)) return false;
   try {
-    return (0, import_yaml5.parse)(readFileSync9(path, "utf8"))?.skip_specs === true;
+    return (0, import_yaml7.parse)(readFileSync13(path, "utf8"))?.skip_specs === true;
   } catch {
     return false;
   }
@@ -9473,7 +10355,7 @@ function checkChange(config, bundleRoot, change) {
 }
 function checkPlannedChange(config, bundleRoot, change) {
   const findings = checkChange(config, bundleRoot, change);
-  return existsSync11(join14(changeDir(config, change), "tasks.md")) ? findings : findings.filter((f) => f.rule.startsWith("B"));
+  return existsSync18(join22(changeDir(config, change), "tasks.md")) ? findings : findings.filter((f) => f.rule.startsWith("B"));
 }
 register({
   name: "change",
@@ -9505,22 +10387,223 @@ register({
   }
 });
 
-// src/doctor/command.ts
-import { execFileSync as execFileSync2 } from "node:child_process";
+// src/commitments/command.ts
+import { readFileSync as readFileSync15, writeFileSync as writeFileSync6 } from "node:fs";
+import { relative as relative10, sep as sep10 } from "node:path";
 
-// src/doctor/checks.ts
-import { existsSync as existsSync13, readdirSync as readdirSync4, readFileSync as readFileSync10, statSync as statSync5 } from "node:fs";
-import { join as join16 } from "node:path";
+// src/log/command.ts
+import { existsSync as existsSync19, readFileSync as readFileSync14, writeFileSync as writeFileSync5 } from "node:fs";
+import { join as join23 } from "node:path";
 
-// src/openspec.ts
-import { existsSync as existsSync12 } from "node:fs";
-import { join as join15 } from "node:path";
-function openspecBinary(root) {
-  const local = root ? join15(root, "node_modules", ".bin", "openspec") : void 0;
-  return local !== void 0 && existsSync12(local) ? { command: local, source: "node_modules/.bin" } : { command: "openspec", source: "PATH" };
+// src/log/insert.ts
+var DATE_HEADING = /^## (\d{4}-\d{2}-\d{2})\s*$/;
+function insertEntry(text3, date, entry) {
+  if (text3 === void 0 || text3.trim() === "") return `# Log
+
+## ${date}
+
+${entry}
+`;
+  const lines3 = text3.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n");
+  const headings = lines3.map((line, index) => ({ index, date: DATE_HEADING.exec(line)?.[1] })).filter((h) => h.date !== void 0);
+  const same = headings.find((h) => h.date === date);
+  if (same) {
+    const next = lines3.findIndex((line, i) => i > same.index && line.startsWith("## "));
+    let last = (next === -1 ? lines3.length : next) - 1;
+    while (last > same.index && lines3[last]?.trim() === "") last--;
+    lines3.splice(last + 1, 0, ...last === same.index ? ["", entry] : [entry]);
+  } else {
+    const older = headings.find((h) => h.date < date);
+    if (older) lines3.splice(older.index, 0, `## ${date}`, "", entry, "");
+    else lines3.push("", `## ${date}`, "", entry);
+  }
+  return `${lines3.join("\n")}
+`;
 }
 
+// src/log/command.ts
+var KIND = /^[A-Z][A-Za-z]*$/;
+function isCalendarDate2(text3) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text3)) return false;
+  const date = /* @__PURE__ */ new Date(`${text3}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text3;
+}
+function localDate(now = /* @__PURE__ */ new Date()) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+register({
+  name: "log",
+  summary: "add a dated entry to the bundle's log.md",
+  usage: "specfold log add [--kind <Kind>] [--date <YYYY-MM-DD>] [--bundle <dir>] <message...>",
+  options: { kind: { type: "string" }, date: { type: "string" }, bundle: { type: "string" } },
+  run: ({ io, values, positionals }) => {
+    const [sub, ...words2] = positionals;
+    if (sub !== "add")
+      throw new UsageError(sub ? `unknown log subcommand '${sub}'` : "missing subcommand: specfold log add");
+    const message = words2.join(" ").replace(/\s+/g, " ").trim();
+    if (!message) throw new UsageError("missing message");
+    const kind = values.kind ?? "Update";
+    if (!KIND.test(kind))
+      throw new UsageError(`kind '${kind}' must be one word starting with an uppercase letter`);
+    const date = values.date ?? localDate();
+    if (!isCalendarDate2(date)) throw new UsageError(`date '${date}' is not a valid YYYY-MM-DD date`);
+    const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, void 0);
+    const path = join23(bundleRoot, "log.md");
+    const entry = `* **${kind}**: ${message}`;
+    writeFileSync5(path, insertEntry(existsSync19(path) ? readFileSync14(path, "utf8") : void 0, date, entry));
+    io.stdout(`${entry}
+`);
+    return 0;
+  }
+});
+
+// src/verify/apply.ts
+var flowValue = (v) => typeof v === "string" && /^[A-Za-z0-9][\w:.+/@-]*$/.test(v) ? v : JSON.stringify(v);
+var flowEntry = (entry) => isRecord2(entry) ? `{ ${Object.entries(entry).map(([k, v]) => `${k}: ${flowValue(v)}`).join(", ")} }` : flowValue(entry);
+var sameLogin = (entry, by) => isRecord2(entry) && typeof entry.by === "string" && entry.by.toLowerCase() === by.toLowerCase();
+function verifyText(text3, login, at, keepStatus = false) {
+  const data = parseText("concept.md", text3).frontmatter?.data;
+  const current = isRecord2(data) ? data.verified : void 0;
+  const entries = Array.isArray(current) ? [...current] : current === void 0 ? [] : [current];
+  const by = `human:${login}`;
+  const entry = { by, at };
+  const index = entries.findIndex((e) => sameLogin(e, by));
+  if (index === -1) entries.push(entry);
+  else entries[index] = entry;
+  const block = entries.length === 1 ? [`verified: ${flowEntry(entries[0])}`] : ["verified:", ...entries.map((e) => `  - ${flowEntry(e)}`)];
+  return editFrontmatter(text3, {
+    ...keepStatus ? {} : { set: { status: "stable" } },
+    setBlock: { verified: block }
+  }).text;
+}
+
+// src/commitments/command.ts
+var STATES2 = ["open", "fulfilled", "withdrawn"];
+var CHANGE_NAME3 = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+var str2 = (v) => typeof v === "string" ? v : "";
+register({
+  name: "commitments",
+  summary: "list, fulfill and withdraw deferred commitments (withdraw: humans only)",
+  usage: "specfold commitments list [--state <state>] | fulfill <commitment> --change <name> | withdraw <commitment> --reason <text>  [--json]",
+  options: {
+    state: { type: "string" },
+    change: { type: "string" },
+    reason: { type: "string" },
+    json: { type: "boolean" }
+  },
+  run: ({ io, values, positionals }) => {
+    const [sub, ...args] = positionals;
+    const config = requireConfig(io.cwd);
+    const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
+    const shown = (abs) => relative10(config.root, abs).split(sep10).join("/");
+    const print = (lines3, json) => io.stdout(values.json ? `${JSON.stringify(json, null, 2)}
+` : `${lines3.join("\n")}
+`);
+    const refuse = (item, message) => {
+      if (values.json)
+        io.stdout(`${JSON.stringify({ ok: false, item: shown(item.abs), error: message }, null, 2)}
+`);
+      else io.stderr(`specfold: ${shown(item.abs)}: ${message}
+`);
+      return 1;
+    };
+    const one = (what) => {
+      if (args.length !== 1) throw new UsageError(`expected one commitment: ${what}`);
+      return findItem(config.root, bundleRoot, "commitments", args[0]);
+    };
+    const required = (key, hint) => {
+      const value = (values[key] ?? "").trim();
+      if (!value) throw new UsageError(`missing --${key}: ${hint}`);
+      return value;
+    };
+    switch (sub) {
+      case "list": {
+        if (args.length > 0) throw new UsageError(`unexpected argument '${args[0]}'`);
+        const state = values.state ?? "open";
+        if (state !== "all" && !STATES2.includes(state))
+          throw new UsageError(`state must be one of ${[...STATES2, "all"].join(", ")}, got '${state}'`);
+        const rows = listItems(bundleRoot, "commitments").filter((i) => state === "all" || i.data.state === state).map((i) => ({ i, due: dueDate(i.data.trigger) })).sort(
+          (a, b) => (a.due ? 0 : 1) - (b.due ? 0 : 1) || (a.due?.getTime() ?? 0) - (b.due?.getTime() ?? 0) || (a.i.rel < b.i.rel ? -1 : 1)
+        );
+        const cells = rows.map(({ i, due }) => [
+          str2(i.data.state),
+          due ? localDate(due) : "-",
+          shown(i.abs),
+          `${i.title} (trigger: ${str2(i.data.trigger)})`
+        ]);
+        const widths = [0, 1, 2].map((c) => Math.max(0, ...cells.map((r) => r[c].length)));
+        print(
+          cells.length === 0 ? [`no ${state === "all" ? "" : `${state} `}commitments`] : cells.map(
+            (r) => r.map((cell2, c) => c < 3 ? cell2.padEnd(widths[c]) : cell2).join("  ")
+          ),
+          {
+            commitments: rows.map(({ i, due }) => ({
+              path: shown(i.abs),
+              title: i.title,
+              state: i.data.state ?? null,
+              trigger: i.data.trigger ?? null,
+              due: due ? localDate(due) : null,
+              committed_by: i.data.committed_by ?? null,
+              vision: i.data.vision ?? null,
+              change: i.data.change ?? null
+            }))
+          }
+        );
+        return 0;
+      }
+      case "fulfill": {
+        const change = required("change", "name the change that kept the commitment");
+        if (!CHANGE_NAME3.test(change)) throw new UsageError(`'${change}' is not a change name (kebab-case)`);
+        const item = one("specfold commitments fulfill <commitment> --change <name>");
+        if (item.data.state !== "open")
+          return refuse(item, `state is '${str2(item.data.state)}'; only open commitments are fulfilled`);
+        setKeys(item.abs, { state: "fulfilled", change });
+        print([`${shown(item.abs)}: state fulfilled, change ${change}`], {
+          ok: true,
+          item: shown(item.abs),
+          change
+        });
+        return 0;
+      }
+      case "withdraw": {
+        const reason = required("reason", "say why the commitment is withdrawn");
+        const item = one("specfold commitments withdraw <commitment> --reason <text>");
+        const agent = agentReason();
+        if (agent)
+          throw new EnvError(
+            `only humans withdraw commitments (${agent}); run specfold commitments withdraw yourself in a terminal`
+          );
+        const login = resolveLogin(config.root);
+        if (item.data.state !== "open")
+          return refuse(item, `state is '${str2(item.data.state)}'; only open commitments are withdrawn`);
+        setKeys(item.abs, { state: "withdrawn", reason });
+        writeFileSync6(
+          item.abs,
+          verifyText(readFileSync15(item.abs, "utf8"), login, isoWithOffset(/* @__PURE__ */ new Date()), true)
+        );
+        print([`${shown(item.abs)}: state withdrawn, verified by human:${login}`], {
+          ok: true,
+          item: shown(item.abs),
+          login,
+          reason
+        });
+        return 0;
+      }
+      default:
+        throw new UsageError(
+          sub ? `unknown commitments subcommand '${sub}'` : "missing subcommand: list, fulfill or withdraw"
+        );
+    }
+  }
+});
+
+// src/doctor/command.ts
+import { execFileSync as execFileSync4 } from "node:child_process";
+
 // src/doctor/checks.ts
+import { existsSync as existsSync20, readdirSync as readdirSync4, readFileSync as readFileSync16, statSync as statSync5 } from "node:fs";
+import { join as join24 } from "node:path";
 var DEFAULT_OPENSPEC_RANGE = ">=1.15 <2";
 var MIN_NODE = "20.19.0";
 var parts = (v) => v.split(".").map((n) => Number.parseInt(n, 10) || 0);
@@ -9551,18 +10634,18 @@ function satisfies(version, range) {
     }
   });
 }
-var firstVersion = (text2) => text2 ? /\d+\.\d+\.\d+/.exec(text2)?.[0] : void 0;
+var firstVersion = (text3) => text3 ? /\d+\.\d+\.\d+/.exec(text3)?.[0] : void 0;
 var ok = (id, message) => ({ id, status: "ok", message, fix: null });
 function hookManagerMentions(root) {
   const files = ["lefthook.yml", "lefthook.yaml", ".lefthook.yml", ".pre-commit-config.yaml"].map(
-    (f) => join16(root, f)
+    (f) => join24(root, f)
   );
-  const husky = join16(root, ".husky");
-  if (existsSync13(husky) && statSync5(husky).isDirectory()) {
-    for (const f of readdirSync4(husky)) files.push(join16(husky, f));
+  const husky = join24(root, ".husky");
+  if (existsSync20(husky) && statSync5(husky).isDirectory()) {
+    for (const f of readdirSync4(husky)) files.push(join24(husky, f));
   }
   return files.some(
-    (f) => existsSync13(f) && statSync5(f).isFile() && readFileSync10(f, "utf8").includes("specfold hook")
+    (f) => existsSync20(f) && statSync5(f).isFile() && readFileSync16(f, "utf8").includes("specfold hook")
   );
 }
 function runChecks(env) {
@@ -9637,14 +10720,14 @@ function runChecks(env) {
       fix: "specfold hooks install"
     });
   }
-  if (!root || !existsSync13(join16(root, "knowledge"))) {
+  if (!root || !existsSync20(join24(root, "knowledge"))) {
     checks.push({
       id: "D5",
       status: "fail",
       message: "no knowledge/ bundle",
       fix: "create knowledge/ with a root index.md, or run 'specfold init'"
     });
-  } else if (!existsSync13(join16(root, "knowledge", "index.md"))) {
+  } else if (!existsSync20(join24(root, "knowledge", "index.md"))) {
     checks.push({
       id: "D5",
       status: "fail",
@@ -9666,7 +10749,7 @@ function realEnv(cwd) {
     nodeVersion: process.versions.node,
     exec: (cmd, args, dir) => {
       try {
-        return execFileSync2(cmd, args, {
+        return execFileSync4(cmd, args, {
           cwd: dir,
           encoding: "utf8",
           stdio: ["ignore", "pipe", "ignore"],
@@ -9702,94 +10785,10 @@ register({
 });
 
 // src/drift/command.ts
-import { existsSync as existsSync15, statSync as statSync6 } from "node:fs";
-import { join as join18, relative as relative5, resolve as resolve3, sep as sep4 } from "node:path";
-
-// src/drift/deps.ts
-import { existsSync as existsSync14 } from "node:fs";
-import { dirname as dirname4, join as join17, relative as relative4, sep as sep3 } from "node:path";
-var toRepo = (repoRoot, abs) => {
-  const rel = relative4(repoRoot, abs).split(sep3).join("/");
-  return rel === "" || rel.startsWith("../") || rel === ".." ? void 0 : rel;
-};
-function resourcePaths(repoRoot, bundleRoot, rel, data) {
-  const values = [data.resource];
-  if (Array.isArray(data.sources)) {
-    for (const s of data.sources) if (isRecord2(s)) values.push(s.resource);
-  }
-  return values.flatMap((value) => {
-    if (typeof value !== "string" || value.trim() === "" || SCHEME.test(value)) return [];
-    const path = value.split("#")[0] ?? "";
-    const abs = path.startsWith("/") ? join17(bundleRoot, path) : join17(bundleRoot, dirname4(rel), path);
-    const inRepo2 = existsSync14(abs) ? toRepo(repoRoot, abs) : void 0;
-    return inRepo2 ? [inRepo2] : [];
-  });
-}
-function conceptDependencies(repoRoot, bundleRoot, sourceGlobs) {
-  const code = /* @__PURE__ */ new Map();
-  for (const ref of scanReferences(repoRoot, sourceGlobs))
-    code.set(ref.concept, [...code.get(ref.concept) ?? [], ref.file]);
-  const out = [];
-  for (const entry of walk(bundleRoot)) {
-    const name = entry.rel.slice(entry.rel.lastIndexOf("/") + 1);
-    if (entry.isDir || !name.endsWith(".md") || RESERVED.has(name)) continue;
-    const data = parseFile(bundleRoot, entry.rel).frontmatter?.data;
-    if (!isRecord2(data)) continue;
-    const file = toRepo(repoRoot, join17(bundleRoot, entry.rel)) ?? entry.rel;
-    const paths = /* @__PURE__ */ new Set([
-      ...resourcePaths(repoRoot, bundleRoot, entry.rel, data),
-      ...code.get(entry.rel) ?? []
-    ]);
-    paths.delete(file);
-    out.push({ rel: entry.rel, file, data, paths: [...paths].sort() });
-  }
-  return out;
-}
-var coveredBy = (file, path) => file === path || file.startsWith(`${path}/`);
-
-// src/drift/drift.ts
-function trustTime(data) {
-  const verified = Array.isArray(data.verified) ? data.verified : data.verified === void 0 ? [] : [data.verified];
-  const times = verified.map((v) => isRecord2(v) && typeof v.at === "string" ? v.at : void 0).filter((t) => t !== void 0 && !Number.isNaN(Date.parse(t)));
-  if (times.length > 0) return times.reduce((a, b) => Date.parse(b) > Date.parse(a) ? b : a);
-  const at = isRecord2(data.generated) ? data.generated.at : void 0;
-  return typeof at === "string" && !Number.isNaN(Date.parse(at)) ? at : void 0;
-}
-var hasHistory = (repoRoot) => gitSucceeds(repoRoot, ["rev-parse", "--verify", "--quiet", "HEAD"]);
-function baselineOf(repoRoot, concept) {
-  const committed = git(repoRoot, ["log", "-1", "--format=%cI", "--", concept.file]).trim() || void 0;
-  const trusted = trustTime(concept.data);
-  if (!committed || !trusted) return committed ?? trusted;
-  return Date.parse(committed) > Date.parse(trusted) ? committed : trusted;
-}
-function driftOf(repoRoot, concept) {
-  if (concept.paths.length === 0) return void 0;
-  const baseline = baselineOf(repoRoot, concept);
-  if (!baseline) return void 0;
-  const after = Date.parse(baseline);
-  const log = git(repoRoot, [
-    "log",
-    "--relative",
-    "--name-only",
-    "--format=%x00%h%x09%cI%x09%s",
-    `--since=${baseline}`,
-    "--",
-    ...concept.paths
-  ]);
-  const commits = [];
-  for (const chunk of log.split("\0").slice(1)) {
-    const [head = "", ...files] = chunk.split("\n");
-    const [hash = "", date = "", ...subject] = head.split("	");
-    if (Date.parse(date) <= after) continue;
-    const paths = concept.paths.filter((p) => files.some((f) => f !== "" && coveredBy(f, p)));
-    if (paths.length > 0) commits.push({ hash, date, subject: subject.join("	"), paths });
-  }
-  return commits.length > 0 ? { path: concept.file, baseline, commits } : void 0;
-}
-
-// src/drift/command.ts
+import { existsSync as existsSync21, statSync as statSync6 } from "node:fs";
+import { join as join25, relative as relative11, resolve as resolve3, sep as sep11 } from "node:path";
 function conceptRel(arg, root, bundleRoot, known) {
-  const rel = [resolve3(root, arg), resolve3(bundleRoot, arg)].map((abs) => relative5(bundleRoot, abs).split(sep4).join("/")).find((r) => known.has(r) && existsSync15(join18(bundleRoot, r)) && statSync6(join18(bundleRoot, r)).isFile());
+  const rel = [resolve3(root, arg), resolve3(bundleRoot, arg)].map((abs) => relative11(bundleRoot, abs).split(sep11).join("/")).find((r) => known.has(r) && existsSync21(join25(bundleRoot, r)) && statSync6(join25(bundleRoot, r)).isFile());
   if (!rel) throw new UsageError(`'${arg}' is not a concept in the bundle`);
   return rel;
 }
@@ -9828,16 +10827,16 @@ register({
 });
 
 // src/gate/command.ts
-import { existsSync as existsSync27, readFileSync as readFileSync18, writeFileSync as writeFileSync4 } from "node:fs";
+import { existsSync as existsSync30, readFileSync as readFileSync22, writeFileSync as writeFileSync8 } from "node:fs";
 import { resolve as resolve5 } from "node:path";
 
 // src/gate/diff.ts
-import { existsSync as existsSync16, statSync as statSync7 } from "node:fs";
-import { join as join19 } from "node:path";
+import { existsSync as existsSync22, statSync as statSync7 } from "node:fs";
+import { join as join26 } from "node:path";
 var ACTIVE = /^openspec\/changes\/([^/]+)\//;
 var ARCHIVED = /^openspec\/changes\/archive\/([^/]+)\//;
-var lines = (text2) => text2.split("\n").filter((l) => l !== "");
-var isDir = (path) => existsSync16(path) && statSync7(path).isDirectory();
+var lines = (text3) => text3.split("\n").filter((l) => l !== "");
+var isDir = (path) => existsSync22(path) && statSync7(path).isDirectory();
 function computeDiff(root, ref, local) {
   if (!gitSucceeds(root, ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`]))
     throw new EnvError(`unknown base '${ref}': not a git ref`);
@@ -9866,9 +10865,9 @@ function computeDiff(root, ref, local) {
     ref,
     mergeBase,
     files: sorted,
-    activeChanges: [...active].filter((n) => isDir(join19(root, "openspec", "changes", n))),
+    activeChanges: [...active].filter((n) => isDir(join26(root, "openspec", "changes", n))),
     archivedChanges: [...archived].filter(
-      (id) => isDir(join19(root, "openspec", "changes", "archive", id)) && !gitSucceeds(root, ["cat-file", "-e", `${mergeBase}:./openspec/changes/archive/${id}`])
+      (id) => isDir(join26(root, "openspec", "changes", "archive", id)) && !gitSucceeds(root, ["cat-file", "-e", `${mergeBase}:./openspec/changes/archive/${id}`])
     )
   };
 }
@@ -9928,394 +10927,33 @@ async function fetchPullRequest(env, number) {
 }
 
 // src/gate/rules.ts
-import { existsSync as existsSync26 } from "node:fs";
-import { join as join29, relative as relative13, sep as sep12 } from "node:path";
-
-// src/indexes/command.ts
-import { existsSync as existsSync17, readFileSync as readFileSync11, writeFileSync } from "node:fs";
-import { join as join20, relative as relative7, sep as sep6 } from "node:path";
-
-// src/indexes/generate.ts
-import { basename, relative as relative6, sep as sep5 } from "node:path";
-var LOG_ENTRY = "* [Log](log.md) - Dated record of changes to this bundle";
-var byCodeUnit = (a, b) => a < b ? -1 : a > b ? 1 : 0;
-var isRecord4 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
-var oneLine = (v) => typeof v === "string" && v.trim() !== "" ? v.replace(/\s+/g, " ").trim() : void 0;
-function folderTitle(config, folder, fallbackName) {
-  const configured = config.folders[folder]?.title;
-  if (configured) return configured;
-  const words2 = fallbackName.replace(/-/g, " ");
-  return words2.charAt(0).toUpperCase() + words2.slice(1);
-}
-function generateIndexes(bundleRoot, config, refs = /* @__PURE__ */ new Map()) {
-  const entries = walk(bundleRoot);
-  const folders = ["", ...entries.filter((e) => e.isDir).map((e) => e.rel)];
-  const repoRel = (rel) => relative6(config.root, `${bundleRoot}${sep5}${rel}`).split(sep5).join("/");
-  const findings = [];
-  const concepts2 = /* @__PURE__ */ new Set();
-  const indexes = /* @__PURE__ */ new Map();
-  const typeOrder = (t) => {
-    const i = config.types.indexOf(t);
-    return i === -1 ? config.types.length : i;
-  };
-  for (const folder of folders) {
-    const prefix = folder ? `${folder}/` : "";
-    const children = entries.filter(
-      (e) => e.rel.startsWith(prefix) && !e.rel.slice(prefix.length).includes("/")
-    );
-    const subfolders = children.filter((e) => e.isDir).map((e) => e.rel);
-    const items = [];
-    for (const child of children) {
-      const name = child.rel.slice(prefix.length);
-      if (child.isDir || !name.endsWith(".md") || RESERVED.has(name)) continue;
-      const parsed = parseFile(bundleRoot, child.rel);
-      const data = parsed.frontmatter?.data;
-      const type = isRecord4(data) ? oneLine(data.type) : void 0;
-      if (!isRecord4(data) || type === void 0) {
-        const why = parsed.frontmatterError ? `invalid frontmatter: ${parsed.frontmatterError.message}` : "no frontmatter or no 'type'";
-        findings.push({
-          rule: "I1",
-          severity: "error",
-          path: repoRel(child.rel),
-          line: parsed.frontmatterError?.line ?? 1,
-          message: `left out of the index: ${why}`,
-          fix: "fix the frontmatter; 'specfold validate' shows the details"
-        });
-        continue;
-      }
-      concepts2.add(child.rel);
-      items.push({
-        file: name,
-        type,
-        title: oneLine(data.title) ?? name.slice(0, -3),
-        description: oneLine(data.description),
-        deprecated: data.status === "deprecated"
-      });
-    }
-    const blocks = [];
-    if (subfolders.length > 0) {
-      const lines3 = subfolders.map((sub) => {
-        const name = sub.slice(prefix.length);
-        const description = config.folders[sub]?.description;
-        return `* [${folderTitle(config, sub, name)}](${name}/)${description ? ` - ${description}` : ""}`;
-      });
-      blocks.push(["# Sections", "", ...lines3].join("\n"));
-    }
-    const types = [...new Set(items.map((i) => i.type))].sort(
-      (a, b) => typeOrder(a) - typeOrder(b) || byCodeUnit(a, b)
-    );
-    for (const type of types) {
-      const group = items.filter((i) => i.type === type).sort(
-        (a, b) => byCodeUnit(a.title.toLowerCase(), b.title.toLowerCase()) || byCodeUnit(a.file, b.file)
-      );
-      const lines3 = group.flatMap((i) => [
-        `* [${i.title}](${i.file})${i.deprecated ? " (deprecated)" : ""}${i.description ? ` - ${i.description}` : ""}`,
-        ...(refs.get(`${prefix}${i.file}`) ?? []).map((loc) => `  * Referenced from code: ${loc}`)
-      ]);
-      blocks.push([`# ${type}`, "", ...lines3].join("\n"));
-    }
-    const hasLog = folder === "" && entries.some((e) => !e.isDir && e.rel === "log.md");
-    if (blocks.length === 0) {
-      const title = folder ? folderTitle(config, folder, folder.slice(folder.lastIndexOf("/") + 1)) : folderTitle(config, "", basename(bundleRoot));
-      blocks.push(`# ${title}
-
-No concepts yet.`);
-    }
-    if (hasLog) blocks.push(`# Log
-
-${LOG_ENTRY}`);
-    if (folder === "") blocks.unshift('---\nokf_version: "0.2"\n---');
-    indexes.set(`${prefix}index.md`, `${blocks.join("\n\n")}
-`);
-  }
-  return { indexes, findings, concepts: concepts2 };
-}
-
-// src/indexes/command.ts
-function syncIndexes(repoRoot, bundleRoot, generated, check2) {
-  const changed = [];
-  for (const [rel, content] of [...generated].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) {
-    const abs = join20(bundleRoot, rel);
-    if (existsSync17(abs) && readFileSync11(abs, "utf8") === content) continue;
-    if (!check2) writeFileSync(abs, content);
-    changed.push(relative7(repoRoot, abs).split(sep6).join("/"));
-  }
-  return changed;
-}
-register({
-  name: "index",
-  summary: "generate every index.md of the knowledge bundle",
-  usage: "specfold index [--check] [--bundle <dir>] [--json]",
-  options: { check: { type: "boolean" }, bundle: { type: "string" }, json: { type: "boolean" } },
-  run: ({ io, values }) => {
-    const config = requireConfig(io.cwd);
-    const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, config);
-    const refs = scanReferences(config.root, config.sourceGlobs);
-    const { indexes, findings, concepts: concepts2 } = generateIndexes(bundleRoot, config, locationsByConcept(refs));
-    for (const ref of refs) {
-      if (concepts2.has(ref.concept)) continue;
-      findings.push({
-        rule: "I2",
-        severity: "warning",
-        path: ref.file,
-        line: ref.line,
-        message: `reference to missing concept /${ref.concept}`,
-        fix: "point the comment at an existing concept or create it"
-      });
-    }
-    const check2 = values.check === true;
-    const changed = syncIndexes(config.root, bundleRoot, indexes, check2);
-    const written = check2 ? [] : changed;
-    const outdated = check2 ? changed : [];
-    const sorted = sortFindings(findings);
-    const { errors, warnings } = countBySeverity(sorted);
-    const ok2 = errors === 0 && outdated.length === 0;
-    if (values.json) {
-      io.stdout(`${JSON.stringify({ ok: ok2, written, outdated, findings: sorted }, null, 2)}
-`);
-    } else {
-      const counted = check2 ? `${outdated.length} outdated` : `${written.length} written`;
-      const lines3 = [
-        ...written.map((p) => `wrote ${p}`),
-        ...outdated.map((p) => `outdated ${p}`),
-        ...sorted.filter((f) => f.severity === "error").map(findingLine),
-        `${plural(indexes.size, "index")}, ${counted}: ${plural(errors, "error")}, ${plural(warnings, "warning")}`
-      ];
-      io.stdout(`${lines3.join("\n")}
-`);
-    }
-    return ok2 ? 0 : 1;
-  }
-});
+import { existsSync as existsSync29 } from "node:fs";
+import { join as join33, relative as relative16, sep as sep16 } from "node:path";
 
 // src/sync/plan.ts
-import { existsSync as existsSync21, readFileSync as readFileSync14 } from "node:fs";
-import { join as join24, relative as relative10, sep as sep9 } from "node:path";
+import { existsSync as existsSync24, readFileSync as readFileSync18 } from "node:fs";
+import { join as join28, relative as relative13, sep as sep13 } from "node:path";
 
 // src/sync/apply.ts
-import { existsSync as existsSync20, mkdirSync as mkdirSync3, readFileSync as readFileSync13, writeFileSync as writeFileSync3 } from "node:fs";
-import { dirname as dirname6, join as join23, relative as relative9, sep as sep8 } from "node:path";
-
-// src/new/command.ts
-import { existsSync as existsSync19, mkdirSync as mkdirSync2, writeFileSync as writeFileSync2 } from "node:fs";
-import { dirname as dirname5, join as join22, relative as relative8, sep as sep7 } from "node:path";
-
-// src/new/templates.ts
-import { existsSync as existsSync18, readFileSync as readFileSync12 } from "node:fs";
-import { join as join21 } from "node:path";
-var HEADINGS = {
-  Term: ["Meaning", "Not to be confused with", "Related"],
-  "Business Rule": ["Rule", "Why", "Related"],
-  Component: ["Responsibility", "Interfaces", "Related"],
-  "Data Flow": ["Flow", "Related"],
-  Interface: ["Contract summary", "Consumers", "Related"],
-  Decision: ["Decision", "Why", "Rejected alternatives", "Related"],
-  Capability: ["Why", "Related"],
-  Convention: ["Convention", "Why", "Related"],
-  Runbook: ["When to use", "Steps", "Verify", "Related"],
-  Reference: ["Summary", "Related"],
-  Vision: ["Goals", "Non-goals", "Principles"],
-  "Deferred Commitment": ["Commitment", "Trigger", "Related"],
-  "Backlog Item": ["Idea", "Related"]
-};
-var GENERIC = ["Summary", "Related"];
-var TEMPLATE_DIR = ".agents/skills/sf-capture/templates";
-var typeSlug = (type) => type.trim().toLowerCase().replace(/\s+/g, "-");
-function builtInBody(type) {
-  return `${(HEADINGS[type] ?? GENERIC).map((h) => `# ${h}`).join("\n\n")}
-`;
-}
-function overrideTemplate(repoRoot, type, values) {
-  const path = join21(repoRoot, TEMPLATE_DIR, `${typeSlug(type)}.md`);
-  if (!existsSync18(path)) return void 0;
-  return readFileSync12(path, "utf8").replace(
-    /\{\{(type|title|description|by|now)\}\}/g,
-    (_, key) => values[key]
-  );
-}
-
-// src/new/command.ts
-var KEBAB2 = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-var ACTOR2 = /^(?:process:\S+|[^\s/:]+\/\S+)$/;
-var RESERVED_WORDS = /^(?:true|false|null|yes|no|on|off|~)$/i;
-var DAY_MS2 = 24 * 60 * 60 * 1e3;
-function scalar(value) {
-  const plain = /^[A-Za-z0-9][A-Za-z0-9 _.,;()'/-]*$/.test(value) && !RESERVED_WORDS.test(value) && !value.endsWith(" ");
-  return plain ? value : JSON.stringify(value);
-}
-function isoWithOffset(date) {
-  const pad = (n) => String(Math.abs(n)).padStart(2, "0");
-  const offset = -date.getTimezoneOffset();
-  const sign = offset < 0 ? "-" : "+";
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}${sign}${pad(Math.trunc(offset / 60))}:${pad(offset % 60)}`;
-}
-function titleFromPath(rel) {
-  const name = rel.slice(rel.lastIndexOf("/") + 1, -3).replace(/-/g, " ");
-  return name.charAt(0).toUpperCase() + name.slice(1);
-}
-function renderConcept(repoRoot, fields) {
-  const { type, title, description, by, now } = fields;
-  const placeholders = { type, title, description, by, now: isoWithOffset(now) };
-  return overrideTemplate(repoRoot, type, placeholders) ?? [
-    "---",
-    `type: ${scalar(type)}`,
-    `title: ${scalar(title)}`,
-    `description: ${scalar(description)}`,
-    "status: draft",
-    ...type === "Decision" ? ["decision: accepted"] : [],
-    ...type === "Runbook" || type === "Interface" ? [`stale_after: ${isoWithOffset(new Date(now.getTime() + 90 * DAY_MS2))}`] : [],
-    `generated: { by: ${scalar(by)}, at: ${placeholders.now} }`,
-    ...type === "Decision" ? ["sources: []"] : [],
-    "---",
-    "",
-    builtInBody(type)
-  ].join("\n");
-}
-function bundlePath(arg) {
-  const rel = arg.replace(/^\/+/, "");
-  const segments = rel.split("/");
-  const file = segments.at(-1) ?? "";
-  const valid = file.endsWith(".md") && file !== "index.md" && file !== "log.md" && segments.slice(0, -1).every((s) => KEBAB2.test(s)) && KEBAB2.test(file.slice(0, -3));
-  if (!valid)
-    throw new UsageError(
-      `path '${arg}' must be a kebab-case .md file inside the bundle, e.g. decisions/use-yaml.md`
-    );
-  return rel;
-}
-register({
-  name: "new",
-  summary: "create a concept from its type's template",
-  usage: "specfold new <type> <path> [--title <text>] [--description <text>] [--by <actor>] [--json]",
-  options: {
-    title: { type: "string" },
-    description: { type: "string" },
-    by: { type: "string" },
-    json: { type: "boolean" }
-  },
-  run: ({ io, values, positionals }) => {
-    if (positionals.length !== 2) throw new UsageError("expected <type> and <path>");
-    const [type = "", pathArg = ""] = positionals;
-    const config = requireConfig(io.cwd);
-    if (!config.types.includes(type)) {
-      throw new UsageError(`type '${type}' is not in specfold.yaml types: ${config.types.join(", ")}`);
-    }
-    const rel = bundlePath(pathArg);
-    const model = process.env.SPECFOLD_MODEL;
-    const by = values.by ?? (model ? `${config.agentPrefix}${model}` : "process:specfold-new");
-    if (by.startsWith("human:"))
-      throw new UsageError("human actors are added by 'specfold verify', never by 'new'");
-    if (!ACTOR2.test(by))
-      throw new UsageError(`actor '${by}' must look like '<producer>/<version>' or 'process:<id>'`);
-    const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
-    const abs = join22(bundleRoot, rel);
-    const shown = relative8(config.root, abs).split(sep7).join("/");
-    if (existsSync19(abs)) {
-      if (values.json) io.stdout(`${JSON.stringify({ created: null, error: `${shown} already exists` })}
-`);
-      else io.stderr(`specfold: ${shown} already exists
-`);
-      return 1;
-    }
-    const title = values.title ?? titleFromPath(rel);
-    const description = values.description ?? "";
-    const content = renderConcept(config.root, { type, title, description, by, now: /* @__PURE__ */ new Date() });
-    mkdirSync2(dirname5(abs), { recursive: true });
-    writeFileSync2(abs, content);
-    io.stdout(values.json ? `${JSON.stringify({ created: shown })}
-` : `${shown}
-`);
-    return 0;
-  }
-});
-
-// src/sync/frontmatter.ts
-var import_yaml6 = __toESM(require_dist(), 1);
-var yamlValue = (value) => /^[A-Za-z0-9._/][A-Za-z0-9._/-]*$/.test(value) && /[A-Za-z]/.test(value) && !/^(?:true|false|null|yes|no|on|off)$/i.test(value) ? value : scalar(value);
-var TOP_KEY = /^([A-Za-z_][\w-]*):(?:\s|$)/;
-function keyRange(lines3, key) {
-  const start = lines3.findIndex((l) => TOP_KEY.exec(l)?.[1] === key);
-  if (start === -1) return void 0;
-  let end = start + 1;
-  while (end < lines3.length && /^(?:\s|-|$)/.test(lines3[end])) end++;
-  while (end > start + 1 && lines3[end - 1].trim() === "") end--;
-  return [start, end];
-}
-function editFrontmatter(text2, edit) {
-  const unchanged = { text: text2, setKeys: [], addedSources: [] };
-  const all = text2.split("\n");
-  if (all[0] !== "---") return unchanged;
-  const close = all.findIndex((l, i) => i > 0 && (l === "---" || l === "..."));
-  if (close === -1) return unchanged;
-  const lines3 = all.slice(1, close);
-  let data;
-  try {
-    data = (0, import_yaml6.parse)(lines3.join("\n"), { schema: "core" }) ?? {};
-  } catch {
-    return unchanged;
-  }
-  const setKeys = [];
-  for (const [key, value] of Object.entries(edit.set ?? {})) {
-    if (data[key] === value) continue;
-    const line = `${key}: ${yamlValue(value)}`;
-    const range = keyRange(lines3, key);
-    if (range) lines3.splice(range[0], range[1] - range[0], line);
-    else {
-      const generated = keyRange(lines3, "generated");
-      lines3.splice(generated ? generated[0] : lines3.length, 0, line);
-    }
-    setKeys.push(key);
-  }
-  for (const [key, block] of Object.entries(edit.setBlock ?? {})) {
-    const range = keyRange(lines3, key);
-    if (range) {
-      if (lines3.slice(range[0], range[1]).join("\n") === block.join("\n")) continue;
-      lines3.splice(range[0], range[1] - range[0], ...block);
-    } else {
-      const generated = keyRange(lines3, "generated");
-      lines3.splice(generated ? generated[1] : lines3.length, 0, ...block);
-    }
-    setKeys.push(key);
-  }
-  const addedSources = [];
-  const linked = new Set(
-    (Array.isArray(data.sources) ? data.sources : []).map((s) => s?.resource)
-  );
-  for (const source of edit.addSources ?? []) {
-    if (linked.has(source.resource)) continue;
-    linked.add(source.resource);
-    const entry = [`  - id: ${yamlValue(source.id)}`, `    resource: ${yamlValue(source.resource)}`];
-    const range = keyRange(lines3, "sources");
-    if (!range) lines3.push("sources:", ...entry);
-    else if (range[1] - range[0] > 1) lines3.splice(range[1], 0, ...entry);
-    else {
-      const old = Array.isArray(data.sources) ? data.sources : [];
-      const block = old.length > 0 ? (0, import_yaml6.stringify)(old, { lineWidth: 0 }).trimEnd().split("\n").map((l) => `  ${l}`) : [];
-      lines3.splice(range[0], 1, "sources:", ...block, ...entry);
-    }
-    addedSources.push(source.id);
-  }
-  if (setKeys.length === 0 && addedSources.length === 0) return unchanged;
-  return { text: ["---", ...lines3, ...all.slice(close)].join("\n"), setKeys, addedSources };
-}
-
-// src/sync/apply.ts
-var posix2 = (p) => p.split(sep8).join("/");
+import { existsSync as existsSync23, mkdirSync as mkdirSync4, readFileSync as readFileSync17, writeFileSync as writeFileSync7 } from "node:fs";
+import { dirname as dirname7, join as join27, relative as relative12, sep as sep12 } from "node:path";
+var posix2 = (p) => p.split(sep12).join("/");
 var CAPABILITY = /^capabilities\/(.+)\.md$/;
 function editsFor(op, abs, ctx) {
   const set = {};
   const addSources = [];
   if (op.op === "deprecate") set.status = "deprecated";
   const cap = op.type === "Capability" ? CAPABILITY.exec(op.path)?.[1] : void 0;
-  const archive = join23(ctx.repoRoot, "openspec", "changes", "archive", ctx.archivedId);
-  const fromCard = (target) => posix2(relative9(dirname6(abs), target));
+  const archive = join27(ctx.repoRoot, "openspec", "changes", "archive", ctx.archivedId);
+  const fromCard = (target) => posix2(relative12(dirname7(abs), target));
   if (cap) {
-    const spec = join23(ctx.repoRoot, "openspec", "specs", cap, "spec.md");
-    set.spec = posix2(relative9(ctx.repoRoot, spec));
+    const spec = join27(ctx.repoRoot, "openspec", "specs", cap, "spec.md");
+    set.spec = posix2(relative12(ctx.repoRoot, spec));
     set.resource = fromCard(spec);
     set.change = ctx.archivedId;
     for (const artifact of ["proposal", "design"]) {
-      const file = join23(archive, `${artifact}.md`);
-      if (existsSync20(file))
+      const file = join27(archive, `${artifact}.md`);
+      if (existsSync23(file))
         addSources.push({ id: `${artifact}-${ctx.archivedId}`, resource: fromCard(file) });
     }
   }
@@ -10325,15 +10963,15 @@ function editsFor(op, abs, ctx) {
 function planOps(ops, ctx) {
   const plan = { actions: [], writes: /* @__PURE__ */ new Map() };
   for (const op of ops) {
-    const abs = join23(ctx.bundleRoot, op.path);
-    const shown = posix2(relative9(ctx.repoRoot, abs));
+    const abs = join27(ctx.bundleRoot, op.path);
+    const shown = posix2(relative12(ctx.repoRoot, abs));
     let original;
-    let text2;
-    if (existsSync20(abs)) {
-      original = readFileSync13(abs, "utf8");
-      text2 = original;
+    let text3;
+    if (existsSync23(abs)) {
+      original = readFileSync17(abs, "utf8");
+      text3 = original;
     } else if (op.op === "create") {
-      text2 = renderConcept(ctx.repoRoot, {
+      text3 = renderConcept(ctx.repoRoot, {
         type: op.type,
         title: titleFromPath(op.path),
         description: op.summary,
@@ -10342,7 +10980,7 @@ function planOps(ops, ctx) {
       });
       plan.actions.push({ path: shown, action: "create stub" });
     } else continue;
-    const result = editFrontmatter(text2, editsFor(op, abs, ctx));
+    const result = editFrontmatter(text3, editsFor(op, abs, ctx));
     for (const key of result.setKeys) {
       plan.actions.push({ path: shown, action: key === "status" ? "set status: deprecated" : `set ${key}` });
     }
@@ -10353,21 +10991,21 @@ function planOps(ops, ctx) {
 }
 function applyWrites(plan) {
   for (const [abs, content] of plan.writes) {
-    mkdirSync3(dirname6(abs), { recursive: true });
-    writeFileSync3(abs, content);
+    mkdirSync4(dirname7(abs), { recursive: true });
+    writeFileSync7(abs, content);
   }
 }
 
 // src/sync/plan.ts
 function planSync(config, bundleRoot, id, now = /* @__PURE__ */ new Date()) {
   const relDir = `openspec/changes/archive/${id}`;
-  const { findings, ops } = checkKnowledge(config, bundleRoot, join24(config.root, relDir), {
+  const { findings, ops } = checkKnowledge(config, bundleRoot, join28(config.root, relDir), {
     relDir,
     archived: true
   });
-  const logPath = join24(bundleRoot, "log.md");
-  const logRel = relative10(config.root, logPath).split(sep9).join("/");
-  const logText = existsSync21(logPath) ? readFileSync14(logPath, "utf8") : void 0;
+  const logPath = join28(bundleRoot, "log.md");
+  const logRel = relative13(config.root, logPath).split(sep13).join("/");
+  const logText = existsSync24(logPath) ? readFileSync18(logPath, "utf8") : void 0;
   if (findings.length > 0)
     return { findings, ops, plan: void 0, logPath, logRel, logText, needsLog: false };
   const model = process.env.SPECFOLD_MODEL;
@@ -10377,15 +11015,15 @@ function planSync(config, bundleRoot, id, now = /* @__PURE__ */ new Date()) {
 }
 
 // src/trace/specs.ts
-import { existsSync as existsSync22, readFileSync as readFileSync15 } from "node:fs";
-import { join as join25 } from "node:path";
+import { existsSync as existsSync25, readFileSync as readFileSync19 } from "node:fs";
+import { join as join29 } from "node:path";
 var SECTION = /^##\s+(ADDED|MODIFIED|REMOVED|RENAMED)\s+Requirements\s*$/;
 var REQUIREMENT = /^###\s+Requirement:\s*(.+?)\s*$/;
 var SCENARIO2 = /^####\s+Scenario:\s*(.+?)\s*$/;
-function parseSpec(text2, capability, spec, delta, into) {
+function parseSpec(text3, capability, spec, delta, into) {
   let section = delta ? "ADDED" : "main";
   let requirement = "";
-  text2.split("\n").forEach((line, i) => {
+  text3.split("\n").forEach((line, i) => {
     const s = delta ? SECTION.exec(line) : null;
     if (s) {
       section = s[1];
@@ -10413,24 +11051,24 @@ ${requirement}`);
 }
 function parseSpecs(repoRoot, specsRel, delta) {
   const parsed = { scenarios: [], removed: /* @__PURE__ */ new Set() };
-  const dir = join25(repoRoot, specsRel);
-  if (!existsSync22(dir)) return parsed;
+  const dir = join29(repoRoot, specsRel);
+  if (!existsSync25(dir)) return parsed;
   for (const rel of walkFiles(dir)) {
     if (!rel.endsWith("/spec.md")) continue;
     const capability = rel.slice(0, -"/spec.md".length);
-    parseSpec(readFileSync15(join25(dir, rel), "utf8"), capability, `${specsRel}/${rel}`, delta, parsed);
+    parseSpec(readFileSync19(join29(dir, rel), "utf8"), capability, `${specsRel}/${rel}`, delta, parsed);
   }
   return parsed;
 }
 var changedScenarios = (parsed) => parsed.scenarios.filter((s) => s.section === "ADDED" || s.section === "MODIFIED");
 
 // src/trace/trace.ts
-import { existsSync as existsSync23, readdirSync as readdirSync5 } from "node:fs";
-import { join as join27 } from "node:path";
+import { existsSync as existsSync26, readdirSync as readdirSync5 } from "node:fs";
+import { join as join31 } from "node:path";
 
 // src/trace/refs.ts
-import { readFileSync as readFileSync16, statSync as statSync8 } from "node:fs";
-import { join as join26 } from "node:path";
+import { readFileSync as readFileSync20, statSync as statSync8 } from "node:fs";
+import { join as join30 } from "node:path";
 var MAX_BYTES2 = 1024 * 1024;
 var REFERENCE2 = /(?<![\w-])spec:\s*([a-z0-9][a-z0-9/-]*#[a-z0-9-]+)/g;
 var NEVER = /^(?:knowledge|openspec)\//;
@@ -10439,11 +11077,11 @@ function scanTestReferences(repoRoot, testGlobs) {
   const refs = [];
   for (const file of walkFiles(repoRoot)) {
     if (NEVER.test(file) || !patterns.some((p) => p.test(file))) continue;
-    const abs = join26(repoRoot, file);
+    const abs = join30(repoRoot, file);
     if (statSync8(abs).size > MAX_BYTES2) continue;
-    const text2 = readFileSync16(abs, "utf8");
-    if (text2.includes("\0")) continue;
-    text2.split("\n").forEach((content, i) => {
+    const text3 = readFileSync20(abs, "utf8");
+    if (text3.includes("\0")) continue;
+    text3.split("\n").forEach((content, i) => {
       for (const match of content.matchAll(REFERENCE2))
         refs.push({ id: match[1], file, line: i + 1 });
     });
@@ -10452,8 +11090,8 @@ function scanTestReferences(repoRoot, testGlobs) {
 }
 
 // src/trace/trace.ts
-var CHANGES = join27("openspec", "changes");
-var activeChangeNames = (root) => existsSync23(join27(root, CHANGES)) ? readdirSync5(join27(root, CHANGES), { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort() : [];
+var CHANGES = join31("openspec", "changes");
+var activeChangeNames = (root) => existsSync26(join31(root, CHANGES)) ? readdirSync5(join31(root, CHANGES), { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort() : [];
 var changeSpecs = (root, changeRel) => parseSpecs(root, `${changeRel}/specs`, true);
 function buildTraceIndex(config) {
   const root = config.root;
@@ -10483,12 +11121,12 @@ function traceReport(index, scope) {
 }
 
 // src/validate/index.ts
-import { existsSync as existsSync24 } from "node:fs";
-import { relative as relative11, resolve as resolve4, sep as sep10 } from "node:path";
+import { existsSync as existsSync27 } from "node:fs";
+import { relative as relative14, resolve as resolve4, sep as sep14 } from "node:path";
 var okfRules = [okf1, okf2, okf3Index, okf3Log];
-var profileRules = [p1, p2, p3, p4, p5, p6, p7, p9, p10, p11, l1, l2];
+var profileRules = [p1, p2, p3, p4, p5, p6, p7, p9, p10, p11, p12, p13, p14, l1, l2];
 var profileBundleRules = [p8];
-var toRel = (root, abs) => relative11(root, abs).split(sep10).join("/");
+var toRel = (root, abs) => relative14(root, abs).split(sep14).join("/");
 function validate(input) {
   const entries = walk(input.bundleRoot);
   const roots = input.paths.map((abs) => toRel(input.bundleRoot, abs));
@@ -10521,11 +11159,11 @@ register({
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, config);
     const paths = positionals.map((p) => {
       const abs = resolve4(io.cwd, p);
-      const rel = relative11(bundleRoot, abs);
+      const rel = relative14(bundleRoot, abs);
       if (rel.startsWith("..") || resolve4(bundleRoot, rel) !== abs) {
         throw new UsageError(`path is outside the bundle ${bundleRoot}: ${p}`);
       }
-      if (!existsSync24(abs)) throw new UsageError(`path not found: ${p}`);
+      if (!existsSync27(abs)) throw new UsageError(`path not found: ${p}`);
       return abs;
     });
     const { findings, checked } = validate({ bundleRoot, paths, okfOnly, ...config ? { config } : {} });
@@ -10535,13 +11173,13 @@ register({
 });
 
 // src/gate/claims.ts
-import { existsSync as existsSync25, readFileSync as readFileSync17 } from "node:fs";
-import { join as join28, relative as relative12, sep as sep11 } from "node:path";
+import { existsSync as existsSync28, readFileSync as readFileSync21 } from "node:fs";
+import { join as join32, relative as relative15, sep as sep15 } from "node:path";
 var BRIEF = /^openspec\/changes\/(?:archive\/)?[^/]+\/brief\.md$/;
 var ARCHIVED_BRIEF = /^openspec\/changes\/archive\/\d{4}-\d{2}-\d{2}-([^/]+)\/brief\.md$/;
 var CONFIRMED_BY = /^confirmed_by:[ \t]*(\S+)/;
-function verifiedClaims(file, text2) {
-  const fm = parseText(file, text2).frontmatter;
+function verifiedClaims(file, text3) {
+  const fm = parseText(file, text3).frontmatter;
   if (!fm || !isRecord2(fm.data)) return [];
   const verified = fm.data.verified;
   const entries = Array.isArray(verified) ? verified : verified === void 0 ? [] : [verified];
@@ -10549,8 +11187,8 @@ function verifiedClaims(file, text2) {
     (e) => isRecord2(e) && typeof e.by === "string" && e.by.startsWith("human:") ? [{ login: e.by.slice("human:".length), file, line: fm.lineOf("verified"), key: "verified" }] : []
   );
 }
-function briefClaims(file, text2) {
-  const lines3 = text2.split(/\r?\n/);
+function briefClaims(file, text3) {
+  const lines3 = text3.split(/\r?\n/);
   return lines3.flatMap((l, i) => {
     const by = CONFIRMED_BY.exec(l)?.[1];
     return by?.startsWith("human:") ? [{ login: by.slice("human:".length), file, line: i + 1, key: "confirmed_by" }] : [];
@@ -10564,11 +11202,11 @@ function baseVersion(root, mergeBase, file) {
   }
 }
 function addedClaims(root, bundleRoot, diff) {
-  const bundlePrefix = `${relative12(root, bundleRoot).split(sep11).join("/")}/`;
+  const bundlePrefix = `${relative15(root, bundleRoot).split(sep15).join("/")}/`;
   const out = [];
   for (const file of diff.files) {
-    const abs = join28(root, file);
-    if (!existsSync25(abs)) continue;
+    const abs = join32(root, file);
+    if (!existsSync28(abs)) continue;
     let extract;
     if (BRIEF.test(file)) extract = briefClaims;
     else if (file.startsWith(bundlePrefix) && file.endsWith(".md") && isConcept(file.slice(bundlePrefix.length)))
@@ -10582,7 +11220,7 @@ function addedClaims(root, bundleRoot, diff) {
         return base === void 0 ? [] : extract(file, base).map((c) => c.login.toLowerCase());
       })
     );
-    for (const claim of extract(file, readFileSync17(abs, "utf8")))
+    for (const claim of extract(file, readFileSync21(abs, "utf8")))
       if (!before.has(claim.login.toLowerCase())) out.push(claim);
   }
   return out;
@@ -10630,12 +11268,12 @@ ${result.stdout}`.trim().split("\n")[0] || `exit code ${result.status}`;
 var LINK_RULES = /* @__PURE__ */ new Set(["L1", "L2"]);
 var NO_SPEC_REASON = /^No-spec reason:[ \t]*\S/m;
 function inRepo(ctx, bundleRel) {
-  const prefix = relative13(ctx.config.root, ctx.bundleRoot).split(sep12).join("/");
+  const prefix = relative16(ctx.config.root, ctx.bundleRoot).split(sep16).join("/");
   return prefix ? `${prefix}/${bundleRel}` : bundleRel;
 }
 function changedConcepts(ctx) {
-  const prefix = `${relative13(ctx.config.root, ctx.bundleRoot).split(sep12).join("/")}/`;
-  return ctx.diff.files.filter((f) => f.startsWith(prefix) && f.endsWith(".md")).map((f) => f.slice(prefix.length)).filter((rel) => isConcept(rel) && existsSync26(join29(ctx.bundleRoot, rel)));
+  const prefix = `${relative16(ctx.config.root, ctx.bundleRoot).split(sep16).join("/")}/`;
+  return ctx.diff.files.filter((f) => f.startsWith(prefix) && f.endsWith(".md")).map((f) => f.slice(prefix.length)).filter((rel) => isConcept(rel) && existsSync29(join33(ctx.bundleRoot, rel)));
 }
 var fromBundle = (ctx, rule, effect, f) => ({
   rule,
@@ -10727,7 +11365,7 @@ var g4 = (ctx) => {
   ];
 };
 var plannedChanges = (ctx) => ctx.diff.activeChanges.filter(
-  (change) => existsSync26(join29(ctx.config.root, "openspec", "changes", change, "tasks.md"))
+  (change) => existsSync29(join33(ctx.config.root, "openspec", "changes", change, "tasks.md"))
 );
 var touchedChanges = (ctx, changes = ctx.diff.activeChanges) => changes.map((change) => checkChange(ctx.config, ctx.bundleRoot, change));
 var g5 = (ctx) => touchedChanges(ctx, plannedChanges(ctx)).flatMap(
@@ -10745,7 +11383,7 @@ var g15 = (ctx) => {
   const covered = new Set(index.refs.map((r) => r.id));
   const checked = /* @__PURE__ */ new Set();
   const findings = [];
-  const archived = ctx.diff.archivedChanges.map((id) => `openspec/changes/archive/${id}`).filter((rel) => existsSync26(join29(root, rel, "tasks.md")));
+  const archived = ctx.diff.archivedChanges.map((id) => `openspec/changes/archive/${id}`).filter((rel) => existsSync29(join33(root, rel, "tasks.md")));
   const changes = [
     ...plannedChanges(ctx).map(
       (name) => index.active.get(name) ?? changeSpecs(root, `openspec/changes/${name}`)
@@ -10883,8 +11521,8 @@ var g12 = (ctx) => auditBundle(ctx.config, ctx.bundleRoot, ctx.now).filter((f) =
 var g14 = (ctx) => {
   const changed = new Set(ctx.diff.files);
   return scanReferences(ctx.config.root, ctx.config.sourceGlobs).flatMap((ref) => {
-    const abs = join29(ctx.bundleRoot, ref.concept);
-    if (!existsSync26(abs))
+    const abs = join33(ctx.bundleRoot, ref.concept);
+    if (!existsSync29(abs))
       return [
         {
           rule: "G14",
@@ -10921,7 +11559,7 @@ function sortGateFindings(findings) {
 var runGate = (ctx) => sortGateFindings(RULES.flatMap((rule) => rule(ctx)));
 
 // src/gate/summary.ts
-var cell = (text2) => text2.replace(/\r?\n/g, " ").replace(/\|/g, "\\|");
+var cell = (text3) => text3.replace(/\r?\n/g, " ").replace(/\|/g, "\\|");
 function renderSummary(findings, verdict2) {
   const lines3 = [`## specfold gate: ${verdict2}`, ""];
   if (findings.length > 0) {
@@ -10993,7 +11631,7 @@ register({
     const base = values.base;
     if (!base) throw new UsageError("missing --base <ref>");
     const bodyFile = values["pr-body"];
-    if (bodyFile !== void 0 && !existsSync27(resolve5(io.cwd, bodyFile)))
+    if (bodyFile !== void 0 && !existsSync30(resolve5(io.cwd, bodyFile)))
       throw new UsageError(`PR body file not found: ${bodyFile}`);
     const prArg = values.pr;
     if (prArg !== void 0 && !/^[1-9]\d*$/.test(prArg))
@@ -11005,13 +11643,13 @@ register({
       gateContext(config, io.cwd, base, {
         local,
         labels: values.label ?? [],
-        prBody: bodyFile === void 0 ? void 0 : readFileSync18(resolve5(io.cwd, bodyFile), "utf8"),
+        prBody: bodyFile === void 0 ? void 0 : readFileSync22(resolve5(io.cwd, bodyFile), "utf8"),
         pr
       })
     );
     const summary = values.summary;
     if (summary !== void 0)
-      writeFileSync4(resolve5(io.cwd, summary), renderSummary(findings, verdict(findings)));
+      writeFileSync8(resolve5(io.cwd, summary), renderSummary(findings, verdict(findings)));
     const counts = countFindings(findings);
     const ok2 = counts.block === 0;
     if (values.json) {
@@ -11025,9 +11663,9 @@ register({
 });
 
 // src/hooks/install.ts
-var import_yaml7 = __toESM(require_dist(), 1);
-import { chmodSync, existsSync as existsSync28, mkdirSync as mkdirSync4, readFileSync as readFileSync19, realpathSync, writeFileSync as writeFileSync5 } from "node:fs";
-import { join as join30 } from "node:path";
+var import_yaml8 = __toESM(require_dist(), 1);
+import { chmodSync, existsSync as existsSync31, mkdirSync as mkdirSync5, readFileSync as readFileSync23, realpathSync, writeFileSync as writeFileSync9 } from "node:fs";
+import { join as join34 } from "node:path";
 var HOOKS_PATH = ".specfold/hooks";
 var OWN_HOOKS = ["pre-commit", "pre-push", "post-checkout", "post-merge"];
 var hookNames = (config) => [.../* @__PURE__ */ new Set([...OWN_HOOKS, ...Object.keys(config.hooksExtra)])];
@@ -11039,10 +11677,10 @@ function gitConfig(root, key) {
     return void 0;
   }
 }
-function writeIfChanged(path, text2, mode) {
-  if (existsSync28(path) && readFileSync19(path, "utf8") === text2) return false;
-  mkdirSync4(join30(path, ".."), { recursive: true });
-  writeFileSync5(path, text2);
+function writeIfChanged(path, text3, mode) {
+  if (existsSync31(path) && readFileSync23(path, "utf8") === text3) return false;
+  mkdirSync5(join34(path, ".."), { recursive: true });
+  writeFileSync9(path, text3);
   if (mode !== void 0) chmodSync(path, mode);
   return true;
 }
@@ -11071,7 +11709,7 @@ function installBuiltIn(config) {
 # Installed by specfold hooks install; project commands go into hooks.extra in specfold.yaml.
 exec ${hookCommand(hook)} "$@"
 `;
-    if (writeIfChanged(join30(config.root, path), script, 493)) actions.push({ path, action: "write" });
+    if (writeIfChanged(join34(config.root, path), script, 493)) actions.push({ path, action: "write" });
   }
   if (current === void 0) {
     git(config.root, ["config", "core.hooksPath", HOOKS_PATH]);
@@ -11082,26 +11720,26 @@ exec ${hookCommand(hook)} "$@"
 var LEFTHOOK_FILES = ["lefthook.yml", "lefthook.yaml", ".lefthook.yml"];
 var PRE_COMMIT_FILE = ".pre-commit-config.yaml";
 function detectManager(root) {
-  const lefthook = LEFTHOOK_FILES.find((f) => existsSync28(join30(root, f)));
+  const lefthook = LEFTHOOK_FILES.find((f) => existsSync31(join34(root, f)));
   if (lefthook) return { name: "lefthook", path: lefthook };
-  if (existsSync28(join30(root, ".husky"))) return { name: "husky", path: ".husky" };
-  if (existsSync28(join30(root, PRE_COMMIT_FILE))) return { name: "pre-commit", path: PRE_COMMIT_FILE };
+  if (existsSync31(join34(root, ".husky"))) return { name: "husky", path: ".husky" };
+  if (existsSync31(join34(root, PRE_COMMIT_FILE))) return { name: "pre-commit", path: PRE_COMMIT_FILE };
   return void 0;
 }
 function readDocument(path) {
-  const doc = (0, import_yaml7.parseDocument)(existsSync28(path) ? readFileSync19(path, "utf8") : "");
+  const doc = (0, import_yaml8.parseDocument)(existsSync31(path) ? readFileSync23(path, "utf8") : "");
   if (doc.errors[0]) throw new EnvError(`${path}: ${doc.errors[0].message.split("\n")[0]}`);
-  return (0, import_yaml7.isMap)(doc.contents) ? doc : new import_yaml7.Document({});
+  return (0, import_yaml8.isMap)(doc.contents) ? doc : new import_yaml8.Document({});
 }
 function lefthookEntries(config, file) {
-  const path = join30(config.root, file);
+  const path = join34(config.root, file);
   const doc = readDocument(path);
   const actions = [];
   for (const hook of hookNames(config)) {
     const run = `${hookCommand(hook)} {0}`;
     const jobs = doc.getIn([hook, "jobs"]);
-    if ((0, import_yaml7.isSeq)(jobs)) {
-      if (jobs.items.some((j) => (0, import_yaml7.isMap)(j) && j.get("name") === "specfold")) continue;
+    if ((0, import_yaml8.isSeq)(jobs)) {
+      if (jobs.items.some((j) => (0, import_yaml8.isMap)(j) && j.get("name") === "specfold")) continue;
       jobs.add(doc.createNode({ name: "specfold", run }));
     } else {
       if (doc.hasIn([hook, "commands", "specfold"])) continue;
@@ -11109,39 +11747,39 @@ function lefthookEntries(config, file) {
     }
     actions.push({ path: file, action: `add specfold to ${hook}` });
   }
-  if (actions.length > 0) writeFileSync5(path, String(doc));
+  if (actions.length > 0) writeFileSync9(path, String(doc));
   return actions;
 }
 function huskyEntries(config) {
   const actions = [];
   for (const hook of hookNames(config)) {
     const path = `.husky/${hook}`;
-    const abs = join30(config.root, path);
+    const abs = join34(config.root, path);
     const line = `${hookCommand(hook)} "$@"`;
-    const text2 = existsSync28(abs) ? readFileSync19(abs, "utf8") : "";
-    if (text2.split("\n").some((l) => l.trim() === line)) continue;
-    writeIfChanged(abs, `${text2}${text2 === "" || text2.endsWith("\n") ? "" : "\n"}${line}
+    const text3 = existsSync31(abs) ? readFileSync23(abs, "utf8") : "";
+    if (text3.split("\n").some((l) => l.trim() === line)) continue;
+    writeIfChanged(abs, `${text3}${text3 === "" || text3.endsWith("\n") ? "" : "\n"}${line}
 `, 493);
     actions.push({ path, action: `add ${hook}` });
   }
   return actions;
 }
-var idOf = (hook) => (0, import_yaml7.isMap)(hook) ? String(hook.get("id")) : "";
+var idOf = (hook) => (0, import_yaml8.isMap)(hook) ? String(hook.get("id")) : "";
 function preCommitEntries(config) {
-  const path = join30(config.root, PRE_COMMIT_FILE);
+  const path = join34(config.root, PRE_COMMIT_FILE);
   const doc = readDocument(path);
-  if (!(0, import_yaml7.isSeq)(doc.get("repos"))) doc.set("repos", doc.createNode([]));
+  if (!(0, import_yaml8.isSeq)(doc.get("repos"))) doc.set("repos", doc.createNode([]));
   const repos = doc.get("repos");
   const hookSeqs = repos.items.flatMap((repo) => {
-    const hooks = (0, import_yaml7.isMap)(repo) ? repo.get("hooks") : void 0;
-    return (0, import_yaml7.isSeq)(hooks) ? [{ repo, hooks }] : [];
+    const hooks = (0, import_yaml8.isMap)(repo) ? repo.get("hooks") : void 0;
+    return (0, import_yaml8.isSeq)(hooks) ? [{ repo, hooks }] : [];
   });
   const ids = new Set(hookSeqs.flatMap(({ hooks }) => hooks.items.map(idOf)));
   const actions = [];
   const missing = hookNames(config).filter((hook) => !ids.has(`specfold-${hook}`));
   if (missing.length > 0) {
     let target = hookSeqs.find(
-      ({ repo, hooks }) => (0, import_yaml7.isMap)(repo) && repo.get("repo") === "local" && hooks.items.some((h) => idOf(h).startsWith("specfold-"))
+      ({ repo, hooks }) => (0, import_yaml8.isMap)(repo) && repo.get("repo") === "local" && hooks.items.some((h) => idOf(h).startsWith("specfold-"))
     )?.hooks;
     if (!target) {
       target = doc.createNode([]);
@@ -11163,13 +11801,13 @@ function preCommitEntries(config) {
     }
   }
   const listed = doc.get("default_install_hook_types");
-  const types = (0, import_yaml7.isSeq)(listed) ? listed.items.map((t) => String((0, import_yaml7.isScalar)(t) ? t.value : t)) : ["pre-commit"];
+  const types = (0, import_yaml8.isSeq)(listed) ? listed.items.map((t) => String((0, import_yaml8.isScalar)(t) ? t.value : t)) : ["pre-commit"];
   const added = hookNames(config).filter((h) => !types.includes(h));
   if (added.length > 0) {
     doc.set("default_install_hook_types", doc.createNode([...types, ...added], { flow: true }));
     actions.push({ path: PRE_COMMIT_FILE, action: `install hook types ${added.join(", ")}` });
   }
-  if (actions.length > 0) writeFileSync5(path, String(doc));
+  if (actions.length > 0) writeFileSync9(path, String(doc));
   return actions;
 }
 function installHooks(config) {
@@ -11191,8 +11829,8 @@ function installHooks(config) {
 
 // src/hooks/run.ts
 import { spawnSync as spawnSync2 } from "node:child_process";
-import { existsSync as existsSync30, statSync as statSync10 } from "node:fs";
-import { join as join32, relative as relative15, sep as sep14 } from "node:path";
+import { existsSync as existsSync33, statSync as statSync10 } from "node:fs";
+import { join as join36, relative as relative18, sep as sep18 } from "node:path";
 
 // src/hooks/base.ts
 function localBase(root) {
@@ -11205,24 +11843,31 @@ function localBase(root) {
 }
 
 // src/hooks/claude.ts
-import { existsSync as existsSync29, readdirSync as readdirSync6, readFileSync as readFileSync20, statSync as statSync9 } from "node:fs";
-import { isAbsolute, join as join31, relative as relative14, resolve as resolve6, sep as sep13 } from "node:path";
+import { existsSync as existsSync32, readdirSync as readdirSync6, readFileSync as readFileSync24, statSync as statSync9 } from "node:fs";
+import { isAbsolute, join as join35, relative as relative17, resolve as resolve6, sep as sep17 } from "node:path";
 var MAX_LINES = 40;
+var DUE_WINDOW_MS = 30 * 24 * 60 * 60 * 1e3;
 var EDIT_TOOLS = /* @__PURE__ */ new Set(["Edit", "Write"]);
 var activeChanges = (root) => {
-  const dir = join31(root, "openspec", "changes");
-  if (!existsSync29(dir)) return [];
-  return readdirSync6(dir).filter((d) => d !== "archive" && !d.startsWith(".") && statSync9(join31(dir, d)).isDirectory()).sort();
+  const dir = join35(root, "openspec", "changes");
+  if (!existsSync32(dir)) return [];
+  return readdirSync6(dir).filter((d) => d !== "archive" && !d.startsWith(".") && statSync9(join35(dir, d)).isDirectory()).sort();
 };
+var dueSoon = (bundleRoot, now = Date.now()) => listItems(bundleRoot, "commitments").filter((c) => {
+  const due = dueDate(c.data.trigger);
+  return c.data.state === "open" && due !== void 0 && due.getTime() <= now + DUE_WINDOW_MS;
+}).length;
 function sessionStart({ config, io }) {
   const bundleRoot = resolveBundleRoot(config.root, void 0, config);
-  const index = join31(bundleRoot, "index.md");
-  const sections = existsSync29(index) ? readFileSync20(index, "utf8").split("\n").filter((l) => /^\* \[/.test(l)) : [];
+  const index = join35(bundleRoot, "index.md");
+  const sections = existsSync32(index) ? readFileSync24(index, "utf8").split("\n").filter((l) => /^\* \[/.test(l)) : [];
   const changes = activeChanges(config.root);
+  const due = dueSoon(bundleRoot);
   const out = [
     "Knowledge sections (look up with: node scripts/specfold.mjs lookup <words>):",
     ...sections,
-    `Active changes: ${changes.length === 0 ? "none" : changes.join(", ")}`
+    `Active changes: ${changes.length === 0 ? "none" : changes.join(", ")}`,
+    ...due > 0 ? [`Commitments due within 30 days: ${due} (specfold commitments list)`] : []
   ];
   const shown = out.length > MAX_LINES ? [...out.slice(0, MAX_LINES - 1), `... ${out.length - MAX_LINES + 1} more lines`] : out;
   io.stdout(`${shown.join("\n")}
@@ -11240,16 +11885,16 @@ async function postToolUse({ config, io }) {
   if (typeof event.tool_name !== "string" || !EDIT_TOOLS.has(event.tool_name) || typeof file !== "string")
     return 0;
   const base = typeof event.cwd === "string" ? event.cwd : config.root;
-  const rel = relative14(config.root, isAbsolute(file) ? file : resolve6(base, file)).split(sep13).join("/");
+  const rel = relative17(config.root, isAbsolute(file) ? file : resolve6(base, file)).split(sep17).join("/");
   const bundleRoot = resolveBundleRoot(config.root, void 0, config);
-  const prefix = relative14(config.root, bundleRoot).split(sep13).join("/");
+  const prefix = relative17(config.root, bundleRoot).split(sep17).join("/");
   let errors = [];
   if (rel.startsWith(`${prefix}/`) && rel.endsWith(".md") && isConcept(rel.slice(prefix.length + 1))) {
-    if (!existsSync29(join31(config.root, rel))) return 0;
-    errors = validate({ bundleRoot, paths: [join31(config.root, rel)], okfOnly: false, config }).findings.filter((f) => f.severity === "error").map((f) => findingLine({ ...f, path: `${prefix}/${f.path}` }));
+    if (!existsSync32(join35(config.root, rel))) return 0;
+    errors = validate({ bundleRoot, paths: [join35(config.root, rel)], okfOnly: false, config }).findings.filter((f) => f.severity === "error").map((f) => findingLine({ ...f, path: `${prefix}/${f.path}` }));
   } else {
     const change = /^openspec\/changes\/([^/]+)\//.exec(rel)?.[1];
-    if (!change || change === "archive" || !existsSync29(join31(config.root, "openspec", "changes", change)))
+    if (!change || change === "archive" || !existsSync32(join35(config.root, "openspec", "changes", change)))
       return 0;
     errors = checkPlannedChange(config, bundleRoot, change).filter((f) => f.severity === "error").map(taskFindingLine);
   }
@@ -11269,15 +11914,15 @@ function stop({ config, io }) {
 
 // src/hooks/run.ts
 var ACTIVE_CHANGE = /^openspec\/changes\/([^/]+)\//;
-var lines2 = (text2) => text2.split("\n").filter((l) => l !== "");
+var lines2 = (text3) => text3.split("\n").filter((l) => l !== "");
 function preCommit({ config, io }) {
   const staged = lines2(
     git(config.root, ["diff", "--cached", "--name-only", "--diff-filter=ACMR", "--relative"])
   );
   const bundleRoot = resolveBundleRoot(config.root, void 0, config);
-  const prefix = relative15(config.root, bundleRoot).split(sep14).join("/");
+  const prefix = relative18(config.root, bundleRoot).split(sep18).join("/");
   const errors = [];
-  const concepts2 = staged.filter((f) => f.startsWith(`${prefix}/`) && f.endsWith(".md") && isConcept(f.slice(prefix.length + 1))).map((f) => join32(config.root, f));
+  const concepts2 = staged.filter((f) => f.startsWith(`${prefix}/`) && f.endsWith(".md") && isConcept(f.slice(prefix.length + 1))).map((f) => join36(config.root, f));
   if (concepts2.length > 0) {
     const { findings } = validate({ bundleRoot, paths: concepts2, okfOnly: false, config });
     for (const f of findings.filter((x) => x.severity === "error"))
@@ -11286,8 +11931,8 @@ function preCommit({ config, io }) {
   const changes = new Set(
     staged.flatMap((f) => {
       const name = ACTIVE_CHANGE.exec(f)?.[1];
-      const dir = name ? join32(config.root, "openspec", "changes", name) : "";
-      return name && name !== "archive" && existsSync30(dir) && statSync10(dir).isDirectory() ? [name] : [];
+      const dir = name ? join36(config.root, "openspec", "changes", name) : "";
+      return name && name !== "archive" && existsSync33(dir) && statSync10(dir).isDirectory() ? [name] : [];
     })
   );
   for (const change of changes)
@@ -11317,7 +11962,7 @@ function prePush({ config, io }) {
   return 1;
 }
 function refreshGraph({ config }) {
-  if (!existsSync30(join32(config.root, "graphify-out", "graph.json"))) return 0;
+  if (!existsSync33(join36(config.root, "graphify-out", "graph.json"))) return 0;
   spawnSync2("graphify", ["update", "."], {
     cwd: config.root,
     env: { ...process.env, GRAPHIFY_BACKEND: "none" },
@@ -11400,83 +12045,16 @@ register({
   }
 });
 
-// src/log/command.ts
-import { existsSync as existsSync31, readFileSync as readFileSync21, writeFileSync as writeFileSync6 } from "node:fs";
-import { join as join33 } from "node:path";
-
-// src/log/insert.ts
-var DATE_HEADING = /^## (\d{4}-\d{2}-\d{2})\s*$/;
-function insertEntry(text2, date, entry) {
-  if (text2 === void 0 || text2.trim() === "") return `# Log
-
-## ${date}
-
-${entry}
-`;
-  const lines3 = text2.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n");
-  const headings = lines3.map((line, index) => ({ index, date: DATE_HEADING.exec(line)?.[1] })).filter((h) => h.date !== void 0);
-  const same = headings.find((h) => h.date === date);
-  if (same) {
-    const next = lines3.findIndex((line, i) => i > same.index && line.startsWith("## "));
-    let last = (next === -1 ? lines3.length : next) - 1;
-    while (last > same.index && lines3[last]?.trim() === "") last--;
-    lines3.splice(last + 1, 0, ...last === same.index ? ["", entry] : [entry]);
-  } else {
-    const older = headings.find((h) => h.date < date);
-    if (older) lines3.splice(older.index, 0, `## ${date}`, "", entry, "");
-    else lines3.push("", `## ${date}`, "", entry);
-  }
-  return `${lines3.join("\n")}
-`;
-}
-
-// src/log/command.ts
-var KIND = /^[A-Z][A-Za-z]*$/;
-function isCalendarDate2(text2) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(text2)) return false;
-  const date = /* @__PURE__ */ new Date(`${text2}T00:00:00Z`);
-  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text2;
-}
-function localDate(now = /* @__PURE__ */ new Date()) {
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-}
-register({
-  name: "log",
-  summary: "add a dated entry to the bundle's log.md",
-  usage: "specfold log add [--kind <Kind>] [--date <YYYY-MM-DD>] [--bundle <dir>] <message...>",
-  options: { kind: { type: "string" }, date: { type: "string" }, bundle: { type: "string" } },
-  run: ({ io, values, positionals }) => {
-    const [sub, ...words2] = positionals;
-    if (sub !== "add")
-      throw new UsageError(sub ? `unknown log subcommand '${sub}'` : "missing subcommand: specfold log add");
-    const message = words2.join(" ").replace(/\s+/g, " ").trim();
-    if (!message) throw new UsageError("missing message");
-    const kind = values.kind ?? "Update";
-    if (!KIND.test(kind))
-      throw new UsageError(`kind '${kind}' must be one word starting with an uppercase letter`);
-    const date = values.date ?? localDate();
-    if (!isCalendarDate2(date)) throw new UsageError(`date '${date}' is not a valid YYYY-MM-DD date`);
-    const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, void 0);
-    const path = join33(bundleRoot, "log.md");
-    const entry = `* **${kind}**: ${message}`;
-    writeFileSync6(path, insertEntry(existsSync31(path) ? readFileSync21(path, "utf8") : void 0, date, entry));
-    io.stdout(`${entry}
-`);
-    return 0;
-  }
-});
-
 // src/lookup/command.ts
-import { relative as relative16, sep as sep15 } from "node:path";
+import { relative as relative19, sep as sep19 } from "node:path";
 
 // src/lookup/search.ts
 var WEIGHTS = { title: 3, tags: 2, description: 1, type: 1 };
-function words(text2) {
-  return text2.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+function words(text3) {
+  return text3.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
 }
 var isRecord5 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
-var text = (v) => typeof v === "string" && v.trim() !== "" ? v.trim() : void 0;
+var text2 = (v) => typeof v === "string" && v.trim() !== "" ? v.trim() : void 0;
 function flagsOf(data, now) {
   const flags = [];
   if (data.status === "deprecated") flags.push("deprecated");
@@ -11486,43 +12064,78 @@ function flagsOf(data, now) {
   if (!verified) flags.push("unverified");
   return flags;
 }
-function search(bundleRoot, query, options = {}) {
-  const terms = words(query);
-  if (terms.length === 0) return [];
-  const now = options.now ?? Date.now();
-  const wanted = options.type?.toLowerCase();
-  const hits = [];
+function* indexed(bundleRoot) {
   for (const entry of walk(bundleRoot)) {
     const name = entry.rel.slice(entry.rel.lastIndexOf("/") + 1);
     if (entry.isDir || !name.endsWith(".md") || RESERVED.has(name)) continue;
     const data = parseFile(bundleRoot, entry.rel).frontmatter?.data;
     if (!isRecord5(data)) continue;
-    const type = text(data.type);
-    if (!type || wanted !== void 0 && type.toLowerCase() !== wanted) continue;
-    const title = text(data.title) ?? name.slice(0, -3);
-    const description = text(data.description) ?? null;
-    const tags = Array.isArray(data.tags) ? data.tags.filter((t) => typeof t === "string") : text(data.tags) ? [data.tags] : [];
+    const type = text2(data.type);
+    if (!type) continue;
+    const title = text2(data.title) ?? name.slice(0, -3);
+    const description = text2(data.description) ?? null;
+    const tags = Array.isArray(data.tags) ? data.tags.filter((t) => typeof t === "string") : text2(data.tags) ? [data.tags] : [];
     const fields = {
       title: words(title),
       tags: words(tags.join(" ")),
       description: words(description ?? ""),
       type: words(type)
     };
+    yield { rel: entry.rel, title, description, type, data, fields };
+  }
+}
+var bestWeight = (c, term) => Math.max(
+  0,
+  ...Object.keys(WEIGHTS).filter((f) => c.fields[f].some((w) => w.startsWith(term))).map((f) => WEIGHTS[f])
+);
+function search(bundleRoot, query, options = {}) {
+  const terms = words(query);
+  if (terms.length === 0) return [];
+  const now = options.now ?? Date.now();
+  const wanted = options.type?.toLowerCase();
+  const hits = [];
+  for (const c of indexed(bundleRoot)) {
+    if (wanted !== void 0 && c.type.toLowerCase() !== wanted) continue;
     let score = 0;
     for (const term of terms) {
-      const best = Math.max(
-        0,
-        ...Object.keys(WEIGHTS).filter((f) => fields[f].some((w) => w.startsWith(term))).map((f) => WEIGHTS[f])
-      );
+      const best = bestWeight(c, term);
       if (best === 0) {
         score = 0;
         break;
       }
       score += best;
     }
-    if (score > 0) hits.push({ rel: entry.rel, title, description, type, score, flags: flagsOf(data, now) });
+    if (score > 0)
+      hits.push({
+        rel: c.rel,
+        title: c.title,
+        description: c.description,
+        type: c.type,
+        score,
+        flags: flagsOf(c.data, now)
+      });
   }
   return hits.sort((a, b) => b.score - a.score || (a.rel < b.rel ? -1 : a.rel > b.rel ? 1 : 0));
+}
+function contextConcepts(bundleRoot, query, exclude, now = Date.now()) {
+  const terms = words(query);
+  const out = [];
+  for (const c of indexed(bundleRoot)) {
+    if (exclude.has(c.rel)) continue;
+    const vision = c.type === "Vision";
+    const commitment = c.type === "Deferred Commitment" && c.data.state === "open" && terms.some((t) => bestWeight(c, t) > 0);
+    if (vision || commitment)
+      out.push({
+        rel: c.rel,
+        title: c.title,
+        description: c.description,
+        type: c.type,
+        score: 0,
+        flags: flagsOf(c.data, now)
+      });
+  }
+  const rank = (h) => h.type === "Vision" ? 0 : 1;
+  return out.sort((a, b) => rank(a) - rank(b) || (a.rel < b.rel ? -1 : a.rel > b.rel ? 1 : 0));
 }
 
 // src/lookup/command.ts
@@ -11563,23 +12176,25 @@ register({
     const base = repoRoot ?? io.cwd;
     const type = values.type;
     const hits = search(bundleRoot, query, type ? { type } : {}).slice(0, Number(limitArg));
-    const stale = drifted(repoRoot, bundleRoot, hits);
-    const results = hits.map((h) => ({
-      path: relative16(base, `${bundleRoot}${sep15}${h.rel}`).split(sep15).join("/"),
+    const extra = contextConcepts(bundleRoot, query, new Set(hits.map((h) => h.rel)));
+    const stale = drifted(repoRoot, bundleRoot, [...hits, ...extra]);
+    const shape = (h) => ({
+      path: relative19(base, `${bundleRoot}${sep19}${h.rel}`).split(sep19).join("/"),
       title: h.title,
       description: h.description,
       type: h.type,
-      score: h.score,
       flags: stale.has(h.rel) ? withDrift(h.flags) : h.flags
-    }));
+    });
+    const results = hits.map((h) => ({ ...shape(h), score: h.score }));
+    const context = extra.map(shape);
     if (values.json) {
-      io.stdout(`${JSON.stringify({ query, results }, null, 2)}
+      io.stdout(`${JSON.stringify({ query, results, context }, null, 2)}
 `);
-    } else if (results.length === 0) {
-      io.stdout("no matches\n");
     } else {
       const line = (r) => `${r.path} - ${r.title}${r.description ? `: ${r.description}` : ""}${r.flags.length ? ` [${r.flags.join(", ")}]` : ""}`;
-      io.stdout(`${results.map(line).join("\n")}
+      const lines3 = results.length === 0 ? ["no matches"] : results.map(line);
+      if (context.length > 0) lines3.push("vision and open commitments:", ...context.map(line));
+      io.stdout(`${lines3.join("\n")}
 `);
     }
     return 0;
@@ -11587,19 +12202,19 @@ register({
 });
 
 // src/sync/command.ts
-import { existsSync as existsSync32, readdirSync as readdirSync7, writeFileSync as writeFileSync7 } from "node:fs";
-import { join as join34 } from "node:path";
+import { existsSync as existsSync34, readdirSync as readdirSync7, writeFileSync as writeFileSync10 } from "node:fs";
+import { join as join37 } from "node:path";
 var NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 var ARCHIVED2 = /^(\d{4}-\d{2}-\d{2})-([a-z0-9]+(?:-[a-z0-9]+)*)$/;
 function resolveArchived(config, arg) {
   if (!arg) throw new UsageError("missing change name");
-  const archive = join34(config.root, "openspec", "changes", "archive");
-  if (ARCHIVED2.test(arg) && existsSync32(join34(archive, arg))) return arg;
+  const archive = join37(config.root, "openspec", "changes", "archive");
+  if (ARCHIVED2.test(arg) && existsSync34(join37(archive, arg))) return arg;
   if (!NAME.test(arg)) throw new UsageError(`'${arg}' is not a change name or archived change id`);
-  const ids = existsSync32(archive) ? readdirSync7(archive).filter((d) => ARCHIVED2.exec(d)?.[2] === arg).sort() : [];
+  const ids = existsSync34(archive) ? readdirSync7(archive).filter((d) => ARCHIVED2.exec(d)?.[2] === arg).sort() : [];
   const newest = ids.at(-1);
   if (newest) return newest;
-  if (existsSync32(join34(config.root, "openspec", "changes", arg)))
+  if (existsSync34(join37(config.root, "openspec", "changes", arg)))
     throw new EnvError(`change '${arg}' is not archived yet: run 'openspec archive ${arg}' first`);
   throw new EnvError(`unknown change '${arg}': no archived folder openspec/changes/archive/<date>-${arg}/`);
 }
@@ -11614,9 +12229,9 @@ register({
     const id = resolveArchived(config, positionals[0]);
     const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
     const dryRun = values["dry-run"] === true;
-    const print = (ok2, actions2, findings2, text2) => io.stdout(
+    const print = (ok2, actions2, findings2, text3) => io.stdout(
       values.json ? `${JSON.stringify({ ok: ok2, change: id, dryRun, actions: actions2, findings: findings2 }, null, 2)}
-` : `${text2.join("\n")}
+` : `${text3.join("\n")}
 `
     );
     const { findings, ops, plan, logPath, logRel, logText, needsLog } = planSync(config, bundleRoot, id);
@@ -11637,7 +12252,7 @@ register({
       if (needsLog) {
         const count = (kind) => ops.filter((o) => o.op === kind).length;
         const entry = `* **Change**: ${id}: created ${count("create")}, updated ${count("update")}, deprecated ${count("deprecate")}`;
-        writeFileSync7(logPath, insertEntry(logText, localDate(), entry));
+        writeFileSync10(logPath, insertEntry(logText, localDate(), entry));
       }
     }
     if (needsLog) actions.push({ path: logRel, action: "add log entry" });
@@ -11656,8 +12271,8 @@ register({
 });
 
 // src/tasks/progress-command.ts
-import { existsSync as existsSync33, readdirSync as readdirSync8, readFileSync as readFileSync22 } from "node:fs";
-import { join as join35 } from "node:path";
+import { existsSync as existsSync35, readdirSync as readdirSync8, readFileSync as readFileSync25 } from "node:fs";
+import { join as join38 } from "node:path";
 
 // src/tasks/progress.ts
 function progressOf(tasks) {
@@ -11681,12 +12296,12 @@ function progressOf(tasks) {
 
 // src/tasks/progress-command.ts
 function readTasks(config, change) {
-  const path = join35(changeDir(config, change), "tasks.md");
-  return existsSync33(path) ? parseTasks(readFileSync22(path, "utf8")) : void 0;
+  const path = join38(changeDir(config, change), "tasks.md");
+  return existsSync35(path) ? parseTasks(readFileSync25(path, "utf8")) : void 0;
 }
 function activeChanges2(config) {
-  const dir = join35(config.root, "openspec", "changes");
-  if (!existsSync33(dir)) return [];
+  const dir = join38(config.root, "openspec", "changes");
+  if (!existsSync35(dir)) return [];
   return readdirSync8(dir, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort();
 }
 function commitsByTask(config, change) {
@@ -11721,14 +12336,14 @@ register({
       });
       if (values.json) {
         const changes = rows.map(
-          ({ change: name, progress: p12 }) => p12 ? { change: name, done: p12.done, total: p12.total, next: nextJson(p12) } : { change: name, done: 0, total: 0, next: null, tasksFile: false }
+          ({ change: name, progress: p15 }) => p15 ? { change: name, done: p15.done, total: p15.total, next: nextJson(p15) } : { change: name, done: 0, total: 0, next: null, tasksFile: false }
         );
         io.stdout(`${JSON.stringify({ changes }, null, 2)}
 `);
       } else {
         const width2 = Math.max(0, ...rows.map((r) => r.change.length));
         const lines4 = rows.map(
-          ({ change: name, progress: p12 }) => p12 ? `${name.padEnd(width2)}  ${p12.done}/${p12.total}  ${nextLine(p12)}` : `${name.padEnd(width2)}  no tasks.md`
+          ({ change: name, progress: p15 }) => p15 ? `${name.padEnd(width2)}  ${p15.done}/${p15.total}  ${nextLine(p15)}` : `${name.padEnd(width2)}  no tasks.md`
         );
         io.stdout(lines4.length > 0 ? `${lines4.join("\n")}
 ` : "no active changes\n");
@@ -11860,9 +12475,10 @@ register({
     const config = requireConfig(io.cwd);
     const change = values.change;
     const index = buildTraceIndex(config);
-    const scope = change === void 0 ? void 0 : (changeDir(config, change), changedScenarios(
+    if (change !== void 0) changeDir(config, change);
+    const scope = change === void 0 ? void 0 : changedScenarios(
       index.active.get(change) ?? changeSpecs(config.root, `openspec/changes/${change}`)
-    ));
+    );
     const report = traceReport(index, scope);
     const uncovered = report.scenarios.filter((s) => s.refs.length === 0);
     const counts = {
@@ -11891,85 +12507,11 @@ register({
 });
 
 // src/verify/command.ts
-import { existsSync as existsSync35, readFileSync as readFileSync24, statSync as statSync11, writeFileSync as writeFileSync8 } from "node:fs";
-import { join as join37, relative as relative17, resolve as resolve7, sep as sep16 } from "node:path";
-
-// src/verify/apply.ts
-var flowValue = (v) => typeof v === "string" && /^[A-Za-z0-9][\w:.+/@-]*$/.test(v) ? v : JSON.stringify(v);
-var flowEntry = (entry) => isRecord2(entry) ? `{ ${Object.entries(entry).map(([k, v]) => `${k}: ${flowValue(v)}`).join(", ")} }` : flowValue(entry);
-var sameLogin = (entry, by) => isRecord2(entry) && typeof entry.by === "string" && entry.by.toLowerCase() === by.toLowerCase();
-function verifyText(text2, login, at) {
-  const data = parseText("concept.md", text2).frontmatter?.data;
-  const current = isRecord2(data) ? data.verified : void 0;
-  const entries = Array.isArray(current) ? [...current] : current === void 0 ? [] : [current];
-  const by = `human:${login}`;
-  const entry = { by, at };
-  const index = entries.findIndex((e) => sameLogin(e, by));
-  if (index === -1) entries.push(entry);
-  else entries[index] = entry;
-  const block = entries.length === 1 ? [`verified: ${flowEntry(entries[0])}`] : ["verified:", ...entries.map((e) => `  - ${flowEntry(e)}`)];
-  return editFrontmatter(text2, { set: { status: "stable" }, setBlock: { verified: block } }).text;
-}
-
-// src/verify/login.ts
-var import_yaml8 = __toESM(require_dist(), 1);
-import { execFileSync as execFileSync3 } from "node:child_process";
-import { existsSync as existsSync34, readFileSync as readFileSync23 } from "node:fs";
-import { join as join36 } from "node:path";
-var LOCAL_FILE = ".specfold/local.yaml";
-var LOGIN = /^[A-Za-z0-9](?:[A-Za-z0-9]|-(?=[A-Za-z0-9])){0,38}$/;
-var system = {
-  /** The login `gh api user` reports, or undefined when gh is missing or not logged in. */
-  ghLogin(cwd) {
-    try {
-      return execFileSync3("gh", ["api", "user", "--jq", ".login"], {
-        cwd,
-        encoding: "utf8",
-        stdio: ["ignore", "pipe", "ignore"],
-        timeout: 1e4
-      }).trim();
-    } catch {
-      return void 0;
-    }
-  },
-  /** stdin is a terminal, so a person can be at the keyboard. */
-  isInteractive() {
-    return process.stdin.isTTY === true;
-  }
-};
-function localLogin(root) {
-  const path = join36(root, LOCAL_FILE);
-  if (!existsSync34(path)) return void 0;
-  let data;
-  try {
-    data = (0, import_yaml8.parse)(readFileSync23(path, "utf8"));
-  } catch (error) {
-    throw new EnvError(`${LOCAL_FILE}: ${error.message.split("\n")[0]}`);
-  }
-  const login = data?.actors?.github_login;
-  return typeof login === "string" ? login : void 0;
-}
-function resolveLogin(root) {
-  const login = system.ghLogin(root) || localLogin(root);
-  if (!login)
-    throw new EnvError(
-      `no GitHub login found: log in with 'gh auth login', or set actors.github_login in ${LOCAL_FILE}`
-    );
-  if (!LOGIN.test(login)) throw new EnvError(`'${login}' is not a GitHub login`);
-  return login;
-}
-
-// src/verify/command.ts
-var AGENT_VARIABLES = ["CLAUDECODE", "SPECFOLD_MODEL"];
-function agentReason() {
-  const variable = AGENT_VARIABLES.find((v) => process.env[v]);
-  if (variable) return `${variable} is set`;
-  if (!system.isInteractive()) return "stdin is not a terminal";
-  return void 0;
-}
+import { existsSync as existsSync36, readFileSync as readFileSync26, statSync as statSync11, writeFileSync as writeFileSync11 } from "node:fs";
+import { join as join39, relative as relative20, resolve as resolve7, sep as sep20 } from "node:path";
 function check(arg, root, bundleRoot) {
-  const inBundle = [resolve7(root, arg), resolve7(bundleRoot, arg)].map((abs) => relative17(bundleRoot, abs).split(sep16).join("/")).filter((rel2) => rel2 !== "" && !rel2.startsWith("..") && !rel2.startsWith("/"));
-  const rel = inBundle.find((r) => existsSync35(join37(bundleRoot, r)) && statSync11(join37(bundleRoot, r)).isFile());
+  const inBundle = [resolve7(root, arg), resolve7(bundleRoot, arg)].map((abs) => relative20(bundleRoot, abs).split(sep20).join("/")).filter((rel2) => rel2 !== "" && !rel2.startsWith("..") && !rel2.startsWith("/"));
+  const rel = inBundle.find((r) => existsSync36(join39(bundleRoot, r)) && statSync11(join39(bundleRoot, r)).isFile());
   if (!rel)
     return { arg, reason: inBundle.length === 0 ? "outside the bundle" : "no such file in the bundle" };
   if (!rel.endsWith(".md") || !isConcept(rel))
@@ -11994,17 +12536,17 @@ register({
     const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
     const login = resolveLogin(config.root);
     const targets = positionals.map((arg) => check(arg, config.root, bundleRoot));
-    const prefix = relative17(config.root, bundleRoot).split(sep16).join("/");
+    const prefix = relative20(config.root, bundleRoot).split(sep20).join("/");
     const shown = (t) => t.rel ? `${prefix}/${t.rel}` : t.arg;
     const refused = targets.filter((t) => t.reason !== void 0);
     const verified = [];
     if (refused.length === 0) {
       const at = isoWithOffset(/* @__PURE__ */ new Date());
       const written = targets.map((t) => {
-        const abs = join37(bundleRoot, t.rel);
-        return { abs, text: verifyText(readFileSync24(abs, "utf8"), login, at) };
+        const abs = join39(bundleRoot, t.rel);
+        return { abs, text: verifyText(readFileSync26(abs, "utf8"), login, at) };
       });
-      for (const w of written) writeFileSync8(w.abs, w.text);
+      for (const w of written) writeFileSync11(w.abs, w.text);
       verified.push(...targets.map(shown));
     }
     const ok2 = refused.length === 0;
@@ -12035,8 +12577,8 @@ register({
 // src/bin.ts
 process.exitCode = await main(process.argv.slice(2), {
   cwd: process.cwd(),
-  stdout: (text2) => process.stdout.write(text2),
-  stderr: (text2) => process.stderr.write(text2),
+  stdout: (text3) => process.stdout.write(text3),
+  stderr: (text3) => process.stderr.write(text3),
   readStdin: async () => {
     const chunks = [];
     for await (const chunk of process.stdin) chunks.push(chunk);
