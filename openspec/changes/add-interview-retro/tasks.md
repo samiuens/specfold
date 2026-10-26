@@ -27,7 +27,7 @@ agent: implementer
 
 - [x] 2.1 Add the backlog item "Rename an item" and promote it to `add-rename`
   - Done when: the item has `state: promoted` and `change: add-rename`, and the change folder exists without a brief
-- [ ] 2.2 Run the interview with the user and write the confirmed brief
+- [x] 2.2 Run the interview with the user and write the confirmed brief
   - Done when: `specfold change check add-rename` reports no brief errors
 - [ ] 2.3 Write the proposal, delta spec, knowledge and tasks
   - Done when: `openspec validate add-rename --strict` and `specfold tasks check add-rename` pass
