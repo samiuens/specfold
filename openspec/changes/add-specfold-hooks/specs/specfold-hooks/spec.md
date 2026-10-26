@@ -53,7 +53,7 @@ When `core.hooksPath` is set to another folder and no known hook manager is foun
 `specfold hook pre-push` SHALL run `specfold gate --base <base> --local`, with `<base>` from `origin/HEAD`, falling back to `origin/main`, and exit with the gate's code. When no base resolves, it SHALL warn and exit with 0.
 
 #### Scenario: Blocking finding
-- **WHEN** the local gate reports a blocking G4 finding
+- **WHEN** the local gate reports a blocking G2 finding (G4 only warns locally)
 - **THEN** the hook exits with 1 and the push stops
 
 ### Requirement: Graph refresh

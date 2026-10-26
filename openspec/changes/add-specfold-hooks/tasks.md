@@ -35,7 +35,7 @@ agent: implementer
 ## 3. Git hooks
 
 ```yaml
-files: [tools/specfold/src/hooks/run.ts, tools/specfold/src/hooks/command.ts, tools/specfold/test/hooks-run.test.ts]
+files: [tools/specfold/src/hooks/run.ts, tools/specfold/src/hooks/command.ts, tools/specfold/src/gate/command.ts, tools/specfold/test/hooks-run.test.ts]
 depends: [2]
 scenarios: [specfold-hooks#broken-concept-staged, specfold-hooks#change-being-planned-staged, specfold-hooks#blocking-finding, specfold-hooks#graphify-missing, specfold-hooks#commit-message-check]
 agent: implementer
