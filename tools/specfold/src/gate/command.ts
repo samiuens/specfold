@@ -47,6 +47,7 @@ register({
       labels: (values.label as unknown as string[] | undefined) ?? [],
       prBody: bodyFile === undefined ? undefined : readFileSync(resolve(io.cwd, bodyFile), "utf8"),
       openspec: openspecBinary(config.root),
+      pr: undefined,
       now: new Date(),
     });
     const counts = countFindings(findings);

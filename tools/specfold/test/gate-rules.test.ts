@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { EnvError } from "../src/errors.ts";
 import { computeDiff } from "../src/gate/diff.ts";
+import type { PullRequest } from "../src/gate/github.ts";
 import {
   type GateContext,
   type GateRule,
@@ -13,6 +14,7 @@ import {
   g4,
   g5,
   g6,
+  g7,
   g8,
   g9,
   g10,
@@ -32,6 +34,7 @@ interface Options {
   labels?: string[];
   prBody?: string;
   openspec?: string;
+  pr?: PullRequest;
 }
 
 function ctx(root: string, o: Options = {}): GateContext {
@@ -43,6 +46,7 @@ function ctx(root: string, o: Options = {}): GateContext {
     labels: o.labels ?? [],
     prBody: o.prBody,
     openspec: { command: o.openspec ?? KIT_OPENSPEC, source: "node_modules/.bin" },
+    pr: o.pr,
     now: new Date(),
   };
 }
@@ -53,7 +57,7 @@ const rules = (rule: GateRule, root: string, o?: Options) =>
 describe("gate: rules", () => {
   it("reports nothing but G3 setup for an unchanged clean repository", () => {
     const root = gateRepo();
-    for (const rule of [g1, g2, g4, g5, g6, g8, g9, g10, g12, g13, g14, g18])
+    for (const rule of [g1, g2, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g18])
       expect(rule(ctx(root))).toEqual([]);
   });
 
@@ -218,6 +222,52 @@ describe("gate: rules", () => {
       true,
     );
     expect(findings.map((f) => f.message)).toContain(`archived change ${id} is not synced: set spec`);
+  });
+
+  // spec: specfold-gate#approver-verified
+  it("G7: accepts claims by the author and approving reviewers", () => {
+    const root = gateRepo();
+    commit(root, {
+      "knowledge/domain/a.md": concept(
+        "Term",
+        "See [b](/domain/b.md).",
+        "\nverified: { by: human:Ben, at: 2026-10-26T10:00:00+01:00 }",
+      ),
+      "openspec/changes/demo/brief.md": "confirmed_by: human:ana\n",
+    });
+    expect(g7(ctx(root, { pr: { number: 7, author: "ana", approvers: ["ben"] } }))).toEqual([]);
+  });
+
+  // spec: specfold-gate#claimed-stranger
+  it("G7: blocks a claim naming someone who has not approved", () => {
+    const root = gateRepo();
+    commit(root, { "openspec/changes/demo/brief.md": "## Confirmation\n\nconfirmed_by: human:carl\n" });
+    const findings = g7(ctx(root, { pr: { number: 7, author: "ana", approvers: ["ben"] } }));
+    expect(findings).toEqual([
+      expect.objectContaining({
+        rule: "G7",
+        effect: "block",
+        path: "openspec/changes/demo/brief.md",
+        line: 3,
+      }),
+    ]);
+    expect(findings[0]?.message).toContain("human:carl");
+  });
+
+  // spec: specfold-gate#local-verification
+  it("G7: warns once without a PR", () => {
+    const root = gateRepo();
+    commit(root, {
+      "knowledge/domain/a.md": concept(
+        "Term",
+        "See [b](/domain/b.md).",
+        "\nverified: { by: human:ben, at: 2026-10-26T10:00:00+01:00 }",
+      ),
+      "openspec/changes/demo/brief.md": "confirmed_by: human:carl\n",
+    });
+    const findings = g7(ctx(root, { local: true }));
+    expect(findings).toEqual([expect.objectContaining({ rule: "G7", effect: "warn", path: null })]);
+    expect(findings[0]?.message).toContain("2 human claims added");
   });
 
   // spec: specfold-gate#agent-claims-a-human
