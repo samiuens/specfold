@@ -10,7 +10,7 @@
     "tools/specfold"
   ],
   "scripts": {
-    "setup": "git config core.hooksPath .githooks",
+    "setup": "node scripts/specfold.mjs hooks install",
     "prepare": "npm run setup",
     "check:commits": "node scripts/check-commit.mjs"
   },
