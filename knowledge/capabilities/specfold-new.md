@@ -3,14 +3,15 @@ type: Capability
 title: specfold new
 description: Why concepts are created from templates, and where the contract for specfold new lives.
 status: draft
-change: add-specfold-new
-resource: ../../openspec/changes/add-specfold-new/specs/specfold-new/spec.md
+change: 2026-10-26-add-specfold-new
+resource: ../../openspec/specs/specfold-new/spec.md
+spec: openspec/specs/specfold-new/spec.md
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T11:38:53+01:00 }
 sources:
   - id: proposal
-    resource: ../../openspec/changes/add-specfold-new/proposal.md
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-new/proposal.md
   - id: design
-    resource: ../../openspec/changes/add-specfold-new/design.md
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-new/design.md
 ---
 
 # Why
