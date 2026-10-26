@@ -9,7 +9,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Move the git runner to `src/git.ts`
+- [x] 1.1 Move the git runner to `src/git.ts`
   - Done when: `npm test -w specfold` passes with the tasks git tests unchanged
 - [ ] 1.2 Share the OpenSpec binary lookup between doctor and gate
   - Done when: `npm test -w specfold` passes with the doctor tests unchanged
