@@ -48,5 +48,5 @@ Changes with no behavior change (refactors, tooling, docs) set `skip_specs: true
 - One concept per file, kebab-case names, bundle-absolute links (`/decisions/x.md`). New knowledge: skill `sf-capture` (`node scripts/specfold.mjs new <Type> <path>`).
 - Agents write `status: draft` and never write `verified` or any `human:` actor; only humans verify.
 - `index.md` and `log.md` are generated: run `node scripts/specfold.mjs index` and `node scripts/specfold.mjs log add <message>`, never edit them by hand.
-- Code comments stay short and point to knowledge: `see knowledge: /<path>.md` (`/conventions/code-comments.md`).
+- Code comments stay short and point to knowledge with `see knowledge:` and the concept's bundle-absolute path (`/conventions/code-comments.md`).
 - Check with `node scripts/specfold.mjs validate`; `node scripts/specfold.mjs audit` (skill `sf-audit`) reports slow decay.
