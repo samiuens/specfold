@@ -3,7 +3,15 @@ type: Capability
 title: specfold audit
 description: Why audit reports slow decay in the bundle, and where the contract for specfold audit lives.
 status: draft
+spec: openspec/specs/specfold-audit/spec.md
+resource: ../../openspec/specs/specfold-audit/spec.md
+change: 2026-10-26-add-specfold-audit
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:22:47+01:00 }
+sources:
+  - id: proposal-2026-10-26-add-specfold-audit
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-audit/proposal.md
+  - id: design-2026-10-26-add-specfold-audit
+    resource: ../../openspec/changes/archive/2026-10-26-add-specfold-audit/design.md
 ---
 
 # Why
