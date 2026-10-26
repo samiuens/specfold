@@ -25,7 +25,10 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/findings.ts` | the `Finding` shape, ordering, human and JSON rendering |
 | `src/change/` | the `change check` command: brief rules B0 to B4, knowledge rules K0 to K6 (reused by `sync` on archived changes), combined with the tasks findings |
 | `src/agents/` | the `agents sync` command: relative symlinks from `.agents/skills/` into each `agents.targets` folder, keeping real folders and foreign links |
-| `src/audit/` | the `audit` command: rules A1 to A5 over the parsed bundle, the main specs, code references and the root agent instruction files |
+| `src/audit/` | the `audit` command: rules A1 to A8 over the parsed bundle, the main specs, code references and the root agent instruction files |
+| `src/backlog/` | the `backlog` command: add (with index regeneration), list, promote through `openspec new change`, drop |
+| `src/commitments/` | the `commitments` command: list by due date, fulfill, and withdraw behind the `verify` agent guard |
+| `src/future/` | backlog items and commitments: their folders and types, lookup by name or path, due dates from triggers, key edits; shared by the commands, audit, lookup and the session-start hook |
 | `src/bundle.ts` | walks a bundle and splits frontmatter from the body with line numbers |
 | `src/gate/` | the `gate` command: the diff against a merge base (touched and archived changes), rules G1-G10, G12-G16 and G18 over existing rule functions, `openspec validate`, the human claims a branch adds and the PR author and approvers from the GitHub REST API (G7), ordering and counts |
 | `src/git.ts` | runs git; failures become environment errors |
@@ -35,7 +38,7 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/glob.ts` | dependency-free glob matching (`**` also matches zero folders) and the repository file walk |
 | `src/trace/` | the `trace` command: scenario ids from main and delta specs (sections, removed requirements), the `spec:` reference scan over `trace.test_globs`, and the report gate rule G15 shares |
 | `src/verify/` | the `verify` command: agent guard, login from `gh` or `.specfold/local.yaml`, path checks, line-level `verified` entries |
-| `src/validate/` | the `validate` command and its rule sets (OKF, profile, links) |
+| `src/validate/` | the `validate` command and its rule sets (OKF, profile including P12-P14 for backlog items, commitments and visions, links) |
 | `src/hooks/` | the `hooks install` and `hook` commands: built-in hooks or hook-manager entries (lefthook, husky, pre-commit), the pre-commit, pre-push and graph checks, `hooks.extra`, and the Claude Code session, edit and stop hooks |
 | `src/indexes/` | the `index` command: index generation, `see knowledge:` scan, write and check modes |
 | `src/log/` | the `log add` command and the insertion of entries into date sections |
@@ -58,6 +61,8 @@ Under Node, `yaml` resolves to its CommonJS build, so the bundle banner provides
 - [specfold verify](/capabilities/specfold-verify.md)
 - [specfold trace](/capabilities/specfold-trace.md)
 - [specfold drift](/capabilities/specfold-drift.md)
+- [specfold backlog](/capabilities/specfold-backlog.md)
+- [specfold commitments](/capabilities/specfold-commitments.md)
 - [specfold agents sync](/capabilities/specfold-agents-sync.md)
 - [specfold audit](/capabilities/specfold-audit.md)
 - [specfold change check](/capabilities/specfold-change-check.md)

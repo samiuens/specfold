@@ -24,6 +24,7 @@ sources:
 - **What counts as a reference.** Links between concepts count, as do `see knowledge:` references in code and bundle-absolute paths named in the root `AGENTS.md` or `CLAUDE.md`. Generated indexes and the log don't. The instruction files were added after the first run on the template: there the code-comment convention is linked only from `AGENTS.md`.
 - **Exempt folders.** `vision/` and `backlog/` concepts stand alone by nature. Capability cards with an existing spec are reachable through that spec.
 - **The finding points at the fix.** A link to a deprecated concept is reported on the concept that links, at the line of the link.
+- **Promises and ideas age too.** A6 reports an open commitment past its trigger date, A7 one without a vision link, and A8 an open backlog item no commit has touched for `audit.backlog_untouched_days` (default 180). A8 needs git history and is skipped without it ([specfold backlog](/capabilities/specfold-backlog.md), [specfold commitments](/capabilities/specfold-commitments.md)).
 - **No double checks.** Normative words in knowledge are already blocked by `specfold validate` (P9), so audit doesn't repeat that rule.
 
 # Related

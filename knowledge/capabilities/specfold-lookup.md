@@ -27,6 +27,7 @@ The cheapest answer to "why does this exist, what does it mean" is a path and on
 - Only frontmatter is searched, never bodies, which keeps results short and cheap.
 - Matching is by word prefix and every query word has to match; title counts most, then tags, then description and type.
 - No hits is a valid answer (exit 0), not an error.
+- After the results comes every vision and every open commitment that any query word matches, so planning always sees where the project is heading and what it has promised; the block ignores `--type` and `--limit` and never repeats a result.
 - Results carry the `drift` flag when a file they describe changed after they were last written or verified; it is computed only for the printed results, so lookup stays fast ([specfold drift](/capabilities/specfold-drift.md)).
 
 # Related

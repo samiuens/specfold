@@ -24,6 +24,7 @@ The gate in CI is the enforcement, but its feedback comes late. Hooks run the sa
 - **Check what is staged or edited.** pre-commit validates staged concepts and checks staged changes; the Claude Code post-tool-use hook does the same for the one file an `Edit` or `Write` touched. A change without `tasks.md` is still being planned, so only its brief is checked, as in the gate.
 - **Local hooks never replace CI.** pre-push runs the local gate (where G4 only warns) and lets the push through when no `origin/HEAD` or `origin/main` exists. The Claude Code stop hook keeps blocking while blocking findings remain; Claude Code's limit of 8 consecutive blocks ends any loop ([Claude Code](/references/claude-code.md)).
 - **Project commands stay in one place.** `hooks.extra` in `specfold.yaml` lists extra commands per hook; they run with `sh -c` after Specfold's own checks, with the hook's arguments as `$1`, `$2`. The kit's commit-message check runs this way ([commit convention](/decisions/commit-convention.md)).
+- **Promises due soon are visible at the start.** The session-start hook adds one line with the number of open commitments due within 30 days, overdue ones included, and only when there are any ([specfold commitments](/capabilities/specfold-commitments.md)).
 - **The graph is refreshed, never built.** post-checkout and post-merge run `graphify update .` only when graphify is installed and `graphify-out/graph.json` exists ([graphify](/references/graphify.md)).
 
 # Related
