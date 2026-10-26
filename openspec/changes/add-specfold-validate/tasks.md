@@ -75,7 +75,7 @@ scenarios: [specfold-validate#broken-bundle-absolute-link, specfold-validate#ext
 agent: implementer
 ```
 
-- [ ] 5.1 Add L1 and L2
+- [x] 5.1 Add L1 and L2
   - Done when: the four link scenarios pass
 
 ## 6. OKF sample fixture

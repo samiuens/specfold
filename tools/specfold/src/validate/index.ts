@@ -5,6 +5,7 @@ import { register } from "../cli.ts";
 import { EnvError, UsageError } from "../errors.ts";
 import { type Finding, renderHuman, renderJson } from "../findings.ts";
 import { type Config, findRepoRoot, requireConfig } from "../repo.ts";
+import { l1, l2 } from "./links.ts";
 import { okf1, okf2, okf3Index, okf3Log } from "./okf.ts";
 import { p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11 } from "./profile.ts";
 
@@ -22,7 +23,7 @@ export type BundleRule = (ctx: RuleContext, inSelection: (rel: string) => boolea
 
 const okfRules: Rule[] = [okf1, okf2, okf3Index, okf3Log];
 /** Profile and link rules; they only run without --okf-only. */
-const profileRules: Rule[] = [p1, p2, p3, p4, p5, p6, p7, p9, p10, p11];
+const profileRules: Rule[] = [p1, p2, p3, p4, p5, p6, p7, p9, p10, p11, l1, l2];
 const profileBundleRules: BundleRule[] = [p8];
 
 export interface ValidateInput {
