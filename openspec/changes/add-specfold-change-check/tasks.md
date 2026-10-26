@@ -9,7 +9,7 @@ scenarios: [specfold-change-check#missing-brief, specfold-change-check#empty-wis
 agent: implementer
 ```
 
-- [ ] 1.1 Add rules B0 to B4 with the short brief for `skip_specs` changes
+- [x] 1.1 Add rules B0 to B4 with the short brief for `skip_specs` changes
   - Done when: the eight scenarios of this group pass in `change-brief.test.ts`
 
 ## 2. Knowledge rules

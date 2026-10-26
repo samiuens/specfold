@@ -146,7 +146,8 @@ export const p4: Rule = (file) => {
 
 const TIMESTAMP = /^(\d{4}-\d{2}-\d{2})T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:\d{2})$/;
 
-function isTimestamp(value: unknown): boolean {
+/** An ISO 8601 date-time with seconds optional and an explicit offset or `Z`. */
+export function isTimestamp(value: unknown): boolean {
   if (typeof value !== "string") return false;
   const match = TIMESTAMP.exec(value);
   return (
