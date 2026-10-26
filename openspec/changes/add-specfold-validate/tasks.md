@@ -113,7 +113,7 @@ scenarios: []
 agent: knowledge-curator
 ```
 
-- [ ] 8.1 Add the capability card for `specfold-validate` and an architecture concept for the CLI modules
+- [x] 8.1 Add the capability card for `specfold-validate` and an architecture concept for the CLI modules
   - Done when: both concepts exist and `node scripts/specfold.mjs validate` exits 0
 - [ ] 8.2 Add conventions for TypeScript style and test fixtures, then update indexes and log
   - Done when: `node scripts/specfold.mjs validate` exits 0 and the indexes list the new concepts
