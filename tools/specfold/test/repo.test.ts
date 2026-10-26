@@ -25,6 +25,7 @@ describe("repo", () => {
       sourceGlobs: ["src/**"],
       blockOnBrokenLinks: false,
       folders: { decisions: { title: "Decisions", description: "Why" } },
+      agentPrefix: "",
     });
   });
 

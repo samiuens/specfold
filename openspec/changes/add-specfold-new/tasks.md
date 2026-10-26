@@ -21,7 +21,7 @@ scenarios: [specfold-new#unknown-type, specfold-new#path-not-kebab-case, specfol
 agent: implementer
 ```
 
-- [ ] 2.1 Add the `new` command: argument checks, frontmatter, actor, type-specific keys, file creation and JSON output
+- [x] 2.1 Add the `new` command: argument checks, frontmatter, actor, type-specific keys, file creation and JSON output
   - Done when: all nine scenarios of this group pass in `new.test.ts`
 
 ## 3. Knowledge

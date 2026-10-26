@@ -17,6 +17,8 @@ export interface Config {
   sourceGlobs: string[];
   blockOnBrokenLinks: boolean;
   folders: Record<string, FolderInfo>;
+  /** `actors.agent_prefix`, prepended to the model for agent-written `generated.by`. */
+  agentPrefix: string;
 }
 
 /** The nearest directory at or above `cwd` that contains specfold.yaml. */
@@ -50,6 +52,7 @@ export function loadConfig(root: string): Config {
   }
   if (!isRecord(data)) throw new EnvError(`${CONFIG_FILE}: expected a mapping at the top level`);
   const gate = isRecord(data.gate) ? data.gate : {};
+  const actors = isRecord(data.actors) ? data.actors : {};
   const folders: Record<string, FolderInfo> = {};
   if (isRecord(data.folders)) {
     for (const [path, info] of Object.entries(data.folders)) {
@@ -66,6 +69,7 @@ export function loadConfig(root: string): Config {
     sourceGlobs: stringList(data.source_globs, "source_globs"),
     blockOnBrokenLinks: gate.block_on_broken_links !== false,
     folders,
+    agentPrefix: typeof actors.agent_prefix === "string" ? actors.agent_prefix : "",
   };
 }
 
