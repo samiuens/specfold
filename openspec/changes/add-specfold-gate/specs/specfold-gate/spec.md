@@ -64,11 +64,15 @@ When the diff touches a file matching `source_globs`, the gate SHALL block with 
 - **THEN** no `G4` finding is reported
 
 ### Requirement: G5 knowledge delta valid
-For every active change the diff touches, the gate SHALL block with rule `G5` for each knowledge-rule error (K0-K6) of `specfold change check`.
+For every active change the diff touches that has a `tasks.md`, the gate SHALL block with rule `G5` for each knowledge-rule error (K0-K6) of `specfold change check`. A touched change without `tasks.md` is still being planned and SHALL be skipped by G5 and G18.
 
 #### Scenario: Missing knowledge delta
 - **WHEN** a touched change has no `knowledge.md`
 - **THEN** a blocking `G5` finding names the change
+
+#### Scenario: Change being planned
+- **WHEN** a touched change has a brief and a proposal but no `knowledge.md` and no `tasks.md`
+- **THEN** no `G5` and no `G18` finding is reported for it
 
 ### Requirement: G6 archived delta applied
 For every change the diff archives, the gate SHALL block with rule `G6` when its knowledge rules fail or `specfold sync <change> --dry-run` reports anything left to change.
@@ -124,7 +128,7 @@ The gate SHALL block with rule `G14` for every `see knowledge:` reference in a c
 - **THEN** a `G14` warning is reported
 
 ### Requirement: G18 task breakdown
-For every active change the diff touches, the gate SHALL run `specfold tasks check <change> --base <ref>`, block with rule `G18` for its errors and warn for its warnings.
+For every active change the diff touches that has a `tasks.md`, the gate SHALL run `specfold tasks check <change> --base <ref>`, block with rule `G18` for its errors and warn for its warnings.
 
 #### Scenario: Overlapping parallel groups
 - **WHEN** a touched change has two independent groups owning `src/**`

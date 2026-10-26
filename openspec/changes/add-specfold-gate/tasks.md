@@ -35,7 +35,7 @@ agent: implementer
 ```yaml
 files: [tools/specfold/src/gate/rules.ts, tools/specfold/src/gate/openspec.ts, tools/specfold/test/gate-rules.test.ts, tools/specfold/test/gate-helpers.ts]
 depends: [2]
-scenarios: [specfold-gate#missing-frontmatter-key, specfold-gate#stale-index, specfold-gate#broken-link, specfold-gate#invalid-delta-spec, specfold-gate#code-without-change, specfold-gate#escape-with-reason, specfold-gate#missing-knowledge-delta, specfold-gate#archived-without-sync, specfold-gate#unconfirmed-brief, specfold-gate#overlapping-parallel-groups, specfold-gate#agent-claims-a-human, specfold-gate#edited-stale-reference, specfold-gate#old-draft-elsewhere, specfold-gate#new-dangling-reference, specfold-gate#old-dangling-reference]
+scenarios: [specfold-gate#missing-frontmatter-key, specfold-gate#stale-index, specfold-gate#broken-link, specfold-gate#invalid-delta-spec, specfold-gate#code-without-change, specfold-gate#escape-with-reason, specfold-gate#missing-knowledge-delta, specfold-gate#archived-without-sync, specfold-gate#unconfirmed-brief, specfold-gate#overlapping-parallel-groups, specfold-gate#agent-claims-a-human, specfold-gate#edited-stale-reference, specfold-gate#old-draft-elsewhere, specfold-gate#new-dangling-reference, specfold-gate#old-dangling-reference, specfold-gate#change-being-planned]
 agent: implementer
 ```
 
@@ -49,6 +49,8 @@ agent: implementer
   - Done when: scenarios missing-knowledge-delta, archived-without-sync, unconfirmed-brief and overlapping-parallel-groups pass in `gate-rules.test.ts`
 - [x] 3.5 Add G8, G9, G12 and G14 over concepts and code references
   - Done when: scenarios agent-claims-a-human, edited-stale-reference, old-draft-elsewhere, new-dangling-reference and old-dangling-reference pass in `gate-rules.test.ts`
+- [ ] 3.6 Skip G5 and G18 for touched changes without `tasks.md`
+  - Done when: scenario change-being-planned passes in `gate-rules.test.ts`
 
 ## 4. Gate command
 
@@ -72,6 +74,8 @@ agent: implementer
 ```
 
 - [x] 5.1 Rebuild the bundled CLI and its template and sample copies
+  - Done when: `npm run build -w specfold` leaves no diff and the copies equal it
+- [ ] 5.2 Rebuild the bundle and its copies with the planning exemption
   - Done when: `npm run build -w specfold` leaves no diff and the copies equal it
 
 ## 6. Knowledge
