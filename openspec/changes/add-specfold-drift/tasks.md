@@ -9,7 +9,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Read `gate.block_on_drift`
+- [x] 1.1 Read `gate.block_on_drift`
   - Done when: `repo.test.ts` covers the default and `true`
 
 ## 2. Dependent paths and baselines
