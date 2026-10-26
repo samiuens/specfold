@@ -25,16 +25,9 @@ OKF indexes are the entry point for every lookup: an agent reads `index.md`, pic
 - `log.md`: written by `specfold log add`, not by `index`.
 - Blocking on references to missing or deprecated concepts: gate rule G14. `index` only reports them as warnings.
 
-## Open points for review
+## Decisions
 
-Choices the plan does not settle; each is written into the spec as proposed below and can be changed in review.
-
-1. **Folder titles and descriptions** come from a new optional `specfold.yaml` key `folders.<path>.{title, description}`. Without it the title is derived from the folder name and the entry has no description.
-2. **Subfolders** are listed first, under a `# Sections` heading; the root index also lists `log.md` under `# Log`.
-3. **Deprecated concepts** stay listed, with ` (deprecated)` after the link, so agents see them but know not to rely on them.
-4. **Code references** appear as nested entries under the concept: `  * Referenced from code: <path>:<line>`, one per reference, sorted.
-5. **Index files are owned by the command:** any hand-written content in an `index.md` is replaced.
-6. **Unparseable concepts** are skipped in the index and reported; the command still writes the other indexes but exits with 1.
+The open points of the first draft were accepted as proposed on 2026-10-26; they are recorded in `design.md`.
 
 ## Impact
 
