@@ -173,6 +173,39 @@ describe("auditBundle", () => {
     expect(audit(root)).toEqual([]);
   });
 
+  // spec: specfold-audit#named-in-agents-md
+  it("A4: counts concept paths named in AGENTS.md and CLAUDE.md", () => {
+    const root = repo();
+    write(
+      root,
+      "knowledge/conventions/code-comments.md",
+      concept(`type: Term\nstatus: draft\ngenerated: { by: x/y, at: ${FRESH} }`),
+    );
+    write(
+      root,
+      "knowledge/decisions/style.md",
+      concept(`type: Decision\nstatus: draft\ngenerated: { by: x/y, at: ${FRESH} }`),
+    );
+    expect(rules(root)).toEqual([
+      ["A4", "conventions/code-comments.md"],
+      ["A4", "decisions/style.md"],
+    ]);
+    write(root, "AGENTS.md", "Comments follow `/conventions/code-comments.md`.\n");
+    write(root, "CLAUDE.md", "@AGENTS.md\n\nSee [style](/decisions/style.md).\n");
+    expect(audit(root)).toEqual([]);
+  });
+
+  // spec: specfold-audit#backlog-item
+  it("A4: exempts backlog items", () => {
+    const root = repo();
+    write(
+      root,
+      "knowledge/backlog/dark-mode.md",
+      concept(`type: Term\nstatus: draft\ngenerated: { by: x/y, at: ${FRESH} }`),
+    );
+    expect(audit(root)).toEqual([]);
+  });
+
   // spec: specfold-audit#missing-card
   it("A5: reports a main spec without a capability card", () => {
     const root = repo();

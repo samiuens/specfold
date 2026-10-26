@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { type ParsedFile, parseFile, walk } from "../bundle.ts";
 import type { Finding } from "../findings.ts";
@@ -10,6 +10,17 @@ import { isConcept, isRecord } from "../validate/okf.ts";
 import { isTimestamp } from "../validate/profile.ts";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+const INSTRUCTION_FILES = ["AGENTS.md", "CLAUDE.md"];
+const EXEMPT_FOLDERS = ["vision/", "backlog/"];
+// a bundle-absolute concept path, written as a link target or in backticks
+const MENTION = /(?:^|[\s(`[])\/([a-z0-9][a-z0-9/-]*\.md)\b/g;
+
+/** Concept paths named in the repository's root agent instruction files. */
+function instructionMentions(repoRoot: string): string[] {
+  return INSTRUCTION_FILES.filter((f) => existsSync(join(repoRoot, f))).flatMap((f) =>
+    [...readFileSync(join(repoRoot, f), "utf8").matchAll(MENTION)].map((m) => m[1] as string),
+  );
+}
 
 interface Concept {
   file: ParsedFile;
@@ -96,8 +107,9 @@ export function auditBundle(config: Config, bundleRoot: string, now: Date): Find
 
   // A4: orphans.
   for (const ref of scanReferences(config.root, config.sourceGlobs)) incoming.add(ref.concept);
+  for (const mention of instructionMentions(config.root)) incoming.add(mention);
   for (const [rel, c] of all) {
-    if (incoming.has(rel) || rel.startsWith("vision/")) continue;
+    if (incoming.has(rel) || EXEMPT_FOLDERS.some((f) => rel.startsWith(f))) continue;
     const spec = c.data.spec;
     if (c.data.type === "Capability" && typeof spec === "string" && existsSync(join(config.root, spec)))
       continue;

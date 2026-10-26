@@ -25,7 +25,7 @@ agent: implementer
 
 - [x] 2.1 Add rules A1 to A5 over the parsed bundle with an injected current time
   - Done when: the seven scenarios of this group pass in `audit-rules.test.ts`
-- [ ] 2.2 Count mentions in the root AGENTS.md and CLAUDE.md for A4 and exempt `backlog/`
+- [x] 2.2 Count mentions in the root AGENTS.md and CLAUDE.md for A4 and exempt `backlog/`
   - Done when: scenarios named-in-agents-md and backlog-item pass in `audit-rules.test.ts`
 
 ## 3. Audit command
