@@ -17,4 +17,4 @@ sources:
 
 Whether Specfold needs evals for its own skills and agent roles (for example, does `sf-interview` ask before assuming, does `sf-sync` produce a valid delta), and how to run them.
 
-Undecided in the plan; to be decided through the normal workflow.
+Undecided in the plan; it will be decided through the normal workflow.
