@@ -7459,6 +7459,13 @@ function findRepoRoot(cwd) {
   }
 }
 var isRecord = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
+var positiveInt = (v, key, fallback) => {
+  if (v === void 0) return fallback;
+  if (typeof v !== "number" || !Number.isInteger(v) || v < 1) {
+    throw new EnvError(`${CONFIG_FILE}: '${key}' must be a positive integer`);
+  }
+  return v;
+};
 var stringList = (v, key) => {
   if (v === void 0) return [];
   if (!Array.isArray(v) || !v.every((x) => typeof x === "string")) {
@@ -7476,6 +7483,7 @@ function loadConfig(root) {
   if (!isRecord(data)) throw new EnvError(`${CONFIG_FILE}: expected a mapping at the top level`);
   const gate = isRecord(data.gate) ? data.gate : {};
   const actors = isRecord(data.actors) ? data.actors : {};
+  const tasks = isRecord(data.tasks) ? data.tasks : {};
   const folders = {};
   if (isRecord(data.folders)) {
     for (const [path, info] of Object.entries(data.folders)) {
@@ -7497,7 +7505,11 @@ function loadConfig(root) {
       Object.entries(isRecord(data.requires) ? data.requires : {}).filter(
         (e) => typeof e[1] === "string"
       )
-    )
+    ),
+    tasks: {
+      maxFilesPerTask: positiveInt(tasks.max_files_per_task, "tasks.max_files_per_task", 5),
+      maxTasksPerGroup: positiveInt(tasks.max_tasks_per_group, "tasks.max_tasks_per_group", 8)
+    }
   };
 }
 function requireConfig(cwd) {
@@ -7961,6 +7973,9 @@ function segmentPattern(glob) {
 }
 function globToRegExp(glob) {
   return new RegExp(`^(?:${expandBraces(glob).map(segmentPattern).join("|")})$`);
+}
+function matchesAny(path, globs) {
+  return globs.some((g) => globToRegExp(g).test(path));
 }
 var SKIP = /* @__PURE__ */ new Set(["node_modules"]);
 function walkFiles(root) {
@@ -8932,6 +8947,791 @@ register({
     const { findings, checked } = validate({ bundleRoot, paths, okfOnly, ...config ? { config } : {} });
     io.stdout(values.json ? renderJson(findings, checked) : renderHuman(findings, checked));
     return findings.some((f) => f.severity === "error") ? 1 : 0;
+  }
+});
+
+// src/tasks/command.ts
+import { existsSync as existsSync12, readFileSync as readFileSync9, statSync as statSync4 } from "node:fs";
+import { join as join14 } from "node:path";
+
+// src/tasks/git.ts
+import { execFileSync as execFileSync2 } from "node:child_process";
+var RECORD = "";
+var FIELD = "";
+var VALUE = "";
+function git(repoRoot, args) {
+  try {
+    return execFileSync2("git", args, { cwd: repoRoot, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+  } catch (error) {
+    const stderr = String(error.stderr ?? "").trim().split("\n")[0];
+    throw new EnvError(`git ${args[0]} failed${stderr ? `: ${stderr}` : ""}`);
+  }
+}
+function readCommits(repoRoot, range, withFiles = true) {
+  const format = `--format=${RECORD}%H${FIELD}%(trailers:key=Task,valueonly,separator=%x1e)`;
+  const args = ["log", "--reverse", format, ...withFiles ? ["--name-only"] : [], range, "--"];
+  return git(repoRoot, args).split(RECORD).filter((chunk) => chunk.trim() !== "").map((chunk) => {
+    const [header = "", ...rest] = chunk.split("\n");
+    const [sha = "", values = ""] = header.split(FIELD);
+    return {
+      sha,
+      tasks: values.split(VALUE).map((v) => v.trim()).filter(Boolean),
+      files: rest.map((l) => l.trim()).filter(Boolean)
+    };
+  });
+}
+function commitsSinceBase(repoRoot, base) {
+  const mergeBase = git(repoRoot, ["merge-base", base, "HEAD"]).trim();
+  return readCommits(repoRoot, `${mergeBase}..HEAD`);
+}
+var taskIdsFor = (commit, change) => commit.tasks.filter((t) => t.startsWith(`${change}#`)).map((t) => t.slice(change.length + 1));
+function checkTrailers(tasks, commits, ctx) {
+  const out = [];
+  const add = (rule, task, group, message, fix) => out.push({
+    rule,
+    severity: "warning",
+    file: ctx.file,
+    group,
+    task: task?.id ?? null,
+    line: task?.line ?? null,
+    message,
+    fix
+  });
+  const byTask = /* @__PURE__ */ new Map();
+  for (const commit of commits) {
+    for (const id of taskIdsFor(commit, ctx.change)) byTask.set(id, [...byTask.get(id) ?? [], commit]);
+  }
+  const known = new Map(
+    tasks.groups.flatMap((g) => g.tasks.map((t) => [t.id, { task: t, group: g }]))
+  );
+  for (const [id, list] of byTask) {
+    if (!known.has(id)) {
+      for (const c of list)
+        add(
+          "T11",
+          null,
+          null,
+          `commit ${c.sha.slice(0, 7)} names unknown task ${ctx.change}#${id}`,
+          "fix the trailer or add the task to tasks.md"
+        );
+    }
+  }
+  for (const group of tasks.groups) {
+    for (const task of group.tasks) {
+      const list = byTask.get(task.id) ?? [];
+      if (task.done && list.length === 0)
+        add(
+          "T11",
+          task,
+          group.number,
+          `task ${task.id} is ticked but no commit carries 'Task: ${ctx.change}#${task.id}'`,
+          "commit the task's work with its trailer"
+        );
+      if (list.length > 1)
+        add(
+          "T11",
+          task,
+          group.number,
+          `task ${task.id} has ${list.length} commits: ${list.map((c) => c.sha.slice(0, 7)).join(", ")}`,
+          "complete each task in exactly one commit"
+        );
+      const files = new Set(list.flatMap((c) => c.files).filter((f) => f !== ctx.file));
+      const owned = group.meta?.files;
+      if (owned) {
+        for (const f of files) {
+          if (!matchesAny(f, owned))
+            add(
+              "T11",
+              task,
+              group.number,
+              `task ${task.id} changed ${f}, outside group ${group.number}'s files`,
+              "split the work or ask to widen the group's files"
+            );
+        }
+      }
+      if (files.size > ctx.maxFilesPerTask)
+        add(
+          "T10",
+          task,
+          group.number,
+          `task ${task.id} changed ${files.size} files, more than ${ctx.maxFilesPerTask}`,
+          "split the task into smaller tasks"
+        );
+    }
+  }
+  return out;
+}
+
+// src/tasks/parse.ts
+var import_yaml3 = __toESM(require_dist(), 1);
+var FOLLOW_UP = "Workflow follow-up";
+var GROUP = /^## (\d+)\. (.+?)\s*$/;
+var H2 = /^## (.*?)\s*$/;
+var TASK = /^- \[([ xX])\] (\d+)\.(\d+)(?: (.*))?$/;
+var DONE = /^\s+- Done when:(.*)$/;
+var isRecord5 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
+function parseMeta(source) {
+  let data;
+  try {
+    data = (0, import_yaml3.parse)(source);
+  } catch (error) {
+    return { error: `metadata is not valid YAML: ${error.message.split("\n")[0]}` };
+  }
+  if (!isRecord5(data)) return { error: "metadata must be a mapping" };
+  const strings = (v) => Array.isArray(v) && v.every((x) => typeof x === "string");
+  if (data.files === void 0) return { error: "metadata has no 'files'" };
+  if (!strings(data.files)) return { error: "'files' must be a list of globs" };
+  if (data.files.length === 0) return { error: "'files' must not be empty" };
+  const depends = data.depends ?? [];
+  if (!Array.isArray(depends) || !depends.every((x) => Number.isInteger(x) && x >= 1))
+    return { error: "'depends' must be a list of group numbers" };
+  const scenarios = data.scenarios ?? [];
+  if (!strings(scenarios)) return { error: "'scenarios' must be a list of scenario ids" };
+  const agent = data.agent ?? "implementer";
+  if (typeof agent !== "string" || agent === "") return { error: "'agent' must be a role name" };
+  return { meta: { files: data.files, depends, scenarios, agent } };
+}
+function parseTasks(text2) {
+  const lines = text2.split(/\r?\n/);
+  const result = { groups: [], strayHeadings: [], orphanTasks: [] };
+  let current;
+  let inFollowUp = false;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const lineNo = i + 1;
+    const group = GROUP.exec(line);
+    const h2 = H2.exec(line);
+    if (h2 && !group) {
+      if (h2[1] === FOLLOW_UP && result.followUpLine === void 0) {
+        result.followUpLine = lineNo;
+        inFollowUp = true;
+      } else result.strayHeadings.push({ text: h2[1], line: lineNo });
+      current = void 0;
+      continue;
+    }
+    if (group) {
+      if (inFollowUp) {
+        result.strayHeadings.push({ text: line.slice(3), line: lineNo });
+        continue;
+      }
+      current = {
+        number: Number(group[1]),
+        name: group[2],
+        line: lineNo,
+        metaLine: lineNo,
+        tasks: []
+      };
+      result.groups.push(current);
+      let j = i + 1;
+      while (j < lines.length && lines[j].trim() === "") j++;
+      if (/^```ya?ml\s*$/.test(lines[j] ?? "")) {
+        const end = lines.findIndex((l, k) => k > j && l.trim() === "```");
+        current.metaLine = j + 1;
+        if (end === -1) current.metaError = "metadata block is not closed";
+        else {
+          const { meta, error } = parseMeta(lines.slice(j + 1, end).join("\n"));
+          if (meta) current.meta = meta;
+          else current.metaError = error ?? "invalid metadata";
+          i = end;
+        }
+      } else current.metaError = "no metadata block after the heading";
+      continue;
+    }
+    if (inFollowUp) continue;
+    const task = TASK.exec(line);
+    if (!task) continue;
+    const done = DONE.exec(lines[i + 1] ?? "");
+    const entry = {
+      id: `${task[2]}.${task[3]}`,
+      group: Number(task[2]),
+      index: Number(task[3]),
+      done: task[1] !== " ",
+      text: (task[4] ?? "").trim(),
+      line: lineNo,
+      ...done && done[1].trim() !== "" ? { doneWhen: done[1].trim() } : {}
+    };
+    (current ? current.tasks : result.orphanTasks).push(entry);
+  }
+  return result;
+}
+
+// src/tasks/rules.ts
+import { existsSync as existsSync10 } from "node:fs";
+import { join as join12 } from "node:path";
+
+// src/tasks/overlap.ts
+var WILDCARD = /[*?{[]/;
+function staticPrefix(glob) {
+  const segments = glob.split("/");
+  const end = segments.findIndex((s) => WILDCARD.test(s));
+  return segments.slice(0, end === -1 ? segments.length : end).join("/");
+}
+function sharedFiles(a, b, repoFiles) {
+  for (const [x, y] of [
+    [a, b],
+    [b, a]
+  ]) {
+    for (const entry of x) {
+      if (!WILDCARD.test(entry) && (y.includes(entry) || matchesAny(entry, y))) return entry;
+    }
+    for (const glob of x) {
+      if (glob === "**") return glob;
+      if (!glob.endsWith("/**")) continue;
+      const dir = glob.slice(0, -3);
+      for (const other of y) {
+        const prefix = staticPrefix(other);
+        if (prefix === dir || prefix.startsWith(`${dir}/`)) return `${glob} and ${other}`;
+      }
+    }
+  }
+  const ra = a.map(globToRegExp);
+  const rb = b.map(globToRegExp);
+  return repoFiles().find((f) => ra.some((r) => r.test(f)) && rb.some((r) => r.test(f)));
+}
+function transitiveDepends(groups) {
+  const direct = new Map(groups.map((g) => [g.number, g.meta?.depends ?? []]));
+  const reach = /* @__PURE__ */ new Map();
+  for (const g of groups) {
+    const seen = /* @__PURE__ */ new Set();
+    const stack = [...direct.get(g.number) ?? []];
+    while (stack.length > 0) {
+      const n = stack.pop();
+      if (seen.has(n)) continue;
+      seen.add(n);
+      stack.push(...direct.get(n) ?? []);
+    }
+    reach.set(g.number, seen);
+  }
+  return reach;
+}
+function parallelOverlaps(groups, repoFiles) {
+  const reach = transitiveDepends(groups);
+  let files;
+  const lazyFiles = () => {
+    files ??= repoFiles();
+    return files;
+  };
+  const out = [];
+  const withMeta = groups.filter((g) => g.meta);
+  for (let i = 0; i < withMeta.length; i++) {
+    for (let j = i + 1; j < withMeta.length; j++) {
+      const a = withMeta[i];
+      const b = withMeta[j];
+      if (reach.get(a.number)?.has(b.number) || reach.get(b.number)?.has(a.number)) continue;
+      const shared = sharedFiles(a.meta?.files ?? [], b.meta?.files ?? [], lazyFiles);
+      if (shared !== void 0) out.push({ first: a, second: b, shared });
+    }
+  }
+  return out;
+}
+
+// src/tasks/rules.ts
+var DEFAULT_AGENT = "implementer";
+var KNOWLEDGE_GROUP = "Knowledge";
+function dependencyCycles(groups) {
+  const edges = new Map(groups.map((g) => [g.number, g.meta?.depends ?? []]));
+  const index = /* @__PURE__ */ new Map();
+  const low = /* @__PURE__ */ new Map();
+  const stack = [];
+  const onStack = /* @__PURE__ */ new Set();
+  const cycles = [];
+  let counter = 0;
+  const visit = (v) => {
+    index.set(v, counter);
+    low.set(v, counter++);
+    stack.push(v);
+    onStack.add(v);
+    for (const w of edges.get(v) ?? []) {
+      if (!edges.has(w)) continue;
+      if (!index.has(w)) {
+        visit(w);
+        low.set(v, Math.min(low.get(v), low.get(w)));
+      } else if (onStack.has(w)) low.set(v, Math.min(low.get(v), index.get(w)));
+    }
+    if (low.get(v) === index.get(v)) {
+      const component = [];
+      let w;
+      do {
+        w = stack.pop();
+        onStack.delete(w);
+        component.push(w);
+      } while (w !== v);
+      if (component.length > 1) cycles.push(component.sort((a, b) => a - b));
+    }
+  };
+  for (const g of groups) if (!index.has(g.number)) visit(g.number);
+  return cycles;
+}
+function checkStatic(tasks, ctx) {
+  const out = [];
+  const add = (rule, severity, group, task, line, message, fix) => out.push({ rule, severity, file: ctx.file, group, task, line, message, fix });
+  const numbers = new Set(tasks.groups.map((g) => g.number));
+  tasks.groups.forEach((group, i) => {
+    const n = group.number;
+    if (group.metaError)
+      add(
+        "T1",
+        "error",
+        n,
+        null,
+        group.metaLine,
+        group.metaError,
+        "add a yaml block with files, depends, scenarios and agent right after the heading"
+      );
+    if (n !== i + 1)
+      add(
+        "T3",
+        "error",
+        n,
+        null,
+        group.line,
+        `group numbered ${n}, expected ${i + 1}`,
+        "number groups 1, 2, 3, \u2026 without gaps or repeats"
+      );
+    let previous = 0;
+    for (const task of group.tasks) {
+      if (!task.doneWhen)
+        add(
+          "T2",
+          "error",
+          n,
+          task.id,
+          task.line,
+          `task ${task.id} has no 'Done when:' line`,
+          "add an indented '- Done when: <test, command or scenario>' line"
+        );
+      if (task.group !== n) {
+        add(
+          "T3",
+          "error",
+          n,
+          task.id,
+          task.line,
+          `task ${task.id} is in group ${n}`,
+          `number it ${n}.<m> or move it to group ${task.group}`
+        );
+        continue;
+      }
+      if (task.index !== previous + 1)
+        add(
+          "T3",
+          "error",
+          n,
+          task.id,
+          task.line,
+          `task ${task.id} follows ${n}.${previous}, expected ${n}.${previous + 1}`,
+          "number tasks in a group 1, 2, 3, \u2026 without gaps or repeats"
+        );
+      previous = task.index;
+    }
+    for (const dep of group.meta?.depends ?? []) {
+      if (dep === n)
+        add(
+          "T4",
+          "error",
+          n,
+          null,
+          group.metaLine,
+          `group ${n} depends on itself`,
+          "remove the group's own number from depends"
+        );
+      else if (!numbers.has(dep))
+        add(
+          "T4",
+          "error",
+          n,
+          null,
+          group.metaLine,
+          `group ${n} depends on missing group ${dep}`,
+          "depend only on existing groups"
+        );
+    }
+    for (const id of group.meta?.scenarios ?? []) {
+      if (!ctx.knownScenarios.has(id))
+        add(
+          "T6",
+          "error",
+          n,
+          null,
+          group.metaLine,
+          `unknown scenario '${id}'`,
+          "use <capability-path>#<scenario-title-in-kebab-case> from the delta specs or openspec/specs/"
+        );
+    }
+    const agent = group.meta?.agent;
+    if (agent && agent !== DEFAULT_AGENT && !existsSync10(join12(ctx.repoRoot, ".claude", "agents", `${agent}.md`))) {
+      add(
+        "T7",
+        "warning",
+        n,
+        null,
+        group.metaLine,
+        `agent '${agent}' has no definition in .claude/agents/`,
+        `define the role or use ${DEFAULT_AGENT}`
+      );
+    }
+    if (group.tasks.length > ctx.maxTasksPerGroup) {
+      add(
+        "T9",
+        "warning",
+        n,
+        null,
+        group.line,
+        `group ${n} has ${group.tasks.length} tasks, more than ${ctx.maxTasksPerGroup}`,
+        "split the group into smaller groups"
+      );
+    }
+  });
+  for (const heading of tasks.strayHeadings)
+    add(
+      "T3",
+      "error",
+      null,
+      null,
+      heading.line,
+      `'## ${heading.text}' is not a task group heading`,
+      "use '## <n>. <name>' or move the text into '## Workflow follow-up' at the end"
+    );
+  for (const task of tasks.orphanTasks)
+    add(
+      "T3",
+      "error",
+      null,
+      task.id,
+      task.line,
+      `task ${task.id} is outside any group`,
+      "move it below a group heading"
+    );
+  for (const cycle of dependencyCycles(tasks.groups)) {
+    const first = tasks.groups.find((g) => g.number === cycle[0]);
+    add(
+      "T4",
+      "error",
+      cycle[0] ?? null,
+      null,
+      first?.metaLine ?? null,
+      `groups ${cycle.join(", ")} depend on each other in a cycle`,
+      "remove one dependency so the groups can be ordered"
+    );
+  }
+  for (const { first, second, shared } of parallelOverlaps(tasks.groups, () => walkFiles(ctx.repoRoot))) {
+    add(
+      "T5",
+      "error",
+      second.number,
+      null,
+      second.metaLine,
+      `groups ${first.number} and ${second.number} may run in parallel but both own ${shared}`,
+      `make group ${second.number} depend on group ${first.number} or split the files`
+    );
+  }
+  const last = tasks.groups.at(-1);
+  if (last && last.name !== KNOWLEDGE_GROUP) {
+    add(
+      "T8",
+      "warning",
+      last.number,
+      null,
+      last.line,
+      `last group is '${last.name}', not '${KNOWLEDGE_GROUP}'`,
+      `end with a '${KNOWLEDGE_GROUP}' group that writes the concepts from knowledge.md`
+    );
+  }
+  return out;
+}
+
+// src/tasks/scenarios.ts
+import { existsSync as existsSync11, readFileSync as readFileSync8 } from "node:fs";
+import { join as join13 } from "node:path";
+var SCENARIO = /^#### Scenario:\s*(.+?)\s*$/gm;
+var scenarioSlug = (title) => title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+function collect(specsDir, into) {
+  if (!existsSync11(specsDir)) return;
+  for (const rel of walkFiles(specsDir)) {
+    if (!rel.endsWith("/spec.md")) continue;
+    const capability = rel.slice(0, -"/spec.md".length);
+    for (const m of readFileSync8(join13(specsDir, rel), "utf8").matchAll(SCENARIO)) {
+      into.add(`${capability}#${scenarioSlug(m[1])}`);
+    }
+  }
+}
+function knownScenarioIds(repoRoot, changeDir2) {
+  const ids = /* @__PURE__ */ new Set();
+  collect(join13(changeDir2, "specs"), ids);
+  collect(join13(repoRoot, "openspec", "specs"), ids);
+  return ids;
+}
+
+// src/tasks/command.ts
+var CHANGE_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+function changeDir(config, change) {
+  if (!change) throw new UsageError("missing change name");
+  if (!CHANGE_NAME.test(change) || change === "archive")
+    throw new UsageError(`'${change}' is not a change name (kebab-case)`);
+  const dir = join14(config.root, "openspec", "changes", change);
+  if (!existsSync12(dir) || !statSync4(dir).isDirectory())
+    throw new EnvError(`unknown change '${change}': no folder openspec/changes/${change}/`);
+  return dir;
+}
+function checkChangeTasks(config, change, base) {
+  const dir = changeDir(config, change);
+  const file = `openspec/changes/${change}/tasks.md`;
+  const path = join14(dir, "tasks.md");
+  if (!existsSync12(path)) {
+    return [
+      {
+        rule: "T0",
+        severity: "error",
+        file,
+        group: null,
+        task: null,
+        line: null,
+        message: `change '${change}' has no tasks.md`,
+        fix: "write tasks.md with task groups and tasks"
+      }
+    ];
+  }
+  const tasks = parseTasks(readFileSync9(path, "utf8"));
+  const findings = checkStatic(tasks, {
+    repoRoot: config.root,
+    file,
+    knownScenarios: knownScenarioIds(config.root, dir),
+    maxTasksPerGroup: config.tasks.maxTasksPerGroup
+  });
+  if (base !== void 0) {
+    findings.push(
+      ...checkTrailers(tasks, commitsSinceBase(config.root, base), {
+        change,
+        file,
+        maxFilesPerTask: config.tasks.maxFilesPerTask
+      })
+    );
+  }
+  return findings.sort(
+    (a, b) => (a.line ?? 0) - (b.line ?? 0) || (a.rule < b.rule ? -1 : a.rule > b.rule ? 1 : 0)
+  );
+}
+var taskFindingLine = (f) => `${f.file}${f.line === null ? "" : `:${f.line}`} ${f.rule} ${f.message}`;
+register({
+  name: "tasks",
+  summary: "check a change's task breakdown",
+  usage: "specfold tasks check <change> [--base <ref>] [--json]",
+  options: { base: { type: "string" }, json: { type: "boolean" } },
+  run: ({ io, values, positionals }) => {
+    const [sub, change, ...extra] = positionals;
+    if (sub !== "check")
+      throw new UsageError(
+        sub ? `unknown tasks subcommand '${sub}'` : "missing subcommand: specfold tasks check"
+      );
+    if (extra.length > 0) throw new UsageError(`unexpected argument '${extra[0]}'`);
+    const config = requireConfig(io.cwd);
+    const findings = checkChangeTasks(config, change, values.base);
+    const errors = findings.filter((f) => f.severity === "error").length;
+    const warnings = findings.length - errors;
+    if (values.json) {
+      io.stdout(`${JSON.stringify({ ok: errors === 0, change, errors, warnings, findings }, null, 2)}
+`);
+    } else {
+      const lines = findings.filter((f) => f.severity === "error").map(taskFindingLine);
+      lines.push(`tasks check ${change}: ${plural(errors, "error")}, ${plural(warnings, "warning")}`);
+      io.stdout(`${lines.join("\n")}
+`);
+    }
+    return errors === 0 ? 0 : 1;
+  }
+});
+
+// src/tasks/progress-command.ts
+import { existsSync as existsSync13, readdirSync as readdirSync4, readFileSync as readFileSync10 } from "node:fs";
+import { join as join15 } from "node:path";
+
+// src/tasks/progress.ts
+function progressOf(tasks) {
+  const finished = new Set(tasks.groups.filter((g) => g.tasks.every((t) => t.done)).map((g) => g.number));
+  const groups = tasks.groups.map((group) => {
+    const done = group.tasks.filter((t) => t.done).length;
+    const total = group.tasks.length;
+    const blockedBy = (group.meta?.depends ?? []).filter((d) => !finished.has(d));
+    const state = done === total ? "done" : done > 0 ? "in progress" : blockedBy.length > 0 ? "blocked" : "ready";
+    return { group, done, total, state, blockedBy: state === "blocked" ? blockedBy : [] };
+  });
+  const workable = groups.find((g) => g.state === "in progress" || g.state === "ready");
+  const task = workable?.group.tasks.find((t) => !t.done);
+  return {
+    groups,
+    done: groups.reduce((n, g) => n + g.done, 0),
+    total: groups.reduce((n, g) => n + g.total, 0),
+    ...workable && task ? { next: { task, group: workable.group } } : {}
+  };
+}
+
+// src/tasks/progress-command.ts
+function readTasks(config, change) {
+  const path = join15(changeDir(config, change), "tasks.md");
+  return existsSync13(path) ? parseTasks(readFileSync10(path, "utf8")) : void 0;
+}
+function activeChanges(config) {
+  const dir = join15(config.root, "openspec", "changes");
+  if (!existsSync13(dir)) return [];
+  return readdirSync4(dir, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort();
+}
+function commitsByTask(config, change) {
+  const out = /* @__PURE__ */ new Map();
+  try {
+    for (const commit of readCommits(config.root, "HEAD", false)) {
+      for (const id of taskIdsFor(commit, change)) out.set(id, commit.sha.slice(0, 7));
+    }
+  } catch (error) {
+    if (!(error instanceof EnvError)) throw error;
+  }
+  return out;
+}
+var nextJson = (p) => p.next ? { task: p.next.task.id, text: p.next.task.text } : null;
+function nextLine(p) {
+  if (p.next) return `next: ${p.next.task.id} ${p.next.task.text}`;
+  return p.done === p.total ? "next: none, all tasks done" : "next: none, every open group is blocked";
+}
+register({
+  name: "status",
+  summary: "show task progress per group and the next open task",
+  usage: "specfold status [<change>] [--json]",
+  options: { json: { type: "boolean" } },
+  run: ({ io, values, positionals }) => {
+    if (positionals.length > 1) throw new UsageError(`unexpected argument '${positionals[1]}'`);
+    const config = requireConfig(io.cwd);
+    const [change] = positionals;
+    if (change === void 0) {
+      const rows = activeChanges(config).map((name) => {
+        const tasks2 = readTasks(config, name);
+        return { change: name, tasks: tasks2, progress: tasks2 && progressOf(tasks2) };
+      });
+      if (values.json) {
+        const changes = rows.map(
+          ({ change: name, progress: p12 }) => p12 ? { change: name, done: p12.done, total: p12.total, next: nextJson(p12) } : { change: name, done: 0, total: 0, next: null, tasksFile: false }
+        );
+        io.stdout(`${JSON.stringify({ changes }, null, 2)}
+`);
+      } else {
+        const width2 = Math.max(0, ...rows.map((r) => r.change.length));
+        const lines2 = rows.map(
+          ({ change: name, progress: p12 }) => p12 ? `${name.padEnd(width2)}  ${p12.done}/${p12.total}  ${nextLine(p12)}` : `${name.padEnd(width2)}  no tasks.md`
+        );
+        io.stdout(lines2.length > 0 ? `${lines2.join("\n")}
+` : "no active changes\n");
+      }
+      return 0;
+    }
+    const tasks = readTasks(config, change);
+    if (!tasks) throw new EnvError(`change '${change}' has no tasks.md`);
+    const p = progressOf(tasks);
+    if (values.json) {
+      const commits = commitsByTask(config, change);
+      const groups = p.groups.map((g) => ({
+        group: g.group.number,
+        name: g.group.name,
+        done: g.done,
+        total: g.total,
+        state: g.state,
+        blockedBy: g.blockedBy,
+        tasks: g.group.tasks.map((t) => ({
+          task: t.id,
+          text: t.text,
+          done: t.done,
+          commit: commits.get(t.id) ?? null
+        }))
+      }));
+      io.stdout(
+        `${JSON.stringify({ change, done: p.done, total: p.total, groups, next: nextJson(p) }, null, 2)}
+`
+      );
+      return 0;
+    }
+    const label = (g) => `${g.group.number}. ${g.group.name}`;
+    const width = Math.max(0, ...p.groups.map((g) => label(g).length));
+    const states = p.groups.map(
+      (g) => g.state === "blocked" ? `blocked by ${g.blockedBy.join(", ")}` : g.state
+    );
+    const stateWidth = Math.max(0, ...states.map((s) => s.length));
+    const lines = [
+      `${change}: ${p.done}/${p.total} tasks`,
+      ...p.groups.map(
+        (g, i) => `  ${label(g).padEnd(width)}  ${states[i].padEnd(stateWidth)}  ${g.done}/${g.total}`
+      ),
+      nextLine(p)
+    ];
+    io.stdout(`${lines.join("\n")}
+`);
+    return 0;
+  }
+});
+register({
+  name: "resume",
+  summary: "print the next open task with its group context",
+  usage: "specfold resume <change> [--json]",
+  options: { json: { type: "boolean" } },
+  run: ({ io, values, positionals }) => {
+    const [change, ...extra] = positionals;
+    if (extra.length > 0) throw new UsageError(`unexpected argument '${extra[0]}'`);
+    const config = requireConfig(io.cwd);
+    const tasks = readTasks(config, change);
+    if (!tasks) throw new EnvError(`change '${change}' has no tasks.md`);
+    const p = progressOf(tasks);
+    const allDone = p.done === p.total;
+    const blocked = p.groups.filter((g) => g.state === "blocked").map((g) => ({ group: g.group.number, blockedBy: g.blockedBy }));
+    const next = p.next;
+    const remaining = next ? next.group.tasks.filter((t) => !t.done && t !== next.task) : [];
+    const meta = next?.group.meta;
+    const trailer = next ? `Task: ${change}#${next.task.id}` : null;
+    if (values.json) {
+      io.stdout(
+        `${JSON.stringify(
+          {
+            change,
+            allDone,
+            next: next ? { task: next.task.id, text: next.task.text, doneWhen: next.task.doneWhen ?? null } : null,
+            group: next ? {
+              group: next.group.number,
+              name: next.group.name,
+              files: meta?.files ?? [],
+              depends: meta?.depends ?? [],
+              scenarios: meta?.scenarios ?? [],
+              agent: meta?.agent ?? null
+            } : null,
+            remaining: remaining.map((t) => ({ task: t.id, text: t.text })),
+            trailer,
+            blocked: next || allDone ? [] : blocked
+          },
+          null,
+          2
+        )}
+`
+      );
+    } else if (next) {
+      const list = (xs) => xs.length > 0 ? xs.join(", ") : "none";
+      io.stdout(
+        `${[
+          `Next task: ${next.task.id} ${next.task.text}`,
+          `Done when: ${next.task.doneWhen ?? "(missing)"}`,
+          `Group: ${next.group.number}. ${next.group.name}`,
+          `  files: ${list(meta?.files ?? [])}`,
+          `  depends: ${list(meta?.depends ?? [])}`,
+          `  scenarios: ${list(meta?.scenarios ?? [])}`,
+          `  agent: ${meta?.agent ?? "(missing)"}`,
+          `Remaining in group: ${remaining.length > 0 ? remaining.map((t) => `${t.id} ${t.text}`).join("; ") : "none"}`,
+          `Trailer: ${trailer}`
+        ].join("\n")}
+`
+      );
+    } else if (allDone) {
+      io.stdout(`All tasks of ${change} are done.
+`);
+    } else {
+      io.stdout(
+        `No open task can start: ${blocked.map((b) => `group ${b.group} is blocked by ${b.blockedBy.join(", ")}`).join("; ")}
+`
+      );
+    }
+    return next || allDone ? 0 : 1;
   }
 });
 
