@@ -8,17 +8,7 @@ import { isoWithOffset } from "../new/command.ts";
 import { requireConfig, resolveBundleRoot } from "../repo.ts";
 import { isConcept, isRecord } from "../validate/okf.ts";
 import { verifyText } from "./apply.ts";
-import { resolveLogin, system } from "./login.ts";
-
-const AGENT_VARIABLES = ["CLAUDECODE", "SPECFOLD_MODEL"];
-
-/** Why an agent seems to be running the command, or undefined for a person at a terminal. */
-function agentReason(): string | undefined {
-  const variable = AGENT_VARIABLES.find((v) => process.env[v]);
-  if (variable) return `${variable} is set`;
-  if (!system.isInteractive()) return "stdin is not a terminal";
-  return undefined;
-}
+import { agentReason, resolveLogin } from "./login.ts";
 
 interface Target {
   arg: string;

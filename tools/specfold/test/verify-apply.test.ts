@@ -11,6 +11,12 @@ describe("verify: apply", () => {
     );
   });
 
+  it("leaves status alone when asked to", () => {
+    expect(verifyText(concept(), "ana", "2026-10-26T15:00:00+01:00", true)).toContain(
+      "status: draft\ngenerated: { by: claude-code/x, at: 2026-10-26T10:00:00+01:00 }\nverified: { by: human:ana, at: 2026-10-26T15:00:00+01:00 }\n",
+    );
+  });
+
   // spec: specfold-verify#second-reviewer
   it("keeps other reviewers as a list", () => {
     const once = verifyText(concept(), "ana", "2026-10-26T15:00:00+01:00");

@@ -28,6 +28,16 @@ export const system = {
   },
 };
 
+const AGENT_VARIABLES = ["CLAUDECODE", "SPECFOLD_MODEL"];
+
+/** Why an agent seems to be running the command, or undefined for a person at a terminal. */
+export function agentReason(): string | undefined {
+  const variable = AGENT_VARIABLES.find((v) => process.env[v]);
+  if (variable) return `${variable} is set`;
+  if (!system.isInteractive()) return "stdin is not a terminal";
+  return undefined;
+}
+
 function localLogin(root: string): string | undefined {
   const path = join(root, LOCAL_FILE);
   if (!existsSync(path)) return undefined;

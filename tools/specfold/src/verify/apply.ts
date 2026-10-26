@@ -16,8 +16,11 @@ const flowEntry = (entry: unknown) =>
 const sameLogin = (entry: unknown, by: string) =>
   isRecord(entry) && typeof entry.by === "string" && entry.by.toLowerCase() === by.toLowerCase();
 
-/** Sets `status: stable` and records `login`'s verification at `at`, replacing that login's earlier entry. */
-export function verifyText(text: string, login: string, at: string): string {
+/**
+ * Sets `status: stable` (unless `keepStatus`) and records `login`'s verification at `at`, replacing that
+ * login's earlier entry.
+ */
+export function verifyText(text: string, login: string, at: string, keepStatus = false): string {
   const data = parseText("concept.md", text).frontmatter?.data;
   const current = isRecord(data) ? data.verified : undefined;
   const entries: unknown[] = Array.isArray(current) ? [...current] : current === undefined ? [] : [current];
@@ -30,5 +33,8 @@ export function verifyText(text: string, login: string, at: string): string {
     entries.length === 1
       ? [`verified: ${flowEntry(entries[0])}`]
       : ["verified:", ...entries.map((e) => `  - ${flowEntry(e)}`)];
-  return editFrontmatter(text, { set: { status: "stable" }, setBlock: { verified: block } }).text;
+  return editFrontmatter(text, {
+    ...(keepStatus ? {} : { set: { status: "stable" } }),
+    setBlock: { verified: block },
+  }).text;
 }
