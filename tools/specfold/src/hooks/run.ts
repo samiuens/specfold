@@ -82,8 +82,9 @@ function prePush({ config, io }: HookContext): number {
   return 1;
 }
 
-/** Refreshes an installed graphify graph; never fails and stays silent. */
+/** Refreshes an existing graphify graph; never builds one, never fails and stays silent. */
 function refreshGraph({ config }: HookContext): number {
+  if (!existsSync(join(config.root, "graphify-out", "graph.json"))) return 0;
   spawnSync("graphify", ["update", "."], {
     cwd: config.root,
     env: { ...process.env, GRAPHIFY_BACKEND: "none" },
