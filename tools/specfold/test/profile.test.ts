@@ -298,3 +298,76 @@ describe("validate: profile P9-P11", () => {
     expect(await findings(repo)).toEqual([]);
   });
 });
+
+describe("validate: profile P12-P14", () => {
+  /** The valid fixture with the future-facing types allowed and one concept written. */
+  function repoWith(rel: string, frontmatter: string) {
+    const repo = tempDir("valid");
+    edit(repo, "specfold.yaml", "types: [Term,", "types: [Vision, Deferred Commitment, Backlog Item, Term,");
+    mkdirSync(join(repo, "knowledge", rel, ".."), { recursive: true });
+    writeFileSync(
+      join(repo, "knowledge", rel),
+      `---\n${frontmatter}\ntitle: Item\ndescription: An item.\nstatus: draft\ngenerated: { by: x/y, at: 2026-10-01T00:00:00Z }\n---\n\n# Idea\n\nText.\n`,
+    );
+    return repo;
+  }
+  const item = (keys: string) => repoWith("backlog/dark-mode.md", `type: Backlog Item\n${keys}`);
+  const commitment = (keys: string) =>
+    repoWith("commitments/eu-data.md", `type: Deferred Commitment\n${keys}`);
+
+  it("accepts complete items", async () => {
+    expect(await findings(item("state: open\npriority: low\norigin: human"))).toEqual([]);
+    const repo = commitment(
+      "state: open\ntrigger: 2027-01-31\ncommitted_by: human:ana\nvision: /vision/product.md",
+    );
+    mkdirSync(join(repo, "knowledge/vision"), { recursive: true });
+    writeFileSync(
+      join(repo, "knowledge/vision/product.md"),
+      '---\ntype: Vision\ntitle: Product\ndescription: Where it goes.\nstatus: draft\nhorizon: "2027"\ngenerated: { by: x/y, at: 2026-10-01T00:00:00Z }\n---\n\n# Goals\n\nGo.\n',
+    );
+    expect((await findings(repo)).filter((f) => f.severity === "error")).toEqual([]);
+  });
+
+  // spec: specfold-validate#promoted-without-change
+  it("P12 reports a promoted item without change", async () => {
+    expect(await findings(item("state: promoted\npriority: low\norigin: human"))).toEqual([
+      expect.objectContaining({ rule: "P12", severity: "error", message: "a promoted item needs 'change'" }),
+    ]);
+  });
+
+  // spec: specfold-validate#unknown-priority
+  it("P12 reports an unknown priority, a missing origin and a dropped item without reason", async () => {
+    expect((await findings(item("state: dropped\npriority: urgent"))).map((f) => f.message)).toEqual([
+      "a Backlog Item needs 'origin'",
+      "a dropped item needs 'reason'",
+      "priority 'urgent' is not allowed",
+    ]);
+  });
+
+  // spec: specfold-validate#commitment-claimed-by-an-agent
+  it("P13 reports a commitment claimed by an agent, a missing vision and an empty trigger", async () => {
+    const out = await findings(
+      commitment('state: withdrawn\ntrigger: ""\ncommitted_by: claude-code/opus\nvision: /vision/none.md'),
+    );
+    expect(out.map((f) => [f.rule, f.message])).toEqual([
+      ["P13", "a withdrawn commitment needs 'reason'"],
+      ["P13", "a Deferred Commitment needs 'trigger'"],
+      ["P13", "committed_by 'claude-code/opus' is not a human:<login> actor"],
+      ["P13", "vision '/vision/none.md' is not an existing Vision concept"],
+    ]);
+  });
+
+  // spec: specfold-validate#agent-draft-of-a-commitment
+  it("P13 only warns when nobody has committed yet", async () => {
+    const repo = commitment("state: open\ntrigger: before 1.0");
+    expect(await findings(repo)).toEqual([expect.objectContaining({ rule: "P13", severity: "warning" })]);
+    expect((await run(["validate"], repo)).code).toBe(0);
+  });
+
+  // spec: specfold-validate#numeric-horizon
+  it("P14 reports a horizon that is not a string", async () => {
+    expect(await findings(repoWith("vision/product.md", "type: Vision\nhorizon: 2027"))).toEqual([
+      expect.objectContaining({ rule: "P14", line: 3 }),
+    ]);
+  });
+});

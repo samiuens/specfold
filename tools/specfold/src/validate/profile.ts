@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
-import { dirname, join, relative } from "node:path";
-import type { ParsedFile } from "../bundle.ts";
+import { dirname, join, relative, sep } from "node:path";
+import { type ParsedFile, parseFile } from "../bundle.ts";
 import type { Finding } from "../findings.ts";
 import type { BundleRule, Rule } from "./index.ts";
 import { isConcept, isRecord } from "./okf.ts";
@@ -385,6 +385,107 @@ export const p11: Rule = (file, ctx) => {
 };
 
 /** Resolves a bundle-absolute (`/x.md`) or file-relative link target to an absolute path inside the bundle. */
+const BACKLOG_STATES = ["open", "promoted", "dropped"];
+const PRIORITIES = ["low", "medium", "high"];
+const COMMITMENT_STATES = ["open", "fulfilled", "withdrawn"];
+const HUMAN = /^human:\S+$/;
+
+/** P12: the keys of a Backlog Item. */
+export const p12: Rule = (file) => {
+  const data = conceptData(file);
+  if (!data || data.type !== "Backlog Item") return [];
+  const findings: Finding[] = [];
+  const add = (key: string | null, message: string, fix: string) =>
+    findings.push(finding("P12", file, key, message, fix));
+  if (!BACKLOG_STATES.includes(data.state as string))
+    add(
+      "state",
+      `state '${String(data.state ?? "")}' is not allowed`,
+      `set 'state' to ${BACKLOG_STATES.join(", ")}`,
+    );
+  if (!PRIORITIES.includes(data.priority as string))
+    add(
+      "priority",
+      `priority '${String(data.priority ?? "")}' is not allowed`,
+      `set 'priority' to ${PRIORITIES.join(", ")}`,
+    );
+  if (!nonEmptyString(data.origin))
+    add(
+      "origin",
+      "a Backlog Item needs 'origin'",
+      "name where the idea came from: interview, retro, a change id or human",
+    );
+  if (data.state === "promoted" && !nonEmptyString(data.change))
+    add("state", "a promoted item needs 'change'", "set 'change' to the change it was promoted to");
+  if (data.state === "dropped" && !nonEmptyString(data.reason))
+    add("state", "a dropped item needs 'reason'", "say in 'reason' why it was dropped");
+  return findings;
+};
+
+/** P13: the keys of a Deferred Commitment; a missing committed_by only warns. */
+export const p13: Rule = (file, ctx) => {
+  const data = conceptData(file);
+  if (!data || data.type !== "Deferred Commitment") return [];
+  const findings: Finding[] = [];
+  const add = (key: string | null, message: string, fix: string) =>
+    findings.push(finding("P13", file, key, message, fix));
+  if (!COMMITMENT_STATES.includes(data.state as string))
+    add(
+      "state",
+      `state '${String(data.state ?? "")}' is not allowed`,
+      `set 'state' to ${COMMITMENT_STATES.join(", ")}`,
+    );
+  if (!nonEmptyString(data.trigger))
+    add(
+      "trigger",
+      "a Deferred Commitment needs 'trigger'",
+      "set 'trigger' to a date (2027-01-31) or a condition (before 1.0)",
+    );
+  if (data.committed_by === undefined)
+    findings.push({
+      ...finding(
+        "P13",
+        file,
+        null,
+        "no human has committed to this yet (no 'committed_by')",
+        "the person who commits runs specfold new or adds committed_by: human:<login>",
+      ),
+      severity: "warning",
+    });
+  else if (typeof data.committed_by !== "string" || !HUMAN.test(data.committed_by))
+    add(
+      "committed_by",
+      `committed_by '${String(data.committed_by)}' is not a human:<login> actor`,
+      "only a human commits; write committed_by: human:<login>",
+    );
+  if (data.vision !== undefined) {
+    const target =
+      typeof data.vision === "string" ? resolveInBundle(ctx.bundleRoot, file.rel, data.vision) : undefined;
+    const linked =
+      target !== undefined && existsSync(target)
+        ? parseFile(ctx.bundleRoot, relative(ctx.bundleRoot, target).split(sep).join("/")).frontmatter?.data
+        : undefined;
+    const isVision = isRecord(linked) && linked.type === "Vision";
+    if (!isVision)
+      add(
+        "vision",
+        `vision '${String(data.vision)}' is not an existing Vision concept`,
+        "link a Vision concept, e.g. /vision/product.md",
+      );
+  }
+  if (data.state === "withdrawn" && !nonEmptyString(data.reason))
+    add("state", "a withdrawn commitment needs 'reason'", "say in 'reason' why it was withdrawn");
+  return findings;
+};
+
+/** P14: a Vision's horizon is a string. */
+export const p14: Rule = (file) => {
+  const data = conceptData(file);
+  if (!data || data.type !== "Vision" || data.horizon === undefined || typeof data.horizon === "string")
+    return [];
+  return [finding("P14", file, "horizon", "horizon must be a string", 'quote it, e.g. horizon: "2027"')];
+};
+
 export function resolveInBundle(bundleRoot: string, fromRel: string, target: string): string | undefined {
   const clean = target.split("#")[0] ?? "";
   if (clean === "") return undefined;

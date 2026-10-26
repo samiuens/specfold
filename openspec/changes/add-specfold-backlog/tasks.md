@@ -21,9 +21,9 @@ scenarios: [specfold-validate#promoted-without-change, specfold-validate#unknown
 agent: implementer
 ```
 
-- [ ] 2.1 Add P12 for backlog item keys
+- [x] 2.1 Add P12 for backlog item keys
   - Done when: scenarios promoted-without-change and unknown-priority pass in `profile.test.ts`
-- [ ] 2.2 Add P13 for commitment keys and P14 for the vision horizon
+- [x] 2.2 Add P13 for commitment keys and P14 for the vision horizon
   - Done when: scenarios commitment-claimed-by-an-agent, agent-draft-of-a-commitment and numeric-horizon pass in `profile.test.ts`
 
 ## 3. Concept keys and the human guard
