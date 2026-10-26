@@ -23,7 +23,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 2.1 Add argument parsing, command dispatch and exit-code mapping with `--version` and `--help`
+- [x] 2.1 Add argument parsing, command dispatch and exit-code mapping with `--version` and `--help`
   - Done when: `cli.test.ts` covers unknown flags and commands exiting with 2
 - [ ] 2.2 Add repository root discovery and `specfold.yaml` loading
   - Done when: `cli.test.ts` covers root discovery, a missing `specfold.yaml` and an unparseable one
