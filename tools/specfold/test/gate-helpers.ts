@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { syncIndexes } from "../src/indexes/command.ts";
 import { generateIndexes } from "../src/indexes/generate.ts";
@@ -58,3 +58,17 @@ export function gateRepo(files: Record<string, string> = {}): string {
   git(root, "checkout", "-q", "-b", "work");
   return root;
 }
+
+const FIXTURE = new URL("./fixtures/change/", import.meta.url);
+const fixture = (rel: string) => readFileSync(new URL(rel, FIXTURE), "utf8");
+
+/** The valid `demo` change of the change check fixture, with the concept its brief cites. */
+export const demoChange = (): Record<string, string> => ({
+  "knowledge/decisions/receipts.md": concept("Term", "Receipts go by mail."),
+  ...Object.fromEntries(
+    ["brief.md", "knowledge.md", "tasks.md", ".openspec.yaml", "specs/guest-checkout/spec.md"].map((f) => [
+      `openspec/changes/demo/${f}`,
+      fixture(`openspec/changes/demo/${f}`),
+    ]),
+  ),
+});

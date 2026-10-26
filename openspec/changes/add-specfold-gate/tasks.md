@@ -53,13 +53,13 @@ agent: implementer
 ## 4. Gate command
 
 ```yaml
-files: [tools/specfold/src/gate/command.ts, tools/specfold/src/commands.ts, tools/specfold/test/gate-command.test.ts]
+files: [tools/specfold/src/gate/command.ts, tools/specfold/src/commands.ts, tools/specfold/test/gate-command.test.ts, tools/specfold/test/gate-helpers.ts, tools/specfold/test/gate-rules.test.ts]
 depends: [3]
 scenarios: [specfold-gate#clean-branch, specfold-gate#unknown-base, specfold-gate#json-verdict]
 agent: implementer
 ```
 
-- [ ] 4.1 Add `specfold gate` with output, ordering and exit codes
+- [x] 4.1 Add `specfold gate` with output, ordering and exit codes
   - Done when: scenarios clean-branch, unknown-base and json-verdict pass in `gate-command.test.ts`
 
 ## 5. Bundle
