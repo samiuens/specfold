@@ -1,5 +1,6 @@
 import { chmodSync, existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { Document, isMap, isScalar, isSeq, parseDocument, type YAMLSeq } from "yaml";
 import { EnvError } from "../errors.ts";
 import { git } from "../git.ts";
 import type { Config } from "../repo.ts";
@@ -75,8 +76,128 @@ function installBuiltIn(config: Config): InstallResult {
   return { manager: null, actions, next: null };
 }
 
+const LEFTHOOK_FILES = ["lefthook.yml", "lefthook.yaml", ".lefthook.yml"];
+const PRE_COMMIT_FILE = ".pre-commit-config.yaml";
+
+/** The first hook manager found: lefthook, husky, then pre-commit/prek. */
+export function detectManager(root: string): { name: string; path: string } | undefined {
+  const lefthook = LEFTHOOK_FILES.find((f) => existsSync(join(root, f)));
+  if (lefthook) return { name: "lefthook", path: lefthook };
+  if (existsSync(join(root, ".husky"))) return { name: "husky", path: ".husky" };
+  if (existsSync(join(root, PRE_COMMIT_FILE))) return { name: "pre-commit", path: PRE_COMMIT_FILE };
+  return undefined;
+}
+
+/** The YAML file as an editable document that keeps comments; a missing or empty file becomes an empty mapping. */
+function readDocument(path: string): Document {
+  const doc = parseDocument(existsSync(path) ? readFileSync(path, "utf8") : "");
+  if (doc.errors[0]) throw new EnvError(`${path}: ${doc.errors[0].message.split("\n")[0]}`);
+  return isMap(doc.contents) ? doc : new Document({});
+}
+
+/** One `specfold` command per hook; a hook that already uses `jobs` gets a job instead. */
+function lefthookEntries(config: Config, file: string): InstallAction[] {
+  const path = join(config.root, file);
+  const doc = readDocument(path);
+  const actions: InstallAction[] = [];
+  for (const hook of hookNames(config)) {
+    const run = `${hookCommand(hook)} {0}`;
+    const jobs = doc.getIn([hook, "jobs"]);
+    if (isSeq(jobs)) {
+      if (jobs.items.some((j) => isMap(j) && j.get("name") === "specfold")) continue;
+      jobs.add(doc.createNode({ name: "specfold", run }));
+    } else {
+      if (doc.hasIn([hook, "commands", "specfold"])) continue;
+      doc.setIn([hook, "commands", "specfold"], doc.createNode({ run }));
+    }
+    actions.push({ path: file, action: `add specfold to ${hook}` });
+  }
+  if (actions.length > 0) writeFileSync(path, String(doc));
+  return actions;
+}
+
+/** One line per hook file in `.husky/`, created when missing. */
+function huskyEntries(config: Config): InstallAction[] {
+  const actions: InstallAction[] = [];
+  for (const hook of hookNames(config)) {
+    const path = `.husky/${hook}`;
+    const abs = join(config.root, path);
+    const line = `${hookCommand(hook)} "$@"`;
+    const text = existsSync(abs) ? readFileSync(abs, "utf8") : "";
+    if (text.split("\n").some((l) => l.trim() === line)) continue;
+    writeIfChanged(abs, `${text}${text === "" || text.endsWith("\n") ? "" : "\n"}${line}\n`, 0o755);
+    actions.push({ path, action: `add ${hook}` });
+  }
+  return actions;
+}
+
+const idOf = (hook: unknown) => (isMap(hook) ? String(hook.get("id")) : "");
+
+/** A local repo with one `specfold-<hook>` hook per hook, and every hook type in default_install_hook_types. */
+function preCommitEntries(config: Config): InstallAction[] {
+  const path = join(config.root, PRE_COMMIT_FILE);
+  const doc = readDocument(path);
+  if (!isSeq(doc.get("repos"))) doc.set("repos", doc.createNode([]));
+  const repos = doc.get("repos") as YAMLSeq;
+  const hookSeqs = repos.items.flatMap((repo) => {
+    const hooks = isMap(repo) ? repo.get("hooks") : undefined;
+    return isSeq(hooks) ? [{ repo, hooks }] : [];
+  });
+  const ids = new Set(hookSeqs.flatMap(({ hooks }) => hooks.items.map(idOf)));
+  const actions: InstallAction[] = [];
+  const missing = hookNames(config).filter((hook) => !ids.has(`specfold-${hook}`));
+  if (missing.length > 0) {
+    let target = hookSeqs.find(
+      ({ repo, hooks }) =>
+        isMap(repo) &&
+        repo.get("repo") === "local" &&
+        hooks.items.some((h) => idOf(h).startsWith("specfold-")),
+    )?.hooks;
+    if (!target) {
+      target = doc.createNode([]) as YAMLSeq;
+      repos.add(doc.createNode({ repo: "local", hooks: target }));
+    }
+    for (const hook of missing) {
+      target.add(
+        doc.createNode({
+          id: `specfold-${hook}`,
+          name: `specfold ${hook}`,
+          entry: hookCommand(hook),
+          language: "system",
+          always_run: true,
+          pass_filenames: hook === "commit-msg",
+          stages: [hook],
+        }),
+      );
+      actions.push({ path: PRE_COMMIT_FILE, action: `add specfold-${hook}` });
+    }
+  }
+  // pre-commit installs only the hook types listed here, [pre-commit] when the key is missing
+  const listed = doc.get("default_install_hook_types");
+  const types = isSeq(listed) ? listed.items.map((t) => String(isScalar(t) ? t.value : t)) : ["pre-commit"];
+  const added = hookNames(config).filter((h) => !types.includes(h));
+  if (added.length > 0) {
+    doc.set("default_install_hook_types", doc.createNode([...types, ...added], { flow: true }));
+    actions.push({ path: PRE_COMMIT_FILE, action: `install hook types ${added.join(", ")}` });
+  }
+  if (actions.length > 0) writeFileSync(path, String(doc));
+  return actions;
+}
+
 /** Installs Specfold's hooks: into the repository's hook manager, or as built-in hooks via core.hooksPath. */
 export function installHooks(config: Config): InstallResult {
   requireGitRoot(config.root);
-  return installBuiltIn(config);
+  const manager = detectManager(config.root);
+  if (!manager) return installBuiltIn(config);
+  if (manager.name === "lefthook") {
+    const actions = lefthookEntries(config, manager.path);
+    return { manager: "lefthook", actions, next: actions.length > 0 ? "run lefthook install" : null };
+  }
+  if (manager.name === "husky") return { manager: "husky", actions: huskyEntries(config), next: null };
+  const actions = preCommitEntries(config);
+  return {
+    manager: "pre-commit",
+    actions,
+    next: actions.length > 0 ? "run pre-commit install (or prek install)" : null,
+  };
 }
