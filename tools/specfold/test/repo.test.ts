@@ -30,6 +30,7 @@ describe("repo", () => {
       tasks: { maxFilesPerTask: 5, maxTasksPerGroup: 8 },
       agentTargets: [".claude/skills"],
       unverifiedAfterDays: 30,
+      backlogUntouchedDays: 180,
       gate: {
         requireChangeForSourceChanges: true,
         escapeLabel: "no-spec",
@@ -126,6 +127,14 @@ describe("repo", () => {
     const root = tempDir();
     writeFileSync(join(root, "specfold.yaml"), "audit:\n  unverified_after_days: 90\n");
     expect(requireConfig(root).unverifiedAfterDays).toBe(90);
+  });
+
+  it("reads the audit age limit for open backlog items", () => {
+    const root = tempDir();
+    writeFileSync(join(root, "specfold.yaml"), "types: []\n");
+    expect(requireConfig(root).backlogUntouchedDays).toBe(180);
+    writeFileSync(join(root, "specfold.yaml"), "audit:\n  backlog_untouched_days: 60\n");
+    expect(requireConfig(root).backlogUntouchedDays).toBe(60);
   });
 
   it("reads the test globs for trace, with defaults", () => {
