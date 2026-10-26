@@ -23,7 +23,7 @@ scenarios: [specfold-audit#expired-reference, specfold-audit#old-draft, specfold
 agent: implementer
 ```
 
-- [ ] 2.1 Add rules A1 to A5 over the parsed bundle with an injected current time
+- [x] 2.1 Add rules A1 to A5 over the parsed bundle with an injected current time
   - Done when: the seven scenarios of this group pass in `audit-rules.test.ts`
 
 ## 3. Audit command
