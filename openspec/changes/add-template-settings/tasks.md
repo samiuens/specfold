@@ -51,7 +51,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 4.1 Add the sample-app checks and the copy check to CI
+- [x] 4.1 Add the sample-app checks and the copy check to CI
   - Done when: the `cli` workflow passes on the PR
 
 ## 5. Knowledge
