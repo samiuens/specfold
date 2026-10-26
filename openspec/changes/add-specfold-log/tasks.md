@@ -35,7 +35,7 @@ scenarios: []
 agent: knowledge-curator
 ```
 
-- [ ] 3.1 Add the capability card for `specfold-log`, update the CLI architecture concept, and write the log entry with `specfold log add`
+- [x] 3.1 Add the capability card for `specfold-log`, update the CLI architecture concept, and write the log entry with `specfold log add`
   - Done when: `node scripts/specfold.mjs validate` and `node scripts/specfold.mjs index --check` exit 0
 
 ## Workflow follow-up
