@@ -108,7 +108,8 @@ describe("specfold schema", { timeout: 30_000 }, () => {
     expect(sections.at(-1)).toBe("Commitments");
     expect(design.template).toContain(": kept");
     expect(design.template).toContain(": blocked: ");
-    expect(design.instruction).toContain("**Commitments** (always, last)");
+    // the instruction stays upstream's; the template and the config rule carry the section
+    expect(design.instruction).not.toContain("Commitments");
   });
 
   // spec: specfold-schema#tasks-rendered-for-a-change

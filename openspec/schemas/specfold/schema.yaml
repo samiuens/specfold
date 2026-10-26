@@ -221,11 +221,6 @@ artifacts:
       - **Migration Plan**: Steps to deploy, rollback strategy (if applicable)
       - **Open Questions**: Unknowns that can safely be answered later without
         changing the specs, the approach, or the task breakdown. Omit if none.
-      - **Commitments** (always, last): every open deferred commitment the
-        change touches (`specfold commitments list`, `specfold lookup`), one
-        line each: a bundle-absolute link followed by `: kept`, or by
-        `: blocked: <reason>` when the design cannot keep it. Write `none`
-        when no open commitment is touched. The gate warns on blocked entries.
 
       Open questions are for genuinely deferrable unknowns, not decisions you
       skipped. If a question would change the specs, the chosen approach, or
