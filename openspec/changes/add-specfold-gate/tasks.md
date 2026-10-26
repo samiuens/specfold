@@ -75,7 +75,7 @@ agent: implementer
 
 - [x] 5.1 Rebuild the bundled CLI and its template and sample copies
   - Done when: `npm run build -w specfold` leaves no diff and the copies equal it
-- [ ] 5.2 Rebuild the bundle and its copies with the planning exemption
+- [x] 5.2 Rebuild the bundle and its copies with the planning exemption
   - Done when: `npm run build -w specfold` leaves no diff and the copies equal it
 
 ## 6. Knowledge
