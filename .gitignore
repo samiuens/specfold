@@ -1,0 +1,10 @@
+.DS_Store
+node_modules/
+
+# personal settings
+.specfold/local.yaml
+.claude/settings.local.json
+
+# generated, never committed
+.claude/worktrees/
+graphify-out/
