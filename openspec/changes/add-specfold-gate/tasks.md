@@ -33,13 +33,13 @@ agent: implementer
 ## 3. Rules
 
 ```yaml
-files: [tools/specfold/src/gate/rules.ts, tools/specfold/src/gate/openspec.ts, tools/specfold/test/gate-rules.test.ts]
+files: [tools/specfold/src/gate/rules.ts, tools/specfold/src/gate/openspec.ts, tools/specfold/test/gate-rules.test.ts, tools/specfold/test/gate-helpers.ts]
 depends: [2]
 scenarios: [specfold-gate#missing-frontmatter-key, specfold-gate#stale-index, specfold-gate#broken-link, specfold-gate#invalid-delta-spec, specfold-gate#code-without-change, specfold-gate#escape-with-reason, specfold-gate#missing-knowledge-delta, specfold-gate#archived-without-sync, specfold-gate#unconfirmed-brief, specfold-gate#overlapping-parallel-groups, specfold-gate#agent-claims-a-human, specfold-gate#edited-stale-reference, specfold-gate#old-draft-elsewhere, specfold-gate#new-dangling-reference, specfold-gate#old-dangling-reference]
 agent: implementer
 ```
 
-- [ ] 3.1 Add G1, G2 and G10 over validate and the index check
+- [x] 3.1 Add G1, G2 and G10 over validate and the index check
   - Done when: scenarios missing-frontmatter-key, stale-index and broken-link pass in `gate-rules.test.ts`
 - [ ] 3.2 Add G3 over `openspec validate`
   - Done when: scenario invalid-delta-spec passes in `gate-rules.test.ts`
