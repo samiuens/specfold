@@ -23,7 +23,7 @@ agent: implementer
 
 - [x] 2.1 Write `template/AGENTS.md`, linking the code-comment convention
   - Done when: it has under 120 lines and `node scripts/specfold.mjs audit` in `template/` reports 0 findings
-- [ ] 2.2 Write `template/CLAUDE.md`
+- [x] 2.2 Write `template/CLAUDE.md`
   - Done when: it starts with `@AGENTS.md` and names the planner start command
 
 ## 3. Sample app wiring
