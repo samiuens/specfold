@@ -1,7 +1,46 @@
 name: specfold
 version: 1
-description: Default OpenSpec workflow - proposal → specs → design → tasks
+description: Specfold workflow - brief → proposal → specs → design → knowledge → tasks
 artifacts:
+  - id: brief
+    generates: brief.md
+    description: The user's confirmed wish, decisions and scope for this change
+    template: brief.md
+    instruction: |
+      Create the brief: the user's wish in their own words and every decision
+      that shapes the change, confirmed by the user before any spec is written.
+
+      Rather ask than assume. Before writing:
+      - Ground first: read knowledge/index.md, the concepts and decisions that
+        touch the idea (`specfold lookup <words>`), and the related specs. Never
+        ask what you can verify yourself. Name any rejected decision
+        (`decision: rejected`) that covers the same idea.
+      - Ask the user every open decision through the tool's native question UI
+        (in Claude Code: AskUserQuestion), one decision per question, the
+        recommended answer first with a one-line reason. Work outcome and scope
+        first, then behavior, edge cases, constraints and non-functional needs.
+      - A missing or timed-out answer is never consent: pause and ask again.
+
+      Sections:
+      - **Wish**: one paragraph in the user's words.
+      - **Decisions**: one table row per decision. Source is `user`,
+        `delegated` (the user left it to you; spell out your choice) or
+        `knowledge:/<path>.md` for an answer taken from an existing concept.
+      - **Out of scope**: what this change deliberately does not do.
+      - **Open questions**: empty, or each item as
+        `- <question> (owner: <actor>) <why it does not block the spec>`.
+      - **Confirmation**: `confirmed_by: human:<login>` and `confirmed_at:` with
+        an ISO 8601 timestamp including the offset.
+
+      Never fill Confirmation yourself without the user's explicit approval of
+      the brief; leave both values empty until then.
+
+      Changes with `skip_specs: true` (no behavior change) may use a short
+      brief with only Wish and Confirmation.
+
+      `specfold change check <change>` checks this file (rules B0-B4).
+    requires: []
+
   - id: proposal
     generates: proposal.md
     description: Initial proposal document outlining the change
@@ -45,7 +84,8 @@ artifacts:
       implementation details belong in design.md.
 
       This is the foundation - specs, design, and tasks all build on this.
-    requires: []
+    requires:
+      - brief
 
   - id: specs
     generates: "specs/**/*.md"
@@ -195,74 +235,84 @@ artifacts:
     requires:
       - proposal
 
+  - id: knowledge
+    generates: knowledge.md
+    description: Knowledge delta this change applies to the bundle
+    template: knowledge.md
+    instruction: |
+      Create the knowledge delta: every concept in knowledge/ (OKF v0.2) this
+      change creates, updates or deprecates.
+
+      Read knowledge/index.md and the concepts linked from the proposal first.
+
+      Fill the `ops` list in the Delta block, one entry per concept:
+      - `op`: create, update or deprecate
+      - `path`: bundle-relative, kebab-case, `.md` (for example
+        `decisions/guest-orders-without-accounts.md`), no leading `/`
+      - `type`: one of the types in specfold.yaml
+      - `summary`: one line, at most 160 characters
+
+      Rules:
+      - Every capability in this change's delta specs needs a Capability entry
+        at `capabilities/<capability-path>.md`: `op: create` for a new
+        capability, `op: update` for a modified one.
+      - Record rejected alternatives from design.md as Decision concepts.
+      - An empty `ops` list needs a one-line `empty_reason`.
+      - Knowledge is descriptive: no SHALL/MUST sentences, nothing that
+        restates a requirement.
+
+      The Knowledge task group writes these concepts before archive;
+      `specfold sync <change>` sets their keys, indexes and log entry after
+      archive. `specfold change check <change>` checks this file (rules K0-K6).
+    requires:
+      - proposal
+      - specs
+
   - id: tasks
     generates: tasks.md
-    description: Implementation checklist with trackable tasks
+    description: Task groups and tasks for implementing the change
     template: tasks.md
     instruction: |
-      Create the task list that breaks down the implementation work.
+      Create the task breakdown. Subagents work on one task group each, so
+      every group must be a bounded unit with owned files and every task a
+      small, checkable step.
 
       Before writing tasks, check design.md for Open Questions. If any of them
-      would change what gets built, resolve them with the user first - do not
-      bake an unstated assumption into the task list.
+      would change what gets built, ask the user first - do not bake an
+      unstated assumption into the task list.
 
-      **IMPORTANT: Follow the template below for tracked tasks.** The apply phase parses
-      checkbox format to track progress. A box holding only `x` counts as done,
-      upper or lower case and with any spacing, so `- [ x]` is done too. Every
-      other marker, including `- [~]`, `- [-]` and an empty `- []`, reads as
-      unfinished. A line with no checkbox is not tracked at all.
+      Task groups:
+      - Heading `## <n>. <name>`, numbered from 1 without gaps.
+      - Directly followed by a fenced `yaml` block with
+        `files` (non-empty list of repository globs the group owns),
+        `depends` (group numbers that must finish first, default []),
+        `scenarios` (scenario ids `<capability-path>#<scenario-title-in-kebab-case>`
+        the group makes pass, default []) and `agent` (role, default implementer).
+      - Groups that may run in parallel (neither depends on the other, directly
+        or transitively) never share files.
+      - Order groups by dependency. Each group lands the tests its own work
+        calls for; tests or scenarios come before or alongside the code.
+      - At most 8 tasks per group (`tasks.max_tasks_per_group`).
 
-      Guidelines:
-      - Group related tracked tasks under ## numbered headings
-      - Each tracked task MUST be a checkbox: `- [ ] X.Y Task description`
-      - Tasks should be small enough to complete in one session
-      - Order tasks by dependency (what must be done first?)
-      - Track implementation and verification work that can be completed before
-        archive. If the requested workflow includes archive or work that requires
-        this change to be archived, preserve those steps as plain bullets in an
-        optional `## Workflow follow-up` section at the end of tasks.md. These
-        bullets are reference information outside tracked task progress.
-      - Each task MUST state how to verify completion (a test, command,
-        observable behavior, or delivered artifact). Put the verification in
-        that task's checkbox description. Use a separate verification task only
-        when it checks broader integration or system behavior that spans
-        multiple implementation tasks.
-      - Each task group MUST land the tests and documentation its own work
-        calls for. Do NOT collect testing or documentation into a final group -
-        when a late group first exercises work from an early one, the failures
-        cascade back through every group in between and force rework. A group
-        whose work calls for neither, such as scaffolding or dependency setup,
-        carries neither. A final group is for integration checks only, not for
-        the tests and docs an earlier group owed.
+      Tasks:
+      - Checkbox `- [ ] <n>.<m> <text>` inside group `<n>`, numbered from 1.
+      - Directly followed by an indented line `- Done when: <check>` naming a
+        test, a command or a scenario id.
+      - One task is one commit with the trailer `Task: <change>#<n>.<m>`; keep
+        each task to at most 5 changed files (`tasks.max_files_per_task`).
 
-      Example:
-      ```
-      # Tasks
+      The last group is always `Knowledge`: write or update the concepts listed
+      in knowledge.md before archive, with `agent: knowledge-curator`.
 
-      ## 1. Setup
+      Steps after archive are plain bullets in a final `## Workflow follow-up`
+      section, outside tracked progress. It always contains
+      `specfold sync <change>`. No other level-2 headings are allowed.
 
-      - [ ] 1.1 Create new module structure and verify expected files are present
-      - [ ] 1.2 Add dependencies to package.json and verify package installation succeeds
-
-      ## 2. Core Implementation
-
-      - [ ] 2.1 Implement data export function and verify the export test passes
-      - [ ] 2.2 Add CSV formatting utilities and verify unit tests cover quoting and delimiters
-      - [ ] 2.3 Document the export API in docs/export.md and verify the documented command runs as written
-      ```
-
-      When applicable, append workflow follow-up as plain bullets, for example:
-      ```
-      ## Workflow follow-up
-
-      - Archive the change after the project's review requirements are satisfied.
-      - Verify the archived result.
-      ```
-
-      Reference specs for what needs to be built, design for how to build it.
+      `specfold tasks check <change>` checks this file (rules T0-T11).
     requires:
       - specs
       - design
+      - knowledge
 
 apply:
   requires: [ tasks ]
