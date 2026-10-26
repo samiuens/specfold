@@ -3,7 +3,15 @@ type: Capability
 title: Due dates
 description: Why to-do items have due dates and an overdue query, and where the contract lives.
 status: draft
+spec: openspec/specs/due-dates/spec.md
+resource: ../../openspec/specs/due-dates/spec.md
+change: 2026-10-26-add-due-dates
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T14:41:31+01:00 }
+sources:
+  - id: proposal-2026-10-26-add-due-dates
+    resource: ../../openspec/changes/archive/2026-10-26-add-due-dates/proposal.md
+  - id: design-2026-10-26-add-due-dates
+    resource: ../../openspec/changes/archive/2026-10-26-add-due-dates/design.md
 ---
 
 # Why
