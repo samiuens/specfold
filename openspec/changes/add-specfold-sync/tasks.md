@@ -45,7 +45,7 @@ scenarios: [specfold-sync#name-resolves-to-the-archived-change, specfold-sync#no
 agent: implementer
 ```
 
-- [ ] 4.1 Add `specfold sync <change> [--dry-run] [--json]` with resolving, checks, indexes and the log entry
+- [x] 4.1 Add `specfold sync <change> [--dry-run] [--json]` with resolving, checks, indexes and the log entry
   - Done when: the six scenarios of this group pass in `sync.test.ts`
 
 ## 5. Bundle
