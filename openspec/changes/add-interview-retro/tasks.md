@@ -33,10 +33,10 @@ agent: implementer
   - Done when: `openspec validate add-rename --strict` and `specfold tasks check add-rename` pass
 - [x] 2.4 Implement the change with `spec:` references in its tests
   - Done when: `npm test` passes and `specfold trace --change add-rename` reports every scenario covered
-- [ ] 2.5 Archive, sync and run the retro for `add-rename`
+- [x] 2.5 Archive, sync and run the retro for `add-rename`
   - Done when: `specfold sync add-rename --dry-run` reports nothing to change, `specfold validate` passes, and `log.md` has the Retro entry
 - [ ] 2.6 Check trace and drift on the sample app
-  - Done when: `specfold trace` reports 0 uncovered and 0 dangling, and `specfold drift` runs without error
+  - Done when: `specfold trace` reports 0 dangling and no uncovered main-spec scenario (the planned `add-priorities` change has no tests yet), and `specfold drift` runs without error
 
 ## 3. Knowledge
 

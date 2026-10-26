@@ -3,7 +3,13 @@ type: Capability
 title: Rename
 description: Why to-do items can be renamed in place, and where the contract lives.
 status: draft
+spec: openspec/specs/rename/spec.md
+resource: ../../openspec/specs/rename/spec.md
+change: 2026-10-26-add-rename
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T18:58:24+01:00 }
+sources:
+  - id: proposal-2026-10-26-add-rename
+    resource: ../../openspec/changes/archive/2026-10-26-add-rename/proposal.md
 ---
 
 # Why
