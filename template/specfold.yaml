@@ -68,6 +68,8 @@ agents:
 # Concepts without `verified` older than this many days are reported by `specfold audit` (A2).
 audit:
   unverified_after_days: 30
+  # Open backlog items whose file no commit changed for this many days are reported (A8).
+  backlog_untouched_days: 180
 
 # Size limits for task breakdowns; exceeding them only warns (specfold tasks check T9, T10).
 tasks:
