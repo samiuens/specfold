@@ -397,7 +397,7 @@ var require_directives = __commonJS({
         return tag[0] === "!" ? tag : `!<${tag}>`;
       }
       toString(doc) {
-        const lines = this.yaml.explicit ? [`%YAML ${this.yaml.version || "1.2"}`] : [];
+        const lines2 = this.yaml.explicit ? [`%YAML ${this.yaml.version || "1.2"}`] : [];
         const tagEntries = Object.entries(this.tags);
         let tagNames;
         if (doc && tagEntries.length > 0 && identity.isNode(doc.contents)) {
@@ -413,9 +413,9 @@ var require_directives = __commonJS({
           if (handle === "!!" && prefix === "tag:yaml.org,2002:")
             continue;
           if (!doc || tagNames.some((tn) => tn.startsWith(prefix)))
-            lines.push(`%TAG ${handle} ${prefix}`);
+            lines2.push(`%TAG ${handle} ${prefix}`);
         }
-        return lines.join("\n");
+        return lines2.join("\n");
       }
     };
     Directives.defaultYaml = { explicit: false, version: "1.2" };
@@ -1876,22 +1876,22 @@ var require_stringifyCollection = __commonJS({
       const { indent, options: { commentString } } = ctx;
       const itemCtx = Object.assign({}, ctx, { indent: itemIndent, type: null });
       let chompKeep = false;
-      const lines = [];
+      const lines2 = [];
       for (let i = 0; i < items.length; ++i) {
         const item = items[i];
         let comment2 = null;
         if (identity.isNode(item)) {
           if (!chompKeep && item.spaceBefore)
-            lines.push("");
-          addCommentBefore(ctx, lines, item.commentBefore, chompKeep);
+            lines2.push("");
+          addCommentBefore(ctx, lines2, item.commentBefore, chompKeep);
           if (item.comment)
             comment2 = item.comment;
         } else if (identity.isPair(item)) {
           const ik = identity.isNode(item.key) ? item.key : null;
           if (ik) {
             if (!chompKeep && ik.spaceBefore)
-              lines.push("");
-            addCommentBefore(ctx, lines, ik.commentBefore, chompKeep);
+              lines2.push("");
+            addCommentBefore(ctx, lines2, ik.commentBefore, chompKeep);
           }
         }
         chompKeep = false;
@@ -1900,15 +1900,15 @@ var require_stringifyCollection = __commonJS({
           str2 += stringifyComment.lineComment(str2, itemIndent, commentString(comment2));
         if (chompKeep && comment2)
           chompKeep = false;
-        lines.push(blockItemPrefix + str2);
+        lines2.push(blockItemPrefix + str2);
       }
       let str;
-      if (lines.length === 0) {
+      if (lines2.length === 0) {
         str = flowChars.start + flowChars.end;
       } else {
-        str = lines[0];
-        for (let i = 1; i < lines.length; ++i) {
-          const line = lines[i];
+        str = lines2[0];
+        for (let i = 1; i < lines2.length; ++i) {
+          const line = lines2[i];
           str += line ? `
 ${indent}${line}` : "\n";
         }
@@ -1931,22 +1931,22 @@ ${indent}${line}` : "\n";
       });
       let reqNewline = false;
       let linesAtValue = 0;
-      const lines = [];
+      const lines2 = [];
       for (let i = 0; i < items.length; ++i) {
         const item = items[i];
         let comment = null;
         if (identity.isNode(item)) {
           if (item.spaceBefore)
-            lines.push("");
-          addCommentBefore(ctx, lines, item.commentBefore, false);
+            lines2.push("");
+          addCommentBefore(ctx, lines2, item.commentBefore, false);
           if (item.comment)
             comment = item.comment;
         } else if (identity.isPair(item)) {
           const ik = identity.isNode(item.key) ? item.key : null;
           if (ik) {
             if (ik.spaceBefore)
-              lines.push("");
-            addCommentBefore(ctx, lines, ik.commentBefore, false);
+              lines2.push("");
+            addCommentBefore(ctx, lines2, ik.commentBefore, false);
             if (ik.comment)
               reqNewline = true;
           }
@@ -1963,12 +1963,12 @@ ${indent}${line}` : "\n";
         if (comment)
           reqNewline = true;
         let str = stringify2.stringify(item, itemCtx, () => comment = null);
-        reqNewline || (reqNewline = lines.length > linesAtValue || str.includes("\n"));
+        reqNewline || (reqNewline = lines2.length > linesAtValue || str.includes("\n"));
         if (i < items.length - 1) {
           str += ",";
         } else if (ctx.options.trailingComma) {
           if (ctx.options.lineWidth > 0) {
-            reqNewline || (reqNewline = lines.reduce((sum, line) => sum + line.length + 2, 2) + (str.length + 2) > ctx.options.lineWidth);
+            reqNewline || (reqNewline = lines2.reduce((sum, line) => sum + line.length + 2, 2) + (str.length + 2) > ctx.options.lineWidth);
           }
           if (reqNewline) {
             str += ",";
@@ -1976,35 +1976,35 @@ ${indent}${line}` : "\n";
         }
         if (comment)
           str += stringifyComment.lineComment(str, itemIndent, commentString(comment));
-        lines.push(str);
-        linesAtValue = lines.length;
+        lines2.push(str);
+        linesAtValue = lines2.length;
       }
       const { start, end } = flowChars;
-      if (lines.length === 0) {
+      if (lines2.length === 0) {
         return start + end;
       } else {
         if (!reqNewline) {
-          const len = lines.reduce((sum, line) => sum + line.length + 2, 2);
+          const len = lines2.reduce((sum, line) => sum + line.length + 2, 2);
           reqNewline = ctx.options.lineWidth > 0 && len > ctx.options.lineWidth;
         }
         if (reqNewline) {
           let str = start;
-          for (const line of lines)
+          for (const line of lines2)
             str += line ? `
 ${indentStep}${indent}${line}` : "\n";
           return `${str}
 ${indent}${end}`;
         } else {
-          return `${start}${fcPadding}${lines.join(" ")}${fcPadding}${end}`;
+          return `${start}${fcPadding}${lines2.join(" ")}${fcPadding}${end}`;
         }
       }
     }
-    function addCommentBefore({ indent, options: { commentString } }, lines, comment, chompKeep) {
+    function addCommentBefore({ indent, options: { commentString } }, lines2, comment, chompKeep) {
       if (comment && chompKeep)
         comment = comment.replace(/^\n+/, "");
       if (comment) {
         const ic = stringifyComment.indentComment(commentString(comment), indent);
-        lines.push(ic.trimStart());
+        lines2.push(ic.trimStart());
       }
     }
     exports.stringifyCollection = stringifyCollection;
@@ -2642,11 +2642,11 @@ var require_binary = __commonJS({
         if (type !== Scalar.Scalar.QUOTE_DOUBLE) {
           const lineWidth = Math.max(ctx.options.lineWidth - ctx.indent.length, ctx.options.minContentWidth);
           const n = Math.ceil(str.length / lineWidth);
-          const lines = new Array(n);
+          const lines2 = new Array(n);
           for (let i = 0, o = 0; i < n; ++i, o += lineWidth) {
-            lines[i] = str.substr(o, lineWidth);
+            lines2[i] = str.substr(o, lineWidth);
           }
-          str = lines.join(type === Scalar.Scalar.BLOCK_LITERAL ? "\n" : " ");
+          str = lines2.join(type === Scalar.Scalar.BLOCK_LITERAL ? "\n" : " ");
         }
         return stringifyString.stringifyString({ comment, type, value: str }, ctx, onComment, onChompKeep);
       }
@@ -3326,35 +3326,35 @@ var require_stringifyDocument = __commonJS({
     var stringify2 = require_stringify();
     var stringifyComment = require_stringifyComment();
     function stringifyDocument(doc, options) {
-      const lines = [];
+      const lines2 = [];
       let hasDirectives = options.directives === true;
       if (options.directives !== false && doc.directives) {
         const dir = doc.directives.toString(doc);
         if (dir) {
-          lines.push(dir);
+          lines2.push(dir);
           hasDirectives = true;
         } else if (doc.directives.docStart)
           hasDirectives = true;
       }
       if (hasDirectives)
-        lines.push("---");
+        lines2.push("---");
       const ctx = stringify2.createStringifyContext(doc, options);
       const { commentString } = ctx.options;
       if (doc.commentBefore) {
-        if (lines.length !== 1)
-          lines.unshift("");
+        if (lines2.length !== 1)
+          lines2.unshift("");
         const cs = commentString(doc.commentBefore);
-        lines.unshift(stringifyComment.indentComment(cs, ""));
+        lines2.unshift(stringifyComment.indentComment(cs, ""));
       }
       let chompKeep = false;
       let contentComment = null;
       if (doc.contents) {
         if (identity.isNode(doc.contents)) {
           if (doc.contents.spaceBefore && hasDirectives)
-            lines.push("");
+            lines2.push("");
           if (doc.contents.commentBefore) {
             const cs = commentString(doc.contents.commentBefore);
-            lines.push(stringifyComment.indentComment(cs, ""));
+            lines2.push(stringifyComment.indentComment(cs, ""));
           }
           ctx.forceBlockIndent = !!doc.comment;
           contentComment = doc.contents.comment;
@@ -3363,36 +3363,36 @@ var require_stringifyDocument = __commonJS({
         let body = stringify2.stringify(doc.contents, ctx, () => contentComment = null, onChompKeep);
         if (contentComment)
           body += stringifyComment.lineComment(body, "", commentString(contentComment));
-        if ((body[0] === "|" || body[0] === ">") && lines[lines.length - 1] === "---") {
-          lines[lines.length - 1] = `--- ${body}`;
+        if ((body[0] === "|" || body[0] === ">") && lines2[lines2.length - 1] === "---") {
+          lines2[lines2.length - 1] = `--- ${body}`;
         } else
-          lines.push(body);
+          lines2.push(body);
       } else {
-        lines.push(stringify2.stringify(doc.contents, ctx));
+        lines2.push(stringify2.stringify(doc.contents, ctx));
       }
       if (doc.directives?.docEnd) {
         if (doc.comment) {
           const cs = commentString(doc.comment);
           if (cs.includes("\n")) {
-            lines.push("...");
-            lines.push(stringifyComment.indentComment(cs, ""));
+            lines2.push("...");
+            lines2.push(stringifyComment.indentComment(cs, ""));
           } else {
-            lines.push(`... ${cs}`);
+            lines2.push(`... ${cs}`);
           }
         } else {
-          lines.push("...");
+          lines2.push("...");
         }
       } else {
         let dc = doc.comment;
         if (dc && chompKeep)
           dc = dc.replace(/^\n+/, "");
         if (dc) {
-          if ((!chompKeep || contentComment) && lines[lines.length - 1] !== "")
-            lines.push("");
-          lines.push(stringifyComment.indentComment(commentString(dc), ""));
+          if ((!chompKeep || contentComment) && lines2[lines2.length - 1] !== "")
+            lines2.push("");
+          lines2.push(stringifyComment.indentComment(commentString(dc), ""));
         }
       }
-      return lines.join("\n") + "\n";
+      return lines2.join("\n") + "\n";
     }
     exports.stringifyDocument = stringifyDocument;
   }
@@ -4001,10 +4001,10 @@ var require_resolve_block_map = __commonJS({
       let offset = bm.offset;
       let commentEnd = null;
       for (const collItem of bm.items) {
-        const { start, key, sep: sep10, value } = collItem;
+        const { start, key, sep: sep11, value } = collItem;
         const keyProps = resolveProps.resolveProps(start, {
           indicator: "explicit-key-ind",
-          next: key ?? sep10?.[0],
+          next: key ?? sep11?.[0],
           offset,
           onError,
           parentIndent: bm.indent,
@@ -4018,7 +4018,7 @@ var require_resolve_block_map = __commonJS({
             else if ("indent" in key && key.indent !== bm.indent)
               onError(offset, "BAD_INDENT", startColMsg);
           }
-          if (!keyProps.anchor && !keyProps.tag && !sep10) {
+          if (!keyProps.anchor && !keyProps.tag && !sep11) {
             commentEnd = keyProps.end;
             if (keyProps.comment) {
               if (map.comment)
@@ -4042,7 +4042,7 @@ var require_resolve_block_map = __commonJS({
         ctx.atKey = false;
         if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
           onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
-        const valueProps = resolveProps.resolveProps(sep10 ?? [], {
+        const valueProps = resolveProps.resolveProps(sep11 ?? [], {
           indicator: "map-value-ind",
           next: value,
           offset: keyNode.range[2],
@@ -4058,7 +4058,7 @@ var require_resolve_block_map = __commonJS({
             if (ctx.options.strict && keyProps.start < valueProps.found.offset - 1024)
               onError(keyNode.range, "KEY_OVER_1024_CHARS", "The : indicator must be at most 1024 chars after the start of an implicit block mapping key");
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep10, null, valueProps, onError);
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : composeEmptyNode(ctx, offset, sep11, null, valueProps, onError);
           if (ctx.schema.compat)
             utilFlowIndentCheck.flowIndentCheck(bm.indent, value, onError);
           offset = valueNode.range[2];
@@ -4149,7 +4149,7 @@ var require_resolve_end = __commonJS({
       let comment = "";
       if (end) {
         let hasSpace = false;
-        let sep10 = "";
+        let sep11 = "";
         for (const token of end) {
           const { source, type } = token;
           switch (type) {
@@ -4163,13 +4163,13 @@ var require_resolve_end = __commonJS({
               if (!comment)
                 comment = cb;
               else
-                comment += sep10 + cb;
-              sep10 = "";
+                comment += sep11 + cb;
+              sep11 = "";
               break;
             }
             case "newline":
               if (comment)
-                sep10 += source;
+                sep11 += source;
               hasSpace = true;
               break;
             default:
@@ -4212,18 +4212,18 @@ var require_resolve_flow_collection = __commonJS({
       let offset = fc.offset + fc.start.source.length;
       for (let i = 0; i < fc.items.length; ++i) {
         const collItem = fc.items[i];
-        const { start, key, sep: sep10, value } = collItem;
+        const { start, key, sep: sep11, value } = collItem;
         const props = resolveProps.resolveProps(start, {
           flow: fcName,
           indicator: "explicit-key-ind",
-          next: key ?? sep10?.[0],
+          next: key ?? sep11?.[0],
           offset,
           onError,
           parentIndent: fc.indent,
           startOnNewline: false
         });
         if (!props.found) {
-          if (!props.anchor && !props.tag && !sep10 && !value) {
+          if (!props.anchor && !props.tag && !sep11 && !value) {
             if (i === 0 && props.comma)
               onError(props.comma, "UNEXPECTED_TOKEN", `Unexpected , in ${fcName}`);
             else if (i < fc.items.length - 1)
@@ -4277,8 +4277,8 @@ var require_resolve_flow_collection = __commonJS({
             }
           }
         }
-        if (!isMap2 && !sep10 && !props.found) {
-          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep10, null, props, onError);
+        if (!isMap2 && !sep11 && !props.found) {
+          const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep11, null, props, onError);
           coll.items.push(valueNode);
           offset = valueNode.range[2];
           if (isBlock(value))
@@ -4290,7 +4290,7 @@ var require_resolve_flow_collection = __commonJS({
           if (isBlock(key))
             onError(keyNode.range, "BLOCK_IN_FLOW", blockMsg);
           ctx.atKey = false;
-          const valueProps = resolveProps.resolveProps(sep10 ?? [], {
+          const valueProps = resolveProps.resolveProps(sep11 ?? [], {
             flow: fcName,
             indicator: "map-value-ind",
             next: value,
@@ -4301,8 +4301,8 @@ var require_resolve_flow_collection = __commonJS({
           });
           if (valueProps.found) {
             if (!isMap2 && !props.found && ctx.options.strict) {
-              if (sep10)
-                for (const st of sep10) {
+              if (sep11)
+                for (const st of sep11) {
                   if (st === valueProps.found)
                     break;
                   if (st.type === "newline") {
@@ -4319,7 +4319,7 @@ var require_resolve_flow_collection = __commonJS({
             else
               onError(valueProps.start, "MISSING_CHAR", `Missing , or : between ${fcName} items`);
           }
-          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep10, null, valueProps, onError) : null;
+          const valueNode = value ? composeNode(ctx, value, valueProps, onError) : valueProps.found ? composeEmptyNode(ctx, valueProps.end, sep11, null, valueProps, onError) : null;
           if (valueNode) {
             if (isBlock(value))
               onError(valueNode.range, "BLOCK_IN_FLOW", blockMsg);
@@ -4454,17 +4454,17 @@ var require_resolve_block_scalar = __commonJS({
       if (!header)
         return { value: "", type: null, comment: "", range: [start, start, start] };
       const type = header.mode === ">" ? Scalar.Scalar.BLOCK_FOLDED : Scalar.Scalar.BLOCK_LITERAL;
-      const lines = scalar2.source ? splitLines(scalar2.source) : [];
-      let chompStart = lines.length;
-      for (let i = lines.length - 1; i >= 0; --i) {
-        const content = lines[i][1];
+      const lines2 = scalar2.source ? splitLines(scalar2.source) : [];
+      let chompStart = lines2.length;
+      for (let i = lines2.length - 1; i >= 0; --i) {
+        const content = lines2[i][1];
         if (content === "" || content === "\r")
           chompStart = i;
         else
           break;
       }
       if (chompStart === 0) {
-        const value2 = header.chomp === "+" && lines.length > 0 ? "\n".repeat(Math.max(1, lines.length - 1)) : "";
+        const value2 = header.chomp === "+" && lines2.length > 0 ? "\n".repeat(Math.max(1, lines2.length - 1)) : "";
         let end2 = start + header.length;
         if (scalar2.source)
           end2 += scalar2.source.length;
@@ -4474,7 +4474,7 @@ var require_resolve_block_scalar = __commonJS({
       let offset = scalar2.offset + header.length;
       let contentStart = 0;
       for (let i = 0; i < chompStart; ++i) {
-        const [indent, content] = lines[i];
+        const [indent, content] = lines2[i];
         if (content === "" || content === "\r") {
           if (header.indent === 0 && indent.length > trimIndent)
             trimIndent = indent.length;
@@ -4494,17 +4494,17 @@ var require_resolve_block_scalar = __commonJS({
         }
         offset += indent.length + content.length + 1;
       }
-      for (let i = lines.length - 1; i >= chompStart; --i) {
-        if (lines[i][0].length > trimIndent)
+      for (let i = lines2.length - 1; i >= chompStart; --i) {
+        if (lines2[i][0].length > trimIndent)
           chompStart = i + 1;
       }
       let value = "";
-      let sep10 = "";
+      let sep11 = "";
       let prevMoreIndented = false;
       for (let i = 0; i < contentStart; ++i)
-        value += lines[i][0].slice(trimIndent) + "\n";
+        value += lines2[i][0].slice(trimIndent) + "\n";
       for (let i = contentStart; i < chompStart; ++i) {
-        let [indent, content] = lines[i];
+        let [indent, content] = lines2[i];
         offset += indent.length + content.length + 1;
         const crlf = content[content.length - 1] === "\r";
         if (crlf)
@@ -4516,24 +4516,24 @@ var require_resolve_block_scalar = __commonJS({
           indent = "";
         }
         if (type === Scalar.Scalar.BLOCK_LITERAL) {
-          value += sep10 + indent.slice(trimIndent) + content;
-          sep10 = "\n";
+          value += sep11 + indent.slice(trimIndent) + content;
+          sep11 = "\n";
         } else if (indent.length > trimIndent || content[0] === "	") {
-          if (sep10 === " ")
-            sep10 = "\n";
-          else if (!prevMoreIndented && sep10 === "\n")
-            sep10 = "\n\n";
-          value += sep10 + indent.slice(trimIndent) + content;
-          sep10 = "\n";
+          if (sep11 === " ")
+            sep11 = "\n";
+          else if (!prevMoreIndented && sep11 === "\n")
+            sep11 = "\n\n";
+          value += sep11 + indent.slice(trimIndent) + content;
+          sep11 = "\n";
           prevMoreIndented = true;
         } else if (content === "") {
-          if (sep10 === "\n")
+          if (sep11 === "\n")
             value += "\n";
           else
-            sep10 = "\n";
+            sep11 = "\n";
         } else {
-          value += sep10 + content;
-          sep10 = " ";
+          value += sep11 + content;
+          sep11 = " ";
           prevMoreIndented = false;
         }
       }
@@ -4541,8 +4541,8 @@ var require_resolve_block_scalar = __commonJS({
         case "-":
           break;
         case "+":
-          for (let i = chompStart; i < lines.length; ++i)
-            value += "\n" + lines[i][0].slice(trimIndent);
+          for (let i = chompStart; i < lines2.length; ++i)
+            value += "\n" + lines2[i][0].slice(trimIndent);
           if (value[value.length - 1] !== "\n")
             value += "\n";
           break;
@@ -4617,10 +4617,10 @@ var require_resolve_block_scalar = __commonJS({
       const first = split[0];
       const m = first.match(/^( *)/);
       const line0 = m?.[1] ? [m[1], first.slice(m[1].length)] : ["", first];
-      const lines = [line0];
+      const lines2 = [line0];
       for (let i = 1; i < split.length; i += 2)
-        lines.push([split[i], split[i + 1]]);
-      return lines;
+        lines2.push([split[i], split[i + 1]]);
+      return lines2;
     }
     exports.resolveBlockScalar = resolveBlockScalar;
   }
@@ -4716,25 +4716,25 @@ var require_resolve_flow_scalar = __commonJS({
         trimBoth = /^[ \t]+|[ \t]+$/g;
       }
       let res = match[1].replace(trimEnd, "");
-      let sep10 = " ";
+      let sep11 = " ";
       let pos = line.lastIndex;
       while (match = line.exec(source)) {
         const lm = match[1].replace(trimBoth, "");
         if (lm === "") {
-          if (sep10 === "\n")
-            res += sep10;
+          if (sep11 === "\n")
+            res += sep11;
           else
-            sep10 = "\n";
+            sep11 = "\n";
         } else {
-          res += sep10 + lm;
-          sep10 = " ";
+          res += sep11 + lm;
+          sep11 = " ";
         }
         pos = line.lastIndex;
       }
       const last = /[ \t]*(.*)/sy;
       last.lastIndex = pos;
       match = last.exec(source);
-      return res + sep10 + (match?.[1] ?? "");
+      return res + sep11 + (match?.[1] ?? "");
     }
     function doubleQuotedValue(source, onError) {
       let res = "";
@@ -5544,14 +5544,14 @@ var require_cst_stringify = __commonJS({
         }
       }
     }
-    function stringifyItem({ start, key, sep: sep10, value }) {
+    function stringifyItem({ start, key, sep: sep11, value }) {
       let res = "";
       for (const st of start)
         res += st.source;
       if (key)
         res += stringifyToken(key);
-      if (sep10)
-        for (const st of sep10)
+      if (sep11)
+        for (const st of sep11)
           res += st.source;
       if (value)
         res += stringifyToken(value);
@@ -6718,18 +6718,18 @@ var require_parser = __commonJS({
         if (this.type === "map-value-ind") {
           const prev = getPrevProps(this.peek(2));
           const start = getFirstKeyStartProps(prev);
-          let sep10;
+          let sep11;
           if (scalar2.end) {
-            sep10 = scalar2.end;
-            sep10.push(this.sourceToken);
+            sep11 = scalar2.end;
+            sep11.push(this.sourceToken);
             delete scalar2.end;
           } else
-            sep10 = [this.sourceToken];
+            sep11 = [this.sourceToken];
           const map = {
             type: "block-map",
             offset: scalar2.offset,
             indent: scalar2.indent,
-            items: [{ start, key: scalar2, sep: sep10 }]
+            items: [{ start, key: scalar2, sep: sep11 }]
           };
           this.onKeyLine = true;
           this.stack[this.stack.length - 1] = map;
@@ -6882,15 +6882,15 @@ var require_parser = __commonJS({
                 } else if (isFlowToken(it.key) && !includesToken(it.sep, "newline")) {
                   const start2 = getFirstKeyStartProps(it.start);
                   const key = it.key;
-                  const sep10 = it.sep;
-                  sep10.push(this.sourceToken);
+                  const sep11 = it.sep;
+                  sep11.push(this.sourceToken);
                   delete it.key;
                   delete it.sep;
                   this.stack.push({
                     type: "block-map",
                     offset: this.offset,
                     indent: this.indent,
-                    items: [{ start: start2, key, sep: sep10 }]
+                    items: [{ start: start2, key, sep: sep11 }]
                   });
                 } else if (start.length > 0) {
                   it.sep = it.sep.concat(start, this.sourceToken);
@@ -7084,13 +7084,13 @@ var require_parser = __commonJS({
             const prev = getPrevProps(parent);
             const start = getFirstKeyStartProps(prev);
             fixFlowSeqItems(fc);
-            const sep10 = fc.end.splice(1, fc.end.length);
-            sep10.push(this.sourceToken);
+            const sep11 = fc.end.splice(1, fc.end.length);
+            sep11.push(this.sourceToken);
             const map = {
               type: "block-map",
               offset: fc.offset,
               indent: fc.indent,
-              items: [{ start, key: fc, sep: sep10 }]
+              items: [{ start, key: fc, sep: sep11 }]
             };
             this.onKeyLine = true;
             this.stack[this.stack.length - 1] = map;
@@ -7383,12 +7383,12 @@ function register(command) {
   commands.set(command.name, command);
 }
 function help() {
-  const lines = ["Usage: specfold <command> [options]", "", "Commands:"];
+  const lines2 = ["Usage: specfold <command> [options]", "", "Commands:"];
   for (const c of [...commands.values()].sort((a, b) => a.name.localeCompare(b.name))) {
-    lines.push(`  ${c.name.padEnd(12)}${c.summary}`);
+    lines2.push(`  ${c.name.padEnd(12)}${c.summary}`);
   }
-  lines.push("", "Options:", "  --help      show help", "  --version   show the version");
-  return `${lines.join("\n")}
+  lines2.push("", "Options:", "  --help      show help", "  --version   show the version");
+  return `${lines2.join("\n")}
 `;
 }
 async function main(argv, io) {
@@ -7455,11 +7455,11 @@ var plural = (n, word) => `${n} ${n === 1 ? word : word.endsWith("x") ? `${word}
 function renderHuman(findings, checked) {
   const sorted = sortFindings(findings);
   const { errors, warnings } = countBySeverity(sorted);
-  const lines = sorted.filter((f) => f.severity === "error").map(findingLine);
-  lines.push(
+  const lines2 = sorted.filter((f) => f.severity === "error").map(findingLine);
+  lines2.push(
     `${plural(checked, "file")} checked: ${plural(errors, "error")}, ${plural(warnings, "warning")}`
   );
-  return `${lines.join("\n")}
+  return `${lines2.join("\n")}
 `;
 }
 function renderJson(findings, checked) {
@@ -7544,7 +7544,12 @@ function loadConfig(root) {
       maxTasksPerGroup: positiveInt(tasks.max_tasks_per_group, "tasks.max_tasks_per_group", 8)
     },
     agentTargets: agents.targets === void 0 ? [".claude/skills"] : stringList(agents.targets, "agents.targets").map((t) => repoFolder(t, "agents.targets")),
-    unverifiedAfterDays: positiveInt(audit.unverified_after_days, "audit.unverified_after_days", 30)
+    unverifiedAfterDays: positiveInt(audit.unverified_after_days, "audit.unverified_after_days", 30),
+    gate: {
+      requireChangeForSourceChanges: gate.require_change_for_source_changes !== false,
+      escapeLabel: typeof gate.escape_label === "string" && gate.escape_label !== "" ? gate.escape_label : "no-spec",
+      blockOnStaleTouched: gate.block_on_stale_touched !== false
+    }
   };
 }
 function requireConfig(cwd) {
@@ -7672,12 +7677,12 @@ register({
     } else if (!skills) {
       io.stdout("no skills to link: .agents/skills/ does not exist\n");
     } else {
-      const lines = actions.map(
+      const lines2 = actions.map(
         (a) => `${a.path}: ${a.action}${a.target && a.action !== "kept" ? ` -> ${a.target}` : ""}`
       );
       const counts = changes.length === 0 ? "links are up to date" : plural(changes.length, "change");
-      lines.push(`agents sync${check ? " --check" : ""}: ${counts}, ${actions.length - changes.length} kept`);
-      io.stdout(`${lines.join("\n")}
+      lines2.push(`agents sync${check ? " --check" : ""}: ${counts}, ${actions.length - changes.length} kept`);
+      io.stdout(`${lines2.join("\n")}
 `);
     }
     return ok2 ? 0 : 1;
@@ -7707,34 +7712,34 @@ function walk(bundleRoot) {
   return out;
 }
 function keyLines(doc, counter) {
-  const lines = /* @__PURE__ */ new Map();
+  const lines2 = /* @__PURE__ */ new Map();
   const contents = doc.contents;
   for (const item of contents?.items ?? []) {
     const offset = item.key?.range?.[0];
     if (typeof item.key?.value === "string" && offset !== void 0) {
-      lines.set(item.key.value, counter.linePos(offset).line + 1);
+      lines2.set(item.key.value, counter.linePos(offset).line + 1);
     }
   }
-  return lines;
+  return lines2;
 }
 function parseFile(bundleRoot, rel) {
   const text2 = readFileSync2(join3(bundleRoot, rel), "utf8").replace(/\r\n/g, "\n");
-  const lines = text2.split("\n");
-  if (lines[0] !== "---") return { rel, hasFrontmatter: false, body: text2, bodyStartLine: 1 };
-  const end = lines.findIndex((line, i) => i > 0 && (line === "---" || line === "..."));
+  const lines2 = text2.split("\n");
+  if (lines2[0] !== "---") return { rel, hasFrontmatter: false, body: text2, bodyStartLine: 1 };
+  const end = lines2.findIndex((line, i) => i > 0 && (line === "---" || line === "..."));
   if (end === -1) {
     return {
       rel,
       hasFrontmatter: true,
       frontmatterError: { message: "frontmatter block is not closed with ---", line: 1 },
       body: "",
-      bodyStartLine: lines.length + 1
+      bodyStartLine: lines2.length + 1
     };
   }
-  const body = lines.slice(end + 1).join("\n");
+  const body = lines2.slice(end + 1).join("\n");
   const bodyStartLine = end + 2;
   const counter = new import_yaml2.LineCounter();
-  const doc = (0, import_yaml2.parseDocument)(lines.slice(1, end).join("\n"), { lineCounter: counter, schema: "core" });
+  const doc = (0, import_yaml2.parseDocument)(lines2.slice(1, end).join("\n"), { lineCounter: counter, schema: "core" });
   const error = doc.errors[0];
   if (error) {
     const line = (error.linePos?.[0]?.line ?? 0) + 1;
@@ -8236,15 +8241,15 @@ var p9 = (file) => {
 var MAX_BODY_LINES = 300;
 var p10 = (file) => {
   if (!conceptData(file)) return [];
-  const lines = file.body.replace(/\n+$/, "").split("\n").length;
-  if (lines <= MAX_BODY_LINES) return [];
+  const lines2 = file.body.replace(/\n+$/, "").split("\n").length;
+  if (lines2 <= MAX_BODY_LINES) return [];
   return [
     {
       rule: "P10",
       severity: "warning",
       path: file.rel,
       line: null,
-      message: `body has ${lines} lines (more than ${MAX_BODY_LINES})`,
+      message: `body has ${lines2} lines (more than ${MAX_BODY_LINES})`,
       fix: "split the topic into a folder with its own index.md"
     }
   ];
@@ -8523,10 +8528,10 @@ register({
       io.stdout(`${JSON.stringify({ ok: findings.length === 0, findings, counts }, null, 2)}
 `);
     } else {
-      const lines = findings.map(findingLine);
+      const lines2 = findings.map(findingLine);
       const byRule = Object.entries(counts).sort(([a], [b]) => a < b ? -1 : 1).map(([rule, n]) => `${rule} ${n}`).join(", ");
-      lines.push(`audit: ${plural(findings.length, "finding")}${byRule ? ` (${byRule})` : ""}`);
-      io.stdout(`${lines.join("\n")}
+      lines2.push(`audit: ${plural(findings.length, "finding")}${byRule ? ` (${byRule})` : ""}`);
+      io.stdout(`${lines2.join("\n")}
 `);
     }
     return findings.length === 0 ? 0 : 1;
@@ -8542,11 +8547,8 @@ import { join as join14 } from "node:path";
 import { existsSync as existsSync8, readFileSync as readFileSync6, statSync as statSync4 } from "node:fs";
 import { join as join11 } from "node:path";
 
-// src/tasks/git.ts
+// src/git.ts
 import { execFileSync } from "node:child_process";
-var RECORD = "";
-var FIELD = "";
-var VALUE = "";
 function git(repoRoot, args) {
   try {
     return execFileSync("git", args, { cwd: repoRoot, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
@@ -8555,6 +8557,19 @@ function git(repoRoot, args) {
     throw new EnvError(`git ${args[0]} failed${stderr ? `: ${stderr}` : ""}`);
   }
 }
+function gitSucceeds(repoRoot, args) {
+  try {
+    execFileSync("git", args, { cwd: repoRoot, stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// src/tasks/git.ts
+var RECORD = "";
+var FIELD = "";
+var VALUE = "";
 function readCommits(repoRoot, range, withFiles = true) {
   const format = `--format=${RECORD}%H${FIELD}%(trailers:key=Task,valueonly,separator=%x1e)`;
   const args = ["log", "--reverse", format, ...withFiles ? ["--name-only"] : [], range, "--"];
@@ -8680,12 +8695,12 @@ function parseMeta(source) {
   return { meta: { files: data.files, depends, scenarios, agent } };
 }
 function parseTasks(text2) {
-  const lines = text2.split(/\r?\n/);
+  const lines2 = text2.split(/\r?\n/);
   const result = { groups: [], strayHeadings: [], orphanTasks: [] };
   let current;
   let inFollowUp = false;
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+  for (let i = 0; i < lines2.length; i++) {
+    const line = lines2[i];
     const lineNo = i + 1;
     const group = GROUP.exec(line);
     const h2 = H2.exec(line);
@@ -8711,13 +8726,13 @@ function parseTasks(text2) {
       };
       result.groups.push(current);
       let j = i + 1;
-      while (j < lines.length && lines[j].trim() === "") j++;
-      if (/^```ya?ml\s*$/.test(lines[j] ?? "")) {
-        const end = lines.findIndex((l, k) => k > j && l.trim() === "```");
+      while (j < lines2.length && lines2[j].trim() === "") j++;
+      if (/^```ya?ml\s*$/.test(lines2[j] ?? "")) {
+        const end = lines2.findIndex((l, k) => k > j && l.trim() === "```");
         current.metaLine = j + 1;
         if (end === -1) current.metaError = "metadata block is not closed";
         else {
-          const { meta, error } = parseMeta(lines.slice(j + 1, end).join("\n"));
+          const { meta, error } = parseMeta(lines2.slice(j + 1, end).join("\n"));
           if (meta) current.meta = meta;
           else current.metaError = error ?? "invalid metadata";
           i = end;
@@ -8728,7 +8743,7 @@ function parseTasks(text2) {
     if (inFollowUp) continue;
     const task = TASK.exec(line);
     if (!task) continue;
-    const done = DONE.exec(lines[i + 1] ?? "");
+    const done = DONE.exec(lines2[i + 1] ?? "");
     const entry = {
       id: `${task[2]}.${task[3]}`,
       group: Number(task[2]),
@@ -9120,9 +9135,9 @@ register({
       io.stdout(`${JSON.stringify({ ok: errors === 0, change, errors, warnings, findings }, null, 2)}
 `);
     } else {
-      const lines = findings.filter((f) => f.severity === "error").map(taskFindingLine);
-      lines.push(`tasks check ${change}: ${plural(errors, "error")}, ${plural(warnings, "warning")}`);
-      io.stdout(`${lines.join("\n")}
+      const lines2 = findings.filter((f) => f.severity === "error").map(taskFindingLine);
+      lines2.push(`tasks check ${change}: ${plural(errors, "error")}, ${plural(warnings, "warning")}`);
+      io.stdout(`${lines2.join("\n")}
 `);
     }
     return errors === 0 ? 0 : 1;
@@ -9270,8 +9285,8 @@ function checkKnowledge(config, bundleRoot, dir, options) {
     add("K0", null, "the change has no knowledge.md", "write knowledge.md from the schema template");
     return { findings, ops: [] };
   }
-  const lines = readFileSync8(path, "utf8").split(/\r?\n/);
-  const start = lines.findIndex((l) => /^## Delta\s*$/.test(l));
+  const lines2 = readFileSync8(path, "utf8").split(/\r?\n/);
+  const start = lines2.findIndex((l) => /^## Delta\s*$/.test(l));
   if (start === -1) {
     add(
       "K1",
@@ -9281,13 +9296,13 @@ function checkKnowledge(config, bundleRoot, dir, options) {
     );
     return { findings, ops: [] };
   }
-  const end = lines.findIndex((l, i) => i > start && /^## /.test(l));
+  const end = lines2.findIndex((l, i) => i > start && /^## /.test(l));
   const blocks = [];
-  for (let i = start + 1; i < (end === -1 ? lines.length : end); i++) {
-    if (!/^```ya?ml\s*$/.test(lines[i])) continue;
-    const close = lines.findIndex((l, k) => k > i && l.trim() === "```");
-    const stop = close === -1 ? lines.length : close;
-    blocks.push({ fence: i + 1, source: lines.slice(i + 1, stop).join("\n") });
+  for (let i = start + 1; i < (end === -1 ? lines2.length : end); i++) {
+    if (!/^```ya?ml\s*$/.test(lines2[i])) continue;
+    const close = lines2.findIndex((l, k) => k > i && l.trim() === "```");
+    const stop = close === -1 ? lines2.length : close;
+    blocks.push({ fence: i + 1, source: lines2.slice(i + 1, stop).join("\n") });
     i = stop;
   }
   if (blocks.length !== 1) {
@@ -9452,9 +9467,9 @@ register({
       io.stdout(`${JSON.stringify({ ok: errors === 0, change, errors, warnings, findings }, null, 2)}
 `);
     } else {
-      const lines = findings.filter((f) => f.severity === "error").map(taskFindingLine);
-      lines.push(`change check ${change}: ${plural(errors, "error")}, ${plural(warnings, "warning")}`);
-      io.stdout(`${lines.join("\n")}
+      const lines2 = findings.filter((f) => f.severity === "error").map(taskFindingLine);
+      lines2.push(`change check ${change}: ${plural(errors, "error")}, ${plural(warnings, "warning")}`);
+      io.stdout(`${lines2.join("\n")}
 `);
     }
     return errors === 0 ? 0 : 1;
@@ -9465,8 +9480,18 @@ register({
 import { execFileSync as execFileSync2 } from "node:child_process";
 
 // src/doctor/checks.ts
-import { existsSync as existsSync12, readdirSync as readdirSync4, readFileSync as readFileSync10, statSync as statSync5 } from "node:fs";
+import { existsSync as existsSync13, readdirSync as readdirSync4, readFileSync as readFileSync10, statSync as statSync5 } from "node:fs";
+import { join as join16 } from "node:path";
+
+// src/openspec.ts
+import { existsSync as existsSync12 } from "node:fs";
 import { join as join15 } from "node:path";
+function openspecBinary(root) {
+  const local = root ? join15(root, "node_modules", ".bin", "openspec") : void 0;
+  return local !== void 0 && existsSync12(local) ? { command: local, source: "node_modules/.bin" } : { command: "openspec", source: "PATH" };
+}
+
+// src/doctor/checks.ts
 var DEFAULT_OPENSPEC_RANGE = ">=1.15 <2";
 var MIN_NODE = "20.19.0";
 var parts = (v) => v.split(".").map((n) => Number.parseInt(n, 10) || 0);
@@ -9501,14 +9526,14 @@ var firstVersion = (text2) => text2 ? /\d+\.\d+\.\d+/.exec(text2)?.[0] : void 0;
 var ok = (id, message) => ({ id, status: "ok", message, fix: null });
 function hookManagerMentions(root) {
   const files = ["lefthook.yml", "lefthook.yaml", ".lefthook.yml", ".pre-commit-config.yaml"].map(
-    (f) => join15(root, f)
+    (f) => join16(root, f)
   );
-  const husky = join15(root, ".husky");
-  if (existsSync12(husky) && statSync5(husky).isDirectory()) {
-    for (const f of readdirSync4(husky)) files.push(join15(husky, f));
+  const husky = join16(root, ".husky");
+  if (existsSync13(husky) && statSync5(husky).isDirectory()) {
+    for (const f of readdirSync4(husky)) files.push(join16(husky, f));
   }
   return files.some(
-    (f) => existsSync12(f) && statSync5(f).isFile() && readFileSync10(f, "utf8").includes("specfold hook")
+    (f) => existsSync13(f) && statSync5(f).isFile() && readFileSync10(f, "utf8").includes("specfold hook")
   );
 }
 function runChecks(env) {
@@ -9544,10 +9569,10 @@ function runChecks(env) {
     }
   }
   const range = config?.requires.openspec ?? DEFAULT_OPENSPEC_RANGE;
-  const local = root ? join15(root, "node_modules", ".bin", "openspec") : void 0;
-  const useLocal = local !== void 0 && existsSync12(local);
-  const source = useLocal ? "node_modules/.bin" : "PATH";
-  const openspec = firstVersion(env.exec(useLocal ? local : "openspec", ["--version"], env.cwd));
+  const binary = openspecBinary(root);
+  const useLocal = binary.source === "node_modules/.bin";
+  const source = binary.source;
+  const openspec = firstVersion(env.exec(binary.command, ["--version"], env.cwd));
   if (!openspec) {
     checks.push({
       id: "D3",
@@ -9583,14 +9608,14 @@ function runChecks(env) {
       fix: "specfold hooks install"
     });
   }
-  if (!root || !existsSync12(join15(root, "knowledge"))) {
+  if (!root || !existsSync13(join16(root, "knowledge"))) {
     checks.push({
       id: "D5",
       status: "fail",
       message: "no knowledge/ bundle",
       fix: "create knowledge/ with a root index.md, or run 'specfold init'"
     });
-  } else if (!existsSync12(join15(root, "knowledge", "index.md"))) {
+  } else if (!existsSync13(join16(root, "knowledge", "index.md"))) {
     checks.push({
       id: "D5",
       status: "fail",
@@ -9628,11 +9653,11 @@ var exitCode = (checks) => checks.some((c) => c.status === "fail") ? 1 : 0;
 function render(checks, json) {
   if (json) return `${JSON.stringify({ ok: exitCode(checks) === 0, checks }, null, 2)}
 `;
-  const lines = checks.flatMap((c) => [
+  const lines2 = checks.flatMap((c) => [
     `${c.id} ${c.status} ${c.message}`,
     ...c.fix ? [`    fix: ${c.fix}`] : []
   ]);
-  return `${lines.join("\n")}
+  return `${lines2.join("\n")}
 `;
 }
 register({
@@ -9647,9 +9672,59 @@ register({
   }
 });
 
+// src/gate/command.ts
+import { existsSync as existsSync22, readFileSync as readFileSync15 } from "node:fs";
+import { resolve as resolve4 } from "node:path";
+
+// src/gate/diff.ts
+import { existsSync as existsSync14, statSync as statSync6 } from "node:fs";
+import { join as join17 } from "node:path";
+var ACTIVE = /^openspec\/changes\/([^/]+)\//;
+var ARCHIVED = /^openspec\/changes\/archive\/([^/]+)\//;
+var lines = (text2) => text2.split("\n").filter((l) => l !== "");
+var isDir = (path) => existsSync14(path) && statSync6(path).isDirectory();
+function computeDiff(root, ref, local) {
+  if (!gitSucceeds(root, ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`]))
+    throw new EnvError(`unknown base '${ref}': not a git ref`);
+  const mergeBase = git(root, ["merge-base", ref, "HEAD"]).trim();
+  const files = new Set(
+    lines(git(root, ["diff", "--name-only", "--no-renames", "--relative", mergeBase, "HEAD"]))
+  );
+  if (local) {
+    for (const f of lines(git(root, ["diff", "--name-only", "--no-renames", "--relative", "HEAD"])))
+      files.add(f);
+    for (const f of lines(git(root, ["ls-files", "--others", "--exclude-standard"]))) files.add(f);
+  }
+  const sorted = [...files].sort((a, b) => a < b ? -1 : a > b ? 1 : 0);
+  const active = /* @__PURE__ */ new Set();
+  const archived = /* @__PURE__ */ new Set();
+  for (const f of sorted) {
+    const id = ARCHIVED.exec(f)?.[1];
+    if (id !== void 0) {
+      archived.add(id);
+      continue;
+    }
+    const name = ACTIVE.exec(f)?.[1];
+    if (name !== void 0 && name !== "archive") active.add(name);
+  }
+  return {
+    ref,
+    mergeBase,
+    files: sorted,
+    activeChanges: [...active].filter((n) => isDir(join17(root, "openspec", "changes", n))),
+    archivedChanges: [...archived].filter(
+      (id) => isDir(join17(root, "openspec", "changes", "archive", id)) && !gitSucceeds(root, ["cat-file", "-e", `${mergeBase}:./openspec/changes/archive/${id}`])
+    )
+  };
+}
+
+// src/gate/rules.ts
+import { existsSync as existsSync21 } from "node:fs";
+import { join as join23, relative as relative10, sep as sep9 } from "node:path";
+
 // src/indexes/command.ts
-import { existsSync as existsSync13, readFileSync as readFileSync11, writeFileSync } from "node:fs";
-import { join as join16, relative as relative5, sep as sep4 } from "node:path";
+import { existsSync as existsSync15, readFileSync as readFileSync11, writeFileSync } from "node:fs";
+import { join as join18, relative as relative5, sep as sep4 } from "node:path";
 
 // src/indexes/generate.ts
 import { basename, relative as relative4, sep as sep3 } from "node:path";
@@ -9710,12 +9785,12 @@ function generateIndexes(bundleRoot, config, refs = /* @__PURE__ */ new Map()) {
     }
     const blocks = [];
     if (subfolders.length > 0) {
-      const lines = subfolders.map((sub) => {
+      const lines2 = subfolders.map((sub) => {
         const name = sub.slice(prefix.length);
         const description = config.folders[sub]?.description;
         return `* [${folderTitle(config, sub, name)}](${name}/)${description ? ` - ${description}` : ""}`;
       });
-      blocks.push(["# Sections", "", ...lines].join("\n"));
+      blocks.push(["# Sections", "", ...lines2].join("\n"));
     }
     const types = [...new Set(items.map((i) => i.type))].sort(
       (a, b) => typeOrder(a) - typeOrder(b) || byCodeUnit(a, b)
@@ -9724,11 +9799,11 @@ function generateIndexes(bundleRoot, config, refs = /* @__PURE__ */ new Map()) {
       const group = items.filter((i) => i.type === type).sort(
         (a, b) => byCodeUnit(a.title.toLowerCase(), b.title.toLowerCase()) || byCodeUnit(a.file, b.file)
       );
-      const lines = group.flatMap((i) => [
+      const lines2 = group.flatMap((i) => [
         `* [${i.title}](${i.file})${i.deprecated ? " (deprecated)" : ""}${i.description ? ` - ${i.description}` : ""}`,
         ...(refs.get(`${prefix}${i.file}`) ?? []).map((loc) => `  * Referenced from code: ${loc}`)
       ]);
-      blocks.push([`# ${type}`, "", ...lines].join("\n"));
+      blocks.push([`# ${type}`, "", ...lines2].join("\n"));
     }
     const hasLog = folder === "" && entries.some((e) => !e.isDir && e.rel === "log.md");
     if (blocks.length === 0) {
@@ -9751,8 +9826,8 @@ ${LOG_ENTRY}`);
 function syncIndexes(repoRoot, bundleRoot, generated, check) {
   const changed = [];
   for (const [rel, content] of [...generated].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)) {
-    const abs = join16(bundleRoot, rel);
-    if (existsSync13(abs) && readFileSync11(abs, "utf8") === content) continue;
+    const abs = join18(bundleRoot, rel);
+    if (existsSync15(abs) && readFileSync11(abs, "utf8") === content) continue;
     if (!check) writeFileSync(abs, content);
     changed.push(relative5(repoRoot, abs).split(sep4).join("/"));
   }
@@ -9791,194 +9866,34 @@ register({
 `);
     } else {
       const counted = check ? `${outdated.length} outdated` : `${written.length} written`;
-      const lines = [
+      const lines2 = [
         ...written.map((p) => `wrote ${p}`),
         ...outdated.map((p) => `outdated ${p}`),
         ...sorted.filter((f) => f.severity === "error").map(findingLine),
         `${plural(indexes.size, "index")}, ${counted}: ${plural(errors, "error")}, ${plural(warnings, "warning")}`
       ];
-      io.stdout(`${lines.join("\n")}
+      io.stdout(`${lines2.join("\n")}
 `);
     }
     return ok2 ? 0 : 1;
   }
 });
 
-// src/log/command.ts
-import { existsSync as existsSync14, readFileSync as readFileSync12, writeFileSync as writeFileSync2 } from "node:fs";
-import { join as join17 } from "node:path";
+// src/sync/plan.ts
+import { existsSync as existsSync19, readFileSync as readFileSync14 } from "node:fs";
+import { join as join22, relative as relative8, sep as sep7 } from "node:path";
 
-// src/log/insert.ts
-var DATE_HEADING = /^## (\d{4}-\d{2}-\d{2})\s*$/;
-function insertEntry(text2, date, entry) {
-  if (text2 === void 0 || text2.trim() === "") return `# Log
-
-## ${date}
-
-${entry}
-`;
-  const lines = text2.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n");
-  const headings = lines.map((line, index) => ({ index, date: DATE_HEADING.exec(line)?.[1] })).filter((h) => h.date !== void 0);
-  const same = headings.find((h) => h.date === date);
-  if (same) {
-    const next = lines.findIndex((line, i) => i > same.index && line.startsWith("## "));
-    let last = (next === -1 ? lines.length : next) - 1;
-    while (last > same.index && lines[last]?.trim() === "") last--;
-    lines.splice(last + 1, 0, ...last === same.index ? ["", entry] : [entry]);
-  } else {
-    const older = headings.find((h) => h.date < date);
-    if (older) lines.splice(older.index, 0, `## ${date}`, "", entry, "");
-    else lines.push("", `## ${date}`, "", entry);
-  }
-  return `${lines.join("\n")}
-`;
-}
-
-// src/log/command.ts
-var KIND = /^[A-Z][A-Za-z]*$/;
-function isCalendarDate2(text2) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(text2)) return false;
-  const date = /* @__PURE__ */ new Date(`${text2}T00:00:00Z`);
-  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text2;
-}
-function localDate(now = /* @__PURE__ */ new Date()) {
-  const pad = (n) => String(n).padStart(2, "0");
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-}
-register({
-  name: "log",
-  summary: "add a dated entry to the bundle's log.md",
-  usage: "specfold log add [--kind <Kind>] [--date <YYYY-MM-DD>] [--bundle <dir>] <message...>",
-  options: { kind: { type: "string" }, date: { type: "string" }, bundle: { type: "string" } },
-  run: ({ io, values, positionals }) => {
-    const [sub, ...words2] = positionals;
-    if (sub !== "add")
-      throw new UsageError(sub ? `unknown log subcommand '${sub}'` : "missing subcommand: specfold log add");
-    const message = words2.join(" ").replace(/\s+/g, " ").trim();
-    if (!message) throw new UsageError("missing message");
-    const kind = values.kind ?? "Update";
-    if (!KIND.test(kind))
-      throw new UsageError(`kind '${kind}' must be one word starting with an uppercase letter`);
-    const date = values.date ?? localDate();
-    if (!isCalendarDate2(date)) throw new UsageError(`date '${date}' is not a valid YYYY-MM-DD date`);
-    const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, void 0);
-    const path = join17(bundleRoot, "log.md");
-    const entry = `* **${kind}**: ${message}`;
-    writeFileSync2(path, insertEntry(existsSync14(path) ? readFileSync12(path, "utf8") : void 0, date, entry));
-    io.stdout(`${entry}
-`);
-    return 0;
-  }
-});
-
-// src/lookup/command.ts
-import { relative as relative6, sep as sep5 } from "node:path";
-
-// src/lookup/search.ts
-var WEIGHTS = { title: 3, tags: 2, description: 1, type: 1 };
-function words(text2) {
-  return text2.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
-}
-var isRecord5 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
-var text = (v) => typeof v === "string" && v.trim() !== "" ? v.trim() : void 0;
-function flagsOf(data, now) {
-  const flags = [];
-  if (data.status === "deprecated") flags.push("deprecated");
-  const stale = typeof data.stale_after === "string" ? Date.parse(data.stale_after) : Number.NaN;
-  if (!Number.isNaN(stale) && stale < now) flags.push("stale");
-  const verified = Array.isArray(data.verified) ? data.verified.length > 0 : data.verified !== void 0;
-  if (!verified) flags.push("unverified");
-  return flags;
-}
-function search(bundleRoot, query, options = {}) {
-  const terms = words(query);
-  if (terms.length === 0) return [];
-  const now = options.now ?? Date.now();
-  const wanted = options.type?.toLowerCase();
-  const hits = [];
-  for (const entry of walk(bundleRoot)) {
-    const name = entry.rel.slice(entry.rel.lastIndexOf("/") + 1);
-    if (entry.isDir || !name.endsWith(".md") || RESERVED.has(name)) continue;
-    const data = parseFile(bundleRoot, entry.rel).frontmatter?.data;
-    if (!isRecord5(data)) continue;
-    const type = text(data.type);
-    if (!type || wanted !== void 0 && type.toLowerCase() !== wanted) continue;
-    const title = text(data.title) ?? name.slice(0, -3);
-    const description = text(data.description) ?? null;
-    const tags = Array.isArray(data.tags) ? data.tags.filter((t) => typeof t === "string") : text(data.tags) ? [data.tags] : [];
-    const fields = {
-      title: words(title),
-      tags: words(tags.join(" ")),
-      description: words(description ?? ""),
-      type: words(type)
-    };
-    let score = 0;
-    for (const term of terms) {
-      const best = Math.max(
-        0,
-        ...Object.keys(WEIGHTS).filter((f) => fields[f].some((w) => w.startsWith(term))).map((f) => WEIGHTS[f])
-      );
-      if (best === 0) {
-        score = 0;
-        break;
-      }
-      score += best;
-    }
-    if (score > 0) hits.push({ rel: entry.rel, title, description, type, score, flags: flagsOf(data, now) });
-  }
-  return hits.sort((a, b) => b.score - a.score || (a.rel < b.rel ? -1 : a.rel > b.rel ? 1 : 0));
-}
-
-// src/lookup/command.ts
-register({
-  name: "lookup",
-  summary: "find concepts by their frontmatter",
-  usage: "specfold lookup <query...> [--type <type>] [--limit <n>] [--bundle <dir>] [--json]",
-  options: {
-    type: { type: "string" },
-    limit: { type: "string" },
-    bundle: { type: "string" },
-    json: { type: "boolean" }
-  },
-  run: ({ io, values, positionals }) => {
-    const query = positionals.join(" ").trim();
-    if (!query) throw new UsageError("missing query");
-    const limitArg = values.limit ?? "10";
-    if (!/^[1-9]\d*$/.test(limitArg))
-      throw new UsageError(`--limit must be a positive integer, got '${limitArg}'`);
-    const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, void 0);
-    const base = findRepoRoot(io.cwd) ?? io.cwd;
-    const type = values.type;
-    const hits = search(bundleRoot, query, type ? { type } : {}).slice(0, Number(limitArg));
-    const results = hits.map((h) => ({
-      path: relative6(base, `${bundleRoot}${sep5}${h.rel}`).split(sep5).join("/"),
-      title: h.title,
-      description: h.description,
-      type: h.type,
-      score: h.score,
-      flags: h.flags
-    }));
-    if (values.json) {
-      io.stdout(`${JSON.stringify({ query, results }, null, 2)}
-`);
-    } else if (results.length === 0) {
-      io.stdout("no matches\n");
-    } else {
-      const line = (r) => `${r.path} - ${r.title}${r.description ? `: ${r.description}` : ""}${r.flags.length ? ` [${r.flags.join(", ")}]` : ""}`;
-      io.stdout(`${results.map(line).join("\n")}
-`);
-    }
-    return 0;
-  }
-});
+// src/sync/apply.ts
+import { existsSync as existsSync18, mkdirSync as mkdirSync3, readFileSync as readFileSync13, writeFileSync as writeFileSync3 } from "node:fs";
+import { dirname as dirname5, join as join21, relative as relative7, sep as sep6 } from "node:path";
 
 // src/new/command.ts
-import { existsSync as existsSync16, mkdirSync as mkdirSync2, writeFileSync as writeFileSync3 } from "node:fs";
-import { dirname as dirname4, join as join19, relative as relative7, sep as sep6 } from "node:path";
+import { existsSync as existsSync17, mkdirSync as mkdirSync2, writeFileSync as writeFileSync2 } from "node:fs";
+import { dirname as dirname4, join as join20, relative as relative6, sep as sep5 } from "node:path";
 
 // src/new/templates.ts
-import { existsSync as existsSync15, readFileSync as readFileSync13 } from "node:fs";
-import { join as join18 } from "node:path";
+import { existsSync as existsSync16, readFileSync as readFileSync12 } from "node:fs";
+import { join as join19 } from "node:path";
 var HEADINGS = {
   Term: ["Meaning", "Not to be confused with", "Related"],
   "Business Rule": ["Rule", "Why", "Related"],
@@ -10002,9 +9917,9 @@ function builtInBody(type) {
 `;
 }
 function overrideTemplate(repoRoot, type, values) {
-  const path = join18(repoRoot, TEMPLATE_DIR, `${typeSlug(type)}.md`);
-  if (!existsSync15(path)) return void 0;
-  return readFileSync13(path, "utf8").replace(
+  const path = join19(repoRoot, TEMPLATE_DIR, `${typeSlug(type)}.md`);
+  if (!existsSync16(path)) return void 0;
+  return readFileSync12(path, "utf8").replace(
     /\{\{(type|title|description|by|now)\}\}/g,
     (_, key) => values[key]
   );
@@ -10083,9 +9998,9 @@ register({
     if (!ACTOR2.test(by))
       throw new UsageError(`actor '${by}' must look like '<producer>/<version>' or 'process:<id>'`);
     const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
-    const abs = join19(bundleRoot, rel);
-    const shown = relative7(config.root, abs).split(sep6).join("/");
-    if (existsSync16(abs)) {
+    const abs = join20(bundleRoot, rel);
+    const shown = relative6(config.root, abs).split(sep5).join("/");
+    if (existsSync17(abs)) {
       if (values.json) io.stdout(`${JSON.stringify({ created: null, error: `${shown} already exists` })}
 `);
       else io.stderr(`specfold: ${shown} already exists
@@ -10096,7 +10011,7 @@ register({
     const description = values.description ?? "";
     const content = renderConcept(config.root, { type, title, description, by, now: /* @__PURE__ */ new Date() });
     mkdirSync2(dirname4(abs), { recursive: true });
-    writeFileSync3(abs, content);
+    writeFileSync2(abs, content);
     io.stdout(values.json ? `${JSON.stringify({ created: shown })}
 ` : `${shown}
 `);
@@ -10104,24 +10019,16 @@ register({
   }
 });
 
-// src/sync/command.ts
-import { existsSync as existsSync18, readdirSync as readdirSync5, readFileSync as readFileSync15, writeFileSync as writeFileSync5 } from "node:fs";
-import { join as join21, relative as relative9, sep as sep8 } from "node:path";
-
-// src/sync/apply.ts
-import { existsSync as existsSync17, mkdirSync as mkdirSync3, readFileSync as readFileSync14, writeFileSync as writeFileSync4 } from "node:fs";
-import { dirname as dirname5, join as join20, relative as relative8, sep as sep7 } from "node:path";
-
 // src/sync/frontmatter.ts
 var import_yaml6 = __toESM(require_dist(), 1);
 var yamlValue = (value) => /^[A-Za-z0-9._/][A-Za-z0-9._/-]*$/.test(value) && /[A-Za-z]/.test(value) && !/^(?:true|false|null|yes|no|on|off)$/i.test(value) ? value : scalar(value);
 var TOP_KEY = /^([A-Za-z_][\w-]*):(?:\s|$)/;
-function keyRange(lines, key) {
-  const start = lines.findIndex((l) => TOP_KEY.exec(l)?.[1] === key);
+function keyRange(lines2, key) {
+  const start = lines2.findIndex((l) => TOP_KEY.exec(l)?.[1] === key);
   if (start === -1) return void 0;
   let end = start + 1;
-  while (end < lines.length && /^(?:\s|-|$)/.test(lines[end])) end++;
-  while (end > start + 1 && lines[end - 1].trim() === "") end--;
+  while (end < lines2.length && /^(?:\s|-|$)/.test(lines2[end])) end++;
+  while (end > start + 1 && lines2[end - 1].trim() === "") end--;
   return [start, end];
 }
 function editFrontmatter(text2, edit) {
@@ -10130,10 +10037,10 @@ function editFrontmatter(text2, edit) {
   if (all[0] !== "---") return unchanged;
   const close = all.findIndex((l, i) => i > 0 && (l === "---" || l === "..."));
   if (close === -1) return unchanged;
-  const lines = all.slice(1, close);
+  const lines2 = all.slice(1, close);
   let data;
   try {
-    data = (0, import_yaml6.parse)(lines.join("\n"), { schema: "core" }) ?? {};
+    data = (0, import_yaml6.parse)(lines2.join("\n"), { schema: "core" }) ?? {};
   } catch {
     return unchanged;
   }
@@ -10141,11 +10048,11 @@ function editFrontmatter(text2, edit) {
   for (const [key, value] of Object.entries(edit.set ?? {})) {
     if (data[key] === value) continue;
     const line = `${key}: ${yamlValue(value)}`;
-    const range = keyRange(lines, key);
-    if (range) lines.splice(range[0], range[1] - range[0], line);
+    const range = keyRange(lines2, key);
+    if (range) lines2.splice(range[0], range[1] - range[0], line);
     else {
-      const generated = keyRange(lines, "generated");
-      lines.splice(generated ? generated[0] : lines.length, 0, line);
+      const generated = keyRange(lines2, "generated");
+      lines2.splice(generated ? generated[0] : lines2.length, 0, line);
     }
     setKeys.push(key);
   }
@@ -10157,38 +10064,38 @@ function editFrontmatter(text2, edit) {
     if (linked.has(source.resource)) continue;
     linked.add(source.resource);
     const entry = [`  - id: ${yamlValue(source.id)}`, `    resource: ${yamlValue(source.resource)}`];
-    const range = keyRange(lines, "sources");
-    if (!range) lines.push("sources:", ...entry);
-    else if (range[1] - range[0] > 1) lines.splice(range[1], 0, ...entry);
+    const range = keyRange(lines2, "sources");
+    if (!range) lines2.push("sources:", ...entry);
+    else if (range[1] - range[0] > 1) lines2.splice(range[1], 0, ...entry);
     else {
       const old = Array.isArray(data.sources) ? data.sources : [];
       const block = old.length > 0 ? (0, import_yaml6.stringify)(old, { lineWidth: 0 }).trimEnd().split("\n").map((l) => `  ${l}`) : [];
-      lines.splice(range[0], 1, "sources:", ...block, ...entry);
+      lines2.splice(range[0], 1, "sources:", ...block, ...entry);
     }
     addedSources.push(source.id);
   }
   if (setKeys.length === 0 && addedSources.length === 0) return unchanged;
-  return { text: ["---", ...lines, ...all.slice(close)].join("\n"), setKeys, addedSources };
+  return { text: ["---", ...lines2, ...all.slice(close)].join("\n"), setKeys, addedSources };
 }
 
 // src/sync/apply.ts
-var posix2 = (p) => p.split(sep7).join("/");
+var posix2 = (p) => p.split(sep6).join("/");
 var CAPABILITY = /^capabilities\/(.+)\.md$/;
 function editsFor(op, abs, ctx) {
   const set = {};
   const addSources = [];
   if (op.op === "deprecate") set.status = "deprecated";
   const cap = op.type === "Capability" ? CAPABILITY.exec(op.path)?.[1] : void 0;
-  const archive = join20(ctx.repoRoot, "openspec", "changes", "archive", ctx.archivedId);
-  const fromCard = (target) => posix2(relative8(dirname5(abs), target));
+  const archive = join21(ctx.repoRoot, "openspec", "changes", "archive", ctx.archivedId);
+  const fromCard = (target) => posix2(relative7(dirname5(abs), target));
   if (cap) {
-    const spec = join20(ctx.repoRoot, "openspec", "specs", cap, "spec.md");
-    set.spec = posix2(relative8(ctx.repoRoot, spec));
+    const spec = join21(ctx.repoRoot, "openspec", "specs", cap, "spec.md");
+    set.spec = posix2(relative7(ctx.repoRoot, spec));
     set.resource = fromCard(spec);
     set.change = ctx.archivedId;
     for (const artifact of ["proposal", "design"]) {
-      const file = join20(archive, `${artifact}.md`);
-      if (existsSync17(file))
+      const file = join21(archive, `${artifact}.md`);
+      if (existsSync18(file))
         addSources.push({ id: `${artifact}-${ctx.archivedId}`, resource: fromCard(file) });
     }
   }
@@ -10198,12 +10105,12 @@ function editsFor(op, abs, ctx) {
 function planOps(ops, ctx) {
   const plan = { actions: [], writes: /* @__PURE__ */ new Map() };
   for (const op of ops) {
-    const abs = join20(ctx.bundleRoot, op.path);
-    const shown = posix2(relative8(ctx.repoRoot, abs));
+    const abs = join21(ctx.bundleRoot, op.path);
+    const shown = posix2(relative7(ctx.repoRoot, abs));
     let original;
     let text2;
-    if (existsSync17(abs)) {
-      original = readFileSync14(abs, "utf8");
+    if (existsSync18(abs)) {
+      original = readFileSync13(abs, "utf8");
       text2 = original;
     } else if (op.op === "create") {
       text2 = renderConcept(ctx.repoRoot, {
@@ -10227,22 +10134,560 @@ function planOps(ops, ctx) {
 function applyWrites(plan) {
   for (const [abs, content] of plan.writes) {
     mkdirSync3(dirname5(abs), { recursive: true });
-    writeFileSync4(abs, content);
+    writeFileSync3(abs, content);
   }
 }
 
+// src/sync/plan.ts
+function planSync(config, bundleRoot, id, now = /* @__PURE__ */ new Date()) {
+  const relDir = `openspec/changes/archive/${id}`;
+  const { findings, ops } = checkKnowledge(config, bundleRoot, join22(config.root, relDir), {
+    relDir,
+    archived: true
+  });
+  const logPath = join22(bundleRoot, "log.md");
+  const logRel = relative8(config.root, logPath).split(sep7).join("/");
+  const logText = existsSync19(logPath) ? readFileSync14(logPath, "utf8") : void 0;
+  if (findings.length > 0)
+    return { findings, ops, plan: void 0, logPath, logRel, logText, needsLog: false };
+  const model = process.env.SPECFOLD_MODEL;
+  const by = model ? `${config.agentPrefix}${model}` : "process:specfold-sync";
+  const plan = planOps(ops, { repoRoot: config.root, bundleRoot, archivedId: id, by, now });
+  return { findings, ops, plan, logPath, logRel, logText, needsLog: !logText?.includes(id) };
+}
+
+// src/validate/index.ts
+import { existsSync as existsSync20 } from "node:fs";
+import { relative as relative9, resolve as resolve3, sep as sep8 } from "node:path";
+var okfRules = [okf1, okf2, okf3Index, okf3Log];
+var profileRules = [p1, p2, p3, p4, p5, p6, p7, p9, p10, p11, l1, l2];
+var profileBundleRules = [p8];
+var toRel = (root, abs) => relative9(root, abs).split(sep8).join("/");
+function validate(input) {
+  const entries = walk(input.bundleRoot);
+  const roots = input.paths.map((abs) => toRel(input.bundleRoot, abs));
+  const inSelection = (rel) => roots.length === 0 || roots.some((r) => r === "" || rel === r || rel.startsWith(`${r}/`));
+  const selected = new Set(
+    entries.filter((e) => !e.isDir && e.rel.endsWith(".md") && inSelection(e.rel)).map((e) => e.rel)
+  );
+  const ctx = {
+    bundleRoot: input.bundleRoot,
+    entries,
+    ...input.config ? { config: input.config } : {}
+  };
+  const rules = input.okfOnly ? okfRules : [...okfRules, ...profileRules];
+  const findings = [];
+  for (const rel of [...selected].sort()) {
+    const file = parseFile(input.bundleRoot, rel);
+    for (const rule of rules) findings.push(...rule(file, ctx));
+  }
+  if (!input.okfOnly) for (const rule of profileBundleRules) findings.push(...rule(ctx, inSelection));
+  return { findings, checked: selected.size };
+}
+register({
+  name: "validate",
+  summary: "check a knowledge bundle: OKF conformance, profile rules, links",
+  usage: "specfold validate [<path>...] [--bundle <dir>] [--okf-only] [--json]",
+  options: { bundle: { type: "string" }, "okf-only": { type: "boolean" }, json: { type: "boolean" } },
+  run: ({ io, values, positionals }) => {
+    const okfOnly = values["okf-only"] === true;
+    const config = okfOnly ? void 0 : requireConfig(io.cwd);
+    const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, config);
+    const paths = positionals.map((p) => {
+      const abs = resolve3(io.cwd, p);
+      const rel = relative9(bundleRoot, abs);
+      if (rel.startsWith("..") || resolve3(bundleRoot, rel) !== abs) {
+        throw new UsageError(`path is outside the bundle ${bundleRoot}: ${p}`);
+      }
+      if (!existsSync20(abs)) throw new UsageError(`path not found: ${p}`);
+      return abs;
+    });
+    const { findings, checked } = validate({ bundleRoot, paths, okfOnly, ...config ? { config } : {} });
+    io.stdout(values.json ? renderJson(findings, checked) : renderHuman(findings, checked));
+    return findings.some((f) => f.severity === "error") ? 1 : 0;
+  }
+});
+
+// src/gate/openspec.ts
+import { spawnSync } from "node:child_process";
+function openspecValidate(root, binary) {
+  const result = spawnSync(
+    binary.command,
+    ["validate", "--all", "--strict", "--json", "--report", "findings", "--no-interactive"],
+    { cwd: root, encoding: "utf8", timeout: 12e4 }
+  );
+  if (result.error) return void 0;
+  let report;
+  try {
+    report = JSON.parse(result.stdout);
+  } catch {
+    report = void 0;
+  }
+  if (!report?.itemFindings) {
+    if (result.status === 0) return [];
+    const first = `${result.stderr}
+${result.stdout}`.trim().split("\n")[0] || `exit code ${result.status}`;
+    return [{ path: "openspec", message: `openspec validate failed: ${first}` }];
+  }
+  const issues = [];
+  for (const item of report.itemFindings) {
+    if (item.valid !== false) continue;
+    const path = `openspec/${item.type === "spec" ? "specs" : "changes"}/${item.id ?? ""}`;
+    const failing = (item.issues ?? []).filter((i) => i.level === "ERROR" || i.level === "WARNING");
+    if (failing.length === 0) issues.push({ path, message: "openspec validate --strict failed" });
+    for (const i of failing)
+      issues.push({ path, message: `${i.path ? `${i.path}: ` : ""}${i.message ?? ""}` });
+  }
+  if (issues.length === 0 && result.status !== 0)
+    issues.push({ path: "openspec", message: `openspec validate exited with ${result.status}` });
+  return issues;
+}
+
+// src/gate/rules.ts
+var LINK_RULES = /* @__PURE__ */ new Set(["L1", "L2"]);
+var NO_SPEC_REASON = /^No-spec reason:[ \t]*\S/m;
+function inRepo(ctx, bundleRel) {
+  const prefix = relative10(ctx.config.root, ctx.bundleRoot).split(sep9).join("/");
+  return prefix ? `${prefix}/${bundleRel}` : bundleRel;
+}
+function changedConcepts(ctx) {
+  const prefix = `${relative10(ctx.config.root, ctx.bundleRoot).split(sep9).join("/")}/`;
+  return ctx.diff.files.filter((f) => f.startsWith(prefix) && f.endsWith(".md")).map((f) => f.slice(prefix.length)).filter((rel) => isConcept(rel) && existsSync21(join23(ctx.bundleRoot, rel)));
+}
+var fromBundle = (ctx, rule, effect, f) => ({
+  rule,
+  effect,
+  path: inRepo(ctx, f.path),
+  line: f.line,
+  message: `${f.rule} ${f.message}`,
+  fix: f.fix
+});
+var fromChange = (rule, f) => ({
+  rule,
+  effect: f.severity === "error" ? "block" : "warn",
+  path: f.file,
+  line: f.line,
+  message: `${f.rule} ${f.message}`,
+  fix: f.fix
+});
+var validated = /* @__PURE__ */ new WeakMap();
+function validateFindings(ctx) {
+  let findings = validated.get(ctx);
+  if (!findings) {
+    findings = validate({
+      bundleRoot: ctx.bundleRoot,
+      paths: [],
+      okfOnly: false,
+      config: ctx.config
+    }).findings;
+    validated.set(ctx, findings);
+  }
+  return findings;
+}
+var g1 = (ctx) => validateFindings(ctx).filter((f) => f.severity === "error" && !LINK_RULES.has(f.rule)).map((f) => fromBundle(ctx, "G1", "block", f));
+var g2 = (ctx) => {
+  const refs = scanReferences(ctx.config.root, ctx.config.sourceGlobs);
+  const { indexes } = generateIndexes(ctx.bundleRoot, ctx.config, locationsByConcept(refs));
+  return syncIndexes(ctx.config.root, ctx.bundleRoot, indexes, true).map((path) => ({
+    rule: "G2",
+    effect: "block",
+    path,
+    line: null,
+    message: "index is outdated",
+    fix: "run specfold index and commit the result"
+  }));
+};
+var g3 = (ctx) => {
+  const issues = openspecValidate(ctx.config.root, ctx.openspec);
+  if (issues === void 0) {
+    const message = `openspec is not installed (looked for ${ctx.openspec.command})`;
+    if (!ctx.local) throw new EnvError(message);
+    return [
+      {
+        rule: "G3",
+        effect: "warn",
+        path: null,
+        line: null,
+        message: `${message}; specs were not validated`,
+        fix: "install OpenSpec so that `openspec` is on the PATH or in node_modules/.bin"
+      }
+    ];
+  }
+  return issues.map((i) => ({
+    rule: "G3",
+    effect: "block",
+    path: i.path,
+    line: null,
+    message: i.message,
+    fix: "run openspec validate --all --strict and fix the reported items"
+  }));
+};
+var g4 = (ctx) => {
+  if (!ctx.config.gate.requireChangeForSourceChanges) return [];
+  const sources = ctx.diff.files.filter((f) => matchesAny(f, ctx.config.sourceGlobs));
+  if (sources.length === 0) return [];
+  if (ctx.diff.activeChanges.length > 0 || ctx.diff.archivedChanges.length > 0) return [];
+  const label = ctx.config.gate.escapeLabel;
+  const labelled = ctx.labels.includes(label);
+  const reasoned = ctx.prBody !== void 0 && NO_SPEC_REASON.test(ctx.prBody);
+  if (labelled && reasoned) return [];
+  const count = sources.length === 1 ? "1 source file" : `${sources.length} source files`;
+  return [
+    {
+      rule: "G4",
+      effect: ctx.local ? "warn" : "block",
+      path: sources[0],
+      line: null,
+      message: labelled ? `label '${label}' is set but the PR body has no 'No-spec reason:' line` : `${count} changed without an OpenSpec change`,
+      fix: `add or update a change under openspec/changes/, or set the '${label}' label and a 'No-spec reason:' line in the PR body`
+    }
+  ];
+};
+var touchedChanges = (ctx) => ctx.diff.activeChanges.map((change) => checkChange(ctx.config, ctx.bundleRoot, change));
+var g5 = (ctx) => touchedChanges(ctx).flatMap(
+  (fs) => fs.filter((f) => f.rule.startsWith("K")).map((f) => fromChange("G5", f))
+);
+var g13 = (ctx) => touchedChanges(ctx).flatMap(
+  (fs) => fs.filter((f) => f.rule.startsWith("B")).map((f) => fromChange("G13", f))
+);
+var g18 = (ctx) => ctx.diff.activeChanges.flatMap(
+  (change) => checkChangeTasks(ctx.config, change, ctx.diff.ref).map((f) => fromChange("G18", f))
+);
+var g6 = (ctx) => ctx.diff.archivedChanges.flatMap((id) => {
+  const sync = planSync(ctx.config, ctx.bundleRoot, id, ctx.now);
+  if (sync.findings.length > 0)
+    return sync.findings.map((f) => ({ ...fromChange("G6", f), effect: "block" }));
+  const actions = [...sync.plan?.actions ?? []];
+  if (sync.needsLog) actions.push({ path: sync.logRel, action: "add log entry" });
+  const name = id.replace(/^\d{4}-\d{2}-\d{2}-/, "");
+  return actions.map((a) => ({
+    rule: "G6",
+    effect: "block",
+    path: a.path,
+    line: null,
+    message: `archived change ${id} is not synced: ${a.action}`,
+    fix: `run specfold sync ${name} and commit the result`
+  }));
+});
+function changedData(ctx) {
+  return changedConcepts(ctx).flatMap((rel) => {
+    const file = parseFile(ctx.bundleRoot, rel);
+    const data = file.frontmatter?.data;
+    return isRecord2(data) ? [{ rel, data, lineOf: (k) => file.frontmatter?.lineOf(k) ?? null }] : [];
+  });
+}
+var g8 = (ctx) => changedData(ctx).flatMap(({ rel, data, lineOf }) => {
+  const by = isRecord2(data.generated) ? data.generated.by : void 0;
+  if (typeof by !== "string" || !by.startsWith("human:")) return [];
+  return [
+    {
+      rule: "G8",
+      effect: "block",
+      path: inRepo(ctx, rel),
+      line: lineOf("generated"),
+      message: `generated.by is the human actor '${by}'`,
+      fix: "set generated.by to the agent or process that wrote it; humans record review with specfold verify"
+    }
+  ];
+});
+var g9 = (ctx) => changedData(ctx).flatMap(({ rel, data, lineOf }) => {
+  const stale = data.stale_after;
+  if (!isTimestamp(stale) || Date.parse(stale) >= ctx.now.getTime()) return [];
+  return [
+    {
+      rule: "G9",
+      effect: ctx.config.gate.blockOnStaleTouched ? "block" : "warn",
+      path: inRepo(ctx, rel),
+      line: lineOf("stale_after"),
+      message: `edited concept is stale since ${stale}`,
+      fix: "review it against its sources, then move stale_after forward"
+    }
+  ];
+});
+var g10 = (ctx) => validateFindings(ctx).filter((f) => LINK_RULES.has(f.rule)).map((f) => fromBundle(ctx, "G10", ctx.config.blockOnBrokenLinks ? "block" : "warn", f));
+var g12 = (ctx) => auditBundle(ctx.config, ctx.bundleRoot, ctx.now).filter((f) => f.rule === "A1" || f.rule === "A2").map((f) => fromBundle(ctx, "G12", "warn", f));
+var g14 = (ctx) => {
+  const changed = new Set(ctx.diff.files);
+  return scanReferences(ctx.config.root, ctx.config.sourceGlobs).flatMap((ref) => {
+    const abs = join23(ctx.bundleRoot, ref.concept);
+    if (!existsSync21(abs))
+      return [
+        {
+          rule: "G14",
+          effect: changed.has(ref.file) ? "block" : "warn",
+          path: ref.file,
+          line: ref.line,
+          message: `reference to missing concept /${ref.concept}`,
+          fix: "point the comment at an existing concept or create it"
+        }
+      ];
+    const data = parseFile(ctx.bundleRoot, ref.concept).frontmatter?.data;
+    if (isRecord2(data) && data.status === "deprecated")
+      return [
+        {
+          rule: "G14",
+          effect: "warn",
+          path: ref.file,
+          line: ref.line,
+          message: `reference to deprecated concept /${ref.concept}`,
+          fix: "point the comment at the concept that replaced it"
+        }
+      ];
+    return [];
+  });
+};
+var RULES = [g1, g2, g3, g4, g5, g6, g8, g9, g10, g12, g13, g14, g18];
+var compare3 = (a, b) => a < b ? -1 : a > b ? 1 : 0;
+var ruleNumber = (rule) => Number.parseInt(rule.slice(1), 10);
+function sortGateFindings(findings) {
+  return [...findings].sort(
+    (a, b) => (a.effect === b.effect ? 0 : a.effect === "block" ? -1 : 1) || ruleNumber(a.rule) - ruleNumber(b.rule) || compare3(a.path ?? "", b.path ?? "") || (a.line ?? 0) - (b.line ?? 0)
+  );
+}
+var runGate = (ctx) => sortGateFindings(RULES.flatMap((rule) => rule(ctx)));
+
+// src/gate/command.ts
+var location = (f) => f.path === null ? "" : `${f.path}${f.line === null ? "" : `:${f.line}`} `;
+function countFindings(findings) {
+  const rules = {};
+  for (const f of findings) rules[f.rule] = (rules[f.rule] ?? 0) + 1;
+  const block = findings.filter((f) => f.effect === "block").length;
+  return { block, warn: findings.length - block, rules };
+}
+register({
+  name: "gate",
+  summary: "decide whether a branch may merge: run the merge-gate rules on its diff",
+  usage: "specfold gate --base <ref> [--local] [--label <name>]... [--pr-body <file>] [--json]",
+  options: {
+    base: { type: "string" },
+    local: { type: "boolean" },
+    label: { type: "string", multiple: true },
+    "pr-body": { type: "string" },
+    json: { type: "boolean" }
+  },
+  run: ({ io, values, positionals }) => {
+    if (positionals.length > 0) throw new UsageError(`unexpected argument '${positionals[0]}'`);
+    const base = values.base;
+    if (!base) throw new UsageError("missing --base <ref>");
+    const bodyFile = values["pr-body"];
+    if (bodyFile !== void 0 && !existsSync22(resolve4(io.cwd, bodyFile)))
+      throw new UsageError(`PR body file not found: ${bodyFile}`);
+    const config = requireConfig(io.cwd);
+    const local = values.local === true;
+    const findings = runGate({
+      config,
+      bundleRoot: resolveBundleRoot(io.cwd, void 0, config),
+      diff: computeDiff(config.root, base, local),
+      local,
+      labels: values.label ?? [],
+      prBody: bodyFile === void 0 ? void 0 : readFileSync15(resolve4(io.cwd, bodyFile), "utf8"),
+      openspec: openspecBinary(config.root),
+      now: /* @__PURE__ */ new Date()
+    });
+    const counts = countFindings(findings);
+    const ok2 = counts.block === 0;
+    if (values.json) {
+      io.stdout(`${JSON.stringify({ ok: ok2, base, findings, counts }, null, 2)}
+`);
+    } else {
+      const lines2 = findings.flatMap((f) => [
+        `${f.effect} ${f.rule} ${location(f)}${f.message}`,
+        ...f.effect === "block" ? [`    fix: ${f.fix}`] : []
+      ]);
+      const blocking = [...new Set(findings.filter((f) => f.effect === "block").map((f) => f.rule))];
+      const warnings = plural(counts.warn, "warning");
+      lines2.push(
+        ok2 ? `gate: passed, ${warnings}` : `gate: blocked by ${blocking.join(", ")} (${plural(counts.block, "blocking finding")}, ${warnings})`
+      );
+      io.stdout(`${lines2.join("\n")}
+`);
+    }
+    return ok2 ? 0 : 1;
+  }
+});
+
+// src/log/command.ts
+import { existsSync as existsSync23, readFileSync as readFileSync16, writeFileSync as writeFileSync4 } from "node:fs";
+import { join as join24 } from "node:path";
+
+// src/log/insert.ts
+var DATE_HEADING = /^## (\d{4}-\d{2}-\d{2})\s*$/;
+function insertEntry(text2, date, entry) {
+  if (text2 === void 0 || text2.trim() === "") return `# Log
+
+## ${date}
+
+${entry}
+`;
+  const lines2 = text2.replace(/\r\n/g, "\n").replace(/\n+$/, "").split("\n");
+  const headings = lines2.map((line, index) => ({ index, date: DATE_HEADING.exec(line)?.[1] })).filter((h) => h.date !== void 0);
+  const same = headings.find((h) => h.date === date);
+  if (same) {
+    const next = lines2.findIndex((line, i) => i > same.index && line.startsWith("## "));
+    let last = (next === -1 ? lines2.length : next) - 1;
+    while (last > same.index && lines2[last]?.trim() === "") last--;
+    lines2.splice(last + 1, 0, ...last === same.index ? ["", entry] : [entry]);
+  } else {
+    const older = headings.find((h) => h.date < date);
+    if (older) lines2.splice(older.index, 0, `## ${date}`, "", entry, "");
+    else lines2.push("", `## ${date}`, "", entry);
+  }
+  return `${lines2.join("\n")}
+`;
+}
+
+// src/log/command.ts
+var KIND = /^[A-Z][A-Za-z]*$/;
+function isCalendarDate2(text2) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text2)) return false;
+  const date = /* @__PURE__ */ new Date(`${text2}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text2;
+}
+function localDate(now = /* @__PURE__ */ new Date()) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+register({
+  name: "log",
+  summary: "add a dated entry to the bundle's log.md",
+  usage: "specfold log add [--kind <Kind>] [--date <YYYY-MM-DD>] [--bundle <dir>] <message...>",
+  options: { kind: { type: "string" }, date: { type: "string" }, bundle: { type: "string" } },
+  run: ({ io, values, positionals }) => {
+    const [sub, ...words2] = positionals;
+    if (sub !== "add")
+      throw new UsageError(sub ? `unknown log subcommand '${sub}'` : "missing subcommand: specfold log add");
+    const message = words2.join(" ").replace(/\s+/g, " ").trim();
+    if (!message) throw new UsageError("missing message");
+    const kind = values.kind ?? "Update";
+    if (!KIND.test(kind))
+      throw new UsageError(`kind '${kind}' must be one word starting with an uppercase letter`);
+    const date = values.date ?? localDate();
+    if (!isCalendarDate2(date)) throw new UsageError(`date '${date}' is not a valid YYYY-MM-DD date`);
+    const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, void 0);
+    const path = join24(bundleRoot, "log.md");
+    const entry = `* **${kind}**: ${message}`;
+    writeFileSync4(path, insertEntry(existsSync23(path) ? readFileSync16(path, "utf8") : void 0, date, entry));
+    io.stdout(`${entry}
+`);
+    return 0;
+  }
+});
+
+// src/lookup/command.ts
+import { relative as relative11, sep as sep10 } from "node:path";
+
+// src/lookup/search.ts
+var WEIGHTS = { title: 3, tags: 2, description: 1, type: 1 };
+function words(text2) {
+  return text2.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+}
+var isRecord5 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
+var text = (v) => typeof v === "string" && v.trim() !== "" ? v.trim() : void 0;
+function flagsOf(data, now) {
+  const flags = [];
+  if (data.status === "deprecated") flags.push("deprecated");
+  const stale = typeof data.stale_after === "string" ? Date.parse(data.stale_after) : Number.NaN;
+  if (!Number.isNaN(stale) && stale < now) flags.push("stale");
+  const verified = Array.isArray(data.verified) ? data.verified.length > 0 : data.verified !== void 0;
+  if (!verified) flags.push("unverified");
+  return flags;
+}
+function search(bundleRoot, query, options = {}) {
+  const terms = words(query);
+  if (terms.length === 0) return [];
+  const now = options.now ?? Date.now();
+  const wanted = options.type?.toLowerCase();
+  const hits = [];
+  for (const entry of walk(bundleRoot)) {
+    const name = entry.rel.slice(entry.rel.lastIndexOf("/") + 1);
+    if (entry.isDir || !name.endsWith(".md") || RESERVED.has(name)) continue;
+    const data = parseFile(bundleRoot, entry.rel).frontmatter?.data;
+    if (!isRecord5(data)) continue;
+    const type = text(data.type);
+    if (!type || wanted !== void 0 && type.toLowerCase() !== wanted) continue;
+    const title = text(data.title) ?? name.slice(0, -3);
+    const description = text(data.description) ?? null;
+    const tags = Array.isArray(data.tags) ? data.tags.filter((t) => typeof t === "string") : text(data.tags) ? [data.tags] : [];
+    const fields = {
+      title: words(title),
+      tags: words(tags.join(" ")),
+      description: words(description ?? ""),
+      type: words(type)
+    };
+    let score = 0;
+    for (const term of terms) {
+      const best = Math.max(
+        0,
+        ...Object.keys(WEIGHTS).filter((f) => fields[f].some((w) => w.startsWith(term))).map((f) => WEIGHTS[f])
+      );
+      if (best === 0) {
+        score = 0;
+        break;
+      }
+      score += best;
+    }
+    if (score > 0) hits.push({ rel: entry.rel, title, description, type, score, flags: flagsOf(data, now) });
+  }
+  return hits.sort((a, b) => b.score - a.score || (a.rel < b.rel ? -1 : a.rel > b.rel ? 1 : 0));
+}
+
+// src/lookup/command.ts
+register({
+  name: "lookup",
+  summary: "find concepts by their frontmatter",
+  usage: "specfold lookup <query...> [--type <type>] [--limit <n>] [--bundle <dir>] [--json]",
+  options: {
+    type: { type: "string" },
+    limit: { type: "string" },
+    bundle: { type: "string" },
+    json: { type: "boolean" }
+  },
+  run: ({ io, values, positionals }) => {
+    const query = positionals.join(" ").trim();
+    if (!query) throw new UsageError("missing query");
+    const limitArg = values.limit ?? "10";
+    if (!/^[1-9]\d*$/.test(limitArg))
+      throw new UsageError(`--limit must be a positive integer, got '${limitArg}'`);
+    const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, void 0);
+    const base = findRepoRoot(io.cwd) ?? io.cwd;
+    const type = values.type;
+    const hits = search(bundleRoot, query, type ? { type } : {}).slice(0, Number(limitArg));
+    const results = hits.map((h) => ({
+      path: relative11(base, `${bundleRoot}${sep10}${h.rel}`).split(sep10).join("/"),
+      title: h.title,
+      description: h.description,
+      type: h.type,
+      score: h.score,
+      flags: h.flags
+    }));
+    if (values.json) {
+      io.stdout(`${JSON.stringify({ query, results }, null, 2)}
+`);
+    } else if (results.length === 0) {
+      io.stdout("no matches\n");
+    } else {
+      const line = (r) => `${r.path} - ${r.title}${r.description ? `: ${r.description}` : ""}${r.flags.length ? ` [${r.flags.join(", ")}]` : ""}`;
+      io.stdout(`${results.map(line).join("\n")}
+`);
+    }
+    return 0;
+  }
+});
+
 // src/sync/command.ts
+import { existsSync as existsSync24, readdirSync as readdirSync5, writeFileSync as writeFileSync5 } from "node:fs";
+import { join as join25 } from "node:path";
 var NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-var ARCHIVED = /^(\d{4}-\d{2}-\d{2})-([a-z0-9]+(?:-[a-z0-9]+)*)$/;
+var ARCHIVED2 = /^(\d{4}-\d{2}-\d{2})-([a-z0-9]+(?:-[a-z0-9]+)*)$/;
 function resolveArchived(config, arg) {
   if (!arg) throw new UsageError("missing change name");
-  const archive = join21(config.root, "openspec", "changes", "archive");
-  if (ARCHIVED.test(arg) && existsSync18(join21(archive, arg))) return arg;
+  const archive = join25(config.root, "openspec", "changes", "archive");
+  if (ARCHIVED2.test(arg) && existsSync24(join25(archive, arg))) return arg;
   if (!NAME.test(arg)) throw new UsageError(`'${arg}' is not a change name or archived change id`);
-  const ids = existsSync18(archive) ? readdirSync5(archive).filter((d) => ARCHIVED.exec(d)?.[2] === arg).sort() : [];
+  const ids = existsSync24(archive) ? readdirSync5(archive).filter((d) => ARCHIVED2.exec(d)?.[2] === arg).sort() : [];
   const newest = ids.at(-1);
   if (newest) return newest;
-  if (existsSync18(join21(config.root, "openspec", "changes", arg)))
+  if (existsSync24(join25(config.root, "openspec", "changes", arg)))
     throw new EnvError(`change '${arg}' is not archived yet: run 'openspec archive ${arg}' first`);
   throw new EnvError(`unknown change '${arg}': no archived folder openspec/changes/archive/<date>-${arg}/`);
 }
@@ -10256,32 +10701,21 @@ register({
     const config = requireConfig(io.cwd);
     const id = resolveArchived(config, positionals[0]);
     const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
-    const relDir = `openspec/changes/archive/${id}`;
     const dryRun = values["dry-run"] === true;
     const print = (ok2, actions2, findings2, text2) => io.stdout(
       values.json ? `${JSON.stringify({ ok: ok2, change: id, dryRun, actions: actions2, findings: findings2 }, null, 2)}
 ` : `${text2.join("\n")}
 `
     );
-    const { findings, ops } = checkKnowledge(config, bundleRoot, join21(config.root, relDir), {
-      relDir,
-      archived: true
-    });
-    if (findings.length > 0) {
+    const { findings, ops, plan, logPath, logRel, logText, needsLog } = planSync(config, bundleRoot, id);
+    if (findings.length > 0 || !plan) {
       print(false, [], findings, [
         ...findings.map(taskFindingLine),
         `sync ${id}: ${plural(findings.length, "error")}, nothing written`
       ]);
       return 1;
     }
-    const model = process.env.SPECFOLD_MODEL;
-    const by = model ? `${config.agentPrefix}${model}` : "process:specfold-sync";
-    const plan = planOps(ops, { repoRoot: config.root, bundleRoot, archivedId: id, by, now: /* @__PURE__ */ new Date() });
     const actions = [...plan.actions];
-    const logPath = join21(bundleRoot, "log.md");
-    const logRel = relative9(config.root, logPath).split(sep8).join("/");
-    const logText = existsSync18(logPath) ? readFileSync15(logPath, "utf8") : void 0;
-    const needsLog = !logText?.includes(id);
     if (!dryRun) {
       applyWrites(plan);
       const refs = scanReferences(config.root, config.sourceGlobs);
@@ -10310,8 +10744,8 @@ register({
 });
 
 // src/tasks/progress-command.ts
-import { existsSync as existsSync19, readdirSync as readdirSync6, readFileSync as readFileSync16 } from "node:fs";
-import { join as join22 } from "node:path";
+import { existsSync as existsSync25, readdirSync as readdirSync6, readFileSync as readFileSync17 } from "node:fs";
+import { join as join26 } from "node:path";
 
 // src/tasks/progress.ts
 function progressOf(tasks) {
@@ -10335,12 +10769,12 @@ function progressOf(tasks) {
 
 // src/tasks/progress-command.ts
 function readTasks(config, change) {
-  const path = join22(changeDir(config, change), "tasks.md");
-  return existsSync19(path) ? parseTasks(readFileSync16(path, "utf8")) : void 0;
+  const path = join26(changeDir(config, change), "tasks.md");
+  return existsSync25(path) ? parseTasks(readFileSync17(path, "utf8")) : void 0;
 }
 function activeChanges(config) {
-  const dir = join22(config.root, "openspec", "changes");
-  if (!existsSync19(dir)) return [];
+  const dir = join26(config.root, "openspec", "changes");
+  if (!existsSync25(dir)) return [];
   return readdirSync6(dir, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort();
 }
 function commitsByTask(config, change) {
@@ -10381,10 +10815,10 @@ register({
 `);
       } else {
         const width2 = Math.max(0, ...rows.map((r) => r.change.length));
-        const lines2 = rows.map(
+        const lines3 = rows.map(
           ({ change: name, progress: p12 }) => p12 ? `${name.padEnd(width2)}  ${p12.done}/${p12.total}  ${nextLine(p12)}` : `${name.padEnd(width2)}  no tasks.md`
         );
-        io.stdout(lines2.length > 0 ? `${lines2.join("\n")}
+        io.stdout(lines3.length > 0 ? `${lines3.join("\n")}
 ` : "no active changes\n");
       }
       return 0;
@@ -10420,14 +10854,14 @@ register({
       (g) => g.state === "blocked" ? `blocked by ${g.blockedBy.join(", ")}` : g.state
     );
     const stateWidth = Math.max(0, ...states.map((s) => s.length));
-    const lines = [
+    const lines2 = [
       `${change}: ${p.done}/${p.total} tasks`,
       ...p.groups.map(
         (g, i) => `  ${label(g).padEnd(width)}  ${states[i].padEnd(stateWidth)}  ${g.done}/${g.total}`
       ),
       nextLine(p)
     ];
-    io.stdout(`${lines.join("\n")}
+    io.stdout(`${lines2.join("\n")}
 `);
     return 0;
   }
@@ -10500,58 +10934,6 @@ register({
       );
     }
     return next || allDone ? 0 : 1;
-  }
-});
-
-// src/validate/index.ts
-import { existsSync as existsSync20 } from "node:fs";
-import { relative as relative10, resolve as resolve3, sep as sep9 } from "node:path";
-var okfRules = [okf1, okf2, okf3Index, okf3Log];
-var profileRules = [p1, p2, p3, p4, p5, p6, p7, p9, p10, p11, l1, l2];
-var profileBundleRules = [p8];
-var toRel = (root, abs) => relative10(root, abs).split(sep9).join("/");
-function validate(input) {
-  const entries = walk(input.bundleRoot);
-  const roots = input.paths.map((abs) => toRel(input.bundleRoot, abs));
-  const inSelection = (rel) => roots.length === 0 || roots.some((r) => r === "" || rel === r || rel.startsWith(`${r}/`));
-  const selected = new Set(
-    entries.filter((e) => !e.isDir && e.rel.endsWith(".md") && inSelection(e.rel)).map((e) => e.rel)
-  );
-  const ctx = {
-    bundleRoot: input.bundleRoot,
-    entries,
-    ...input.config ? { config: input.config } : {}
-  };
-  const rules = input.okfOnly ? okfRules : [...okfRules, ...profileRules];
-  const findings = [];
-  for (const rel of [...selected].sort()) {
-    const file = parseFile(input.bundleRoot, rel);
-    for (const rule of rules) findings.push(...rule(file, ctx));
-  }
-  if (!input.okfOnly) for (const rule of profileBundleRules) findings.push(...rule(ctx, inSelection));
-  return { findings, checked: selected.size };
-}
-register({
-  name: "validate",
-  summary: "check a knowledge bundle: OKF conformance, profile rules, links",
-  usage: "specfold validate [<path>...] [--bundle <dir>] [--okf-only] [--json]",
-  options: { bundle: { type: "string" }, "okf-only": { type: "boolean" }, json: { type: "boolean" } },
-  run: ({ io, values, positionals }) => {
-    const okfOnly = values["okf-only"] === true;
-    const config = okfOnly ? void 0 : requireConfig(io.cwd);
-    const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, config);
-    const paths = positionals.map((p) => {
-      const abs = resolve3(io.cwd, p);
-      const rel = relative10(bundleRoot, abs);
-      if (rel.startsWith("..") || resolve3(bundleRoot, rel) !== abs) {
-        throw new UsageError(`path is outside the bundle ${bundleRoot}: ${p}`);
-      }
-      if (!existsSync20(abs)) throw new UsageError(`path not found: ${p}`);
-      return abs;
-    });
-    const { findings, checked } = validate({ bundleRoot, paths, okfOnly, ...config ? { config } : {} });
-    io.stdout(values.json ? renderJson(findings, checked) : renderHuman(findings, checked));
-    return findings.some((f) => f.severity === "error") ? 1 : 0;
   }
 });
 
