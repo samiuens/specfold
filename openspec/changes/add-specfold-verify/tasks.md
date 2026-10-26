@@ -47,7 +47,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 4.1 Ignore `.specfold/local.yaml` in the template
+- [x] 4.1 Ignore `.specfold/local.yaml` in the template
   - Done when: `template/.gitignore` lists `.specfold/local.yaml`
 
 ## 5. Bundle
