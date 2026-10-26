@@ -37,6 +37,23 @@ function gateContext(config: Config, cwd: string, base: string, o: ContextOption
 export const localGate = (config: Config, cwd: string, base: string): GateFinding[] =>
   runGate(gateContext(config, cwd, base, { local: true, labels: [], prBody: undefined, pr: undefined }));
 
+/** Findings (blocking ones with their fix), then the verdict line. */
+export function renderGate(findings: GateFinding[]): string {
+  const counts = countFindings(findings);
+  const lines = findings.flatMap((f) => [
+    `${f.effect} ${f.rule} ${location(f)}${f.message}`,
+    ...(f.effect === "block" ? [`    fix: ${f.fix}`] : []),
+  ]);
+  const blocking = [...new Set(findings.filter((f) => f.effect === "block").map((f) => f.rule))];
+  const warnings = plural(counts.warn, "warning");
+  lines.push(
+    counts.block === 0
+      ? `gate: passed, ${warnings}`
+      : `gate: blocked by ${blocking.join(", ")} (${plural(counts.block, "blocking finding")}, ${warnings})`,
+  );
+  return `${lines.join("\n")}\n`;
+}
+
 register({
   name: "gate",
   summary: "decide whether a branch may merge: run the merge-gate rules on its diff",
@@ -77,18 +94,7 @@ register({
     if (values.json) {
       io.stdout(`${JSON.stringify({ ok, base, findings, counts }, null, 2)}\n`);
     } else {
-      const lines = findings.flatMap((f) => [
-        `${f.effect} ${f.rule} ${location(f)}${f.message}`,
-        ...(f.effect === "block" ? [`    fix: ${f.fix}`] : []),
-      ]);
-      const blocking = [...new Set(findings.filter((f) => f.effect === "block").map((f) => f.rule))];
-      const warnings = plural(counts.warn, "warning");
-      lines.push(
-        ok
-          ? `gate: passed, ${warnings}`
-          : `gate: blocked by ${blocking.join(", ")} (${plural(counts.block, "blocking finding")}, ${warnings})`,
-      );
-      io.stdout(`${lines.join("\n")}\n`);
+      io.stdout(renderGate(findings));
     }
     return ok ? 0 : 1;
   },

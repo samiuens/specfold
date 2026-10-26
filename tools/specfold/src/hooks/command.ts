@@ -3,6 +3,7 @@ import { UsageError } from "../errors.ts";
 import { plural } from "../findings.ts";
 import { requireConfig } from "../repo.ts";
 import { installHooks } from "./install.ts";
+import { runHook } from "./run.ts";
 
 register({
   name: "hooks",
@@ -31,5 +32,18 @@ register({
     ];
     io.stdout(`${lines.join("\n")}\n`);
     return 0;
+  },
+});
+
+register({
+  name: "hook",
+  summary: "run one hook: Specfold's checks for it, then hooks.extra (called by the installed hooks)",
+  usage: "specfold hook <name> [args...]",
+  options: {},
+  run: ({ io, positionals }) => {
+    const [name, ...args] = positionals;
+    if (!name) throw new UsageError("missing hook name: specfold hook <name> [args...]");
+    if (!/^[a-z]+(?:-[a-z]+)*$/.test(name)) throw new UsageError(`'${name}' is not a hook name`);
+    return runHook(name, { config: requireConfig(io.cwd), io, args });
   },
 });

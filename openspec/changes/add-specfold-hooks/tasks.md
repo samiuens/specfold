@@ -41,7 +41,7 @@ scenarios: [specfold-hooks#broken-concept-staged, specfold-hooks#change-being-pl
 agent: implementer
 ```
 
-- [ ] 3.1 Add `specfold hook` with the pre-commit checks and extra commands
+- [x] 3.1 Add `specfold hook` with the pre-commit checks and extra commands
   - Done when: scenarios broken-concept-staged, change-being-planned-staged and commit-message-check pass in `hooks-run.test.ts`
 - [ ] 3.2 Add the pre-push gate and the graph refresh hooks
   - Done when: scenarios blocking-finding and graphify-missing pass in `hooks-run.test.ts`
