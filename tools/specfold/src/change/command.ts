@@ -38,6 +38,14 @@ export function checkChange(config: Config, bundleRoot: string, change: string):
   );
 }
 
+/** `checkChange` once the change has tasks.md; before that it is being planned and only its brief is checked. */
+export function checkPlannedChange(config: Config, bundleRoot: string, change: string): TaskFinding[] {
+  const findings = checkChange(config, bundleRoot, change);
+  return existsSync(join(changeDir(config, change), "tasks.md"))
+    ? findings
+    : findings.filter((f) => f.rule.startsWith("B"));
+}
+
 register({
   name: "change",
   summary: "check a change's brief.md, knowledge.md and tasks.md",

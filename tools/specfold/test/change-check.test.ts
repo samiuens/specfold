@@ -1,6 +1,8 @@
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { checkPlannedChange } from "../src/change/command.ts";
+import { requireConfig } from "../src/repo.ts";
 import { run, tempDir } from "./helpers.ts";
 
 const CHANGE = "openspec/changes/demo";
@@ -81,5 +83,16 @@ describe("change check: command", () => {
     writeFileSync(join(repo, CHANGE, ".openspec.yaml"), "schema: specfold\n");
     const out = JSON.parse((await run(["change", "check", "demo", "--json"], repo)).stdout);
     expect(out.findings.map((f: { rule: string }) => f.rule)).toEqual(["B1", "K5"]);
+  });
+
+  it("checks only the brief of a change without tasks.md", () => {
+    const repo = tempDir("change");
+    const planned = () => checkPlannedChange(requireConfig(repo), join(repo, "knowledge"), "demo");
+    rmSync(join(repo, CHANGE, "knowledge.md"));
+    expect(planned().map((f) => f.rule)).toEqual(["K0"]);
+    rmSync(join(repo, CHANGE, "tasks.md"));
+    expect(planned()).toEqual([]);
+    mutate(repo, "brief.md", "confirmed_by: human:samiuens", "confirmed_by:");
+    expect(planned().map((f) => f.rule)).toEqual(["B2"]);
   });
 });

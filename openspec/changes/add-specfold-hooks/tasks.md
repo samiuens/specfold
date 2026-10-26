@@ -13,7 +13,7 @@ agent: implementer
   - Done when: `npm test -w specfold` passes with `run()` accepting stdin
 - [x] 1.2 Read `hooks.extra` from the settings
   - Done when: `repo.test.ts` covers an empty and a configured `hooks.extra`
-- [ ] 1.3 Check a change as planned: brief rules only until `tasks.md` exists
+- [x] 1.3 Check a change as planned: brief rules only until `tasks.md` exists
   - Done when: `change-check.test.ts` covers a change with and without `tasks.md`
 - [ ] 1.4 Export the local gate evaluation from the gate command
   - Done when: `npm test -w specfold` passes with the gate tests unchanged
