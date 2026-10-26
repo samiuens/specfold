@@ -12,3 +12,4 @@ import "./sync/command.ts";
 import "./tasks/command.ts";
 import "./tasks/progress-command.ts";
 import "./validate/index.ts";
+import "./verify/command.ts";

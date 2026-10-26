@@ -35,7 +35,7 @@ scenarios: [specfold-verify#concept-verified, specfold-verify#run-by-claude-code
 agent: implementer
 ```
 
-- [ ] 3.1 Add `specfold verify` with the agent guard, path checks and output
+- [x] 3.1 Add `specfold verify` with the agent guard, path checks and output
   - Done when: scenarios concept-verified, run-by-claude-code and one-bad-path pass in `verify-command.test.ts`
 
 ## 4. Template
