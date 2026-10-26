@@ -1,0 +1,27 @@
+{
+  "name": "specfold",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Specs and knowledge folded into one agent workflow: OKF knowledge bundles plus OpenSpec.",
+  "type": "module",
+  "engines": { "node": ">=20.19" },
+  "bin": {
+    "specfold": "../../scripts/specfold.mjs",
+    "sf": "../../scripts/specfold.mjs"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "biome check . && tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "yaml": "2.9.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.3",
+    "@types/node": "20.19.43",
+    "esbuild": "0.28.2",
+    "typescript": "7.0.2",
+    "vitest": "5.0.5"
+  }
+}

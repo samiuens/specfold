@@ -9,7 +9,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Add the `tools/specfold` workspace with pinned dev dependencies and `yaml` as the only runtime dependency
+- [x] 1.1 Add the `tools/specfold` workspace with pinned dev dependencies and `yaml` as the only runtime dependency
   - Done when: `npm ci` succeeds and `npm ls -w specfold --omit=dev` lists only `yaml`
 - [ ] 1.2 Add TypeScript, Biome and vitest configuration with `check` and `test` scripts
   - Done when: `npm run check -w specfold` and `npm test -w specfold` run (no tests yet) and exit 0
