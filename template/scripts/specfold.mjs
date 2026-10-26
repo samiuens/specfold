@@ -10269,6 +10269,7 @@ register({
 import { existsSync as existsSync21, readFileSync as readFileSync15 } from "node:fs";
 import { join as join23, relative as relative10, sep as sep9 } from "node:path";
 var BRIEF = /^openspec\/changes\/(?:archive\/)?[^/]+\/brief\.md$/;
+var ARCHIVED_BRIEF = /^openspec\/changes\/archive\/\d{4}-\d{2}-\d{2}-([^/]+)\/brief\.md$/;
 var CONFIRMED_BY = /^confirmed_by:[ \t]*(\S+)/;
 function verifiedClaims(file, text2) {
   const fm = parseText(file, text2).frontmatter;
@@ -10304,8 +10305,14 @@ function addedClaims(root, bundleRoot, diff) {
     else if (file.startsWith(bundlePrefix) && file.endsWith(".md") && isConcept(file.slice(bundlePrefix.length)))
       extract = verifiedClaims;
     if (!extract) continue;
-    const base = baseVersion(root, diff.mergeBase, file);
-    const before = new Set(base === void 0 ? [] : extract(file, base).map((c) => c.login.toLowerCase()));
+    const active = ARCHIVED_BRIEF.exec(file);
+    const bases = [file, ...active ? [`openspec/changes/${active[1]}/brief.md`] : []];
+    const before = new Set(
+      bases.flatMap((path) => {
+        const base = baseVersion(root, diff.mergeBase, path);
+        return base === void 0 ? [] : extract(file, base).map((c) => c.login.toLowerCase());
+      })
+    );
     for (const claim of extract(file, readFileSync15(abs, "utf8")))
       if (!before.has(claim.login.toLowerCase())) out.push(claim);
   }
