@@ -34,6 +34,7 @@ The rules that keep knowledge and specs honest exist as separate commands (`vali
 6. **G12 is bundle-wide** and reuses audit rules A1 and A2 as warnings.
 7. **Rule order in the output** is by rule number, then path and line.
 8. **JSON `counts`** holds `block`, `warn` and `rules` (findings per rule id).
+9. **Changes being planned:** G5 and G18 skip a touched change until it has `tasks.md`; G13 still applies, because a brief is confirmed when the user approves it.
 
 ## Impact
 
