@@ -25,16 +25,9 @@ Specfold's knowledge bundle is only trustworthy if every agent, hook and CI job 
 - Rules that need git history or GitHub (human actors in `verified`, agent-written `human:` actors, staleness of touched concepts): those are gate rules G7, G8, G9.
 - Index freshness: `specfold index --check` (`add-specfold-index`).
 
-## Open points for review
+## Decisions
 
-Choices the plan does not settle; each is written into the spec as proposed below and can be changed in review.
-
-1. **Warnings in human output:** printed only as a count in the summary line; listed individually with `--json`. (The plan says "only errors printed".)
-2. **`decision` key required on every `Decision`:** proposed yes (`accepted`, `rejected`, `superseded`).
-3. **Body length over 300 lines:** a warning, not an error (the plan says "about 300 lines").
-4. **Broken links:** errors when `gate.block_on_broken_links` is true (default), otherwise warnings. Ignored entirely under `--okf-only`, because OKF requires consumers to tolerate broken links.
-5. **Repo-relative `sources[].resource` paths** (non-URL) must resolve, relative to the concept file or bundle-absolute.
-6. **Normative wording:** the uppercase words SHALL and MUST outside code spans and fenced code count as an error.
+The open points of the first draft were accepted as proposed on 2026-10-26; they are recorded in `design.md`.
 
 ## Impact
 
