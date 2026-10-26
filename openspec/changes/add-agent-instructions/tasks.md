@@ -9,7 +9,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Ship the bundled CLI as `template/scripts/specfold.mjs`
+- [x] 1.1 Ship the bundled CLI as `template/scripts/specfold.mjs`
   - Done when: `diff scripts/specfold.mjs template/scripts/specfold.mjs` finds no difference
 
 ## 2. Agent instructions
