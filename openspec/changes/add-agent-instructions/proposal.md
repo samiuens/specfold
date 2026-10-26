@@ -29,7 +29,9 @@ Skills only help when agents know the ground rules: where knowledge and specs li
 
 - Hooks and permissions (M4, M7).
 
-## Open points for review
+## Confirmed in review
+
+Confirmed by the maintainer on 2026-10-26, point by point:
 
 1. **The end-to-end run in Claude Code is interactive** (native questions, plan approval), so it needs you at the keyboard: I prepare the sample and a short runbook, you run `claude --agent planner` in `examples/sample-app`, and we commit the result. The opencode check I can run myself.
 

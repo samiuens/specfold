@@ -32,6 +32,8 @@ The CLI does the deterministic work, but agents still need to know when to call 
 
 ## Verify before building
 
+- That `npx skills add samiuens/specfold --list` finds the sf-* skills in the kit's `.agents/skills/` (skills CLI compatibility, decided 2026-10-26), and that every `SKILL.md` has the `name` and `description` frontmatter it requires.
+
 - The current Claude Code subagent frontmatter keys (`permissionMode`, `skills`, `model`, `tools`, `maxTurns`) and how `claude --agent` starts a main-session agent.
 - The current `SKILL.md` frontmatter (`name`, `description`) for Claude Code and opencode, and where opencode reads skills.
 
