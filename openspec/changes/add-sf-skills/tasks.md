@@ -55,7 +55,7 @@ agent: implementer
   - Done when: `node ../scripts/specfold.mjs agents sync --check` exits 0 in `template/`
 - [x] 4.2 Copy the skills and the planner into the kit and link them
   - Done when: `node scripts/specfold.mjs agents sync --check` exits 0 and `diff -r` finds no difference to the template
-- [ ] 4.3 Add the skills checks to CI
+- [x] 4.3 Add the skills checks to CI
   - Done when: the `cli` workflow passes on the PR
 
 ## 5. Skills check
