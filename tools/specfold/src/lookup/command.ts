@@ -1,8 +1,33 @@
 import { relative, sep } from "node:path";
 import { register } from "../cli.ts";
+import { conceptDependencies } from "../drift/deps.ts";
+import { driftOf, hasHistory } from "../drift/drift.ts";
 import { UsageError } from "../errors.ts";
-import { findRepoRoot, resolveBundleRoot } from "../repo.ts";
-import { search } from "./search.ts";
+import { findRepoRoot, loadConfig, resolveBundleRoot } from "../repo.ts";
+import { type Hit, search } from "./search.ts";
+
+/** Bundle-relative paths of the hits that are possibly stale; empty outside a git repository. */
+function drifted(repoRoot: string | undefined, bundleRoot: string, hits: Hit[]): Set<string> {
+  if (!repoRoot || hits.length === 0 || !hasHistory(repoRoot)) return new Set();
+  let sourceGlobs: string[] = [];
+  try {
+    sourceGlobs = loadConfig(repoRoot).sourceGlobs;
+  } catch {
+    // a broken specfold.yaml only costs the code references here
+  }
+  const wanted = new Set(hits.map((h) => h.rel));
+  return new Set(
+    conceptDependencies(repoRoot, bundleRoot, sourceGlobs)
+      .filter((c) => wanted.has(c.rel) && driftOf(repoRoot, c) !== undefined)
+      .map((c) => c.rel),
+  );
+}
+
+/** Inserts `drift` before `unverified`, keeping the documented flag order. */
+const withDrift = (flags: string[]) => {
+  const at = flags.indexOf("unverified");
+  return at === -1 ? [...flags, "drift"] : [...flags.slice(0, at), "drift", ...flags.slice(at)];
+};
 
 register({
   name: "lookup",
@@ -22,16 +47,18 @@ register({
       throw new UsageError(`--limit must be a positive integer, got '${limitArg}'`);
 
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle as string | undefined, undefined);
-    const base = findRepoRoot(io.cwd) ?? io.cwd;
+    const repoRoot = findRepoRoot(io.cwd);
+    const base = repoRoot ?? io.cwd;
     const type = values.type as string | undefined;
     const hits = search(bundleRoot, query, type ? { type } : {}).slice(0, Number(limitArg));
+    const stale = drifted(repoRoot, bundleRoot, hits);
     const results = hits.map((h) => ({
       path: relative(base, `${bundleRoot}${sep}${h.rel}`).split(sep).join("/"),
       title: h.title,
       description: h.description,
       type: h.type,
       score: h.score,
-      flags: h.flags,
+      flags: stale.has(h.rel) ? withDrift(h.flags) : h.flags,
     }));
     if (values.json) {
       io.stdout(`${JSON.stringify({ query, results }, null, 2)}\n`);
