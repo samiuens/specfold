@@ -3,7 +3,7 @@ type: Component
 title: specfold CLI
 description: How the specfold CLI is structured, built and shipped as one bundled file.
 status: draft
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T16:42:23+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T16:52:58+01:00 }
 sources:
   - id: source
     resource: ../../tools/specfold/src/cli.ts
@@ -32,6 +32,7 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/openspec.ts` | finds the OpenSpec binary: `node_modules/.bin/openspec`, then the PATH |
 | `src/doctor/` | the `doctor` command: checks D1 to D6 over an injected environment, version ranges |
 | `src/glob.ts` | dependency-free glob matching (`**` also matches zero folders) and the repository file walk |
+| `src/verify/` | the `verify` command: agent guard, login from `gh` or `.specfold/local.yaml`, path checks, line-level `verified` entries |
 | `src/validate/` | the `validate` command and its rule sets (OKF, profile, links) |
 | `src/indexes/` | the `index` command: index generation, `see knowledge:` scan, write and check modes |
 | `src/log/` | the `log add` command and the insertion of entries into date sections |
@@ -51,6 +52,7 @@ Under Node, `yaml` resolves to its CommonJS build, so the bundle banner provides
 # Related
 
 - [specfold validate](/capabilities/specfold-validate.md)
+- [specfold verify](/capabilities/specfold-verify.md)
 - [specfold agents sync](/capabilities/specfold-agents-sync.md)
 - [specfold audit](/capabilities/specfold-audit.md)
 - [specfold change check](/capabilities/specfold-change-check.md)
