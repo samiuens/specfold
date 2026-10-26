@@ -1,7 +1,7 @@
 ---
 type: Runbook
 title: Sample app agent check
-description: How to check the agent layer end to end on a fresh copy of the sample app, in Claude Code and in opencode.
+description: How to check the agent layer and the quality loops end to end on the sample app, in Claude Code and in opencode.
 status: draft
 stale_after: 2027-01-24T16:02:15+01:00
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T16:02:15+01:00 }
@@ -24,6 +24,7 @@ The exact commands are in the sample app's README (section "Agent check"), linke
 3. Run `claude --agent planner --permission-mode plan`, ask for a small change, and answer its questions.
 4. Run `opencode` in the same copy, list the skills and do a lookup through `sf-lookup`.
 5. Copy the new change folder back into `examples/sample-app/openspec/changes/`.
+6. After a change to trace, drift, the backlog or the retro, run the README's "Quality loops check" in `examples/sample-app`.
 
 # Verify
 
@@ -33,6 +34,7 @@ The exact commands are in the sample app's README (section "Agent check"), linke
 - **Your login:** the planner asks you to state it for `confirmed_by`; it never copies one from earlier files.
 - **The new change** passes `change check` (only the T7 warning for `knowledge-curator` until M8) and `openspec validate --strict`.
 - **opencode** lists the six sf skills and answers the lookup from the right concept.
+- **Quality loops:** trace has no dangling reference and covers every main-spec scenario; drift names the decision whose code `add-rename` touched; the backlog shows the promoted and the open item; `log.md` has the `Retro` entry.
 
 # Related
 
