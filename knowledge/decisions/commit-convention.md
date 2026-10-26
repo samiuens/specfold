@@ -4,7 +4,7 @@ title: Commit convention for the kit repo
 description: Kit-repo commits use Conventional Commits with a type-matched gitmoji, subject only, the human as author and the agent as co-author; not shipped.
 status: draft
 decision: accepted
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T02:10:00+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:11:42+01:00 }
 sources:
   - id: config
     resource: ../../scripts/commit-convention.json
@@ -27,7 +27,7 @@ Commits in the kit repo follow `<type>(<scope>): <gitmoji> <subject>`:
 
 Enforcement:
 
-- `scripts/check-commit.mjs`, which depends only on the pinned `gitmojis` package. It runs from `.githooks/commit-msg` (set by `npm run setup`) until `specfold hook` ships in M4, and then through `hooks.extra.commit-msg` in the kit's `specfold.yaml`.
+- `scripts/check-commit.mjs`, which depends only on the pinned `gitmojis` package. It runs through `hooks.extra.commit-msg` in the kit's `specfold.yaml`, which `specfold hook commit-msg` executes; `npm run setup` installs the hooks with `specfold hooks install` ([specfold hooks](/capabilities/specfold-hooks.md)).
 - The required CI check `commit-convention` runs over every commit of a PR and over the PR title.
 - The kit repo allows only rebase merges, so the granular commits and their trailers land on the default branch unchanged.
 
