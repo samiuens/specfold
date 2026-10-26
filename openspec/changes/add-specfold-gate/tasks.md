@@ -45,7 +45,7 @@ agent: implementer
   - Done when: scenario invalid-delta-spec passes in `gate-rules.test.ts`
 - [x] 3.3 Add G4 with the escape label and reason
   - Done when: scenarios code-without-change and escape-with-reason pass in `gate-rules.test.ts`
-- [ ] 3.4 Add G5, G6, G13 and G18 over touched and archived changes
+- [x] 3.4 Add G5, G6, G13 and G18 over touched and archived changes
   - Done when: scenarios missing-knowledge-delta, archived-without-sync, unconfirmed-brief and overlapping-parallel-groups pass in `gate-rules.test.ts`
 - [ ] 3.5 Add G8, G9, G12 and G14 over concepts and code references
   - Done when: scenarios agent-claims-a-human, edited-stale-reference, old-draft-elsewhere, new-dangling-reference and old-dangling-reference pass in `gate-rules.test.ts`

@@ -1,4 +1,5 @@
 import { relative, sep } from "node:path";
+import { checkChange } from "../change/command.ts";
 import { EnvError } from "../errors.ts";
 import type { Finding } from "../findings.ts";
 import { matchesAny } from "../glob.ts";
@@ -7,6 +8,9 @@ import { generateIndexes } from "../indexes/generate.ts";
 import { locationsByConcept, scanReferences } from "../indexes/refs.ts";
 import type { OpenSpecBinary } from "../openspec.ts";
 import type { Config } from "../repo.ts";
+import { planSync } from "../sync/plan.ts";
+import { checkChangeTasks } from "../tasks/command.ts";
+import type { TaskFinding } from "../tasks/rules.ts";
 import { validate } from "../validate/index.ts";
 import type { GateDiff } from "./diff.ts";
 import { openspecValidate } from "./openspec.ts";
@@ -51,6 +55,15 @@ const fromBundle = (ctx: GateContext, rule: string, effect: Effect, f: Finding):
   rule,
   effect,
   path: inRepo(ctx, f.path),
+  line: f.line,
+  message: `${f.rule} ${f.message}`,
+  fix: f.fix,
+});
+
+const fromChange = (rule: string, f: TaskFinding): GateFinding => ({
+  rule,
+  effect: f.severity === "error" ? "block" : "warn",
+  path: f.file,
   line: f.line,
   message: `${f.rule} ${f.message}`,
   fix: f.fix,
@@ -143,13 +156,53 @@ export const g4: GateRule = (ctx) => {
   ];
 };
 
+const touchedChanges = (ctx: GateContext) =>
+  ctx.diff.activeChanges.map((change) => checkChange(ctx.config, ctx.bundleRoot, change));
+
+/** G5: knowledge rule errors of every touched active change. */
+export const g5: GateRule = (ctx) =>
+  touchedChanges(ctx).flatMap((fs) =>
+    fs.filter((f) => f.rule.startsWith("K")).map((f) => fromChange("G5", f)),
+  );
+
+/** G13: brief rule errors of every touched active change. */
+export const g13: GateRule = (ctx) =>
+  touchedChanges(ctx).flatMap((fs) =>
+    fs.filter((f) => f.rule.startsWith("B")).map((f) => fromChange("G13", f)),
+  );
+
+/** G18: `specfold tasks check <change> --base <ref>` for every touched active change. */
+export const g18: GateRule = (ctx) =>
+  ctx.diff.activeChanges.flatMap((change) =>
+    checkChangeTasks(ctx.config, change, ctx.diff.ref).map((f) => fromChange("G18", f)),
+  );
+
+/** G6: every archived change's knowledge rules pass and its sync has nothing left to do. */
+export const g6: GateRule = (ctx) =>
+  ctx.diff.archivedChanges.flatMap((id) => {
+    const sync = planSync(ctx.config, ctx.bundleRoot, id, ctx.now);
+    if (sync.findings.length > 0)
+      return sync.findings.map((f) => ({ ...fromChange("G6", f), effect: "block" as const }));
+    const actions = [...(sync.plan?.actions ?? [])];
+    if (sync.needsLog) actions.push({ path: sync.logRel, action: "add log entry" });
+    const name = id.replace(/^\d{4}-\d{2}-\d{2}-/, "");
+    return actions.map((a) => ({
+      rule: "G6",
+      effect: "block" as const,
+      path: a.path,
+      line: null,
+      message: `archived change ${id} is not synced: ${a.action}`,
+      fix: `run specfold sync ${name} and commit the result`,
+    }));
+  });
+
 /** G10: the link rules of validate. */
 export const g10: GateRule = (ctx) =>
   validateFindings(ctx)
     .filter((f) => LINK_RULES.has(f.rule))
     .map((f) => fromBundle(ctx, "G10", ctx.config.blockOnBrokenLinks ? "block" : "warn", f));
 
-export const RULES: GateRule[] = [g1, g2, g3, g4, g10];
+export const RULES: GateRule[] = [g1, g2, g3, g4, g5, g6, g10, g13, g18];
 
 const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 const ruleNumber = (rule: string) => Number.parseInt(rule.slice(1), 10);
