@@ -73,7 +73,7 @@ scenarios: []
 agent: knowledge-curator
 ```
 
-- [ ] 6.1 Add the capability card for `specfold-index`, then update the CLI architecture concept, indexes and log
+- [x] 6.1 Add the capability card for `specfold-index`, then update the CLI architecture concept, indexes and log
   - Done when: `node scripts/specfold.mjs validate` and `node scripts/specfold.mjs index --check` exit 0
 
 ## Workflow follow-up

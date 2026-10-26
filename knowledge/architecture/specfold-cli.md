@@ -3,7 +3,7 @@ type: Component
 title: specfold CLI
 description: How the specfold CLI is structured, built and shipped as one bundled file.
 status: draft
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T11:30:00+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T13:00:00+01:00 }
 sources:
   - id: source
     resource: ../../tools/specfold/src/cli.ts
@@ -24,7 +24,9 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/repo.ts` | finds the repository root (nearest `specfold.yaml`) and loads the config |
 | `src/findings.ts` | the `Finding` shape, ordering, human and JSON rendering |
 | `src/bundle.ts` | walks a bundle and splits frontmatter from the body with line numbers |
+| `src/glob.ts` | dependency-free glob matching (`**` also matches zero folders) and the repository file walk |
 | `src/validate/` | the `validate` command and its rule sets (OKF, profile, links) |
+| `src/indexes/` | the `index` command: index generation, `see knowledge:` scan, write and check modes |
 
 # How commands work
 
@@ -37,5 +39,6 @@ Under Node, `yaml` resolves to its CommonJS build, so the bundle banner provides
 # Related
 
 - [specfold validate](/capabilities/specfold-validate.md)
+- [specfold index](/capabilities/specfold-index.md)
 - [Deterministic CLI](/decisions/deterministic-cli.md)
 - [TypeScript style](/conventions/typescript-style.md)
