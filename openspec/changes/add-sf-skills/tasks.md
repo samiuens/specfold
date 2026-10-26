@@ -11,7 +11,7 @@ agent: implementer
 
 - [x] 1.1 Write `sf-lookup`
   - Done when: `node scripts/check-skills.mjs template/.agents/skills` reports no problem for `sf-lookup`
-- [ ] 1.2 Write `sf-capture`, including rejected proposals and moving long rationale comments
+- [x] 1.2 Write `sf-capture`, including rejected proposals and moving long rationale comments
   - Done when: `node scripts/check-skills.mjs template/.agents/skills` reports no problem for `sf-capture`
 
 ## 2. Sync and audit skills
