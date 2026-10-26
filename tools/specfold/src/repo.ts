@@ -27,6 +27,8 @@ export interface Config {
   agentTargets: string[];
   /** `audit.unverified_after_days`: age after which a concept without `verified` is an audit finding. */
   unverifiedAfterDays: number;
+  /** `gate.*` settings beyond `block_on_broken_links`. */
+  gate: { requireChangeForSourceChanges: boolean; escapeLabel: string; blockOnStaleTouched: boolean };
 }
 
 /** The nearest directory at or above `cwd` that contains specfold.yaml. */
@@ -111,6 +113,12 @@ export function loadConfig(root: string): Config {
         ? [".claude/skills"]
         : stringList(agents.targets, "agents.targets").map((t) => repoFolder(t, "agents.targets")),
     unverifiedAfterDays: positiveInt(audit.unverified_after_days, "audit.unverified_after_days", 30),
+    gate: {
+      requireChangeForSourceChanges: gate.require_change_for_source_changes !== false,
+      escapeLabel:
+        typeof gate.escape_label === "string" && gate.escape_label !== "" ? gate.escape_label : "no-spec",
+      blockOnStaleTouched: gate.block_on_stale_touched !== false,
+    },
   };
 }
 

@@ -30,6 +30,20 @@ describe("repo", () => {
       tasks: { maxFilesPerTask: 5, maxTasksPerGroup: 8 },
       agentTargets: [".claude/skills"],
       unverifiedAfterDays: 30,
+      gate: { requireChangeForSourceChanges: true, escapeLabel: "no-spec", blockOnStaleTouched: true },
+    });
+  });
+
+  it("reads the gate settings", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "specfold.yaml"),
+      "types: []\ngate:\n  require_change_for_source_changes: false\n  escape_label: skip-spec\n  block_on_stale_touched: false\n",
+    );
+    expect(requireConfig(root).gate).toEqual({
+      requireChangeForSourceChanges: false,
+      escapeLabel: "skip-spec",
+      blockOnStaleTouched: false,
     });
   });
 

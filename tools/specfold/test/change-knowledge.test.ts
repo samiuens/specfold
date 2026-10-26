@@ -48,6 +48,7 @@ function setup(knowledge: string | undefined) {
     tasks: { maxFilesPerTask: 5, maxTasksPerGroup: 8 },
     agentTargets: [".claude/skills"],
     unverifiedAfterDays: 30,
+    gate: { requireChangeForSourceChanges: true, escapeLabel: "no-spec", blockOnStaleTouched: true },
   };
   return { root, dir, config };
 }
