@@ -1,6 +1,8 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import type { Severity } from "../findings.ts";
+import { walkFiles } from "../glob.ts";
+import { parallelOverlaps } from "./overlap.ts";
 import type { Group, TasksFile } from "./parse.ts";
 
 export interface TaskFinding {
@@ -230,6 +232,18 @@ export function checkStatic(tasks: TasksFile, ctx: RuleContext): TaskFinding[] {
       first?.metaLine ?? null,
       `groups ${cycle.join(", ")} depend on each other in a cycle`,
       "remove one dependency so the groups can be ordered",
+    );
+  }
+
+  for (const { first, second, shared } of parallelOverlaps(tasks.groups, () => walkFiles(ctx.repoRoot))) {
+    add(
+      "T5",
+      "error",
+      second.number,
+      null,
+      second.metaLine,
+      `groups ${first.number} and ${second.number} may run in parallel but both own ${shared}`,
+      `make group ${second.number} depend on group ${first.number} or split the files`,
     );
   }
 

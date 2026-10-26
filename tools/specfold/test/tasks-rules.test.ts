@@ -43,7 +43,6 @@ describe("checkStatic", () => {
   });
 
   // spec: specfold-tasks#id-from-a-delta-spec
-
   it("knows scenario ids from delta specs and main specs", () => {
     const root = tempDir();
     const changeDir = join(root, "openspec", "changes", "demo");
@@ -59,7 +58,6 @@ describe("checkStatic", () => {
   });
 
   // spec: specfold-tasks#group-without-files
-
   it("T1: reports a group without files", () => {
     const text = VALID.replace("files: [src/mail/**]", "depends: [1]");
     expect(rules(text)).toEqual([
@@ -74,7 +72,6 @@ describe("checkStatic", () => {
   });
 
   // spec: specfold-tasks#task-without-done-criterion
-
   it("T2: reports a task without done criterion", () => {
     const text = VALID.replace(
       "- [ ] 2.1 Do step 1\n  - Done when: npm test passes\n",
@@ -84,7 +81,6 @@ describe("checkStatic", () => {
   });
 
   // spec: specfold-tasks#gap-in-task-numbers
-
   it("T3: reports a gap in task numbers", () => {
     const text = VALID.replace(
       group(2, "Mail", "files: [src/mail/**]"),
@@ -96,7 +92,6 @@ describe("checkStatic", () => {
   });
 
   // spec: specfold-tasks#task-in-the-wrong-group
-
   it("T3: reports a task numbered for another group", () => {
     const text = VALID.replace("- [ ] 2.1 Do step 1", "- [ ] 3.1 Do step 1");
     expect(rules(text)).toEqual([expect.objectContaining({ rule: "T3", group: 2, task: "3.1" })]);
@@ -113,7 +108,6 @@ describe("checkStatic", () => {
   });
 
   // spec: specfold-tasks#stray-heading
-
   it("T3: reports a stray level-2 heading", () => {
     const text = VALID.replace("## 2. Mail", "## Notes\n\nSome text.\n\n## 2. Mail");
     expect(rules(text)).toEqual([
@@ -122,7 +116,6 @@ describe("checkStatic", () => {
   });
 
   // spec: specfold-tasks#cycle
-
   it("T4: reports a dependency cycle with its groups", () => {
     const text = VALID.replace("files: [src/mail/**]", "files: [src/mail/**]\ndepends: [3]");
     expect(rules(text)).toEqual([
@@ -135,7 +128,6 @@ describe("checkStatic", () => {
   });
 
   // spec: specfold-tasks#unknown-group
-
   it("T4: reports a dependency on a missing group and on itself", () => {
     const text = VALID.replace("files: [src/mail/**]", "files: [src/mail/**]\ndepends: [7, 2]");
     expect(rules(text).map((f) => f.message)).toEqual([
@@ -145,11 +137,38 @@ describe("checkStatic", () => {
   });
 
   // spec: specfold-tasks#nested-directories
+  it("T5: reports nested directories in independent groups", () => {
+    const text = VALID.replace("files: [src/mail/**]", "files: [src/token/sub/**]");
+    expect(rules(text)).toEqual([
+      expect.objectContaining({
+        rule: "T5",
+        group: 2,
+        message: "groups 1 and 2 may run in parallel but both own src/token/** and src/token/sub/**",
+      }),
+    ]);
+  });
+
+  it("T5: finds overlaps through wildcard-free entries and existing files", () => {
+    const repoRoot = tempDir();
+    write(repoRoot, "src/shared/util.ts");
+    const byEntry = VALID.replace("files: [src/mail/**]", "files: [src/token/index.ts]");
+    expect(rules(byEntry).map((f) => f.rule)).toEqual(["T5"]);
+    const byFile = VALID.replace("files: [src/token/**]", "files: ['src/*/util.ts']").replace(
+      "files: [src/mail/**]",
+      "files: ['src/shared/*.ts']",
+    );
+    expect(rules(byFile, { repoRoot }).map((f) => f.message)).toEqual([
+      "groups 1 and 2 may run in parallel but both own src/shared/util.ts",
+    ]);
+  });
 
   // spec: specfold-tasks#ordered-groups-may-share-files
+  it("T5: lets ordered groups share files", () => {
+    const text = VALID.replace("files: [src/mail/**]", "files: [src/token/**]\ndepends: [1]");
+    expect(rules(text)).toEqual([]);
+  });
 
   // spec: specfold-tasks#renamed-scenario
-
   it("T6: reports an unknown scenario id", () => {
     const text = VALID.replace("#guest-pays-without-account", "#old-title");
     expect(rules(text)).toEqual([
@@ -162,7 +181,6 @@ describe("checkStatic", () => {
   });
 
   // spec: specfold-tasks#unknown-role
-
   it("T7: warns about an unknown agent role", () => {
     const text = VALID.replace("agent: implementer", "agent: designer");
     expect(rules(text)).toEqual([expect.objectContaining({ rule: "T7", severity: "warning", group: 3 })]);
@@ -172,14 +190,12 @@ describe("checkStatic", () => {
   });
 
   // spec: specfold-tasks#knowledge-group-missing
-
   it("T8: warns when the last group is not Knowledge", () => {
     const text = VALID.replace("## 3. Knowledge", "## 3. Tests");
     expect(rules(text)).toEqual([expect.objectContaining({ rule: "T8", severity: "warning", group: 3 })]);
   });
 
   // spec: specfold-tasks#too-many-tasks
-
   it("T9: warns about a group with more tasks than the limit", () => {
     const text = VALID.replace(
       group(2, "Mail", "files: [src/mail/**]"),
