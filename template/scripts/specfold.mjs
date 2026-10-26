@@ -10343,14 +10343,17 @@ var g4 = (ctx) => {
     }
   ];
 };
-var touchedChanges = (ctx) => ctx.diff.activeChanges.map((change) => checkChange(ctx.config, ctx.bundleRoot, change));
-var g5 = (ctx) => touchedChanges(ctx).flatMap(
+var plannedChanges = (ctx) => ctx.diff.activeChanges.filter(
+  (change) => existsSync21(join23(ctx.config.root, "openspec", "changes", change, "tasks.md"))
+);
+var touchedChanges = (ctx, changes = ctx.diff.activeChanges) => changes.map((change) => checkChange(ctx.config, ctx.bundleRoot, change));
+var g5 = (ctx) => touchedChanges(ctx, plannedChanges(ctx)).flatMap(
   (fs) => fs.filter((f) => f.rule.startsWith("K")).map((f) => fromChange("G5", f))
 );
 var g13 = (ctx) => touchedChanges(ctx).flatMap(
   (fs) => fs.filter((f) => f.rule.startsWith("B")).map((f) => fromChange("G13", f))
 );
-var g18 = (ctx) => ctx.diff.activeChanges.flatMap(
+var g18 = (ctx) => plannedChanges(ctx).flatMap(
   (change) => checkChangeTasks(ctx.config, change, ctx.diff.ref).map((f) => fromChange("G18", f))
 );
 var g6 = (ctx) => ctx.diff.archivedChanges.flatMap((id) => {
