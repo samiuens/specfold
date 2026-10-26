@@ -59,12 +59,12 @@ scenarios: [specfold-validate#error-line-and-summary, specfold-validate#only-war
 agent: implementer
 ```
 
-- [ ] 4.1 Add P1 to P4 (type, title and description, status, trust fields)
-  - Done when: their scenarios and error-line-and-summary pass in `profile.test.ts`
+- [x] 4.1 Add P1 to P4 (type, title and description, status, trust fields)
+  - Done when: their scenarios pass in `profile.test.ts`
 - [ ] 4.2 Add P5 to P8 (timestamps, sources, stale_after, file names)
   - Done when: their scenarios in `profile.test.ts` pass
 - [ ] 4.3 Add P9 to P11 and the unknown-key guarantee
-  - Done when: their scenarios and only-warnings pass in `profile.test.ts`
+  - Done when: their scenarios, only-warnings and error-line-and-summary pass in `profile.test.ts`
 
 ## 5. Link rules
 
