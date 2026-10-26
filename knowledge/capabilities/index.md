@@ -4,6 +4,7 @@
 * [specfold audit](specfold-audit.md) - Why audit reports slow decay in the bundle, and where the contract for specfold audit lives.
 * [specfold change check](specfold-change-check.md) - Why change check is the enforcement of brief.md and knowledge.md, and where its contract lives.
 * [specfold doctor](specfold-doctor.md) - Why setup problems are checked in one command, and where the contract for specfold doctor lives.
+* [specfold drift](specfold-drift.md) - Why drift is computed from git alone, and where the contract for specfold drift lives.
 * [specfold gate](specfold-gate.md) - Why specfold gate gives one merge verdict, and where the contract for its rules lives.
 * [specfold hooks](specfold-hooks.md) - Why Specfold ships its own git and Claude Code hook entry points, and where their contract lives.
 * [specfold index](specfold-index.md) - Why bundle indexes are generated instead of written, and where the contract for specfold index lives.
