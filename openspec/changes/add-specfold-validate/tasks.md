@@ -101,7 +101,7 @@ agent: implementer
 
 - [x] 7.1 Rebuild the bundle and fix every finding `specfold validate` reports on the kit's own bundle
   - Done when: `node scripts/specfold.mjs validate` exits 0 in the kit repo
-- [ ] 7.2 Add a CI workflow that runs check, tests, the bundle freshness check and validate
+- [x] 7.2 Add a CI workflow that runs check, tests, the bundle freshness check and validate
   - Done when: the workflow passes on this PR
 
 ## 8. Knowledge
