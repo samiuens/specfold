@@ -35,7 +35,7 @@ scenarios: [specfold-audit#clean-bundle, specfold-audit#json-report]
 agent: implementer
 ```
 
-- [ ] 3.1 Add `specfold audit [--json]` with output and exit codes
+- [x] 3.1 Add `specfold audit [--json]` with output and exit codes
   - Done when: scenarios clean-bundle and json-report pass in `audit-command.test.ts`
 
 ## 4. Bundle

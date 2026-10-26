@@ -1,5 +1,6 @@
 // Every command module registers itself on import; the entry point and the tests load this one list.
 import "./agents/command.ts";
+import "./audit/command.ts";
 import "./change/command.ts";
 import "./doctor/command.ts";
 import "./indexes/command.ts";
