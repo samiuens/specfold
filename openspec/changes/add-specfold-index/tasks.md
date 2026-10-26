@@ -29,13 +29,13 @@ agent: implementer
 ## 3. Code references
 
 ```yaml
-files: [tools/specfold/src/indexes/refs.ts, tools/specfold/src/indexes/generate.ts, tools/specfold/test/index-refs.test.ts]
+files: [tools/specfold/src/indexes/refs.ts, tools/specfold/src/indexes/command.ts, tools/specfold/test/index-refs.test.ts, tools/specfold/test/index.test.ts, tools/specfold/test/fixtures/index/**]
 depends: [1, 2]
 scenarios: [specfold-index#reference-listed, specfold-index#reference-to-a-missing-concept]
 agent: implementer
 ```
 
-- [ ] 3.1 Scan `source_globs` for `see knowledge:` references and list them under their concepts
+- [x] 3.1 Scan `source_globs` for `see knowledge:` references and list them under their concepts
   - Done when: scenarios reference-listed and reference-to-a-missing-concept pass
 
 ## 4. Check mode and output

@@ -4,6 +4,7 @@ import { register } from "../cli.ts";
 import { countBySeverity, type Finding, findingLine, sortFindings } from "../findings.ts";
 import { requireConfig, resolveBundleRoot } from "../repo.ts";
 import { generateIndexes } from "./generate.ts";
+import { locationsByConcept, scanReferences } from "./refs.ts";
 
 export interface IndexResult {
   written: string[];
@@ -31,7 +32,19 @@ register({
   run: ({ io, values }) => {
     const config = requireConfig(io.cwd);
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle as string | undefined, config);
-    const { indexes, findings } = generateIndexes(bundleRoot, config);
+    const refs = scanReferences(config.root, config.sourceGlobs);
+    const { indexes, findings, concepts } = generateIndexes(bundleRoot, config, locationsByConcept(refs));
+    for (const ref of refs) {
+      if (concepts.has(ref.concept)) continue;
+      findings.push({
+        rule: "I2",
+        severity: "warning",
+        path: ref.file,
+        line: ref.line,
+        message: `reference to missing concept /${ref.concept}`,
+        fix: "point the comment at an existing concept or create it",
+      });
+    }
     const written = writeIndexes(config.root, bundleRoot, indexes);
     const sorted = sortFindings(findings);
     const { errors, warnings } = countBySeverity(sorted);
