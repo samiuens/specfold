@@ -89,7 +89,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 7.1 Rebuild the bundled CLI
+- [x] 7.1 Rebuild the bundled CLI
   - Done when: `npm run build -w specfold` leaves no diff and `node scripts/specfold.mjs tasks check add-specfold-tasks --base origin/main` reports no errors
 
 ## 8. Knowledge
