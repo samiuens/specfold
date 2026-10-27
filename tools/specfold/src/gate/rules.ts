@@ -153,9 +153,9 @@ export const g3: GateRule = (ctx) => {
   }));
 };
 
-/** G4: source changes need an active or archived change, or the escape label with a reason. */
+/** G4: source changes need an active or archived change, or the escape label with a reason; adoption PRs are exempt. */
 export const g4: GateRule = (ctx) => {
-  if (!ctx.config.gate.requireChangeForSourceChanges) return [];
+  if (!ctx.config.gate.requireChangeForSourceChanges || ctx.diff.adoption) return [];
   const sources = ctx.diff.files.filter((f) => matchesAny(f, ctx.config.sourceGlobs));
   if (sources.length === 0) return [];
   if (ctx.diff.activeChanges.length > 0 || ctx.diff.archivedChanges.length > 0) return [];
