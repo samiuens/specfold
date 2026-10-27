@@ -4,10 +4,11 @@ title: Kit content in repo-owned files lives in managed blocks
 description: Specfold writes its part of AGENTS.md, CLAUDE.md and similar files between specfold markers, the only part upgrades rewrite.
 status: draft
 decision: accepted
+change: 2026-10-27-add-specfold-migrate
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-27T12:25:39+01:00 }
 sources:
   - id: brief
-    resource: ../../openspec/changes/add-specfold-migrate/brief.md
+    resource: ../../openspec/changes/archive/2026-10-27-add-specfold-migrate/brief.md
     title: "Brief of add-specfold-migrate, decision Q4"
 ---
 
