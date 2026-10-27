@@ -51,7 +51,7 @@ agent: implementer
 
 - [x] 4.1 Install kit-owned files, managed blocks, settings and project files
   - Done when: scenarios wrong-folder, differing-cli-copy, existing-agents-md, existing-permissions, source-globs and agents-only pass in `migrate-install.test.ts`
-- [ ] 4.2 Set up OpenSpec, links, hooks and the manifest, idempotently
+- [x] 4.2 Set up OpenSpec, links, hooks and the manifest, idempotently
   - Done when: scenarios active-change-on-another-schema, manifest-entry and rerun pass in `migrate-install.test.ts`
 
 ## 5. Migrate command
