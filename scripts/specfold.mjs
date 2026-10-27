@@ -51,7 +51,7 @@ var require_identity = __commonJS({
     var NODE_TYPE = /* @__PURE__ */ Symbol.for("yaml.node.type");
     var isAlias = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === ALIAS;
     var isDocument = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === DOC;
-    var isMap3 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === MAP;
+    var isMap4 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === MAP;
     var isPair = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === PAIR;
     var isScalar2 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SCALAR;
     var isSeq3 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SEQ;
@@ -87,7 +87,7 @@ var require_identity = __commonJS({
     exports.isAlias = isAlias;
     exports.isCollection = isCollection;
     exports.isDocument = isDocument;
-    exports.isMap = isMap3;
+    exports.isMap = isMap4;
     exports.isNode = isNode;
     exports.isPair = isPair;
     exports.isScalar = isScalar2;
@@ -741,7 +741,7 @@ var require_Scalar = __commonJS({
     var Node = require_Node();
     var toJS = require_toJS();
     var isScalarValue = (value) => !value || typeof value !== "function" && typeof value !== "object";
-    var Scalar = class extends Node.NodeBase {
+    var Scalar2 = class extends Node.NodeBase {
       constructor(value) {
         super(identity.SCALAR);
         this.value = value;
@@ -753,12 +753,12 @@ var require_Scalar = __commonJS({
         return String(this.value);
       }
     };
-    Scalar.BLOCK_FOLDED = "BLOCK_FOLDED";
-    Scalar.BLOCK_LITERAL = "BLOCK_LITERAL";
-    Scalar.PLAIN = "PLAIN";
-    Scalar.QUOTE_DOUBLE = "QUOTE_DOUBLE";
-    Scalar.QUOTE_SINGLE = "QUOTE_SINGLE";
-    exports.Scalar = Scalar;
+    Scalar2.BLOCK_FOLDED = "BLOCK_FOLDED";
+    Scalar2.BLOCK_LITERAL = "BLOCK_LITERAL";
+    Scalar2.PLAIN = "PLAIN";
+    Scalar2.QUOTE_DOUBLE = "QUOTE_DOUBLE";
+    Scalar2.QUOTE_SINGLE = "QUOTE_SINGLE";
+    exports.Scalar = Scalar2;
     exports.isScalarValue = isScalarValue;
   }
 });
@@ -769,7 +769,7 @@ var require_createNode = __commonJS({
     "use strict";
     var Alias = require_Alias();
     var identity = require_identity();
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     var defaultTagPrefix = "tag:yaml.org,2002:";
     function findTagObject(value, tagName, tags) {
       if (tagName) {
@@ -814,7 +814,7 @@ var require_createNode = __commonJS({
           value = value.toJSON();
         }
         if (!value || typeof value !== "object") {
-          const node2 = new Scalar.Scalar(value);
+          const node2 = new Scalar2.Scalar(value);
           if (ref)
             ref.node = node2;
           return node2;
@@ -825,7 +825,7 @@ var require_createNode = __commonJS({
         onTagObj(tagObj);
         delete ctx.onTagObj;
       }
-      const node = tagObj?.createNode ? tagObj.createNode(ctx.schema, value, ctx) : typeof tagObj?.nodeClass?.from === "function" ? tagObj.nodeClass.from(ctx.schema, value, ctx) : new Scalar.Scalar(value);
+      const node = tagObj?.createNode ? tagObj.createNode(ctx.schema, value, ctx) : typeof tagObj?.nodeClass?.from === "function" ? tagObj.nodeClass.from(ctx.schema, value, ctx) : new Scalar2.Scalar(value);
       if (tagName)
         node.tag = tagName;
       else if (!tagObj.default)
@@ -1138,7 +1138,7 @@ ${indent}${text3.slice(fold + 1, end2)}`;
 var require_stringifyString = __commonJS({
   "../../node_modules/yaml/dist/stringify/stringifyString.js"(exports) {
     "use strict";
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     var foldFlowLines = require_foldFlowLines();
     var getFoldOptions = (ctx, isBlock) => ({
       indentAtStart: isBlock ? ctx.indent.length : ctx.indentAtStart,
@@ -1281,9 +1281,9 @@ ${indent}`) + "'";
         return quotedString(value, ctx);
       }
       const indent = ctx.indent || (ctx.forceBlockIndent || containsDocumentMarker(value) ? "  " : "");
-      const literal = blockQuote === "literal" ? true : blockQuote === "folded" || type === Scalar.Scalar.BLOCK_FOLDED ? false : type === Scalar.Scalar.BLOCK_LITERAL ? true : !lineLengthOverLimit(value, lineWidth, indent.length);
+      const literal2 = blockQuote === "literal" ? true : blockQuote === "folded" || type === Scalar2.Scalar.BLOCK_FOLDED ? false : type === Scalar2.Scalar.BLOCK_LITERAL ? true : !lineLengthOverLimit(value, lineWidth, indent.length);
       if (!value)
-        return literal ? "|\n" : ">\n";
+        return literal2 ? "|\n" : ">\n";
       let chomp;
       let endStart;
       for (endStart = value.length; endStart > 0; --endStart) {
@@ -1332,11 +1332,11 @@ ${indent}`) + "'";
         if (onComment)
           onComment();
       }
-      if (!literal) {
+      if (!literal2) {
         const foldedValue = value.replace(/\n+/g, "\n$&").replace(/(?:^|\n)([\t ].*)(?:([\n\t ]*)\n(?![\n\t ]))?/g, "$1$2").replace(/\n+/g, `$&${indent}`);
         let literalFallback = false;
         const foldOptions = getFoldOptions(ctx, true);
-        if (blockQuote !== "folded" && type !== Scalar.Scalar.BLOCK_FOLDED) {
+        if (blockQuote !== "folded" && type !== Scalar2.Scalar.BLOCK_FOLDED) {
           foldOptions.onOverflow = () => {
             literalFallback = true;
           };
@@ -1359,7 +1359,7 @@ ${indent}${start}${value}${end}`;
       if (/^[\n\t ,[\]{}#&*!|>'"%@`]|^[?-]$|^[?-][ \t]|[\n:][ \t]|[ \t]\n|[\n\t ]#|[\n\t :]$/.test(value)) {
         return implicitKey || inFlow || !value.includes("\n") ? quotedString(value, ctx) : blockString(item, ctx, onComment, onChompKeep);
       }
-      if (!implicitKey && !inFlow && type !== Scalar.Scalar.PLAIN && value.includes("\n")) {
+      if (!implicitKey && !inFlow && type !== Scalar2.Scalar.PLAIN && value.includes("\n")) {
         return blockString(item, ctx, onComment, onChompKeep);
       }
       if (containsDocumentMarker(value)) {
@@ -1384,20 +1384,20 @@ ${indent}`);
       const { implicitKey, inFlow } = ctx;
       const ss = typeof item.value === "string" ? item : Object.assign({}, item, { value: String(item.value) });
       let { type } = item;
-      if (type !== Scalar.Scalar.QUOTE_DOUBLE) {
+      if (type !== Scalar2.Scalar.QUOTE_DOUBLE) {
         if (/[\x00-\x08\x0b-\x1f\x7f-\x9f\u{D800}-\u{DFFF}]/u.test(ss.value))
-          type = Scalar.Scalar.QUOTE_DOUBLE;
+          type = Scalar2.Scalar.QUOTE_DOUBLE;
       }
       const _stringify = (_type) => {
         switch (_type) {
-          case Scalar.Scalar.BLOCK_FOLDED:
-          case Scalar.Scalar.BLOCK_LITERAL:
+          case Scalar2.Scalar.BLOCK_FOLDED:
+          case Scalar2.Scalar.BLOCK_LITERAL:
             return implicitKey || inFlow ? quotedString(ss.value, ctx) : blockString(ss, ctx, onComment, onChompKeep);
-          case Scalar.Scalar.QUOTE_DOUBLE:
+          case Scalar2.Scalar.QUOTE_DOUBLE:
             return doubleQuotedString(ss.value, ctx);
-          case Scalar.Scalar.QUOTE_SINGLE:
+          case Scalar2.Scalar.QUOTE_SINGLE:
             return singleQuotedString(ss.value, ctx);
-          case Scalar.Scalar.PLAIN:
+          case Scalar2.Scalar.PLAIN:
             return plainString(ss, ctx, onComment, onChompKeep);
           default:
             return null;
@@ -1546,7 +1546,7 @@ var require_stringifyPair = __commonJS({
   "../../node_modules/yaml/dist/stringify/stringifyPair.js"(exports) {
     "use strict";
     var identity = require_identity();
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     var stringify2 = require_stringify();
     var stringifyComment = require_stringifyComment();
     function stringifyPair({ key, value }, ctx, onComment, onChompKeep) {
@@ -1561,7 +1561,7 @@ var require_stringifyPair = __commonJS({
           throw new Error(msg);
         }
       }
-      let explicitKey = !simpleKeys && (!key || keyComment && value == null && !ctx.inFlow || identity.isCollection(key) || (identity.isScalar(key) ? key.type === Scalar.Scalar.BLOCK_FOLDED || key.type === Scalar.Scalar.BLOCK_LITERAL : typeof key === "object"));
+      let explicitKey = !simpleKeys && (!key || keyComment && value == null && !ctx.inFlow || identity.isCollection(key) || (identity.isScalar(key) ? key.type === Scalar2.Scalar.BLOCK_FOLDED || key.type === Scalar2.Scalar.BLOCK_LITERAL : typeof key === "object"));
       ctx = Object.assign({}, ctx, {
         allNullValues: false,
         implicitKey: !explicitKey && (simpleKeys || !allNullValues),
@@ -1701,19 +1701,19 @@ var require_merge = __commonJS({
   "../../node_modules/yaml/dist/schema/yaml-1.1/merge.js"(exports) {
     "use strict";
     var identity = require_identity();
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     var MERGE_KEY = "<<";
     var merge = {
       identify: (value) => value === MERGE_KEY || typeof value === "symbol" && value.description === MERGE_KEY,
       default: "key",
       tag: "tag:yaml.org,2002:merge",
       test: /^<<$/,
-      resolve: () => Object.assign(new Scalar.Scalar(Symbol(MERGE_KEY)), {
+      resolve: () => Object.assign(new Scalar2.Scalar(Symbol(MERGE_KEY)), {
         addToJSMap: addMergeToJSMap
       }),
       stringify: () => MERGE_KEY
     };
-    var isMergeKey = (ctx, key) => (merge.identify(key) || identity.isScalar(key) && (!key.type || key.type === Scalar.Scalar.PLAIN) && merge.identify(key.value)) && ctx?.doc.schema.tags.some((tag) => tag.tag === merge.tag && tag.default);
+    var isMergeKey = (ctx, key) => (merge.identify(key) || identity.isScalar(key) && (!key.type || key.type === Scalar2.Scalar.PLAIN) && merge.identify(key.value)) && ctx?.doc.schema.tags.some((tag) => tag.tag === merge.tag && tag.default);
     function addMergeToJSMap(ctx, map, value) {
       const source = resolveAliasValue(ctx, value);
       if (identity.isSeq(source))
@@ -2020,7 +2020,7 @@ var require_YAMLMap = __commonJS({
     var Collection = require_Collection();
     var identity = require_identity();
     var Pair = require_Pair();
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     function findPair(items, key) {
       const k = identity.isScalar(key) ? key.value : key;
       for (const it of items) {
@@ -2087,7 +2087,7 @@ var require_YAMLMap = __commonJS({
         if (prev) {
           if (!overwrite)
             throw new Error(`Key ${_pair.key} already set`);
-          if (identity.isScalar(prev.value) && Scalar.isScalarValue(_pair.value))
+          if (identity.isScalar(prev.value) && Scalar2.isScalarValue(_pair.value))
             prev.value.value = _pair.value;
           else
             prev.value = _pair.value;
@@ -2185,7 +2185,7 @@ var require_YAMLSeq = __commonJS({
     var stringifyCollection = require_stringifyCollection();
     var Collection = require_Collection();
     var identity = require_identity();
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     var toJS = require_toJS();
     var YAMLSeq = class extends Collection.Collection {
       static get tagName() {
@@ -2242,7 +2242,7 @@ var require_YAMLSeq = __commonJS({
         if (typeof idx !== "number")
           throw new Error(`Expected a valid index, not ${key}.`);
         const prev = this.items[idx];
-        if (identity.isScalar(prev) && Scalar.isScalarValue(value))
+        if (identity.isScalar(prev) && Scalar2.isScalarValue(value))
           prev.value = value;
         else
           this.items[idx] = value;
@@ -2338,14 +2338,14 @@ var require_string = __commonJS({
 var require_null = __commonJS({
   "../../node_modules/yaml/dist/schema/common/null.js"(exports) {
     "use strict";
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     var nullTag = {
       identify: (value) => value == null,
-      createNode: () => new Scalar.Scalar(null),
+      createNode: () => new Scalar2.Scalar(null),
       default: true,
       tag: "tag:yaml.org,2002:null",
       test: /^(?:~|[Nn]ull|NULL)?$/,
-      resolve: () => new Scalar.Scalar(null),
+      resolve: () => new Scalar2.Scalar(null),
       stringify: ({ source }, ctx) => typeof source === "string" && nullTag.test.test(source) ? source : ctx.options.nullStr
     };
     exports.nullTag = nullTag;
@@ -2356,13 +2356,13 @@ var require_null = __commonJS({
 var require_bool = __commonJS({
   "../../node_modules/yaml/dist/schema/core/bool.js"(exports) {
     "use strict";
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     var boolTag = {
       identify: (value) => typeof value === "boolean",
       default: true,
       tag: "tag:yaml.org,2002:bool",
       test: /^(?:[Tt]rue|TRUE|[Ff]alse|FALSE)$/,
-      resolve: (str3) => new Scalar.Scalar(str3[0] === "t" || str3[0] === "T"),
+      resolve: (str3) => new Scalar2.Scalar(str3[0] === "t" || str3[0] === "T"),
       stringify({ source, value }, ctx) {
         if (source && boolTag.test.test(source)) {
           const sv = source[0] === "t" || source[0] === "T";
@@ -2407,7 +2407,7 @@ var require_stringifyNumber = __commonJS({
 var require_float = __commonJS({
   "../../node_modules/yaml/dist/schema/core/float.js"(exports) {
     "use strict";
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     var stringifyNumber = require_stringifyNumber();
     var floatNaN = {
       identify: (value) => typeof value === "number",
@@ -2435,7 +2435,7 @@ var require_float = __commonJS({
       tag: "tag:yaml.org,2002:float",
       test: /^[-+]?(?:\.[0-9]+|[0-9]+\.[0-9]*)$/,
       resolve(str3) {
-        const node = new Scalar.Scalar(parseFloat(str3));
+        const node = new Scalar2.Scalar(parseFloat(str3));
         const dot = str3.indexOf(".");
         if (dot !== -1 && str3[str3.length - 1] === "0")
           node.minFractionDigits = str3.length - dot - 1;
@@ -2526,7 +2526,7 @@ var require_schema = __commonJS({
 var require_schema2 = __commonJS({
   "../../node_modules/yaml/dist/schema/json/schema.js"(exports) {
     "use strict";
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     var map = require_map();
     var seq = require_seq();
     function intIdentify(value) {
@@ -2543,7 +2543,7 @@ var require_schema2 = __commonJS({
       },
       {
         identify: (value) => value == null,
-        createNode: () => new Scalar.Scalar(null),
+        createNode: () => new Scalar2.Scalar(null),
         default: true,
         tag: "tag:yaml.org,2002:null",
         test: /^null$/,
@@ -2594,7 +2594,7 @@ var require_binary = __commonJS({
   "../../node_modules/yaml/dist/schema/yaml-1.1/binary.js"(exports) {
     "use strict";
     var node_buffer = __require("buffer");
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     var stringifyString = require_stringifyString();
     var binary = {
       identify: (value) => value instanceof Uint8Array,
@@ -2638,15 +2638,15 @@ var require_binary = __commonJS({
         } else {
           throw new Error("This environment does not support writing binary tags; either Buffer or btoa is required");
         }
-        type ?? (type = Scalar.Scalar.BLOCK_LITERAL);
-        if (type !== Scalar.Scalar.QUOTE_DOUBLE) {
+        type ?? (type = Scalar2.Scalar.BLOCK_LITERAL);
+        if (type !== Scalar2.Scalar.QUOTE_DOUBLE) {
           const lineWidth = Math.max(ctx.options.lineWidth - ctx.indent.length, ctx.options.minContentWidth);
           const n = Math.ceil(str3.length / lineWidth);
           const lines3 = new Array(n);
           for (let i = 0, o = 0; i < n; ++i, o += lineWidth) {
             lines3[i] = str3.substr(o, lineWidth);
           }
-          str3 = lines3.join(type === Scalar.Scalar.BLOCK_LITERAL ? "\n" : " ");
+          str3 = lines3.join(type === Scalar2.Scalar.BLOCK_LITERAL ? "\n" : " ");
         }
         return stringifyString.stringifyString({ comment, type, value: str3 }, ctx, onComment, onChompKeep);
       }
@@ -2661,7 +2661,7 @@ var require_pairs = __commonJS({
     "use strict";
     var identity = require_identity();
     var Pair = require_Pair();
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     var YAMLSeq = require_YAMLSeq();
     function resolvePairs(seq, onError) {
       if (identity.isSeq(seq)) {
@@ -2672,7 +2672,7 @@ var require_pairs = __commonJS({
           else if (identity.isMap(item)) {
             if (item.items.length > 1)
               onError("Each pair must have its own sequence indicator");
-            const pair = item.items[0] || new Pair.Pair(new Scalar.Scalar(null));
+            const pair = item.items[0] || new Pair.Pair(new Scalar2.Scalar(null));
             if (item.commentBefore)
               pair.key.commentBefore = pair.key.commentBefore ? `${item.commentBefore}
 ${pair.key.commentBefore}` : item.commentBefore;
@@ -2815,7 +2815,7 @@ var require_omap = __commonJS({
 var require_bool2 = __commonJS({
   "../../node_modules/yaml/dist/schema/yaml-1.1/bool.js"(exports) {
     "use strict";
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     function boolStringify({ value, source }, ctx) {
       const boolObj = value ? trueTag : falseTag;
       if (source && boolObj.test.test(source))
@@ -2827,7 +2827,7 @@ var require_bool2 = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:bool",
       test: /^(?:Y|y|[Yy]es|YES|[Tt]rue|TRUE|[Oo]n|ON)$/,
-      resolve: () => new Scalar.Scalar(true),
+      resolve: () => new Scalar2.Scalar(true),
       stringify: boolStringify
     };
     var falseTag = {
@@ -2835,7 +2835,7 @@ var require_bool2 = __commonJS({
       default: true,
       tag: "tag:yaml.org,2002:bool",
       test: /^(?:N|n|[Nn]o|NO|[Ff]alse|FALSE|[Oo]ff|OFF)$/,
-      resolve: () => new Scalar.Scalar(false),
+      resolve: () => new Scalar2.Scalar(false),
       stringify: boolStringify
     };
     exports.falseTag = falseTag;
@@ -2847,7 +2847,7 @@ var require_bool2 = __commonJS({
 var require_float2 = __commonJS({
   "../../node_modules/yaml/dist/schema/yaml-1.1/float.js"(exports) {
     "use strict";
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     var stringifyNumber = require_stringifyNumber();
     var floatNaN = {
       identify: (value) => typeof value === "number",
@@ -2875,7 +2875,7 @@ var require_float2 = __commonJS({
       tag: "tag:yaml.org,2002:float",
       test: /^[-+]?(?:[0-9][0-9_]*)?\.[0-9_]*$/,
       resolve(str3) {
-        const node = new Scalar.Scalar(parseFloat(str3.replace(/_/g, "")));
+        const node = new Scalar2.Scalar(parseFloat(str3.replace(/_/g, "")));
         const dot = str3.indexOf(".");
         if (dot !== -1) {
           const f = str3.substring(dot + 1).replace(/_/g, "");
@@ -4199,9 +4199,9 @@ var require_resolve_flow_collection = __commonJS({
     var blockMsg = "Block collections are not allowed within flow collections";
     var isBlock = (token) => token && (token.type === "block-map" || token.type === "block-seq");
     function resolveFlowCollection({ composeNode, composeEmptyNode }, ctx, fc, onError, tag) {
-      const isMap3 = fc.start.source === "{";
-      const fcName = isMap3 ? "flow map" : "flow sequence";
-      const NodeClass = tag?.nodeClass ?? (isMap3 ? YAMLMap.YAMLMap : YAMLSeq.YAMLSeq);
+      const isMap4 = fc.start.source === "{";
+      const fcName = isMap4 ? "flow map" : "flow sequence";
+      const NodeClass = tag?.nodeClass ?? (isMap4 ? YAMLMap.YAMLMap : YAMLSeq.YAMLSeq);
       const coll = new NodeClass(ctx.schema);
       coll.flow = true;
       const atRoot = ctx.atRoot;
@@ -4237,7 +4237,7 @@ var require_resolve_flow_collection = __commonJS({
             offset = props.end;
             continue;
           }
-          if (!isMap3 && ctx.options.strict && utilContainsNewline.containsNewline(key))
+          if (!isMap4 && ctx.options.strict && utilContainsNewline.containsNewline(key))
             onError(
               key,
               // checked by containsNewline()
@@ -4277,7 +4277,7 @@ var require_resolve_flow_collection = __commonJS({
             }
           }
         }
-        if (!isMap3 && !sep21 && !props.found) {
+        if (!isMap4 && !sep21 && !props.found) {
           const valueNode = value ? composeNode(ctx, value, props, onError) : composeEmptyNode(ctx, props.end, sep21, null, props, onError);
           coll.items.push(valueNode);
           offset = valueNode.range[2];
@@ -4300,7 +4300,7 @@ var require_resolve_flow_collection = __commonJS({
             startOnNewline: false
           });
           if (valueProps.found) {
-            if (!isMap3 && !props.found && ctx.options.strict) {
+            if (!isMap4 && !props.found && ctx.options.strict) {
               if (sep21)
                 for (const st of sep21) {
                   if (st === valueProps.found)
@@ -4332,7 +4332,7 @@ var require_resolve_flow_collection = __commonJS({
           const pair = new Pair.Pair(keyNode, valueNode);
           if (ctx.options.keepSourceTokens)
             pair.srcToken = collItem;
-          if (isMap3) {
+          if (isMap4) {
             const map = coll;
             if (utilMapIncludes.mapIncludes(ctx, map.items, keyNode))
               onError(keyStart, "DUPLICATE_KEY", "Map keys must be unique");
@@ -4348,7 +4348,7 @@ var require_resolve_flow_collection = __commonJS({
           offset = valueNode ? valueNode.range[2] : valueProps.end;
         }
       }
-      const expectedEnd = isMap3 ? "}" : "]";
+      const expectedEnd = isMap4 ? "}" : "]";
       const [ce, ...ee] = fc.end;
       let cePos = offset;
       if (ce?.source === expectedEnd)
@@ -4383,7 +4383,7 @@ var require_compose_collection = __commonJS({
   "../../node_modules/yaml/dist/compose/compose-collection.js"(exports) {
     "use strict";
     var identity = require_identity();
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     var YAMLMap = require_YAMLMap();
     var YAMLSeq = require_YAMLSeq();
     var resolveBlockMap = require_resolve_block_map();
@@ -4432,7 +4432,7 @@ var require_compose_collection = __commonJS({
       }
       const coll = resolveCollection(CN, ctx, token, onError, tagName, tag);
       const res = tag.resolve?.(coll, (msg) => onError(tagToken, "TAG_RESOLVE_FAILED", msg), ctx.options) ?? coll;
-      const node = identity.isNode(res) ? res : new Scalar.Scalar(res);
+      const node = identity.isNode(res) ? res : new Scalar2.Scalar(res);
       node.range = coll.range;
       node.tag = tagName;
       if (tag?.format)
@@ -4447,13 +4447,13 @@ var require_compose_collection = __commonJS({
 var require_resolve_block_scalar = __commonJS({
   "../../node_modules/yaml/dist/compose/resolve-block-scalar.js"(exports) {
     "use strict";
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     function resolveBlockScalar(ctx, scalar2, onError) {
       const start = scalar2.offset;
       const header = parseBlockScalarHeader(scalar2, ctx.options.strict, onError);
       if (!header)
         return { value: "", type: null, comment: "", range: [start, start, start] };
-      const type = header.mode === ">" ? Scalar.Scalar.BLOCK_FOLDED : Scalar.Scalar.BLOCK_LITERAL;
+      const type = header.mode === ">" ? Scalar2.Scalar.BLOCK_FOLDED : Scalar2.Scalar.BLOCK_LITERAL;
       const lines3 = scalar2.source ? splitLines(scalar2.source) : [];
       let chompStart = lines3.length;
       for (let i = lines3.length - 1; i >= 0; --i) {
@@ -4515,7 +4515,7 @@ var require_resolve_block_scalar = __commonJS({
           onError(offset - content.length - (crlf ? 2 : 1), "BAD_INDENT", message);
           indent = "";
         }
-        if (type === Scalar.Scalar.BLOCK_LITERAL) {
+        if (type === Scalar2.Scalar.BLOCK_LITERAL) {
           value += sep21 + indent.slice(trimIndent) + content;
           sep21 = "\n";
         } else if (indent.length > trimIndent || content[0] === "	") {
@@ -4630,7 +4630,7 @@ var require_resolve_block_scalar = __commonJS({
 var require_resolve_flow_scalar = __commonJS({
   "../../node_modules/yaml/dist/compose/resolve-flow-scalar.js"(exports) {
     "use strict";
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     var resolveEnd = require_resolve_end();
     function resolveFlowScalar(scalar2, strict, onError) {
       const { offset, type, source, end } = scalar2;
@@ -4639,15 +4639,15 @@ var require_resolve_flow_scalar = __commonJS({
       const _onError = (rel, code, msg) => onError(offset + rel, code, msg);
       switch (type) {
         case "scalar":
-          _type = Scalar.Scalar.PLAIN;
+          _type = Scalar2.Scalar.PLAIN;
           value = plainValue(source, _onError);
           break;
         case "single-quoted-scalar":
-          _type = Scalar.Scalar.QUOTE_SINGLE;
+          _type = Scalar2.Scalar.QUOTE_SINGLE;
           value = singleQuotedValue(source, _onError);
           break;
         case "double-quoted-scalar":
-          _type = Scalar.Scalar.QUOTE_DOUBLE;
+          _type = Scalar2.Scalar.QUOTE_DOUBLE;
           value = doubleQuotedValue(source, _onError);
           break;
         /* istanbul ignore next should not happen */
@@ -4852,7 +4852,7 @@ var require_compose_scalar = __commonJS({
   "../../node_modules/yaml/dist/compose/compose-scalar.js"(exports) {
     "use strict";
     var identity = require_identity();
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     var resolveBlockScalar = require_resolve_block_scalar();
     var resolveFlowScalar = require_resolve_flow_scalar();
     function composeScalar(ctx, token, tagToken, onError) {
@@ -4870,11 +4870,11 @@ var require_compose_scalar = __commonJS({
       let scalar2;
       try {
         const res = tag.resolve(value, (msg) => onError(tagToken ?? token, "TAG_RESOLVE_FAILED", msg), ctx.options);
-        scalar2 = identity.isScalar(res) ? res : new Scalar.Scalar(res);
+        scalar2 = identity.isScalar(res) ? res : new Scalar2.Scalar(res);
       } catch (error) {
         const msg = error instanceof Error ? error.message : String(error);
         onError(tagToken ?? token, "TAG_RESOLVE_FAILED", msg);
-        scalar2 = new Scalar.Scalar(value);
+        scalar2 = new Scalar2.Scalar(value);
       }
       scalar2.range = range;
       scalar2.source = value;
@@ -5358,10 +5358,10 @@ var require_cst_scalar = __commonJS({
         case "|":
         case ">": {
           const he = source.indexOf("\n");
-          const head = source.substring(0, he);
+          const head2 = source.substring(0, he);
           const body = source.substring(he + 1) + "\n";
           const props = [
-            { type: "block-scalar-header", offset, indent, source: head }
+            { type: "block-scalar-header", offset, indent, source: head2 }
           ];
           if (!addEndtoBlockProps(props, end))
             props.push({ type: "newline", offset: -1, indent, source: "\n" });
@@ -5421,19 +5421,19 @@ var require_cst_scalar = __commonJS({
     }
     function setBlockScalarValue(token, source) {
       const he = source.indexOf("\n");
-      const head = source.substring(0, he);
+      const head2 = source.substring(0, he);
       const body = source.substring(he + 1) + "\n";
       if (token.type === "block-scalar") {
         const header = token.props[0];
         if (header.type !== "block-scalar-header")
           throw new Error("Invalid block scalar header");
-        header.source = head;
+        header.source = head2;
         token.source = body;
       } else {
         const { offset } = token;
         const indent = "indent" in token ? token.indent : -1;
         const props = [
-          { type: "block-scalar-header", offset, indent, source: head }
+          { type: "block-scalar-header", offset, indent, source: head2 }
         ];
         if (!addEndtoBlockProps(props, "end" in token ? token.end : void 0))
           props.push({ type: "newline", offset: -1, indent, source: "\n" });
@@ -7249,7 +7249,7 @@ var require_public_api = __commonJS({
         return docs;
       return Object.assign([], { empty: true }, composer$1.streamInfo());
     }
-    function parseDocument4(source, options = {}) {
+    function parseDocument5(source, options = {}) {
       const { lineCounter: lineCounter2, prettyErrors } = parseOptions(options);
       const parser$1 = new parser.Parser(lineCounter2?.addNewLine);
       const composer$1 = new composer.Composer(options);
@@ -7268,14 +7268,14 @@ var require_public_api = __commonJS({
       }
       return doc;
     }
-    function parse5(src, reviver, options) {
+    function parse7(src, reviver, options) {
       let _reviver = void 0;
       if (typeof reviver === "function") {
         _reviver = reviver;
       } else if (options === void 0 && reviver && typeof reviver === "object") {
         options = reviver;
       }
-      const doc = parseDocument4(src, options);
+      const doc = parseDocument5(src, options);
       if (!doc)
         return null;
       doc.warnings.forEach((warning) => log.warn(doc.options.logLevel, warning));
@@ -7309,9 +7309,9 @@ var require_public_api = __commonJS({
         return value.toString(options);
       return new Document2.Document(value, _replacer, options).toString(options);
     }
-    exports.parse = parse5;
+    exports.parse = parse7;
     exports.parseAllDocuments = parseAllDocuments;
-    exports.parseDocument = parseDocument4;
+    exports.parseDocument = parseDocument5;
     exports.stringify = stringify2;
   }
 });
@@ -7327,7 +7327,7 @@ var require_dist = __commonJS({
     var Alias = require_Alias();
     var identity = require_identity();
     var Pair = require_Pair();
-    var Scalar = require_Scalar();
+    var Scalar2 = require_Scalar();
     var YAMLMap = require_YAMLMap();
     var YAMLSeq = require_YAMLSeq();
     var cst = require_cst();
@@ -7352,7 +7352,7 @@ var require_dist = __commonJS({
     exports.isScalar = identity.isScalar;
     exports.isSeq = identity.isSeq;
     exports.Pair = Pair.Pair;
-    exports.Scalar = Scalar.Scalar;
+    exports.Scalar = Scalar2.Scalar;
     exports.YAMLMap = YAMLMap.YAMLMap;
     exports.YAMLSeq = YAMLSeq.YAMLSeq;
     exports.CST = cst;
@@ -8601,8 +8601,8 @@ function driftOf(repoRoot, concept) {
   ]);
   const commits = [];
   for (const chunk of log.split("\0").slice(1)) {
-    const [head = "", ...files] = chunk.split("\n");
-    const [hash = "", date = "", ...subject] = head.split("	");
+    const [head2 = "", ...files] = chunk.split("\n");
+    const [hash = "", date = "", ...subject] = head2.split("	");
     if (Date.parse(date) <= after) continue;
     const paths = concept.paths.filter((p) => files.some((f) => f !== "" && coveredBy(f, p)));
     if (paths.length > 0) commits.push({ hash, date, subject: subject.join("	"), paths });
@@ -10868,7 +10868,8 @@ function computeDiff(root, ref, local) {
     activeChanges: [...active].filter((n) => isDir(join26(root, "openspec", "changes", n))),
     archivedChanges: [...archived].filter(
       (id) => isDir(join26(root, "openspec", "changes", "archive", id)) && !gitSucceeds(root, ["cat-file", "-e", `${mergeBase}:./openspec/changes/archive/${id}`])
-    )
+    ),
+    adoption: !gitSucceeds(root, ["cat-file", "-e", `${mergeBase}:./specfold.yaml`])
   };
 }
 
@@ -11353,7 +11354,7 @@ var g3 = (ctx) => {
   }));
 };
 var g4 = (ctx) => {
-  if (!ctx.config.gate.requireChangeForSourceChanges) return [];
+  if (!ctx.config.gate.requireChangeForSourceChanges || ctx.diff.adoption) return [];
   const sources = ctx.diff.files.filter((f) => matchesAny(f, ctx.config.sourceGlobs));
   if (sources.length === 0) return [];
   if (ctx.diff.activeChanges.length > 0 || ctx.diff.archivedChanges.length > 0) return [];
@@ -11658,8 +11659,9 @@ var runGate = (ctx) => sortGateFindings(RULES.flatMap((rule) => rule(ctx)));
 
 // src/gate/summary.ts
 var cell = (text3) => text3.replace(/\r?\n/g, " ").replace(/\|/g, "\\|");
-function renderSummary(findings, verdict2) {
+function renderSummary(findings, verdict2, notes = []) {
   const lines3 = [`## specfold gate: ${verdict2}`, ""];
+  if (notes.length > 0) lines3.push(...notes, "");
   if (findings.length > 0) {
     lines3.push("| Rule | Effect | Path | Message | Fix |", "| --- | --- | --- | --- | --- |");
     for (const f of findings) {
@@ -11696,11 +11698,14 @@ function gateContext(config, cwd, base, o) {
   };
 }
 var localGate = (config, cwd, base) => runGate(gateContext(config, cwd, base, { local: true, labels: [], prBody: void 0, pr: void 0 }));
-function renderGate(findings) {
-  const lines3 = findings.flatMap((f) => [
-    `${f.effect} ${f.rule} ${location(f)}${f.message}`,
-    ...f.effect === "block" ? [`    fix: ${f.fix}`] : []
-  ]);
+function renderGate(findings, notes = []) {
+  const lines3 = [...notes];
+  lines3.push(
+    ...findings.flatMap((f) => [
+      `${f.effect} ${f.rule} ${location(f)}${f.message}`,
+      ...f.effect === "block" ? [`    fix: ${f.fix}`] : []
+    ])
+  );
   lines3.push(`gate: ${verdict(findings)}`);
   return `${lines3.join("\n")}
 `;
@@ -11737,24 +11742,25 @@ register({
     const config = requireConfig(io.cwd);
     const local = values.local === true;
     const pr = prArg === void 0 ? void 0 : await fetchPullRequest(githubEnv(), Number(prArg));
-    const findings = runGate(
-      gateContext(config, io.cwd, base, {
-        local,
-        labels: values.label ?? [],
-        prBody: bodyFile === void 0 ? void 0 : readFileSync23(resolve5(io.cwd, bodyFile), "utf8"),
-        pr
-      })
-    );
+    const ctx = gateContext(config, io.cwd, base, {
+      local,
+      labels: values.label ?? [],
+      prBody: bodyFile === void 0 ? void 0 : readFileSync23(resolve5(io.cwd, bodyFile), "utf8"),
+      pr
+    });
+    const findings = runGate(ctx);
+    const adoption = ctx.diff.adoption;
+    const notes = adoption ? ["adoption PR: the base has no specfold.yaml, so G4 is skipped"] : [];
     const summary = values.summary;
     if (summary !== void 0)
-      writeFileSync8(resolve5(io.cwd, summary), renderSummary(findings, verdict(findings)));
+      writeFileSync8(resolve5(io.cwd, summary), renderSummary(findings, verdict(findings), notes));
     const counts = countFindings(findings);
     const ok2 = counts.block === 0;
     if (values.json) {
-      io.stdout(`${JSON.stringify({ ok: ok2, base, findings, counts }, null, 2)}
+      io.stdout(`${JSON.stringify({ ok: ok2, base, adoption, findings, counts }, null, 2)}
 `);
     } else {
-      io.stdout(renderGate(findings));
+      io.stdout(renderGate(findings, notes));
     }
     return ok2 ? 0 : 1;
   }
@@ -11933,8 +11939,8 @@ import { join as join36, relative as relative18, sep as sep18 } from "node:path"
 // src/hooks/base.ts
 function localBase(root) {
   try {
-    const head = git(root, ["symbolic-ref", "--quiet", "refs/remotes/origin/HEAD"]).trim();
-    if (head) return head.replace(/^refs\/remotes\//, "");
+    const head2 = git(root, ["symbolic-ref", "--quiet", "refs/remotes/origin/HEAD"]).trim();
+    if (head2) return head2.replace(/^refs\/remotes\//, "");
   } catch {
   }
   return gitSucceeds(root, ["rev-parse", "--verify", "--quiet", "origin/main^{commit}"]) ? "origin/main" : void 0;
@@ -12143,6 +12149,617 @@ register({
   }
 });
 
+// src/migrate/command.ts
+import { resolve as resolve7 } from "node:path";
+
+// src/migrate/detect.ts
+import { existsSync as existsSync34, readFileSync as readFileSync26 } from "node:fs";
+import { join as join37 } from "node:path";
+var STACK = [
+  [["package.json"], "Node.js"],
+  [["tsconfig.json"], "TypeScript"],
+  [["pyproject.toml", "requirements.txt", "setup.py"], "Python"],
+  [["go.mod"], "Go"],
+  [["Cargo.toml"], "Rust"],
+  [["pom.xml", "build.gradle", "build.gradle.kts"], "Java"],
+  [["Gemfile"], "Ruby"],
+  [["composer.json"], "PHP"],
+  [["mix.exs"], "Elixir"]
+];
+var CI = [
+  [".github/workflows", "GitHub Actions"],
+  [".gitlab-ci.yml", "GitLab CI"],
+  [".circleci", "CircleCI"],
+  ["Jenkinsfile", "Jenkins"],
+  ["azure-pipelines.yml", "Azure Pipelines"]
+];
+var CODE_FOLDERS = [
+  ["src", "src/**"],
+  ["lib", "lib/**"],
+  ["app", "app/**"],
+  ["packages", "packages/*/src/**"]
+];
+function hasWorkspaces(root) {
+  try {
+    const pkg = JSON.parse(readFileSync26(join37(root, "package.json"), "utf8"));
+    return pkg.workspaces !== void 0;
+  } catch {
+    return false;
+  }
+}
+function detect(root) {
+  const has = (p) => existsSync34(join37(root, p));
+  const globs = CODE_FOLDERS.filter(([dir]) => has(dir)).map(([, glob]) => glob);
+  return {
+    stack: STACK.filter(([files]) => files.some(has)).map(([, name]) => name),
+    layout: hasWorkspaces(root) || has("pnpm-workspace.yaml") || has("go.work") ? "monorepo" : "single package",
+    ci: CI.filter(([path]) => has(path)).map(([, name]) => name),
+    sourceGlobs: globs.length > 0 ? globs : ["src/**"],
+    globsFallback: globs.length === 0
+  };
+}
+
+// src/migrate/install.ts
+var import_yaml10 = __toESM(require_dist(), 1);
+import { execFileSync as execFileSync5 } from "node:child_process";
+import { createHash } from "node:crypto";
+import {
+  chmodSync as chmodSync2,
+  existsSync as existsSync35,
+  mkdirSync as mkdirSync6,
+  readdirSync as readdirSync7,
+  readFileSync as readFileSync27,
+  statSync as statSync11,
+  writeFileSync as writeFileSync10
+} from "node:fs";
+import { dirname as dirname8, join as join38 } from "node:path";
+
+// src/migrate/blocks.ts
+var MARKERS = {
+  markdown: ["<!-- specfold:start -->", "<!-- specfold:end -->"],
+  hash: ["# specfold:start", "# specfold:end"]
+};
+var blockStyle = (path) => path.endsWith(".md") ? "markdown" : "hash";
+function applyBlock(existing, content, style) {
+  const [start, end] = MARKERS[style];
+  const block = [start, ...content.replace(/\s+$/, "").split("\n"), end];
+  if (existing === void 0 || existing === "") return { text: `${block.join("\n")}
+`, changed: true };
+  const lines3 = existing.split("\n");
+  const from = lines3.findIndex((l) => l.trim() === start);
+  const to = lines3.findIndex((l, i) => i > from && l.trim() === end);
+  const strayEnd = lines3.some((l) => l.trim() === end);
+  let text3;
+  if (from !== -1 && to !== -1) {
+    text3 = [...lines3.slice(0, from), ...block, ...lines3.slice(to + 1)].join("\n");
+  } else if (from !== -1 || strayEnd) {
+    return {
+      conflict: `has a ${from !== -1 ? "specfold:start marker without an end" : "stray specfold:end marker"}`
+    };
+  } else if (style === "markdown") {
+    text3 = `${block.join("\n")}
+
+${existing}`;
+  } else {
+    text3 = `${existing}${existing.endsWith("\n") ? "" : "\n"}
+${block.join("\n")}
+`;
+  }
+  return { text: text3, changed: text3 !== existing };
+}
+
+// src/migrate/merge.ts
+var import_yaml9 = __toESM(require_dist(), 1);
+var STACK_PLACEHOLDER = /^(\s*)Stack: <filled by specfold init or sf-migrate>$/m;
+var fillStack = (configText, stack) => stack ? configText.replace(STACK_PLACEHOLDER, `$1Stack: ${stack}`) : configText;
+var isRecord5 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
+var commandsOf = (groups) => Array.isArray(groups) ? groups.flatMap((g) => (g.hooks ?? []).map((h) => String(h.command))) : [];
+function mergeSettings(existing, template) {
+  if (existing === void 0) return { text: template, changed: true };
+  let data;
+  try {
+    data = JSON.parse(existing);
+  } catch {
+    return { conflict: "is not valid JSON" };
+  }
+  if (!isRecord5(data)) return { conflict: "is not a JSON object" };
+  const wanted = JSON.parse(template).hooks ?? {};
+  if (data.hooks !== void 0 && !isRecord5(data.hooks))
+    return { conflict: "has a 'hooks' value that is not an object" };
+  const hooks = isRecord5(data.hooks) ? data.hooks : {};
+  let changed = false;
+  for (const [event, groups] of Object.entries(wanted)) {
+    const current = hooks[event];
+    if (current !== void 0 && !Array.isArray(current))
+      return { conflict: `has a '${event}' hook entry that is not a list` };
+    const present = new Set(commandsOf(current));
+    const added = groups.filter((g) => !commandsOf([g]).some((c) => present.has(c)));
+    if (added.length === 0) continue;
+    hooks[event] = [...current ?? [], ...added];
+    changed = true;
+  }
+  if (!changed) return { text: existing, changed: false };
+  return { text: `${JSON.stringify({ ...data, hooks }, null, 2)}
+`, changed: true };
+}
+function mergeOpenspecConfig(existing, template, stack) {
+  const doc = (0, import_yaml9.parseDocument)(existing);
+  if (doc.errors[0]) return { conflict: `is not valid YAML: ${doc.errors[0].message.split("\n")[0]}` };
+  if (!(0, import_yaml9.isMap)(doc.contents)) return { conflict: "is not a YAML mapping" };
+  const wanted = (0, import_yaml9.parse)(fillStack(template, stack));
+  let touched = false;
+  const edit = (apply) => {
+    apply();
+    touched = true;
+  };
+  if (doc.get("schema") !== "specfold") edit(() => doc.set("schema", "specfold"));
+  const context = doc.get("context");
+  if (context === void 0 && wanted.context !== void 0) {
+    const value = wanted.context;
+    edit(() => doc.set("context", literal(value)));
+  } else if (typeof context === "string" && stack && !/^Stack:/m.test(context)) {
+    edit(() => doc.set("context", literal(`${context.replace(/\n*$/, "\n")}Stack: ${stack}
+`)));
+  }
+  if (!doc.has("rules")) {
+    const rules = wanted.rules;
+    if (rules) edit(() => doc.set("rules", doc.createNode(rules)));
+  } else if ((0, import_yaml9.isMap)(doc.get("rules"))) {
+    for (const [key, value] of Object.entries(wanted.rules ?? {}))
+      if (!doc.hasIn(["rules", key])) edit(() => doc.setIn(["rules", key], doc.createNode(value)));
+  }
+  if (!touched) return { text: existing, changed: false };
+  const text3 = String(doc);
+  return { text: text3, changed: text3 !== existing };
+}
+function literal(text3) {
+  const node = new import_yaml9.Scalar(text3);
+  node.type = import_yaml9.Scalar.BLOCK_LITERAL;
+  return node;
+}
+
+// src/migrate/install.ts
+var TOOLS = ["agents", "claude"];
+var MANIFEST_PATH = ".specfold/manifest.json";
+var REQUIRED = [CONFIG_FILE, "scripts/specfold.mjs", "openspec/schemas/specfold"];
+var BLOCK_FILES = [
+  "AGENTS.md",
+  "CLAUDE.md",
+  ".github/pull_request_template.md",
+  ".gitignore",
+  ".github/CODEOWNERS"
+];
+var sha256 = (data) => `sha256:${createHash("sha256").update(data).digest("hex")}`;
+function filesUnder(base, dir) {
+  const abs = join38(base, dir);
+  if (!existsSync35(abs)) return [];
+  if (!statSync11(abs).isDirectory()) return [dir];
+  return readdirSync7(abs, { withFileTypes: true }).flatMap(
+    (d) => d.isDirectory() ? filesUnder(base, `${dir}/${d.name}`) : d.isFile() ? [`${dir}/${d.name}`] : []
+  ).sort();
+}
+function kitOwned(from, tools) {
+  return [
+    "scripts/specfold.mjs",
+    "openspec/schemas/specfold",
+    ".agents/skills",
+    ".github/workflows/specfold-gate.yml",
+    ".github/workflows/specfold-gate-comment.yml",
+    ...tools.includes("claude") ? [".claude/agents"] : []
+  ].flatMap((p) => filesUnder(from, p));
+}
+function preflight(o) {
+  const missing = REQUIRED.filter((p) => !existsSync35(join38(o.from, p)));
+  if (missing.length > 0)
+    throw new EnvError(`--from ${o.from} is not a Specfold template folder: missing ${missing.join(", ")}`);
+  if (existsSync35(join38(o.root, "openspec/config.yaml"))) return;
+  const bin = openspecBinary(o.root);
+  try {
+    execFileSync5(bin.command, ["--version"], { stdio: "ignore" });
+  } catch {
+    throw new EnvError(
+      `openspec is not installed (looked for ${bin.command}); it sets up openspec/ for this repository`
+    );
+  }
+}
+function openspecInit(root, tools) {
+  const bin = openspecBinary(root);
+  try {
+    execFileSync5(bin.command, ["init", "--tools", tools.join(",")], {
+      cwd: root,
+      stdio: ["ignore", "pipe", "pipe"],
+      env: { ...process.env, NO_COLOR: "1" }
+    });
+  } catch (error) {
+    const reason = String(error.stderr ?? "").trim().split("\n").at(-1);
+    throw new EnvError(`openspec init failed${reason ? `: ${reason}` : ""}`);
+  }
+}
+function projectSettings(text3, globs, tools) {
+  const out = text3.replace(/^source_globs:.*$/m, `source_globs: ${JSON.stringify(globs)}`);
+  return tools.includes("claude") ? out : out.replace(/^(agents:\n(?:#.*\n)*\s+targets:).*$/m, "$1 []");
+}
+function installKit(o) {
+  preflight(o);
+  const result = { actions: [], conflicts: [] };
+  const act = (path, action) => result.actions.push({ path, action });
+  const conflict = (path, reason) => result.conflicts.push({ path, reason });
+  const abs = (p) => join38(o.root, p);
+  const read = (p) => existsSync35(abs(p)) ? readFileSync27(abs(p), "utf8") : void 0;
+  const template = (p) => readFileSync27(join38(o.from, p), "utf8");
+  const put = (p, data, mode) => {
+    mkdirSync6(dirname8(abs(p)), { recursive: true });
+    writeFileSync10(abs(p), data);
+    if (mode !== void 0) chmodSync2(abs(p), mode);
+  };
+  const merged = (p, m, action) => {
+    if ("conflict" in m) conflict(p, m.conflict);
+    else if (m.changed) {
+      put(p, m.text);
+      act(p, action);
+    }
+    return !("conflict" in m);
+  };
+  const manifest = { files: {}, blocks: {} };
+  const claude = o.tools.includes("claude");
+  const found = detect(o.root);
+  const stack = o.stack ?? (found.stack.length > 0 ? found.stack.join(", ") : void 0);
+  const freshOpenspec = !existsSync35(abs("openspec/config.yaml"));
+  if (freshOpenspec) {
+    openspecInit(o.root, o.tools);
+    act("openspec/", `run openspec init --tools ${o.tools.join(",")}`);
+  }
+  for (const p of kitOwned(o.from, o.tools)) {
+    const data = readFileSync27(join38(o.from, p));
+    if (!existsSync35(abs(p))) {
+      put(p, data, statSync11(join38(o.from, p)).mode & 511);
+      act(p, "write");
+    } else if (!readFileSync27(abs(p)).equals(data)) {
+      conflict(p, "differs from the kit's copy; left unchanged");
+      continue;
+    }
+    manifest.files[p] = sha256(data);
+  }
+  for (const p of BLOCK_FILES) {
+    if (p === "CLAUDE.md" && !claude) continue;
+    const content = template(p);
+    if (merged(p, applyBlock(read(p), content, blockStyle(p)), "block")) manifest.blocks[p] = sha256(content);
+  }
+  if (claude) {
+    const current = read(".claude/settings.json");
+    const settings2 = mergeSettings(current, template(".claude/settings.json"));
+    merged(".claude/settings.json", settings2, current === void 0 ? "write" : "merge");
+  }
+  if (read(CONFIG_FILE) === void 0) {
+    put(CONFIG_FILE, projectSettings(template(CONFIG_FILE), o.sourceGlobs ?? found.sourceGlobs, o.tools));
+    act(CONFIG_FILE, "write");
+  }
+  for (const p of filesUnder(o.from, "knowledge"))
+    if (!existsSync35(abs(p))) {
+      put(p, readFileSync27(join38(o.from, p)));
+      act(p, "write");
+    }
+  const config = template("openspec/config.yaml");
+  if (freshOpenspec) {
+    put("openspec/config.yaml", fillStack(config, stack));
+    act("openspec/config.yaml", "write");
+  } else {
+    merged(
+      "openspec/config.yaml",
+      mergeOpenspecConfig(read("openspec/config.yaml"), config, stack),
+      "merge"
+    );
+  }
+  const settings = loadConfig(o.root);
+  const skills = listSkills(o.root);
+  if (skills) {
+    const links = planLinks(o.root, skills, settings.agentTargets).filter((l) => l.action !== "kept");
+    applyLinks(o.root, links);
+    for (const l of links) act(l.path, l.action);
+  }
+  try {
+    for (const a of installHooks(settings).actions) act(a.path, a.action);
+  } catch (error) {
+    if (!(error instanceof EnvError)) throw error;
+    conflict("git hooks", error.message);
+  }
+  const kitVersion = String((0, import_yaml10.parse)(template(CONFIG_FILE)).kit_version ?? "");
+  const sorted = (r) => Object.fromEntries(Object.entries(r).sort(([a], [b]) => a < b ? -1 : 1));
+  const text3 = `${JSON.stringify(
+    {
+      manifest_version: 1,
+      kit_version: kitVersion,
+      ...o.ref ? { ref: o.ref } : {},
+      files: sorted(manifest.files),
+      blocks: sorted(manifest.blocks)
+    },
+    null,
+    2
+  )}
+`;
+  if (writeIfChanged(abs(MANIFEST_PATH), text3)) act(MANIFEST_PATH, "write");
+  return result;
+}
+
+// src/migrate/inventory.ts
+import { readFileSync as readFileSync28 } from "node:fs";
+import { join as join39 } from "node:path";
+var AGENT_RULES = [
+  "AGENTS.md",
+  "CLAUDE.md",
+  "GEMINI.md",
+  ".cursorrules",
+  ".windsurfrules",
+  ".clinerules",
+  ".cursor/rules/**",
+  ".github/copilot-instructions.md"
+];
+var SPEC_TOOLS = ["openspec/**", ".specify/**", ".kiro/specs/**"];
+var MARKDOWN = /\.(md|mdx|markdown)$/i;
+var DOC_TEXT = /\.(md|mdx|markdown|rst|adoc|txt)$/i;
+var ADR_FOLDERS = /* @__PURE__ */ new Set(["adr", "adrs", "decisions", "decision-records"]);
+function classify(path) {
+  const parts2 = path.split("/");
+  const name = parts2.at(-1);
+  const folders = parts2.slice(0, -1);
+  if (matchesAny(path, AGENT_RULES)) return "agent-rules";
+  if (matchesAny(path, SPEC_TOOLS)) return "spec-tool";
+  if (MARKDOWN.test(name) && folders.some((f) => ADR_FOLDERS.has(f.toLowerCase()))) return "adr";
+  if (MARKDOWN.test(name) && folders.some((f) => f.toLowerCase() === "wiki")) return "wiki";
+  if (/^readme(\.|$)/i.test(name)) return "readme";
+  if (/^contributing(\.|$)/i.test(name)) return "contributing";
+  if (DOC_TEXT.test(name) && (folders[0] === "docs" || folders[0] === "doc")) return "docs";
+  return void 0;
+}
+var estimateTokens = (text3) => Math.ceil(text3.length / 4);
+function inventory(root) {
+  const tracked = git(root, ["ls-files", "-z"]).split("\0").filter(Boolean).sort();
+  const out = [];
+  for (const path of tracked) {
+    const kind = classify(path);
+    if (!kind) continue;
+    let text3 = "";
+    try {
+      text3 = readFileSync28(join39(root, path), "utf8");
+    } catch {
+    }
+    out.push({ path, kind, tokens: estimateTokens(text3) });
+  }
+  return out;
+}
+
+// src/migrate/repo.ts
+var MIGRATION_BRANCH = "specfold/migration";
+var STATE_PATH = ".specfold/migration/state.json";
+function gitRoot(cwd) {
+  try {
+    return git(cwd, ["rev-parse", "--show-toplevel"]).trim();
+  } catch {
+    throw new EnvError("specfold migrate needs a git repository: run it inside one, or run git init first");
+  }
+}
+function currentBranch(root) {
+  try {
+    return git(root, ["symbolic-ref", "--quiet", "--short", "HEAD"]).trim() || void 0;
+  } catch {
+    return void 0;
+  }
+}
+var branchExists = (root, name) => gitSucceeds(root, ["show-ref", "--verify", "--quiet", `refs/heads/${name}`]);
+function defaultBranch(root, flag) {
+  if (flag) return flag;
+  try {
+    const ref = git(root, ["symbolic-ref", "--quiet", "refs/remotes/origin/HEAD"]).trim();
+    if (ref.startsWith("refs/remotes/origin/")) return ref.slice("refs/remotes/origin/".length);
+  } catch {
+  }
+  const current = currentBranch(root);
+  const known = ["main", "master"].filter((b) => branchExists(root, b) || b === current);
+  if (known.length === 1) return known[0];
+  throw new UsageError(
+    `cannot tell the default branch (${known.length === 0 ? "no main or master" : "both main and master exist"}): pass --default-branch <name>`
+  );
+}
+function dirtyPaths(root) {
+  return git(root, ["status", "--porcelain", "--untracked-files=all"]).split("\n").filter((l) => l !== "").map((l) => l.slice(3)).filter((p) => p !== STATE_PATH);
+}
+
+// src/migrate/state.ts
+import { existsSync as existsSync36, mkdirSync as mkdirSync7, readFileSync as readFileSync29, writeFileSync as writeFileSync11 } from "node:fs";
+import { dirname as dirname9, join as join40 } from "node:path";
+var STEPS = ["start", "inventory", "plan", "install", "convert", "seed", "report"];
+var MARKABLE = ["plan", "convert", "seed", "report"];
+function readState(root) {
+  const path = join40(root, STATE_PATH);
+  if (!existsSync36(path)) return { state_version: 1, default_branch: null, base: null, steps: {} };
+  try {
+    return JSON.parse(readFileSync29(path, "utf8"));
+  } catch (error) {
+    throw new EnvError(`${STATE_PATH}: ${error.message}`);
+  }
+}
+function writeState(root, state) {
+  const path = join40(root, STATE_PATH);
+  mkdirSync7(dirname9(path), { recursive: true });
+  writeFileSync11(path, `${JSON.stringify(state, null, 2)}
+`);
+}
+function markStep(state, step, now) {
+  return state.steps[step] ? state : { ...state, steps: { ...state.steps, [step]: now.toISOString() } };
+}
+var nextStep = (state) => STEPS.find((s) => !state.steps[s]) ?? null;
+
+// src/migrate/command.ts
+var NEXT = {
+  start: "specfold migrate start",
+  inventory: "specfold migrate inventory",
+  plan: "write .specfold/migration/plan.md, get it approved, then specfold migrate mark plan",
+  install: "specfold migrate install --from <template folder>",
+  convert: "convert the plan rows into concepts, then specfold migrate mark convert",
+  seed: "seed concepts from the code, then specfold migrate mark seed",
+  report: "validate and write .specfold/migration/report.md, then specfold migrate mark report"
+};
+function parseTools(value) {
+  if (value === void 0) return [...TOOLS];
+  const tools = value.split(",").map((t) => t.trim());
+  const unknown = tools.filter((t) => !TOOLS.includes(t));
+  if (unknown.length > 0 || !tools.includes("agents"))
+    throw new UsageError(`--tools takes 'agents' or 'agents,claude', got '${value}'`);
+  return tools;
+}
+var head = (root) => {
+  try {
+    return git(root, ["rev-parse", "--verify", "--quiet", "HEAD"]).trim();
+  } catch {
+    return null;
+  }
+};
+register({
+  name: "migrate",
+  summary: "bring an existing repository into Specfold: own branch, state, inventory, kit install",
+  usage: "specfold migrate start [--default-branch <name>] | inventory | install --from <dir> [--tools <list>] [--stack <text>] [--source-glob <glob>]... [--ref <ref>] | mark <step> | status  [--json]",
+  options: {
+    "default-branch": { type: "string" },
+    from: { type: "string" },
+    tools: { type: "string" },
+    stack: { type: "string" },
+    "source-glob": { type: "string", multiple: true },
+    ref: { type: "string" },
+    json: { type: "boolean" }
+  },
+  run: ({ io, values, positionals }) => {
+    const [sub, ...args] = positionals;
+    const allowed = sub === "mark" ? 1 : 0;
+    if (args.length > allowed) throw new UsageError(`unexpected argument '${args[allowed]}'`);
+    if (sub === void 0)
+      throw new UsageError("missing subcommand: start, inventory, install, mark or status");
+    if (!["start", "inventory", "install", "mark", "status"].includes(sub))
+      throw new UsageError(`unknown migrate subcommand '${sub}'`);
+    const root = gitRoot(io.cwd);
+    const print = (lines3, json) => io.stdout(values.json ? `${JSON.stringify(json, null, 2)}
+` : `${lines3.join("\n")}
+`);
+    const refuse = (message) => {
+      if (values.json) io.stdout(`${JSON.stringify({ ok: false, error: message }, null, 2)}
+`);
+      else io.stderr(`specfold: ${message}
+`);
+      return 1;
+    };
+    const now = /* @__PURE__ */ new Date();
+    let state = readState(root);
+    const next = () => {
+      const step = nextStep(state);
+      return step === null ? "all migration steps are done" : `next: ${NEXT[step]}`;
+    };
+    if (sub === "status") {
+      const rows = STEPS.map(
+        (s) => `${state.steps[s] ? "done" : "open"}  ${s.padEnd(9)}${state.steps[s] ?? ""}`.trimEnd()
+      );
+      print([...rows, next()], {
+        steps: state.steps,
+        next: nextStep(state),
+        default_branch: state.default_branch
+      });
+      return 0;
+    }
+    if (sub === "start") {
+      const dirty = dirtyPaths(root);
+      if (dirty.length > 0)
+        return refuse(
+          `the working tree has uncommitted changes (${dirty.slice(0, 3).join(", ")}${dirty.length > 3 ? ", ..." : ""}): commit or stash them first`
+        );
+      const current = currentBranch(root);
+      if (current === void 0) return refuse("HEAD is detached: check out the default branch first");
+      let message;
+      if (current === MIGRATION_BRANCH) {
+        message = `resuming on ${MIGRATION_BRANCH}`;
+        state = {
+          ...state,
+          default_branch: state.default_branch ?? defaultBranch(root, values["default-branch"])
+        };
+      } else {
+        const base = defaultBranch(root, values["default-branch"]);
+        if (current !== base)
+          return refuse(
+            `on branch '${current}': the migration only starts from the default branch '${base}' and runs on ${MIGRATION_BRANCH}`
+          );
+        if (branchExists(root, MIGRATION_BRANCH)) {
+          git(root, ["checkout", "--quiet", MIGRATION_BRANCH]);
+          message = `switched to ${MIGRATION_BRANCH}`;
+        } else {
+          const commit = head(root);
+          git(root, ["checkout", "--quiet", "-b", MIGRATION_BRANCH]);
+          message = `created ${MIGRATION_BRANCH} from ${base}`;
+          state = { ...state, base: state.base ?? commit };
+        }
+        state = { ...state, default_branch: base };
+      }
+      state = markStep(state, "start", now);
+      writeState(root, state);
+      print([message, next()], { ok: true, branch: MIGRATION_BRANCH, message, next: nextStep(state) });
+      return 0;
+    }
+    if (currentBranch(root) !== MIGRATION_BRANCH)
+      return refuse(`not on ${MIGRATION_BRANCH}: run specfold migrate start first; nothing was written`);
+    if (sub === "inventory") {
+      const sources = inventory(root);
+      const found = detect(root);
+      state = markStep({ ...state, inventory: { sources, ...found } }, "inventory", now);
+      writeState(root, state);
+      const width = Math.max(4, ...sources.map((s) => s.kind.length));
+      const tokens = sources.reduce((sum, s) => sum + s.tokens, 0);
+      print(
+        [
+          ...sources.map((s) => `${s.kind.padEnd(width)}  ${String(s.tokens).padStart(6)}  ${s.path}`),
+          `stack: ${found.stack.join(", ") || "unknown"}`,
+          `layout: ${found.layout}`,
+          `ci: ${found.ci.join(", ") || "none"}`,
+          `source globs: ${found.sourceGlobs.join(", ")}${found.globsFallback ? " (fallback: no code folder found)" : ""}`,
+          `inventory: ${plural(sources.length, "source")}, about ${tokens} tokens`,
+          next()
+        ],
+        { ok: true, sources, ...found, next: nextStep(state) }
+      );
+      return 0;
+    }
+    if (sub === "mark") {
+      const step = args[0];
+      if (!step || !MARKABLE.includes(step))
+        throw new UsageError(`mark takes one of ${MARKABLE.join(", ")}${step ? `, got '${step}'` : ""}`);
+      state = markStep(state, step, now);
+      writeState(root, state);
+      print([`${step}: done`, next()], { ok: true, step, next: nextStep(state) });
+      return 0;
+    }
+    const from = values.from;
+    if (!from) throw new UsageError("missing --from <dir>: the unpacked template folder to install from");
+    const globs = values["source-glob"];
+    const result = installKit({
+      root,
+      from: resolve7(io.cwd, from),
+      tools: parseTools(values.tools),
+      stack: values.stack,
+      sourceGlobs: globs,
+      ref: values.ref
+    });
+    const ok2 = result.conflicts.length === 0;
+    if (ok2) state = markStep(state, "install", now);
+    writeState(root, state);
+    const summary = result.actions.length === 0 && ok2 ? "migrate install: everything is up to date" : `migrate install: ${plural(result.actions.length, "change")}, ${plural(result.conflicts.length, "conflict")}`;
+    print(
+      [
+        ...result.actions.map((a) => `${a.path}: ${a.action}`),
+        ...result.conflicts.map((c) => `${c.path}: conflict: ${c.reason}`),
+        summary,
+        ...ok2 ? [next()] : ["resolve the conflicts, then run install again"]
+      ],
+      { ok: ok2, ...result, next: ok2 ? nextStep(state) : "install" }
+    );
+    return ok2 ? 0 : 1;
+  }
+});
+
 // src/lookup/command.ts
 import { relative as relative19, sep as sep19 } from "node:path";
 
@@ -12151,7 +12768,7 @@ var WEIGHTS = { title: 3, tags: 2, description: 1, type: 1 };
 function words(text3) {
   return text3.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
 }
-var isRecord5 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
+var isRecord6 = (v) => typeof v === "object" && v !== null && !Array.isArray(v);
 var text2 = (v) => typeof v === "string" && v.trim() !== "" ? v.trim() : void 0;
 function flagsOf(data, now) {
   const flags = [];
@@ -12167,7 +12784,7 @@ function* indexed(bundleRoot) {
     const name = entry.rel.slice(entry.rel.lastIndexOf("/") + 1);
     if (entry.isDir || !name.endsWith(".md") || RESERVED.has(name)) continue;
     const data = parseFile(bundleRoot, entry.rel).frontmatter?.data;
-    if (!isRecord5(data)) continue;
+    if (!isRecord6(data)) continue;
     const type = text2(data.type);
     if (!type) continue;
     const title = text2(data.title) ?? name.slice(0, -3);
@@ -12300,19 +12917,19 @@ register({
 });
 
 // src/sync/command.ts
-import { existsSync as existsSync34, readdirSync as readdirSync7, writeFileSync as writeFileSync10 } from "node:fs";
-import { join as join37 } from "node:path";
+import { existsSync as existsSync37, readdirSync as readdirSync8, writeFileSync as writeFileSync12 } from "node:fs";
+import { join as join41 } from "node:path";
 var NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 var ARCHIVED2 = /^(\d{4}-\d{2}-\d{2})-([a-z0-9]+(?:-[a-z0-9]+)*)$/;
 function resolveArchived(config, arg) {
   if (!arg) throw new UsageError("missing change name");
-  const archive = join37(config.root, "openspec", "changes", "archive");
-  if (ARCHIVED2.test(arg) && existsSync34(join37(archive, arg))) return arg;
+  const archive = join41(config.root, "openspec", "changes", "archive");
+  if (ARCHIVED2.test(arg) && existsSync37(join41(archive, arg))) return arg;
   if (!NAME.test(arg)) throw new UsageError(`'${arg}' is not a change name or archived change id`);
-  const ids = existsSync34(archive) ? readdirSync7(archive).filter((d) => ARCHIVED2.exec(d)?.[2] === arg).sort() : [];
+  const ids = existsSync37(archive) ? readdirSync8(archive).filter((d) => ARCHIVED2.exec(d)?.[2] === arg).sort() : [];
   const newest = ids.at(-1);
   if (newest) return newest;
-  if (existsSync34(join37(config.root, "openspec", "changes", arg)))
+  if (existsSync37(join41(config.root, "openspec", "changes", arg)))
     throw new EnvError(`change '${arg}' is not archived yet: run 'openspec archive ${arg}' first`);
   throw new EnvError(`unknown change '${arg}': no archived folder openspec/changes/archive/<date>-${arg}/`);
 }
@@ -12350,7 +12967,7 @@ register({
       if (needsLog) {
         const count = (kind) => ops.filter((o) => o.op === kind).length;
         const entry = `* **Change**: ${id}: created ${count("create")}, updated ${count("update")}, deprecated ${count("deprecate")}`;
-        writeFileSync10(logPath, insertEntry(logText, localDate(), entry));
+        writeFileSync12(logPath, insertEntry(logText, localDate(), entry));
       }
     }
     if (needsLog) actions.push({ path: logRel, action: "add log entry" });
@@ -12369,8 +12986,8 @@ register({
 });
 
 // src/tasks/progress-command.ts
-import { existsSync as existsSync35, readdirSync as readdirSync8, readFileSync as readFileSync26 } from "node:fs";
-import { join as join38 } from "node:path";
+import { existsSync as existsSync38, readdirSync as readdirSync9, readFileSync as readFileSync30 } from "node:fs";
+import { join as join42 } from "node:path";
 
 // src/tasks/progress.ts
 function progressOf(tasks) {
@@ -12394,13 +13011,13 @@ function progressOf(tasks) {
 
 // src/tasks/progress-command.ts
 function readTasks(config, change) {
-  const path = join38(changeDir(config, change), "tasks.md");
-  return existsSync35(path) ? parseTasks(readFileSync26(path, "utf8")) : void 0;
+  const path = join42(changeDir(config, change), "tasks.md");
+  return existsSync38(path) ? parseTasks(readFileSync30(path, "utf8")) : void 0;
 }
 function activeChanges2(config) {
-  const dir = join38(config.root, "openspec", "changes");
-  if (!existsSync35(dir)) return [];
-  return readdirSync8(dir, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort();
+  const dir = join42(config.root, "openspec", "changes");
+  if (!existsSync38(dir)) return [];
+  return readdirSync9(dir, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort();
 }
 function commitsByTask(config, change) {
   const out = /* @__PURE__ */ new Map();
@@ -12605,11 +13222,11 @@ register({
 });
 
 // src/verify/command.ts
-import { existsSync as existsSync36, readFileSync as readFileSync27, statSync as statSync11, writeFileSync as writeFileSync11 } from "node:fs";
-import { join as join39, relative as relative20, resolve as resolve7, sep as sep20 } from "node:path";
+import { existsSync as existsSync39, readFileSync as readFileSync31, statSync as statSync12, writeFileSync as writeFileSync13 } from "node:fs";
+import { join as join43, relative as relative20, resolve as resolve8, sep as sep20 } from "node:path";
 function check(arg, root, bundleRoot) {
-  const inBundle = [resolve7(root, arg), resolve7(bundleRoot, arg)].map((abs) => relative20(bundleRoot, abs).split(sep20).join("/")).filter((rel2) => rel2 !== "" && !rel2.startsWith("..") && !rel2.startsWith("/"));
-  const rel = inBundle.find((r) => existsSync36(join39(bundleRoot, r)) && statSync11(join39(bundleRoot, r)).isFile());
+  const inBundle = [resolve8(root, arg), resolve8(bundleRoot, arg)].map((abs) => relative20(bundleRoot, abs).split(sep20).join("/")).filter((rel2) => rel2 !== "" && !rel2.startsWith("..") && !rel2.startsWith("/"));
+  const rel = inBundle.find((r) => existsSync39(join43(bundleRoot, r)) && statSync12(join43(bundleRoot, r)).isFile());
   if (!rel)
     return { arg, reason: inBundle.length === 0 ? "outside the bundle" : "no such file in the bundle" };
   if (!rel.endsWith(".md") || !isConcept(rel))
@@ -12641,10 +13258,10 @@ register({
     if (refused.length === 0) {
       const at = isoWithOffset(/* @__PURE__ */ new Date());
       const written = targets.map((t) => {
-        const abs = join39(bundleRoot, t.rel);
-        return { abs, text: verifyText(readFileSync27(abs, "utf8"), login, at) };
+        const abs = join43(bundleRoot, t.rel);
+        return { abs, text: verifyText(readFileSync31(abs, "utf8"), login, at) };
       });
-      for (const w of written) writeFileSync11(w.abs, w.text);
+      for (const w of written) writeFileSync13(w.abs, w.text);
       verified.push(...targets.map(shown));
     }
     const ok2 = refused.length === 0;
