@@ -38,6 +38,8 @@ export interface InstallOptions {
 export interface InstallResult {
   actions: { path: string; action: string }[];
   conflicts: { path: string; reason: string }[];
+  /** What the user still has to run, such as `lefthook install`. */
+  notes: string[];
 }
 
 const REQUIRED = [CONFIG_FILE, "scripts/specfold.mjs", "openspec/schemas/specfold"];
@@ -132,7 +134,7 @@ function projectSettings(text: string, globs: string[], tools: Tool[]): string {
 /** Installs the kit into `o.root` without overwriting anything the repository already has. */
 export function installKit(o: InstallOptions): InstallResult {
   preflight(o);
-  const result: InstallResult = { actions: [], conflicts: [] };
+  const result: InstallResult = { actions: [], conflicts: [], notes: [] };
   const act = (path: string, action: string) => result.actions.push({ path, action });
   const conflict = (path: string, reason: string) => result.conflicts.push({ path, reason });
   const abs = (p: string) => join(o.root, p);
@@ -220,7 +222,9 @@ export function installKit(o: InstallOptions): InstallResult {
     for (const l of links) act(l.path, l.action);
   }
   try {
-    for (const a of installHooks(settings).actions) act(a.path, a.action);
+    const hooks = installHooks(settings);
+    for (const a of hooks.actions) act(a.path, a.action);
+    if (hooks.next) result.notes.push(hooks.next);
   } catch (error) {
     if (!(error instanceof EnvError)) throw error;
     conflict("git hooks", error.message);

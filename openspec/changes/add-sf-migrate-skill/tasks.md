@@ -31,7 +31,7 @@ agent: implementer
 ## 3. Install manifest
 
 ```yaml
-files: [tools/specfold/src/migrate/install.ts, tools/specfold/test/migrate-install.test.ts, scripts/specfold.mjs, template/scripts/specfold.mjs, examples/sample-app/scripts/specfold.mjs]
+files: [tools/specfold/src/migrate/install.ts, tools/specfold/src/migrate/command.ts, tools/specfold/test/migrate-install.test.ts, tools/specfold/test/migrate.test.ts, scripts/specfold.mjs, template/scripts/specfold.mjs, examples/sample-app/scripts/specfold.mjs]
 depends: []
 scenarios: []
 agent: implementer
@@ -39,6 +39,8 @@ agent: implementer
 
 - [x] 3.1 Keep the installed hash of a kit file or block that is in conflict on a later install
   - Done when: `migrate-install.test.ts` covers a conflicting file and block keeping their manifest entries, and the bundle and its copies are rebuilt
+- [x] 3.2 Pass the hook manager's next step through `migrate install`
+  - Done when: `migrate-install.test.ts` and `migrate.test.ts` show `run lefthook install` for a lefthook repository
 
 ## 4. Knowledge
 

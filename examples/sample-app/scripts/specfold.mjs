@@ -12389,7 +12389,7 @@ function projectSettings(text3, globs, tools) {
 }
 function installKit(o) {
   preflight(o);
-  const result = { actions: [], conflicts: [] };
+  const result = { actions: [], conflicts: [], notes: [] };
   const act = (path, action) => result.actions.push({ path, action });
   const conflict = (path, reason) => result.conflicts.push({ path, reason });
   const abs = (p) => join38(o.root, p);
@@ -12469,7 +12469,9 @@ function installKit(o) {
     for (const l of links) act(l.path, l.action);
   }
   try {
-    for (const a of installHooks(settings).actions) act(a.path, a.action);
+    const hooks = installHooks(settings);
+    for (const a of hooks.actions) act(a.path, a.action);
+    if (hooks.next) result.notes.push(hooks.next);
   } catch (error) {
     if (!(error instanceof EnvError)) throw error;
     conflict("git hooks", error.message);
@@ -12763,6 +12765,7 @@ register({
         ...result.actions.map((a) => `${a.path}: ${a.action}`),
         ...result.conflicts.map((c) => `${c.path}: conflict: ${c.reason}`),
         summary,
+        ...result.notes.map((n) => `then: ${n}`),
         ...ok2 ? [next()] : ["resolve the conflicts, then run install again"]
       ],
       { ok: ok2, ...result, next: ok2 ? nextStep(state) : "install" }
