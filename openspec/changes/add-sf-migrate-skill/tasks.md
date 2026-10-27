@@ -23,7 +23,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 2.1 Migrate the ADR and docs fixture with the skill and record the run
+- [x] 2.1 Migrate the ADR and docs fixture with the skill and record the run
   - Done when: `examples/migrations/adr-docs/` holds the approved `plan.md`, `report.md` and a README showing own branch, idempotent rerun, refusal on `main` and a passing validate
 - [ ] 2.2 Migrate the Cursor rules and OpenSpec fixture with the skill and record the run
   - Done when: `examples/migrations/cursor-openspec/` holds the same, and the existing change still has its own schema
