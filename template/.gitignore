@@ -3,3 +3,6 @@
 
 # Claude Code worktrees
 .claude/worktrees/
+
+# sf-migrate progress, local to one migration run
+.specfold/migration/state.json
