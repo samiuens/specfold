@@ -28,16 +28,28 @@ agent: implementer
 - [ ] 2.2 Migrate the Cursor rules and OpenSpec fixture with the skill and record the run
   - Done when: `examples/migrations/cursor-openspec/` holds the same, and the existing change still has its own schema
 
-## 3. Knowledge
+## 3. Install manifest
+
+```yaml
+files: [tools/specfold/src/migrate/install.ts, tools/specfold/test/migrate-install.test.ts, scripts/specfold.mjs, template/scripts/specfold.mjs, examples/sample-app/scripts/specfold.mjs]
+depends: []
+scenarios: []
+agent: implementer
+```
+
+- [ ] 3.1 Keep the installed hash of a kit file or block that is in conflict on a later install
+  - Done when: `migrate-install.test.ts` covers a conflicting file and block keeping their manifest entries, and the bundle and its copies are rebuilt
+
+## 4. Knowledge
 
 ```yaml
 files: [knowledge/**]
-depends: [2]
+depends: [2, 3]
 scenarios: []
 agent: knowledge-curator
 ```
 
-- [ ] 3.1 Write the concept updates listed in `knowledge.md`
+- [ ] 4.1 Write the concept updates listed in `knowledge.md`
   - Done when: `node scripts/specfold.mjs validate` exits 0
 
 ## Workflow follow-up
