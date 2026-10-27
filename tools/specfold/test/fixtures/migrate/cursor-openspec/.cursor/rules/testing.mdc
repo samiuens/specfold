@@ -1,0 +1,6 @@
+---
+description: Tests
+alwaysApply: false
+---
+
+- Every exported function gets a unit test next to it.

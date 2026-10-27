@@ -1,0 +1,9 @@
+schema: spec-driven
+
+# Our own context for every artifact.
+context: |
+  Accounts service. Never log email addresses.
+
+rules:
+  proposal:
+    - Name the affected endpoint.

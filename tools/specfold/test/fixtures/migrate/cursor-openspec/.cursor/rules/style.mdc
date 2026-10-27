@@ -1,0 +1,8 @@
+---
+description: Code style
+globs: ["src/**/*.ts"]
+alwaysApply: true
+---
+
+- Prefer named exports.
+- No default exports in `src/`.
