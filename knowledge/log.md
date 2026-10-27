@@ -3,6 +3,7 @@
 ## 2026-10-27
 
 * **Change**: 2026-10-27-add-specfold-migrate: created 2, updated 2, deprecated 0
+* **Retro**: add-specfold-migrate: 0 answers
 
 ## 2026-10-26
 
