@@ -5,13 +5,17 @@ description: Why the mechanical steps of a migration are CLI code, and how insta
 status: draft
 spec: openspec/specs/specfold-migrate/spec.md
 resource: ../../openspec/specs/specfold-migrate/spec.md
-change: 2026-10-27-add-specfold-migrate
+change: 2026-10-27-add-sf-migrate-skill
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-27T12:25:39+01:00 }
 sources:
   - id: proposal-2026-10-27-add-specfold-migrate
     resource: ../../openspec/changes/archive/2026-10-27-add-specfold-migrate/proposal.md
   - id: design-2026-10-27-add-specfold-migrate
     resource: ../../openspec/changes/archive/2026-10-27-add-specfold-migrate/design.md
+  - id: proposal-2026-10-27-add-sf-migrate-skill
+    resource: ../../openspec/changes/archive/2026-10-27-add-sf-migrate-skill/proposal.md
+  - id: design-2026-10-27-add-sf-migrate-skill
+    resource: ../../openspec/changes/archive/2026-10-27-add-sf-migrate-skill/design.md
 ---
 
 # Why
