@@ -10,6 +10,7 @@ import "./gate/command.ts";
 import "./hooks/command.ts";
 import "./indexes/command.ts";
 import "./log/command.ts";
+import "./migrate/command.ts";
 import "./lookup/command.ts";
 import "./new/command.ts";
 import "./sync/command.ts";
