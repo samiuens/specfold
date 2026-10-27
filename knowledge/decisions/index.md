@@ -14,6 +14,8 @@
 * [Everything that must be correct is deterministic code](deterministic-cli.md) - Validation, indexing and gate checks live in the specfold CLI; skills call it and never re-implement its checks.
 * [First specs are OpenSpec changes, not baseline specs](specs-start-as-changes.md) - Specs for not-yet-built commands are written as OpenSpec changes and only reach openspec/specs/ when implemented and archived.
 * [graphify is optional, code-only, and writes no instruction blocks](graphify-code-only.md) - The kit recommends graphify for code navigation, in code-only mode, installed as a skill plus a Claude Code guard and never as an instruction block.
+* [Kit content in repo-owned files lives in managed blocks](managed-blocks.md) - Specfold writes its part of AGENTS.md, CLAUDE.md and similar files between specfold markers, the only part upgrades rewrite.
+  * Referenced from code: tools/specfold/src/migrate/blocks.ts:1
 * [Kit knowledge at the root, payload in template/](dogfooding-split.md) - The kit repo keeps its own knowledge, specs and settings at the root; everything shipped to user repos lives in template/.
 * [Knowledge is written before archive and synced after](write-knowledge-before-sync-after.md) - The Knowledge task group writes concept bodies before archive; specfold sync fills keys, stubs, index and log after archive, in the same PR.
 * [Knowledge lives in its own OKF bundle](separate-knowledge-bundle.md) - Project knowledge is an OKF v0.2 bundle in knowledge/, separate from openspec/, so both stay readable by their own tools.

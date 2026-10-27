@@ -30,7 +30,7 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/commitments/` | the `commitments` command: list by due date, fulfill, and withdraw behind the `verify` agent guard |
 | `src/future/` | backlog items and commitments: their folders and types, lookup by name or path, due dates from triggers, key edits; shared by the commands, audit, lookup and the session-start hook |
 | `src/bundle.ts` | walks a bundle and splits frontmatter from the body with line numbers |
-| `src/gate/` | the `gate` command: the diff against a merge base (touched and archived changes), rules G1-G10, G12-G16 and G18 over existing rule functions, `openspec validate`, the human claims a branch adds and the PR author and approvers from the GitHub REST API (G7), ordering and counts |
+| `src/gate/` | the `gate` command: the diff against a merge base (touched and archived changes), rules G1-G10 and G12-G18 over existing rule functions (G4 skipped for adoption PRs), `openspec validate`, the human claims a branch adds and the PR author and approvers from the GitHub REST API (G7), ordering and counts |
 | `src/git.ts` | runs git; failures become environment errors |
 | `src/openspec.ts` | finds the OpenSpec binary: `node_modules/.bin/openspec`, then the PATH |
 | `src/doctor/` | the `doctor` command: checks D1 to D6 over an injected environment, version ranges |
@@ -42,6 +42,7 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/hooks/` | the `hooks install` and `hook` commands: built-in hooks or hook-manager entries (lefthook, husky, pre-commit), the pre-commit, pre-push and graph checks, `hooks.extra`, and the Claude Code session, edit and stop hooks |
 | `src/indexes/` | the `index` command: index generation, `see knowledge:` scan, write and check modes |
 | `src/log/` | the `log add` command and the insertion of entries into date sections |
+| `src/migrate/` | the `migrate` command: git root, branch rule and resumable state, inventory and stack detection (shared with `init`), managed blocks, the settings and OpenSpec config merges, kit installation and the install manifest |
 | `src/lookup/` | the `lookup` command: frontmatter search, weighted ranking, trust flags including `drift` |
 | `src/new/` | the `new` command: per-type templates, override files, frontmatter rendering |
 | `src/sync/` | the `sync` command: resolves archived changes, plans (`planSync`, also used by the gate) and applies delta ops, edits frontmatter line by line, then indexes and log |
