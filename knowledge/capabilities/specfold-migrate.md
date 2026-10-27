@@ -29,6 +29,9 @@ Bringing an existing repository into the kit touches many files at once ([migrat
 - **A rerun is silent.** Every write compares first, and the YAML merge only reserializes after a real edit, because the `yaml` library reformats a file it rewrites (found while building).
 - **The upgrader gets a base.** `.specfold/manifest.json` records a SHA-256 per kit-owned file and per managed block, the template's `kit_version` and the snapshot ref, with no timestamps, for M9's three-way upgrade.
 - **The migration PR passes G4.** The gate treats a branch whose merge base has no `specfold.yaml` as an adoption PR ([specfold gate](/capabilities/specfold-gate.md)).
+- **A conflict keeps its base.** When a kit file or block is in conflict on a later install, its manifest entry keeps the hash it was installed with, so the upgrader still knows the base (found in the first recorded run).
+- **Next steps are passed on.** A hook manager's own step, such as `lefthook install`, appears after the summary as `then: ...` (found in the second recorded run).
+- **The skill drives it.** `sf-migrate` calls the subcommands in order and does the judgment between them; the recorded runs in `examples/migrations/` show both on the two fixtures.
 
 # Related
 
