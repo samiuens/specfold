@@ -63,7 +63,7 @@ scenarios: [specfold-migrate#no-git-repository, specfold-migrate#started-on-the-
 agent: implementer
 ```
 
-- [ ] 5.1 Add `migrate start`, `inventory`, `install`, `mark` and `status`
+- [x] 5.1 Add `migrate start`, `inventory`, `install`, `mark` and `status`
   - Done when: scenarios no-git-repository, started-on-the-default-branch, feature-branch, dirty-tree, install-on-the-default-branch, both-main-and-master and resumed-migration pass in `migrate.test.ts`
 
 ## 6. Adoption PR
