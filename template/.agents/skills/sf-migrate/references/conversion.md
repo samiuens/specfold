@@ -14,8 +14,9 @@ Summarize; do not copy. A concept says what was decided or agreed and why, in a 
 
 - **ADR → `Decision`.** The title is the decision, and `# Decision` and `# Why` summarize the ADR's Decision and Context. Map the ADR status to `decision:`:
   - accepted → `accepted`;
-  - superseded or deprecated → `deprecated`, plus `status: deprecated`, with a link to the successor's concept in `# Related`;
-  - proposed → `proposed`.
+  - rejected → `rejected`;
+  - superseded or deprecated → `superseded`, plus `status: deprecated`, with a link to the successor's concept in `# Related`;
+  - proposed, or no status: not a decision yet. Ask the user at the plan checkpoint whether it is accepted, or whether it stays `keep`.
 - **Agent rule file → `Convention`** (`.cursor/rules/*.mdc`, `.github/copilot-instructions.md`, `.windsurfrules`, a team's `AGENTS.md` rules). One concept per topic, not per file. The rule file stays where it is: other tools still read it.
 - **Existing `## graphify` section** in `AGENTS.md` or `CLAUDE.md`: list it in the plan. After install, merge its advice into the lookup order inside the Specfold block, and remove the duplicate section only if the plan row says so.
 - **`docs/` page** → the type its plan row names: architecture pages become `Component` or `Data Flow`, setup and operations pages `Runbook`, glossaries `Term`, product rules `Business Rule`.
