@@ -23,7 +23,7 @@ agent: implementer
 
 - [x] 2.1 Find the git root, branches and a clean tree, and keep the migration state
   - Done when: `migrate-inventory.test.ts` covers the default branch order and the state file round trip
-- [ ] 2.2 Detect stack, layout, CI and source globs, and classify knowledge sources
+- [x] 2.2 Detect stack, layout, CI and source globs, and classify knowledge sources
   - Done when: scenarios adrs-and-cursor-rules and ignored-files pass in `migrate-inventory.test.ts`
 
 ## 3. Merge helpers
