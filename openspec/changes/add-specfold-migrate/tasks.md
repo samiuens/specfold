@@ -35,7 +35,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 3.1 Insert and replace managed blocks in Markdown and hash-comment files
+- [x] 3.1 Insert and replace managed blocks in Markdown and hash-comment files
   - Done when: `migrate-merge.test.ts` covers a new file, a file without markers, a rerun and a start marker without an end
 - [ ] 3.2 Merge Claude Code settings and an existing OpenSpec config
   - Done when: `migrate-merge.test.ts` covers added hooks, kept keys, invalid JSON and kept rules and comments
