@@ -1,5 +1,9 @@
 # Log
 
+## 2026-10-27
+
+* **Change**: 2026-10-27-add-specfold-migrate: created 2, updated 2, deprecated 0
+
 ## 2026-10-26
 
 * **Update**: `specfold index` implemented (change `add-specfold-index`); indexes are now generated, and folder descriptions moved to `specfold.yaml`.
