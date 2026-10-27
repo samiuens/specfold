@@ -109,8 +109,9 @@ describe("migrate install: OpenSpec, hooks and manifest", () => {
     expect(read(root, "openspec/changes/add-logout/.openspec.yaml")).toBe(before);
     expect(existsSync(join(root, "openspec/schemas/specfold/schema.yaml"))).toBe(true);
     expect(result.actions.some((a) => a.action.startsWith("run openspec init"))).toBe(false);
-    // lefthook is in use, so the hooks go there
+    // lefthook is in use, so the hooks go there, and the user still has to install them
     expect(read(root, "lefthook.yml")).toContain("node scripts/specfold.mjs hook pre-commit {0}");
+    expect(result.notes).toEqual(["run lefthook install"]);
   });
 
   it("runs openspec init in a repository without OpenSpec and writes the template config", () => {
@@ -172,7 +173,7 @@ describe("migrate install: OpenSpec, hooks and manifest", () => {
       git(root, "add", "-A");
       git(root, "commit", "-q", "-m", "install");
       const again = install(root);
-      expect(again, fixture).toEqual({ actions: [], conflicts: [] });
+      expect(again, fixture).toEqual({ actions: [], conflicts: [], notes: [] });
       expect(status(root), fixture).toBe("");
     }
   });

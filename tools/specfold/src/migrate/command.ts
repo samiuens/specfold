@@ -182,6 +182,7 @@ register({
         ...result.actions.map((a) => `${a.path}: ${a.action}`),
         ...result.conflicts.map((c) => `${c.path}: conflict: ${c.reason}`),
         summary,
+        ...result.notes.map((n) => `then: ${n}`),
         ...(ok ? [next()] : ["resolve the conflicts, then run install again"]),
       ],
       { ok, ...result, next: ok ? nextStep(state) : "install" },

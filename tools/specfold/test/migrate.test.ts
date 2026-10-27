@@ -115,6 +115,7 @@ describe("migrate steps", () => {
     const first = await run(["migrate", "install", "--from", TEMPLATE, "--ref", "abc"], root);
     expect(first.code).toBe(0);
     expect(first.stdout).toContain("AGENTS.md: block\n");
+    expect(first.stdout).toContain("then: run lefthook install\n");
     expect(first.stdout).toContain("next: convert the plan rows");
     expect(state(root).steps.install).toBeDefined();
     const again = await run(["migrate", "install", "--from", TEMPLATE, "--ref", "abc"], root);
