@@ -1,6 +1,7 @@
 # Backlog Item
 
 * [Check the Specfold name before publishing](name-and-trademark-check.md) - Check GitHub and trademark registers for Specfold before the kit repo or npm package goes public.
+* [Escaped pipes in brief tables](escaped-pipes-in-brief-tables.md) - The brief and knowledge table parser splits cells on an escaped pipe, which GFM allows inside a table cell.
 * [Evals for the framework itself](framework-evals.md) - Decide whether and how to evaluate Specfold's skills and agent roles with repeatable evals.
 * [General code conventions](general-code-conventions.md) - Style, naming and pattern conventions in knowledge/conventions/, with linters as enforcement wherever a tool can check them.
 * [Merged requirement length check](merged-requirement-length-check.md) - Check before archive that every requirement a change merges into the main specs stays under OpenSpec's 500 characters.
