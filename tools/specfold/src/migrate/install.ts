@@ -165,12 +165,11 @@ export function installKit(o: InstallOptions): InstallResult {
     const content = template(p);
     if (merged(p, applyBlock(read(p), content, blockStyle(p)), "block")) manifest.blocks[p] = sha256(content);
   }
-  if (claude)
-    merged(
-      ".claude/settings.json",
-      mergeSettings(read(".claude/settings.json"), template(".claude/settings.json")),
-      "merge",
-    );
+  if (claude) {
+    const current = read(".claude/settings.json");
+    const settings = mergeSettings(current, template(".claude/settings.json"));
+    merged(".claude/settings.json", settings, current === undefined ? "write" : "merge");
+  }
 
   if (read(CONFIG_FILE) === undefined) {
     put(CONFIG_FILE, projectSettings(template(CONFIG_FILE), o.sourceGlobs ?? found.sourceGlobs, o.tools));
