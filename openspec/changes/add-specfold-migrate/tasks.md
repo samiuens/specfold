@@ -9,7 +9,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Add the fixture with ADRs and docs, and the fixture with Cursor rules and OpenSpec
+- [x] 1.1 Add the fixture with ADRs and docs, and the fixture with Cursor rules and OpenSpec
   - Done when: both folders exist under `tools/specfold/test/fixtures/migrate/` with the files the brief of `add-sf-migrate-skill` lists
 
 ## 2. Repository, state and detection
