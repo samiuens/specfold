@@ -46,6 +46,11 @@
   - each fixture is copied into a scratch git repository and migrated with the skill, with the user approving each plan;
   - `examples/migrations/<fixture>/` gets the resulting `plan.md` and `report.md`, plus a `README.md` with the commands and their outcomes: own branch, a second `install` that reports up to date, refusal on `main`, and validate passing.
 
+- **Found in the recorded runs** (decided while implementing):
+  - a superseded decision is named, not linked, by its successor (audit A3), and the report lists its A4;
+  - a spec that already failed strict validation before the migration is never edited without asking the user;
+  - `migrate install` keeps a conflicting file's or block's manifest hash and prints the hook manager's next step (task group 3, in `src/migrate/`).
+
 ## Risks / Trade-offs
 
 - [The skill's plan step is judgment, so two runs on the same repo can differ] → the plan is the checkpoint: the user approves the mapping, and the recorded runs show one approved example per fixture.
