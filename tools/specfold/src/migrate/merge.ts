@@ -57,19 +57,28 @@ export function mergeOpenspecConfig(existing: string, template: string, stack: s
   if (doc.errors[0]) return { conflict: `is not valid YAML: ${doc.errors[0].message.split("\n")[0]}` };
   if (!isMap(doc.contents)) return { conflict: "is not a YAML mapping" };
   const wanted = parse(fillStack(template, stack)) as { context?: string; rules?: Record<string, unknown> };
-  if (doc.get("schema") !== "specfold") doc.set("schema", "specfold");
+  // re-serializing reformats the file, so it is written only after a real edit
+  let touched = false;
+  const edit = (apply: () => void) => {
+    apply();
+    touched = true;
+  };
+  if (doc.get("schema") !== "specfold") edit(() => doc.set("schema", "specfold"));
   const context = doc.get("context");
   if (context === undefined && wanted.context !== undefined) {
-    doc.set("context", literal(wanted.context));
+    const value = wanted.context;
+    edit(() => doc.set("context", literal(value)));
   } else if (typeof context === "string" && stack && !/^Stack:/m.test(context)) {
-    doc.set("context", literal(`${context.replace(/\n*$/, "\n")}Stack: ${stack}\n`));
+    edit(() => doc.set("context", literal(`${context.replace(/\n*$/, "\n")}Stack: ${stack}\n`)));
   }
   if (!doc.has("rules")) {
-    if (wanted.rules) doc.set("rules", doc.createNode(wanted.rules));
+    const rules = wanted.rules;
+    if (rules) edit(() => doc.set("rules", doc.createNode(rules)));
   } else if (isMap(doc.get("rules"))) {
     for (const [key, value] of Object.entries(wanted.rules ?? {}))
-      if (!doc.hasIn(["rules", key])) doc.setIn(["rules", key], doc.createNode(value));
+      if (!doc.hasIn(["rules", key])) edit(() => doc.setIn(["rules", key], doc.createNode(value)));
   }
+  if (!touched) return { text: existing, changed: false };
   const text = String(doc);
   return { text, changed: text !== existing };
 }
