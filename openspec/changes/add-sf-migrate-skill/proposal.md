@@ -36,7 +36,7 @@ Existing projects are the second target of the kit (`/decisions/delivery-templat
 ## Open points
 
 1. **Plan approval** is recorded in `plan.md` as `approved_by: human:<login>` and `approved_at` once the user approves in the question UI, like a brief's confirmation; a timed-out question is no approval and the skill stops.
-2. **ADR status** maps to `decision:`: accepted → `accepted`, superseded or deprecated → `deprecated` with a link to the successor, proposed → left as `proposed`.
+2. **ADR status** maps to `decision:`: accepted → `accepted`, rejected → `rejected`, superseded or deprecated → `superseded` with `status: deprecated` and a link to the successor. A proposed ADR goes back to the user at the checkpoint. (Corrected while implementing: P11 allows only `accepted`, `rejected` and `superseded`, so the reviewed `deprecated` and `proposed` values would fail validation.)
 3. **An existing `## graphify` section** in `AGENTS.md` or `CLAUDE.md` is listed in the plan and merged into the lookup order inside the managed block, as the token-efficiency section of the plan says.
 4. **The log** gets one `specfold log add --kind Migration` entry naming the counts.
 5. **Resume:** the skill always starts with `specfold migrate status` and continues at the next open step.

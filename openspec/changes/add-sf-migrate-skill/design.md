@@ -33,7 +33,7 @@
   - a timed-out or missing answer stops the run.
 - **Install:** `migrate install --from <kit> --source-glob ... --stack ...` with the plan's values. On a conflict the skill shows each one and asks what to do, and never deletes or overwrites anything to get past it. It then runs `doctor` (all must pass), commits, and continues.
 - **Convert**, per plan row, with `specfold new`:
-  - an ADR becomes a `Decision`; its status maps to `decision:` (accepted → `accepted`, superseded or deprecated → `deprecated` linking the successor, proposed → `proposed`), and the body summarizes Context and Decision;
+  - an ADR becomes a `Decision`; its status maps to `decision:` (accepted → `accepted`, rejected → `rejected`, superseded or deprecated → `superseded` with `status: deprecated` linking the successor; a proposed ADR goes back to the user at the checkpoint, because P11 allows only these three values, found in the first recorded run), and the body summarizes Context and Decision;
   - an agent rule file becomes a `Convention`; the file itself stays, because the managed block already sits in `AGENTS.md`;
   - `docs/` pages become the type the plan names;
   - another spec tool gets one capability card per spec or folder, pointing at it with `resource` and marked as a migration candidate in the report;
