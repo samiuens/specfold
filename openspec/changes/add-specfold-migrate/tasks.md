@@ -15,13 +15,13 @@ agent: implementer
 ## 2. Repository, state and detection
 
 ```yaml
-files: [tools/specfold/src/migrate/repo.ts, tools/specfold/src/migrate/state.ts, tools/specfold/src/migrate/detect.ts, tools/specfold/src/migrate/inventory.ts, tools/specfold/test/migrate-inventory.test.ts]
+files: [tools/specfold/src/migrate/repo.ts, tools/specfold/src/migrate/state.ts, tools/specfold/src/migrate/detect.ts, tools/specfold/src/migrate/inventory.ts, tools/specfold/test/migrate-inventory.test.ts, tools/specfold/test/migrate-helpers.ts]
 depends: [1]
 scenarios: [specfold-migrate#adrs-and-cursor-rules, specfold-migrate#ignored-files]
 agent: implementer
 ```
 
-- [ ] 2.1 Find the git root, branches and a clean tree, and keep the migration state
+- [x] 2.1 Find the git root, branches and a clean tree, and keep the migration state
   - Done when: `migrate-inventory.test.ts` covers the default branch order and the state file round trip
 - [ ] 2.2 Detect stack, layout, CI and source globs, and classify knowledge sources
   - Done when: scenarios adrs-and-cursor-rules and ignored-files pass in `migrate-inventory.test.ts`
