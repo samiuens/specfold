@@ -7,10 +7,11 @@ Both entry points work: `BOOTSTRAP.md` is one paste-able prompt that fetches a p
 | # | Question | Answer | Source |
 | --- | --- | --- | --- |
 | Q1 | Is `specfold init` built in M6? | Yes, in this change; it shares install's code from `add-specfold-migrate`: fills `specfold.yaml` and the config context, runs `openspec init`, `specfold agents sync` and `specfold hooks install` | user |
-| Q2 | How does init get its values? | Detected from package files and the git remote (stack, source globs, owner/repo); flags override (`--stack`, `--source-glob`, `--tools`); no prompts; it prints what it filled, and `--dry-run` shows it first. Agents ask the user, then pass flags | user |
+| Q2 | How does init get its values? | Detected from package files and folders (stack, source globs); flags override (`--stack`, `--source-glob`, `--tools`); no prompts; it prints what it filled, and `--dry-run` shows it first. Agents ask the user, then pass flags | user |
 | Q3 | Which ref does `BOOTSTRAP.md` pin before v0.1.0? | A full commit sha of `samiuens/specfold`; the M9 release job replaces it with `vX.Y.Z` | user |
 | Q4 | How does `BOOTSTRAP.md` fetch the kit while the repo is private? | The repo tarball at the pinned ref through the user's `gh` login, unpacked into a temporary folder; its `template/` is the folder `install --from` takes | user |
 | Q5 | Which agent tools are set up by default? | `agents` and `claude`; `--tools agents` leaves out the Claude Code files | user |
+| Q6 | Does init detect the repository's owner/repo? | No: no setting uses it yet; it comes back when one does | user |
 
 ## Out of scope
 

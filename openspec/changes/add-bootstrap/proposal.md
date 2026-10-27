@@ -37,11 +37,10 @@ The kit has two entry points (`/decisions/delivery-template-bootstrap-migrate.md
 
 ## Open points
 
-1. **Owner/repo:** the brief listed it among detected values, but no setting uses the repository's own owner/repo yet (`source.github` names the kit). So init detects only the stack and the source globs, unless you want owner/repo used for the `CODEOWNERS` placeholder.
-2. **Stack detection:** one name per ecosystem found at the root (`package.json` → Node.js, plus TypeScript with `tsconfig.json`; `pyproject.toml` → Python; `go.mod` → Go; `Cargo.toml` → Rust; and so on), joined with commas; none found leaves the placeholder and says so.
-3. **Source glob detection:** `src/**`, `lib/**`, `app/**`, `packages/*/src/**` when those folders exist; none found keeps `src/**` and says so.
-4. **Rerun:** a filled `Stack:` line or changed `source_globs` stay unless a flag sets them again, so init is idempotent.
-5. **The pin** is updated by hand in a later commit after a change to `template/` merges; CI only rejects a sha that does not exist on `main` or lacks the skill.
+1. **Stack detection:** one name per ecosystem found at the root (`package.json` → Node.js, plus TypeScript with `tsconfig.json`; `pyproject.toml` → Python; `go.mod` → Go; `Cargo.toml` → Rust; and so on), joined with commas; none found leaves the placeholder and says so.
+2. **Source glob detection:** `src/**`, `lib/**`, `app/**`, `packages/*/src/**` when those folders exist; none found keeps `src/**` and says so.
+3. **Rerun:** a filled `Stack:` line or changed `source_globs` stay unless a flag sets them again, so init is idempotent.
+4. **The pin** is updated by hand in a later commit after a change to `template/` merges; CI only rejects a sha that does not exist on `main` or lacks the skill.
 
 ## Impact
 
