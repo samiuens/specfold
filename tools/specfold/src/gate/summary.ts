@@ -4,8 +4,9 @@ import type { GateFinding } from "./rules.ts";
 const cell = (text: string) => text.replace(/\r?\n/g, " ").replace(/\|/g, "\\|");
 
 /** The verdict as a Markdown heading, one table of findings in output order, and warnings per rule. */
-export function renderSummary(findings: GateFinding[], verdict: string): string {
+export function renderSummary(findings: GateFinding[], verdict: string, notes: string[] = []): string {
   const lines = [`## specfold gate: ${verdict}`, ""];
+  if (notes.length > 0) lines.push(...notes, "");
   if (findings.length > 0) {
     lines.push("| Rule | Effect | Path | Message | Fix |", "| --- | --- | --- | --- | --- |");
     for (const f of findings) {

@@ -75,7 +75,7 @@ scenarios: [specfold-gate#migration-pr, specfold-gate#later-pr]
 agent: implementer
 ```
 
-- [ ] 6.1 Skip G4 when the base has no `specfold.yaml` and say so
+- [x] 6.1 Skip G4 when the base has no `specfold.yaml` and say so
   - Done when: scenarios migration-pr and later-pr pass in `gate-adoption.test.ts`
 
 ## 7. Bundle

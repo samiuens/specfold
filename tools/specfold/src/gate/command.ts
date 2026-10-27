@@ -38,12 +38,15 @@ function gateContext(config: Config, cwd: string, base: string, o: ContextOption
 export const localGate = (config: Config, cwd: string, base: string): GateFinding[] =>
   runGate(gateContext(config, cwd, base, { local: true, labels: [], prBody: undefined, pr: undefined }));
 
-/** Findings (blocking ones with their fix), then the verdict line. */
-export function renderGate(findings: GateFinding[]): string {
-  const lines = findings.flatMap((f) => [
-    `${f.effect} ${f.rule} ${location(f)}${f.message}`,
-    ...(f.effect === "block" ? [`    fix: ${f.fix}`] : []),
-  ]);
+/** Notes, findings (blocking ones with their fix), then the verdict line. */
+export function renderGate(findings: GateFinding[], notes: string[] = []): string {
+  const lines = [...notes];
+  lines.push(
+    ...findings.flatMap((f) => [
+      `${f.effect} ${f.rule} ${location(f)}${f.message}`,
+      ...(f.effect === "block" ? [`    fix: ${f.fix}`] : []),
+    ]),
+  );
   lines.push(`gate: ${verdict(findings)}`);
   return `${lines.join("\n")}\n`;
 }
@@ -86,23 +89,24 @@ register({
     const local = values.local === true;
     // read the PR before the diff is judged, so a missing token fails fast
     const pr = prArg === undefined ? undefined : await fetchPullRequest(githubEnv(), Number(prArg));
-    const findings = runGate(
-      gateContext(config, io.cwd, base, {
-        local,
-        labels: (values.label as unknown as string[] | undefined) ?? [],
-        prBody: bodyFile === undefined ? undefined : readFileSync(resolve(io.cwd, bodyFile), "utf8"),
-        pr,
-      }),
-    );
+    const ctx = gateContext(config, io.cwd, base, {
+      local,
+      labels: (values.label as unknown as string[] | undefined) ?? [],
+      prBody: bodyFile === undefined ? undefined : readFileSync(resolve(io.cwd, bodyFile), "utf8"),
+      pr,
+    });
+    const findings = runGate(ctx);
+    const adoption = ctx.diff.adoption;
+    const notes = adoption ? ["adoption PR: the base has no specfold.yaml, so G4 is skipped"] : [];
     const summary = values.summary as string | undefined;
     if (summary !== undefined)
-      writeFileSync(resolve(io.cwd, summary), renderSummary(findings, verdict(findings)));
+      writeFileSync(resolve(io.cwd, summary), renderSummary(findings, verdict(findings), notes));
     const counts = countFindings(findings);
     const ok = counts.block === 0;
     if (values.json) {
-      io.stdout(`${JSON.stringify({ ok, base, findings, counts }, null, 2)}\n`);
+      io.stdout(`${JSON.stringify({ ok, base, adoption, findings, counts }, null, 2)}\n`);
     } else {
-      io.stdout(renderGate(findings));
+      io.stdout(renderGate(findings, notes));
     }
     return ok ? 0 : 1;
   },

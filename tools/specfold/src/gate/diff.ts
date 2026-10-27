@@ -14,6 +14,8 @@ export interface GateDiff {
   activeChanges: string[];
   /** Archived change ids whose folder exists now but not at the merge base. */
   archivedChanges: string[];
+  /** True when the merge base has no specfold.yaml: the branch adopts Specfold. */
+  adoption: boolean;
 }
 
 const ACTIVE = /^openspec\/changes\/([^/]+)\//;
@@ -57,5 +59,6 @@ export function computeDiff(root: string, ref: string, local: boolean): GateDiff
         isDir(join(root, "openspec", "changes", "archive", id)) &&
         !gitSucceeds(root, ["cat-file", "-e", `${mergeBase}:./openspec/changes/archive/${id}`]),
     ),
+    adoption: !gitSucceeds(root, ["cat-file", "-e", `${mergeBase}:./specfold.yaml`]),
   };
 }
