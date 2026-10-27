@@ -11,7 +11,7 @@ agent: implementer
 
 - [x] 1.1 Write `sf-migrate` with its plan, conversion and report references
   - Done when: `node scripts/check-skills.mjs .agents/skills template/.agents/skills` passes
-- [ ] 1.2 Copy the skill to the kit and the sample app and link it for Claude Code
+- [x] 1.2 Copy the skill to the kit and the sample app and link it for Claude Code
   - Done when: the copies equal the template and `agents sync --check` passes in the kit, the template and the sample app
 
 ## 2. Recorded runs
