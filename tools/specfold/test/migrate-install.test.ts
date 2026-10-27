@@ -153,6 +153,17 @@ describe("migrate install: OpenSpec, hooks and manifest", () => {
     ]);
   });
 
+  it("keeps the installed hash of a kit file that later differs", () => {
+    const root = fixtureRepo("adr-docs");
+    install(root);
+    const before = JSON.parse(read(root, ".specfold/manifest.json"));
+    write(root, ".agents/skills/sf-lookup/SKILL.md", "edited\n");
+    write(root, "AGENTS.md", "<!-- specfold:start -->\nno end marker\n");
+    const result = install(root);
+    expect(result.conflicts.map((c) => c.path)).toEqual([".agents/skills/sf-lookup/SKILL.md", "AGENTS.md"]);
+    expect(JSON.parse(read(root, ".specfold/manifest.json"))).toEqual(before);
+  });
+
   // spec: specfold-migrate#rerun
   it("changes nothing on a second run", () => {
     for (const fixture of ["adr-docs", "cursor-openspec"] as const) {

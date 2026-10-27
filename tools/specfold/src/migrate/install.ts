@@ -74,6 +74,21 @@ function kitOwned(from: string, tools: Tool[]): string[] {
   ].flatMap((p) => filesUnder(from, p));
 }
 
+interface Manifest {
+  files: Record<string, string>;
+  blocks: Record<string, string>;
+}
+
+/** The file and block hashes of an earlier install; empty when there is none or it cannot be read. */
+function readManifest(path: string): Manifest {
+  try {
+    const data = JSON.parse(readFileSync(path, "utf8")) as Partial<Manifest>;
+    return { files: data.files ?? {}, blocks: data.blocks ?? {} };
+  } catch {
+    return { files: {}, blocks: {} };
+  }
+}
+
 /** Fails before any write when the template folder is incomplete or OpenSpec is needed but missing. */
 function preflight(o: InstallOptions): void {
   const missing = REQUIRED.filter((p) => !existsSync(join(o.from, p)));
@@ -137,6 +152,8 @@ export function installKit(o: InstallOptions): InstallResult {
     return !("conflict" in m);
   };
   const manifest = { files: {} as Record<string, string>, blocks: {} as Record<string, string> };
+  // a file in conflict keeps the hash it was installed with: the base of a later three-way upgrade
+  const previous = readManifest(abs(MANIFEST_PATH));
   const claude = o.tools.includes("claude");
   const found = detect(o.root);
   const stack = o.stack ?? (found.stack.length > 0 ? found.stack.join(", ") : undefined);
@@ -155,6 +172,7 @@ export function installKit(o: InstallOptions): InstallResult {
       act(p, "write");
     } else if (!readFileSync(abs(p)).equals(data)) {
       conflict(p, "differs from the kit's copy; left unchanged");
+      if (previous.files[p]) manifest.files[p] = previous.files[p];
       continue;
     }
     manifest.files[p] = sha256(data);
@@ -164,6 +182,7 @@ export function installKit(o: InstallOptions): InstallResult {
     if (p === "CLAUDE.md" && !claude) continue;
     const content = template(p);
     if (merged(p, applyBlock(read(p), content, blockStyle(p)), "block")) manifest.blocks[p] = sha256(content);
+    else if (previous.blocks[p]) manifest.blocks[p] = previous.blocks[p];
   }
   if (claude) {
     const current = read(".claude/settings.json");
