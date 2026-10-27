@@ -12348,6 +12348,14 @@ function kitOwned(from, tools) {
     ...tools.includes("claude") ? [".claude/agents"] : []
   ].flatMap((p) => filesUnder(from, p));
 }
+function readManifest(path) {
+  try {
+    const data = JSON.parse(readFileSync27(path, "utf8"));
+    return { files: data.files ?? {}, blocks: data.blocks ?? {} };
+  } catch {
+    return { files: {}, blocks: {} };
+  }
+}
 function preflight(o) {
   const missing = REQUIRED.filter((p) => !existsSync35(join38(o.from, p)));
   if (missing.length > 0)
@@ -12401,6 +12409,7 @@ function installKit(o) {
     return !("conflict" in m);
   };
   const manifest = { files: {}, blocks: {} };
+  const previous = readManifest(abs(MANIFEST_PATH));
   const claude = o.tools.includes("claude");
   const found = detect(o.root);
   const stack = o.stack ?? (found.stack.length > 0 ? found.stack.join(", ") : void 0);
@@ -12416,6 +12425,7 @@ function installKit(o) {
       act(p, "write");
     } else if (!readFileSync27(abs(p)).equals(data)) {
       conflict(p, "differs from the kit's copy; left unchanged");
+      if (previous.files[p]) manifest.files[p] = previous.files[p];
       continue;
     }
     manifest.files[p] = sha256(data);
@@ -12424,6 +12434,7 @@ function installKit(o) {
     if (p === "CLAUDE.md" && !claude) continue;
     const content = template(p);
     if (merged(p, applyBlock(read(p), content, blockStyle(p)), "block")) manifest.blocks[p] = sha256(content);
+    else if (previous.blocks[p]) manifest.blocks[p] = previous.blocks[p];
   }
   if (claude) {
     const current = read(".claude/settings.json");

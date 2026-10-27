@@ -37,7 +37,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 3.1 Keep the installed hash of a kit file or block that is in conflict on a later install
+- [x] 3.1 Keep the installed hash of a kit file or block that is in conflict on a later install
   - Done when: `migrate-install.test.ts` covers a conflicting file and block keeping their manifest entries, and the bundle and its copies are rebuilt
 
 ## 4. Knowledge
