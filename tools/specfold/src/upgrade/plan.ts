@@ -3,6 +3,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { applyBlock, blockStyle } from "../migrate/blocks.ts";
 import { BLOCK_FILES, kitOwned, MANIFEST_PATH, sha256, type Tool } from "../migrate/install.ts";
+import { type ConfigMerge, upgradeOpenspecConfig, upgradeSettings } from "./config.ts";
 import { mergeThreeWay } from "./merge.ts";
 import { compareVersions, isVersion } from "./version.ts";
 
@@ -28,6 +29,15 @@ export interface BlockStep {
   text?: string;
 }
 
+export interface ConfigStep {
+  path: string;
+  action: "merge" | "unchanged" | "conflict";
+  reason?: string;
+  text?: string;
+  /** What the merge left alone, such as an edited context. */
+  notes: string[];
+}
+
 export interface InstalledManifest {
   kit_version?: string;
   ref?: string;
@@ -40,6 +50,8 @@ export interface UpgradePlan {
   to: string;
   files: FileStep[];
   blocks: BlockStep[];
+  /** `.claude/settings.json` and `openspec/config.yaml`. */
+  configs: ConfigStep[];
   /** Migration versions to run, in order. */
   migrations: string[];
   /** Upgrade notes of every version passed, oldest first. */
@@ -234,6 +246,21 @@ export function planUpgrade(o: PlanOptions): UpgradePlan {
     manifest.blocks[p] = sha256(next);
   }
 
+  const configs: ConfigStep[] = [];
+  type Merge = (local: string, base: string | undefined, next: string) => ConfigMerge;
+  const merges: [string, Merge][] = [["openspec/config.yaml", upgradeOpenspecConfig]];
+  if (tools.includes("claude")) merges.unshift([".claude/settings.json", upgradeSettings]);
+  for (const [p, merge] of merges) {
+    if (!existsSync(local(p)) || !existsSync(join(o.from, p))) continue;
+    const base = o.base && existsSync(join(o.base, p)) ? readFileSync(join(o.base, p), "utf8") : undefined;
+    const result = merge(readFileSync(local(p), "utf8"), base, readFileSync(join(o.from, p), "utf8"));
+    if ("conflict" in result)
+      configs.push({ path: p, action: "conflict", reason: result.conflict, notes: [] });
+    else if (result.changed)
+      configs.push({ path: p, action: "merge", text: result.text, notes: result.notes });
+    else configs.push({ path: p, action: "unchanged", notes: result.notes });
+  }
+
   const migrations = versionsIn(join(o.from, "upgrade/migrations"), ".mjs", o.installed, o.target);
   const notes = versionsIn(join(o.from, "upgrade/notes"), ".md", o.installed, o.target).map((version) => ({
     version,
@@ -244,9 +271,10 @@ export function planUpgrade(o: PlanOptions): UpgradePlan {
     to: o.target,
     files,
     blocks,
+    configs,
     migrations,
     notes,
     manifest,
-    conflicts: files.some((f) => f.action === "conflict") || blocks.some((b) => b.action === "conflict"),
+    conflicts: [...files, ...blocks, ...configs].some((s) => s.action === "conflict"),
   };
 }
