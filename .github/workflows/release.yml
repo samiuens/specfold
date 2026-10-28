@@ -1,0 +1,59 @@
+# Kit repo only: release-please keeps the release PR open, the rebuild job keeps its derived files in step,
+# and a merged release PR is published with the template tarball, its checksum and the upgrade notes.
+# see knowledge: /runbooks/cut-a-release.md
+name: release
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  release-please:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    outputs:
+      created: ${{ steps.release.outputs.release_created }}
+      tag: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - name: Token is set
+        run: |
+          [ -n "$TOKEN" ] || { echo "::error::set the RELEASE_PLEASE_TOKEN secret: a fine-grained token for this repository with Contents and Pull requests read/write"; exit 1; }
+        env:
+          TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+      - uses: googleapis/release-please-action@v5
+        id: release
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+
+  publish:
+    needs: release-please
+    if: needs.release-please.outputs.created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Pack the template
+        run: node tools/specfold/release.mjs pack "$VERSION" --out dist
+        env:
+          VERSION: ${{ needs.release-please.outputs.version }}
+      - name: Upload the tarball and its checksum, append the upgrade notes
+        run: |
+          gh release upload "$TAG" dist/specfold-template-v"$VERSION".tar.gz dist/specfold-template-v"$VERSION".tar.gz.sha256
+          { gh release view "$TAG" --json body --jq .body; echo; node tools/specfold/release.mjs notes "$VERSION"; } > notes.md
+          gh release edit "$TAG" --notes-file notes.md
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.release-please.outputs.tag }}
+          VERSION: ${{ needs.release-please.outputs.version }}
