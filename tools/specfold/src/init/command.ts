@@ -5,27 +5,34 @@ import { UsageError } from "../errors.ts";
 import { plural } from "../findings.ts";
 import { MANIFEST_PATH, parseTools } from "../migrate/install.ts";
 import { gitRoot } from "../migrate/repo.ts";
+import { LOCAL_SETTINGS } from "../parallel/limit.ts";
 import { planInit, runInit } from "./init.ts";
 
 register({
   name: "init",
   summary: "finish setting up a repository made from the template: settings, OpenSpec skills, links, hooks",
-  usage: "specfold init [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--dry-run] [--json]",
+  usage:
+    "specfold init [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--max-subagents <n>] [--dry-run] [--json]",
   options: {
     stack: { type: "string" },
     "source-glob": { type: "string", multiple: true },
     tools: { type: "string" },
+    "max-subagents": { type: "string" },
     "dry-run": { type: "boolean" },
     json: { type: "boolean" },
   },
   run: ({ io, values, positionals }) => {
     if (positionals.length > 0) throw new UsageError(`unexpected argument '${positionals[0]}'`);
     const root = gitRoot(io.cwd);
+    const max = values["max-subagents"] as string | undefined;
+    if (max !== undefined && !/^[1-9]\d*$/.test(max))
+      throw new UsageError(`--max-subagents takes a positive whole number, got '${max}'`);
     const options = {
       root,
       tools: parseTools(values.tools as string | undefined),
       stack: values.stack as string | undefined,
       sourceGlobs: values["source-glob"] as unknown as string[] | undefined,
+      maxSubagents: max === undefined ? undefined : Number(max),
     };
     const plan = planInit(options);
     const dryRun = values["dry-run"] === true;
@@ -49,6 +56,9 @@ register({
           : []),
         { path: ".agents/skills", action: "run agents sync" },
         { path: "git hooks", action: "run hooks install" },
+        ...(plan.limit !== undefined
+          ? [{ path: LOCAL_SETTINGS, action: `set subagent limit to ${plan.limit}` }]
+          : []),
         ...(manifestChanges ? [{ path: MANIFEST_PATH, action: "write" }] : []),
       ];
       if (values.json)
