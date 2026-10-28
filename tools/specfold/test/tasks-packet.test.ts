@@ -1,3 +1,5 @@
+import { readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { write } from "./gate-helpers.ts";
 import { run, tempDir } from "./helpers.ts";
@@ -51,6 +53,21 @@ describe("specfold tasks packet", () => {
     expect(out).toContain("## Knowledge\n\n- knowledge/decisions/use-yaml.md\n\n");
     expect(out).toContain("`Task: add-guest-checkout#2.<m>`");
     expect(out).not.toContain("Step one of 1");
+  });
+
+  // spec: specfold-tasks#finished-tasks-marked
+  it("marks ticked tasks done and says where to start", async () => {
+    const root = repo();
+    const tasks = join(root, C, "tasks.md");
+    writeFileSync(tasks, readFileSync(tasks, "utf8").replace("- [ ] 2.1 ", "- [x] 2.1 "));
+    const out = (await run(["tasks", "packet", "add-guest-checkout", "2"], root)).stdout;
+    expect(out).toContain("- [done] 2.1 Step one of 2\n");
+    expect(out).toContain("- 2.2 Step two of 2\n");
+    expect(out).toContain("Start at the first task not marked [done]");
+    const data = JSON.parse(
+      (await run(["tasks", "packet", "add-guest-checkout", "2", "--json"], root)).stdout,
+    );
+    expect(data.tasks.map((t: { done: boolean }) => t.done)).toEqual([true, false]);
   });
 
   // spec: specfold-tasks#unknown-group

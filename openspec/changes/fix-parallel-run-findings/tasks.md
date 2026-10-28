@@ -9,7 +9,7 @@ scenarios: [specfold-tasks#finished-tasks-marked]
 agent: implementer
 ```
 
-- [ ] 1.1 Mark ticked tasks `[done]` in the packet and say where to start
+- [x] 1.1 Mark ticked tasks `[done]` in the packet and say where to start
   - Done when: scenario finished-tasks-marked passes in `tasks-packet.test.ts`
 
 ## 2. Nested root
