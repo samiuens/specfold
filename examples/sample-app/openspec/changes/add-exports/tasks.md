@@ -21,7 +21,7 @@ scenarios: [json-import#valid-entries, json-import#not-an-array, json-import#emp
 agent: implementer
 ```
 
-- [ ] 2.1 Parse and check titles and done flags in `fromJson(text)`
+- [x] 2.1 Parse and check titles and done flags in `fromJson(text)`
   - Done when: scenarios valid-entries, not-an-array, empty-title-names-its-index, non-string-title-names-its-index and the done-flag scenario non-boolean-done-names-its-index pass in `test/import-json.test.js`
 - [ ] 2.2 Check due dates with the same function `add` uses (`isCalendarDate` in `src/todo.js`, imported, not copied)
   - Done when: scenario invalid-due-date-names-its-index passes in `test/import-json.test.js` and `npm test` passes
