@@ -59,7 +59,7 @@ agent: implementer
 
 - [x] 5.1 Let only the main session spawn subagents
   - Done when: the template's settings set `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` to `"1"` and the copies match
-- [ ] 5.2 Rebuild the bundle, its copies and the template manifest
+- [x] 5.2 Rebuild the bundle, its copies and the template manifest
   - Done when: the copies equal `scripts/specfold.mjs` and `template-manifest.test.ts` passes
 
 ## 6. Knowledge
