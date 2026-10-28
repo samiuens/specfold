@@ -4,6 +4,7 @@ import { Document, isMap, isScalar, isSeq, parseDocument, type YAMLSeq } from "y
 import { EnvError } from "../errors.ts";
 import { git } from "../git.ts";
 import type { Config } from "../repo.ts";
+import { yamlText } from "../yaml.ts";
 
 export const HOOKS_PATH = ".specfold/hooks";
 /** Hooks with Specfold's own checks; `hooks.extra` adds more. */
@@ -112,7 +113,7 @@ function lefthookEntries(config: Config, file: string): InstallAction[] {
     }
     actions.push({ path: file, action: `add specfold to ${hook}` });
   }
-  if (actions.length > 0) writeFileSync(path, String(doc));
+  if (actions.length > 0) writeFileSync(path, yamlText(doc));
   return actions;
 }
 
@@ -180,7 +181,7 @@ function preCommitEntries(config: Config): InstallAction[] {
     doc.set("default_install_hook_types", doc.createNode([...types, ...added], { flow: true }));
     actions.push({ path: PRE_COMMIT_FILE, action: `install hook types ${added.join(", ")}` });
   }
-  if (actions.length > 0) writeFileSync(path, String(doc));
+  if (actions.length > 0) writeFileSync(path, yamlText(doc));
   return actions;
 }
 

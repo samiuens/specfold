@@ -45,6 +45,16 @@ describe("specfold parallel", () => {
     expect((await run(["parallel", "set", "1"], root)).stdout).toContain("task groups run one after another");
   });
 
+  // spec: specfold-parallel#long-value-kept
+  it("keeps a long value on one line when it writes the limit", async () => {
+    const root = tempDir("valid");
+    const note = `reviewing on a laptop with little memory, so keep the number of parallel agents low ${"z".repeat(16)}`;
+    expect(note.length).toBe(100);
+    write(root, ".specfold/local.yaml", `note: ${note}\n`);
+    await run(["parallel", "set", "4"], root);
+    expect(read(root, ".specfold/local.yaml")).toBe(`note: ${note}\nparallel:\n  max_subagents: 4\n`);
+  });
+
   // spec: specfold-parallel#from-local-settings
   it("shows the limit with its source, the environment first", async () => {
     const root = tempDir("valid");
