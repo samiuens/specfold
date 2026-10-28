@@ -28,9 +28,11 @@
     "scripts/specfold.mjs": "sha256:6591073c5964cd89074728d2a803b0e5156f41e9051207b6d3be199ec8aadbc4"
   },
   "blocks": {
+    ".gitattributes": "sha256:1bf32920694d48900b707f228d8b154e37439df8994b68e4a4badc87d98e1d58",
     ".github/CODEOWNERS": "sha256:67066f65a9740d8f546b033e48458f634c835883bf2dd18502c075bda8db5be6",
     ".github/pull_request_template.md": "sha256:9d4bb9d55402391ab54b048a68650ba2ab6c426bb35410a584f437e44d8e544e",
     ".gitignore": "sha256:1ed97f91052477eea7f0317cc16e3531a7aea4c9a0f6c65f4aecbfdd5249f125",
+    ".worktreeinclude": "sha256:098461b02af190467ac6a6ff0f49dadef3fd07a6c648c4f109241acbf7daf795",
     "AGENTS.md": "sha256:a87903064a840d6e24a895d8ff5c32dd68d4bf56cb33a220a922b4e6a5232398",
     "CLAUDE.md": "sha256:4137e4cc72fd622d72a6ded0921c27752cddcb98b6fd667d44e88c2e1f68d06c"
   }
