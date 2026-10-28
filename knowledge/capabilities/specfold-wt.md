@@ -5,13 +5,15 @@ description: Why worktrees get their own commands, how wt plan batches changes, 
 status: draft
 spec: openspec/specs/specfold-wt/spec.md
 resource: ../../openspec/specs/specfold-wt/spec.md
-change: 2026-10-28-add-specfold-wt
+change: 2026-10-28-fix-parallel-run-findings
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T10:45:04+01:00 }
 sources:
   - id: proposal-2026-10-28-add-specfold-wt
     resource: ../../openspec/changes/archive/2026-10-28-add-specfold-wt/proposal.md
   - id: design-2026-10-28-add-specfold-wt
     resource: ../../openspec/changes/archive/2026-10-28-add-specfold-wt/design.md
+  - id: proposal-2026-10-28-fix-parallel-run-findings
+    resource: ../../openspec/changes/archive/2026-10-28-fix-parallel-run-findings/proposal.md
 ---
 
 # Why
