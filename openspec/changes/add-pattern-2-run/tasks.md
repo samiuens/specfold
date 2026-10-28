@@ -47,7 +47,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 4.1 Write the run record and link it
+- [x] 4.1 Write the run record and link it
   - Done when: `examples/runs/pattern-2/README.md` holds the timeline, final messages, merges, the split and the verdict
 
 ## 5. Knowledge
