@@ -11,8 +11,8 @@ const SUBCOMMANDS = ["plan", "new", "setup", "clean"];
 register({
   name: "wt",
   summary: "plan, create, set up and clean worktrees for parallel changes and task groups",
-  usage: "specfold wt plan | new <change> | setup | clean [--json]",
-  options: { json: { type: "boolean" } },
+  usage: "specfold wt plan | new <change> | setup | clean [--base <ref>] [--json]",
+  options: { base: { type: "string" }, json: { type: "boolean" } },
   run: ({ io, values, positionals }) => {
     const [sub, ...args] = positionals;
     if (sub === undefined || !SUBCOMMANDS.includes(sub))
@@ -24,6 +24,7 @@ register({
       throw new UsageError(
         sub === "new" ? "wt new takes one change name" : `unexpected argument '${args[0]}'`,
       );
+    if (values.base !== undefined && sub !== "clean") throw new UsageError("--base works only with wt clean");
     const root = requireConfig(io.cwd).root;
     const print = (lines: string[], json: Record<string, unknown>) =>
       io.stdout(values.json ? `${JSON.stringify(json, null, 2)}\n` : `${lines.join("\n")}\n`);
@@ -52,7 +53,7 @@ register({
         ? newWorktree(root, args[0] as string, log)
         : sub === "setup"
           ? setupWorktree(io.cwd, log)
-          : cleanWorktrees(root);
+          : cleanWorktrees(root, values.base as string | undefined);
     if (sub === "new" && !outcome.ok) {
       if (values.json) print([], { ok: false, error: outcome.lines.join("; ") });
       else io.stderr(`specfold: ${outcome.lines.join("; ")}; nothing was created\n`);

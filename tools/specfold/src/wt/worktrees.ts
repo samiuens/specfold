@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { cpSync, existsSync, readFileSync, realpathSync } from "node:fs";
 import { basename, join, relative, sep } from "node:path";
 import { EnvError } from "../errors.ts";
-import { git } from "../git.ts";
+import { git, gitSucceeds } from "../git.ts";
 import { globToRegExp } from "../glob.ts";
 import { writeIfChanged } from "../hooks/install.ts";
 import { defaultBranch } from "../migrate/repo.ts";
@@ -119,8 +119,10 @@ const unmerged = (root: string, base: string, branch: string) =>
     .split("\n")
     .filter((l) => l.startsWith("+")).length;
 
-/** Removes clean, merged worktrees under `.claude/worktrees/` and lists the others with the reason. */
-export function cleanWorktrees(root: string): Outcome {
+/** Removes clean worktrees under `.claude/worktrees/` merged into `ref` (default branch by default) and lists the others. */
+export function cleanWorktrees(root: string, ref?: string): Outcome {
+  if (ref !== undefined && !gitSucceeds(root, ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`]))
+    throw new EnvError(`unknown base '${ref}'; nothing was removed`);
   const folder = join(root, WORKTREES);
   /** A folder directly inside `.claude/worktrees/`. */
   const isCandidate = (w: Worktree) => {
@@ -130,7 +132,7 @@ export function cleanWorktrees(root: string): Outcome {
   };
   const candidates = listWorktrees(root).filter(isCandidate);
   if (candidates.length === 0) return { lines: [`no worktrees under ${WORKTREES}/`], ok: true };
-  const base = defaultBranch(root, undefined);
+  const base = ref ?? defaultBranch(root, undefined);
   const lines: string[] = [];
   let ok = true;
   for (const w of candidates) {
