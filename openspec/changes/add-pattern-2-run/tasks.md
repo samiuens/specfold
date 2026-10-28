@@ -21,9 +21,9 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 2.1 Run the three module groups as parallel implementers and merge their branches
+- [x] 2.1 Run the three module groups as parallel implementers and merge their branches
   - Done when: the three branches are merged into this branch and the sample app's `npm test` passes
-- [ ] 2.2 Resolve the split proposal through `spec-writer` and the user, then finish the group
+- [x] 2.2 Resolve the split proposal through `spec-writer` and the user, then finish the group
   - Done when: the sample app's `tasks check add-exports` passes and every module group is ticked
 
 ## 3. Verify, archive and sync the sample change
