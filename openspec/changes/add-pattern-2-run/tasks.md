@@ -35,7 +35,7 @@ scenarios: []
 agent: knowledge-curator
 ```
 
-- [ ] 3.1 Verify, archive and sync `add-exports` in the sample app
+- [x] 3.1 Verify, archive and sync `add-exports` in the sample app
   - Done when: the verifier returns PASS, and the sample app's validate, `index --check`, `openspec validate --all --strict` and `sync --dry-run` pass
 
 ## 4. Record
