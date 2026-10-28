@@ -35,7 +35,7 @@ scenarios: [summary#mixed-list, summary#empty-list]
 agent: implementer
 ```
 
-- [ ] 3.1 Add `summarize(items)`
+- [x] 3.1 Add `summarize(items)`
   - Done when: scenarios mixed-list and empty-list pass in `test/summary.test.js` and `npm test` passes
 
 ## 4. Knowledge
