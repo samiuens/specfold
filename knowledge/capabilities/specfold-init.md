@@ -37,4 +37,4 @@ A repository made with "Use this template" holds every kit file but still has pl
 - [specfold migrate](/capabilities/specfold-migrate.md)
 - [specfold hooks](/capabilities/specfold-hooks.md)
 - [specfold agents sync](/capabilities/specfold-agents-sync.md)
-- [Move the bootstrap pin](/runbooks/move-bootstrap-pin.md)
+- [Cut a release](/runbooks/cut-a-release.md)
