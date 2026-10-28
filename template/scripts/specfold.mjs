@@ -7399,7 +7399,7 @@ async function main(argv, io) {
       return name === void 0 ? 2 : 0;
     }
     if (name === "--version" || name === "-v") {
-      io.stdout(`${"0.0.0"}
+      io.stdout(`${"0.1.0-rc.1"}
 `);
       return 0;
     }
