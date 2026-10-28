@@ -129,3 +129,10 @@ A second `migrate install` with the same template folder and flags SHALL change 
 #### Scenario: Rerun
 - **WHEN** install has run once and runs again
 - **THEN** `git status` shows no new changes and the output says everything is up to date
+
+### Requirement: OpenSpec config keeps long lines
+When `specfold migrate install` merges an existing `openspec/config.yaml`, it SHALL keep every value on the lines it had, without folding long lines.
+
+#### Scenario: Long context line kept
+- **WHEN** install adds the specfold rules to a config whose context has a 120-character line
+- **THEN** that line is unchanged after the merge
