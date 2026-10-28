@@ -33,7 +33,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 3.1 Write the five role definitions and copy them to the kit and the sample app
+- [x] 3.1 Write the five role definitions and copy them to the kit and the sample app
   - Done when: `specfold tasks check` reports no T7 for `knowledge-curator` in this change and CI's agents comparison covers the whole folder
 
 ## 4. Orchestrator skill
