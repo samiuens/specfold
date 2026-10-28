@@ -5,6 +5,8 @@
   "include-v-in-tag": true,
   "pull-request-title-pattern": "chore(release): 🔖 v${version}",
   "bump-minor-pre-major": true,
+  "extra-label": "no-spec",
+  "pull-request-footer": "No-spec reason: release PR; only versions, the changelog and rebuilt files change",
   "packages": {
     ".": {
       "package-name": "specfold",
