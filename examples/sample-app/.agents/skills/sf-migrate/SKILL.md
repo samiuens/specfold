@@ -20,6 +20,7 @@ Use this when a repository that already has code or docs should start using Spec
    - On an edit, change the plan and ask again. If the answer is missing or the question times out, stop: that is not consent.
 4. **Install.** Run `migrate install --from <kit>` with the plan's values: one `--source-glob` per glob, and `--stack`. Add `--tools agents` if the plan says the repository does not use Claude Code, and `--ref <sha>` if `BOOTSTRAP.md` named one.
    - For each conflict it reports, show it to the user and ask what to do. Never overwrite or delete a file to get past a conflict.
+   - Ask the user once how many subagents may run at the same time (recommended 3; more parallel subagents cost more tokens, and what is affordable depends on their plan), then run `node scripts/specfold.mjs parallel set <n>`. The limit is personal and stays out of git.
    - Run `node scripts/specfold.mjs doctor` again: everything must pass now, and D4 may only warn when a hook manager still needs `lefthook install` or similar.
    - Commit.
 5. **Convert.** Work through the plan's mapping rows following [references/conversion.md](references/conversion.md). Each concept is created with `SPECFOLD_MODEL=<your model id> node scripts/specfold.mjs new <type> <path>` and gets `sources` pointing at the original file. Original files are never moved or deleted. Run `migrate mark convert` and commit.
