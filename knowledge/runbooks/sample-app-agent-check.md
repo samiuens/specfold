@@ -17,6 +17,9 @@ After a change to the skills, the planner, `AGENTS.md`, `CLAUDE.md` or the schem
 
 # Steps
 
+For the parallel layer (M8), repeat the recorded pattern-2 run in `examples/runs/pattern-2/README.md`: plan a change with three groups on disjoint files, run `sf-apply`, and compare the timeline, merges and final messages with the record.
+
+
 The exact commands are in the sample app's README (section "Agent check"), linked as the source, so they live in one place. In short:
 
 1. Copy `examples/sample-app` outside the kit and `git init` it. Claude Code loads `CLAUDE.md` and skills from parent folders, so a run inside the kit would mix in the kit's own instructions.
