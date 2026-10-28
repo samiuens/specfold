@@ -8,3 +8,6 @@ node_modules/
 # generated, never committed
 .claude/worktrees/
 graphify-out/
+
+# index of this worktree for test ports (specfold wt setup)
+.specfold/wt-index
