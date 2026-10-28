@@ -30,7 +30,7 @@
   "blocks": {
     ".github/CODEOWNERS": "sha256:67066f65a9740d8f546b033e48458f634c835883bf2dd18502c075bda8db5be6",
     ".github/pull_request_template.md": "sha256:9d4bb9d55402391ab54b048a68650ba2ab6c426bb35410a584f437e44d8e544e",
-    ".gitignore": "sha256:8e020e6c1c9a1b50381fe3001af32a0064ed978e6c2e8bc057b3c9dc5ec2fd4a",
+    ".gitignore": "sha256:1ed97f91052477eea7f0317cc16e3531a7aea4c9a0f6c65f4aecbfdd5249f125",
     "AGENTS.md": "sha256:a87903064a840d6e24a895d8ff5c32dd68d4bf56cb33a220a922b4e6a5232398",
     "CLAUDE.md": "sha256:4137e4cc72fd622d72a6ded0921c27752cddcb98b6fd667d44e88c2e1f68d06c"
   }
