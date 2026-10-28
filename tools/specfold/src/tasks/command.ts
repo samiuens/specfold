@@ -5,6 +5,7 @@ import { EnvError, UsageError } from "../errors.ts";
 import { plural } from "../findings.ts";
 import { type Config, requireConfig } from "../repo.ts";
 import { checkTrailers, commitsSinceBase } from "./git.ts";
+import { buildPacket, renderPacket } from "./packet.ts";
 import { parseTasks } from "./parse.ts";
 import { checkStatic, type TaskFinding } from "./rules.ts";
 import { knownScenarioIds } from "./scenarios.ts";
@@ -68,14 +69,23 @@ export const taskFindingLine = (f: TaskFinding) =>
 register({
   name: "tasks",
   summary: "check a change's task breakdown",
-  usage: "specfold tasks check <change> [--base <ref>] [--json]",
+  usage: "specfold tasks check <change> [--base <ref>] | packet <change> <group>  [--json]",
   options: { base: { type: "string" }, json: { type: "boolean" } },
   run: ({ io, values, positionals }) => {
     const [sub, change, ...extra] = positionals;
-    if (sub !== "check")
+    if (sub !== "check" && sub !== "packet")
       throw new UsageError(
-        sub ? `unknown tasks subcommand '${sub}'` : "missing subcommand: specfold tasks check",
+        sub ? `unknown tasks subcommand '${sub}'` : "missing subcommand: specfold tasks check or packet",
       );
+    if (sub === "packet") {
+      const [group, ...rest] = extra;
+      if (rest.length > 0) throw new UsageError(`unexpected argument '${rest[0]}'`);
+      if (!group || !/^\d+$/.test(group))
+        throw new UsageError("tasks packet takes a change and a group number");
+      const packet = buildPacket(requireConfig(io.cwd), change as string, Number(group));
+      io.stdout(values.json ? `${JSON.stringify({ ok: true, ...packet }, null, 2)}\n` : renderPacket(packet));
+      return 0;
+    }
     if (extra.length > 0) throw new UsageError(`unexpected argument '${extra[0]}'`);
     const config = requireConfig(io.cwd);
     const findings = checkChangeTasks(config, change as string, values.base as string | undefined);
