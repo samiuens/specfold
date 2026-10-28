@@ -20,6 +20,7 @@ Subagents do their best work on small, bounded units: a group of tasks that owns
 
 # Choices made while specifying and building
 
+- **Packets come from the breakdown.** `tasks packet <change> <group>` prints one group's tasks, files, dependencies, scenario text (delta specs first, so a modified scenario shows its new wording), the brief's wish and decisions and the concepts the proposal links, plus the commit rules; an implementer needs nothing else ([agent layer](/architecture/agent-layer.md)).
 - **What blocks and what warns.** Rules that make task ids or parallel work unsafe are errors: metadata, numbering, cycles, overlap, unknown scenarios. Size limits, unknown roles, a missing Knowledge group and trailer mismatches only warn.
 - **Overlap without listing every path.** Two groups count as overlapping when an existing file matches both, when a plain path of one matches the other, or when one group's `dir/**` covers the other's directory.
 - **The change's own `tasks.md` is exempt** from the scope and size checks, because every task commit ticks it (found while dogfooding `add-specfold-validate`).

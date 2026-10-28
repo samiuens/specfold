@@ -24,13 +24,23 @@ The agent layer tells agents when to call the CLI and what to write around it. I
 | `sf-interview` | skill | the planning interview: ground, design tree plus the interview checklist, native questions, never a timeout as consent, out-of-scope items offered as backlog items or commitments, brief only after approval ([rather ask than assume](/decisions/rather-ask-than-assume.md)) |
 | `sf-plan` | skill | the planner's steps for tools without agent definitions |
 | `sf-migrate` | skill | brings an existing repository in on `specfold/migration`: resume with `migrate status`, inventory, a mapping plan the user approves (stating their login), `migrate install`, conversion into draft concepts with sources, a capped seed from code, validation and a report; asks before pushing |
+| `sf-apply` | skill | the orchestrator in the main session: one `implementer` per task group with its `specfold tasks packet`, parallel up to the personal limit, merges into the change branch, split proposals through `spec-writer` and the user, then `verifier`, archive and `knowledge-curator` |
 | `planner` | `.claude/agents/planner.md` | Claude Code main session in plan mode: interview, plan approval via `ExitPlanMode`, then the change artifacts |
+| `scout` | `.claude/agents/scout.md` (haiku, low) | read-only: answers one question from knowledge, graph and specs in at most 30 lines |
+| `spec-writer` | `.claude/agents/spec-writer.md` (opus, high) | writes and revises one change's artifacts, including `tasks.md` for a split proposal; returns open questions instead of deciding |
+| `implementer` | `.claude/agents/implementer.md` (sonnet, medium, `isolation: worktree`) | one task group from its packet: `wt setup`, one commit per task, ends with `DONE` and its branch or `SPLIT PROPOSAL`; cannot spawn agents, and a scoped hook refuses `git push` and `gh pr` |
+| `verifier` | `.claude/agents/verifier.md` (opus, high) | read-only: tests, `openspec validate`, `change check`, the local gate; `PASS` or findings tied to task groups |
+| `knowledge-curator` | `.claude/agents/knowledge-curator.md` (sonnet, medium) | edits only `knowledge/`: the concepts of `knowledge.md`, sf-sync after archive, sf-audit on request |
 
 # Interfaces
 
 - **One source for skills.** Skills are written once in `.agents/skills/`, which opencode, Codex, Cursor and generic agents read. `specfold agents sync` links them into `.claude/skills/` for Claude Code ([specfold agents sync](/capabilities/specfold-agents-sync.md)). The shared frontmatter core is `name` equal to the folder name plus a `description` of at most 1024 characters ([opencode skills](/references/opencode.md)).
-- **The planner runs as the main session,** because subagents never get `AskUserQuestion` ([Claude Code](/references/claude-code.md)). It is started with `claude --agent planner --permission-mode plan`. Until the M8 roles exist it has no subagents and writes the specs itself.
-- **Shipping.** `template/` holds the canonical skills and planner. The kit runs byte-identical copies, which CI compares with the template ([self-hosting](/decisions/self-hosting.md)).
+- **The planner runs as the main session,** because subagents never get `AskUserQuestion` ([Claude Code](/references/claude-code.md)). It is started with `claude --agent planner --permission-mode plan`, and writes the specs itself or through `spec-writer`.
+- **Only the main session spawns.** The template's settings set `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` to `1`, so subagents can't start further agents, and the implementer also lists `Agent` in `disallowedTools`. Claude Code's default is three layers (checked 2026-10-28).
+- **Hand-offs are deterministic text.** The orchestrator passes the output of `specfold tasks packet` verbatim, and every role ends with a fixed final-message shape (`DONE`, `SPLIT PROPOSAL`, `PASS`, `FINDINGS`), so the main session reads summaries, never files. A worktree subagent's result reaches the parent only through that message, so the implementer names its branch there.
+- **Guarding pushes needs a hook.** A `Bash(git push *)` entry in `disallowedTools` would remove the whole Bash tool, so the implementer's frontmatter runs `specfold hook claude-no-push` as a PreToolUse hook; it is a guard against slips, not a sandbox ([specfold hooks](/capabilities/specfold-hooks.md)).
+- **Two roles wait:** `integrator` (the orchestrator merges itself) and `plan-critic` (the tasks check covers the mechanical review) are backlog items ([integrator](/backlog/integrator-subagent-role.md), [plan-critic](/backlog/plan-critic-subagent-role.md)).
+- **Shipping.** `template/` holds the canonical skills, planner and roles. The kit runs byte-identical copies, which CI compares with the template ([self-hosting](/decisions/self-hosting.md)).
 
 # Instructions and shipping
 
