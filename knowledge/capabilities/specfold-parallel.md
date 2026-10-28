@@ -5,13 +5,15 @@ description: Why the subagent limit is a personal setting in files git ignores, 
 status: draft
 spec: openspec/specs/specfold-parallel/spec.md
 resource: ../../openspec/specs/specfold-parallel/spec.md
-change: 2026-10-28-add-specfold-wt
+change: 2026-10-28-fix-upgrade-follow-ups
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T09:57:10+01:00 }
 sources:
   - id: proposal-2026-10-28-add-specfold-wt
     resource: ../../openspec/changes/archive/2026-10-28-add-specfold-wt/proposal.md
   - id: design-2026-10-28-add-specfold-wt
     resource: ../../openspec/changes/archive/2026-10-28-add-specfold-wt/design.md
+  - id: proposal-2026-10-28-fix-upgrade-follow-ups
+    resource: ../../openspec/changes/archive/2026-10-28-fix-upgrade-follow-ups/proposal.md
 ---
 
 # Why
