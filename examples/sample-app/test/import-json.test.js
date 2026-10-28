@@ -40,3 +40,8 @@ test("names the index of a non-boolean done flag", () => {
     message: "entry 0: done must be true or false",
   });
 });
+
+// spec: json-import#non-json-text
+test("throws a TypeError for text that is not JSON", () => {
+  assert.throws(() => fromJson("not json"), { name: "TypeError" });
+});
