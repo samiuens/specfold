@@ -3,7 +3,13 @@ type: Capability
 title: CSV export
 description: Why to-do items can be exported as CSV text, and where the contract lives.
 status: draft
+spec: openspec/specs/csv-export/spec.md
+resource: ../../openspec/specs/csv-export/spec.md
+change: 2026-10-28-add-exports
 generated: { by: claude-code/claude-sonnet-5-5, at: 2026-10-28T10:24:25+01:00 }
+sources:
+  - id: proposal-2026-10-28-add-exports
+    resource: ../../openspec/changes/archive/2026-10-28-add-exports/proposal.md
 ---
 
 # Why
