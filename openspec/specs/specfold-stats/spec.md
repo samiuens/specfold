@@ -35,7 +35,7 @@ The set SHALL consist of `AGENTS.md`, `CLAUDE.md` and every file they import wit
 - **THEN** the set lists one item per skill with the tokens of its name and description, and one item for the SessionStart hook output
 
 ### Requirement: Budgets
-Budgets SHALL come from `stats.budget` in `specfold.yaml`: `agents_md` (default 2000) for `AGENTS.md`, `total` (default 4000) for the whole set, and `skill_description` (default 60) for each skill whose folder name does not start with `openspec-`. Each exceeded budget SHALL be reported with its value and the estimate.
+Budgets SHALL come from `stats.budget` in `specfold.yaml`: `agents_md` (default 2000) for `AGENTS.md`, `total` (default 4000) for the whole set, and `skill_description` (default 60) for each skill whose folder name neither starts with `openspec-` nor is `graphify`, the skills other tools write. Each exceeded budget SHALL be reported with its value and the estimate.
 
 #### Scenario: AGENTS.md too long
 - **WHEN** `AGENTS.md` has 9000 characters and `stats.budget` is not set
@@ -43,6 +43,10 @@ Budgets SHALL come from `stats.budget` in `specfold.yaml`: `agents_md` (default 
 
 #### Scenario: OpenSpec skill exempt
 - **WHEN** the description of `openspec-propose` is 110 tokens long
+- **THEN** no per-skill budget is reported for it, and its tokens count toward the total
+
+#### Scenario: graphify skill exempt
+- **WHEN** the description of the `graphify` skill is 91 tokens long
 - **THEN** no per-skill budget is reported for it, and its tokens count toward the total
 
 ### Requirement: Knowledge per folder
