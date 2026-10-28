@@ -11,3 +11,6 @@ graphify-out/
 
 # index of this worktree for test ports (specfold wt setup)
 .specfold/wt-index
+
+# the session start's daily check for a newer release (specfold upgrade)
+.specfold/local-state.json

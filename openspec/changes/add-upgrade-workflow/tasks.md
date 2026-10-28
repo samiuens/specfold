@@ -51,7 +51,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 4.1 Document `upgrade.reminder` and ignore the reminder's cache
+- [x] 4.1 Document `upgrade.reminder` and ignore the reminder's cache
   - Done when: the template's specfold.yaml documents the key, the kit's sets it to `false`, and both `.gitignore` files list `.specfold/local-state.json`
 - [ ] 4.2 Ask about the upgrade workflow in `BOOTSTRAP.md` and `sf-migrate`
   - Done when: both ask the user and pass `--upgrade-workflow` on a yes, and `check-skills.mjs` passes
