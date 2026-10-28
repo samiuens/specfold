@@ -9,7 +9,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Ship the manifest an empty-repository install records in `template/.specfold/manifest.json`
+- [x] 1.1 Ship the manifest an empty-repository install records in `template/.specfold/manifest.json`
   - Done when: `template-manifest.test.ts` compares it with `toMatchFileSnapshot` and passes
 
 ## 2. Init command
