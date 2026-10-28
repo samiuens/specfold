@@ -1,10 +1,12 @@
 {
   "name": "specfold",
-  "version": "0.0.0",
+  "version": "0.1.0-rc.1",
   "private": true,
   "description": "Specs and knowledge folded into one agent workflow: OKF knowledge bundles plus OpenSpec.",
   "type": "module",
-  "engines": { "node": ">=20.19" },
+  "engines": {
+    "node": ">=20.19"
+  },
   "bin": {
     "specfold": "../../scripts/specfold.mjs",
     "sf": "../../scripts/specfold.mjs"
