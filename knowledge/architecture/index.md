@@ -8,6 +8,7 @@
 * [Upgrade flow](upgrade-flow.md) - How an upgrade runs: outer stage downloads and checks, the target release's CLI plans, applies, migrates, reports and commits.
   * Referenced from code: tools/specfold/src/upgrade/command.ts:1
   * Referenced from code: tools/specfold/src/upgrade/migrations.ts:1
+  * Referenced from code: tools/specfold/src/upgrade/reminder.ts:1
   * Referenced from code: tools/specfold/src/upgrade/skew.ts:1
   * Referenced from code: tools/specfold/src/upgrade/source.ts:1
   * Referenced from code: tools/specfold/src/upgrade/version.ts:1
