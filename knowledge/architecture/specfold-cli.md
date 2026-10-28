@@ -48,8 +48,10 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/lookup/` | the `lookup` command: frontmatter search, weighted ranking, trust flags including `drift` |
 | `src/new/` | the `new` command: per-type templates, override files, frontmatter rendering |
 | `src/stats/` | the `stats` command: the always-loaded set (files with their `@` imports, config context, skill descriptions, SessionStart output), the budget check G11 reuses, knowledge per folder and named files |
+| `src/parallel/` | the `parallel` command: the personal subagent limit, read from the environment, `.claude/settings.local.json` and `.specfold/local.yaml`, written to both files |
 | `src/sync/` | the `sync` command: resolves archived changes, plans (`planSync`, also used by the gate) and applies delta ops, edits frontmatter line by line, then indexes and log |
 | `src/tasks/` | the `tasks check`, `status` and `resume` commands: the `tasks.md` parser, rules T0 to T11, file overlap between parallel groups, task commits from git trailers, group progress |
+| `src/wt/` | the `wt` command: batches active changes by capability and owned files, creates worktrees with their included files, installs dependencies and the worktree index, removes merged clean worktrees |
 
 # How commands work
 

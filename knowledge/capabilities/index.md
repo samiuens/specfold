@@ -16,6 +16,7 @@
 * [specfold lookup](specfold-lookup.md) - Why agents search knowledge by frontmatter first, and where the contract for specfold lookup lives.
 * [specfold migrate](specfold-migrate.md) - Why the mechanical steps of a migration are CLI code, and how install brings in the kit without overwriting a repository's own files.
 * [specfold new](specfold-new.md) - Why concepts are created from templates, and where the contract for specfold new lives.
+* [specfold parallel](specfold-parallel.md) - Why the subagent limit is a personal setting in files git ignores, and how init and agents set it.
 * [specfold schema](specfold-schema.md) - Why changes use the specfold OpenSpec schema with brief and knowledge artifacts, and where its contract lives.
 * [specfold stats](specfold-stats.md) - Why the always-loaded set is measured, what counts in it, and why OpenSpec's own skills count only toward the total.
 * [specfold sync](specfold-sync.md) - Why sync applies the mechanical part of a knowledge delta after archive, and where its contract lives.
@@ -23,3 +24,4 @@
 * [specfold trace](specfold-trace.md) - Why scenarios carry stable ids that tests cite, and where the contract for specfold trace lives.
 * [specfold validate](specfold-validate.md) - Why the kit has its own OKF and profile validator, and where its contract lives.
 * [specfold verify](specfold-verify.md) - Why specfold verify writes human verification for the person at the keyboard, and where its contract lives.
+* [specfold wt](specfold-wt.md) - Why worktrees get their own commands, how wt plan batches changes, and why wt clean never forces a removal.
