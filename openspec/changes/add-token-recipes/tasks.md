@@ -9,7 +9,7 @@ scenarios: [specfold-stats#graphify-skill-exempt]
 agent: implementer
 ```
 
-- [ ] 1.1 Skip `graphify` in the per-skill budget
+- [x] 1.1 Skip `graphify` in the per-skill budget
   - Done when: scenario graphify-skill-exempt passes in `stats.test.ts`
 
 ## 2. Deny list
