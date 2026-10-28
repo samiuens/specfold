@@ -2,6 +2,8 @@
   "manifest_version": 1,
   "kit_version": "0.0.0",
   "files": {
+    ".agents/skills/sf-apply/SKILL.md": "sha256:6957f776f49f677e7547c8d7a39be9f41e534ef715257d2c2fdcc62203b167c9",
+    ".agents/skills/sf-apply/references/packet-and-split.md": "sha256:77c1096ad22b34d25b24c90496e2bf814c0e616ea8c695d428a28ffb80847976",
     ".agents/skills/sf-audit/SKILL.md": "sha256:dc3ceaa184d6c92d518bd2b3cb306f7b09f8d723d64f3199884d16d82a962ed9",
     ".agents/skills/sf-capture/SKILL.md": "sha256:789c818ae0e778ae7be0a03af33c5960c401d27c158d528c5431125f0a22f4d4",
     ".agents/skills/sf-capture/references/types.md": "sha256:b9d6610e4a38da7e40bb00e677a2defc6c66dda78be9a05a9b73da3e75876175",
