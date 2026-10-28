@@ -77,7 +77,7 @@ agent: implementer
   - Done when: the copies equal the template and `npx vitest run` passes
 - [x] 6.2 Ask for the limit in `sf-migrate` and name it in the template README
   - Done when: the skill copies match and `check-skills.mjs` passes
-- [ ] 6.3 Rebuild the bundle, its copies and the template manifest
+- [x] 6.3 Rebuild the bundle, its copies and the template manifest
   - Done when: the copies equal `scripts/specfold.mjs` and `template-manifest.test.ts` passes
 
 ## 7. Knowledge
