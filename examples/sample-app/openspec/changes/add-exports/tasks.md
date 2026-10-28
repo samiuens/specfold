@@ -45,7 +45,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 4.1 Export `isCalendarDate` from `src/todo.js` with no behavior change
+- [x] 4.1 Export `isCalendarDate` from `src/todo.js` with no behavior change
   - Done when: `npm test` passes
 
 ## 5. Import due dates
