@@ -19,7 +19,10 @@ const commandsOf = (groups: unknown): string[] =>
     ? groups.flatMap((g: HookGroup) => (g.hooks ?? []).map((h) => String(h.command)))
     : [];
 
-/** Adds each hook group of the template whose commands are all missing under its event; keeps every other key. */
+/**
+ * Adds each hook group of the template whose commands are all missing under its event, and each missing
+ * `permissions.deny` rule after the existing ones; keeps every other key.
+ */
 export function mergeSettings(existing: string | undefined, template: string): Merged {
   if (existing === undefined) return { text: template, changed: true };
   let data: unknown;
@@ -29,7 +32,19 @@ export function mergeSettings(existing: string | undefined, template: string): M
     return { conflict: "is not valid JSON" };
   }
   if (!isRecord(data)) return { conflict: "is not a JSON object" };
-  const wanted = (JSON.parse(template) as { hooks?: Record<string, HookGroup[]> }).hooks ?? {};
+  const parsed = JSON.parse(template) as {
+    hooks?: Record<string, HookGroup[]>;
+    permissions?: { deny?: string[] };
+  };
+  const wanted = parsed.hooks ?? {};
+  const wantedDeny = parsed.permissions?.deny ?? [];
+  if (data.permissions !== undefined && !isRecord(data.permissions))
+    return { conflict: "has a 'permissions' value that is not an object" };
+  const permissions: Record<string, unknown> = isRecord(data.permissions) ? data.permissions : {};
+  if (permissions.deny !== undefined && !Array.isArray(permissions.deny))
+    return { conflict: "has a 'permissions.deny' value that is not a list" };
+  const deny = (permissions.deny as unknown[] | undefined) ?? [];
+  const missingDeny = wantedDeny.filter((rule) => !deny.includes(rule));
   if (data.hooks !== undefined && !isRecord(data.hooks))
     return { conflict: "has a 'hooks' value that is not an object" };
   const hooks: Record<string, unknown> = isRecord(data.hooks) ? data.hooks : {};
@@ -44,8 +59,11 @@ export function mergeSettings(existing: string | undefined, template: string): M
     hooks[event] = [...((current as unknown[]) ?? []), ...added];
     changed = true;
   }
-  if (!changed) return { text: existing, changed: false };
-  return { text: `${JSON.stringify({ ...data, hooks }, null, 2)}\n`, changed: true };
+  if (!changed && missingDeny.length === 0) return { text: existing, changed: false };
+  const out: Record<string, unknown> = { ...data };
+  if (missingDeny.length > 0) out.permissions = { ...permissions, deny: [...deny, ...missingDeny] };
+  if (changed) out.hooks = hooks;
+  return { text: `${JSON.stringify(out, null, 2)}\n`, changed: true };
 }
 
 /**
