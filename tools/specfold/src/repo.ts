@@ -40,6 +40,8 @@ export interface Config {
   hooksExtra: Record<string, string[]>;
   /** `trace.test_globs`: files whose `spec:` references count as tests. */
   traceTestGlobs: string[];
+  /** `stats.budget.*`: token budgets of the always-loaded set; exceeding one only warns (G11). */
+  statsBudget: { agentsMd: number; total: number; skillDescription: number };
 }
 
 /** The nearest directory at or above `cwd` that contains specfold.yaml. */
@@ -105,6 +107,8 @@ export function loadConfig(root: string): Config {
   const audit = isRecord(data.audit) ? data.audit : {};
   const hooks = isRecord(data.hooks) ? data.hooks : {};
   const trace = isRecord(data.trace) ? data.trace : {};
+  const stats = isRecord(data.stats) ? data.stats : {};
+  const budget = isRecord(stats.budget) ? stats.budget : {};
   const extra = hooks.extra === undefined ? {} : hooks.extra;
   if (!isRecord(extra))
     throw new EnvError(`${CONFIG_FILE}: 'hooks.extra' must map hook names to command lists`);
@@ -156,6 +160,11 @@ export function loadConfig(root: string): Config {
     hooksExtra,
     traceTestGlobs:
       trace.test_globs === undefined ? DEFAULT_TEST_GLOBS : stringList(trace.test_globs, "trace.test_globs"),
+    statsBudget: {
+      agentsMd: positiveInt(budget.agents_md, "stats.budget.agents_md", 2000),
+      total: positiveInt(budget.total, "stats.budget.total", 4000),
+      skillDescription: positiveInt(budget.skill_description, "stats.budget.skill_description", 60),
+    },
   };
 }
 
