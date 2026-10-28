@@ -15,7 +15,7 @@ The kit has two entry points (`/decisions/delivery-template-bootstrap-migrate.md
   - prints what it filled; `--dry-run` prints it and writes nothing; no prompts.
 - **`BOOTSTRAP.md`** at the kit root: one paste-able prompt for any agent.
   1. Fetch the tarball of `samiuens/specfold` at a pinned full commit sha with `gh api`, into a new temporary folder, and run nothing from it yet.
-  2. Copy `template/.agents/skills/sf-migrate/` into the repo (and link it for Claude Code).
+  2. Copy `template/.agents/skills/sf-migrate/` into the repo (and link it for Claude Code). *Corrected in the design: the agent reads the skill from the snapshot instead, because `migrate start` refuses a dirty tree; install copies the skill.*
   3. Follow its `SKILL.md` from step 1, with the snapshot's `template/` as the install source.
   4. Stop at the plan checkpoint.
   - Empty repo: copy the template files instead and run `node scripts/specfold.mjs init`.
