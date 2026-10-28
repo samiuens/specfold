@@ -1,10 +1,14 @@
 # Specfold settings for this repository. Upgrades keep your values; see the kit docs for every key.
-kit_version: 0.0.0          # set by `specfold upgrade`
+kit_version: 0.1.0-rc.1          # set by `specfold upgrade`
 profile_version: 1
-channel: stable
+channel: next
 
 source:
   github: samiuens/specfold
+
+# the upgrade commit lands in the kit repository, so it follows the kit's commit convention
+upgrade:
+  commit_message: "chore(template): 🔧 upgrade the sample app to v{version}"
 
 requires:
   openspec: ">=1.15 <2"

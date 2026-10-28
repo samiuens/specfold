@@ -1,3 +1,4 @@
+<!-- specfold:start -->
 # Agent instructions
 
 This repository keeps its knowledge in an OKF bundle and its behavior contracts in OpenSpec, wired together by Specfold.
@@ -50,3 +51,4 @@ Changes with no behavior change (refactors, tooling, docs) set `skip_specs: true
 - `index.md` and `log.md` are generated: run `node scripts/specfold.mjs index` and `node scripts/specfold.mjs log add <message>`, never edit them by hand.
 - Code comments stay short and point to knowledge with `see knowledge:` and the concept's bundle-absolute path (`/conventions/code-comments.md`).
 - Check with `node scripts/specfold.mjs validate`; `node scripts/specfold.mjs audit` (skill `sf-audit`) reports slow decay.
+<!-- specfold:end -->
