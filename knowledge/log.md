@@ -3,6 +3,7 @@
 ## 2026-10-28
 
 * **Change**: 2026-10-28-add-bootstrap: created 2, updated 3, deprecated 0
+* **Retro**: add-bootstrap: 0 answers
 
 ## 2026-10-27
 
