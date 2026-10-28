@@ -48,7 +48,7 @@ The framework is called **Specfold**: specs and knowledge folded into one workfl
 | subagent role `kb-scout` | `scout` |
 | OpenSpec schema `kb-driven` | `specfold` |
 | CI check `kb-gate`, workflow `kb-upgrade.yml` | `specfold-gate`, `specfold-upgrade.yml` |
-| managed-block markers `kb:begin` / `kb:end` | `specfold:begin` / `specfold:end` |
+| managed-block markers `kb:begin` / `kb:end` | `specfold:start` / `specfold:end` |
 | env `KB_WT_INDEX` | `SPECFOLD_WT_INDEX` |
 
 The knowledge folder stays `knowledge/` and OpenSpec stays `openspec/`, so both remain recognizable to their own tools. Before publishing, check GitHub and trademark registers for "Specfold"; npm `specfold` was free and a web search found no similar dev tool on 2026-10-26.
@@ -671,7 +671,7 @@ Any repo using the kit updates itself with one command, `specfold upgrade`, or w
 | Class | Examples | On upgrade |
 | --- | --- | --- |
 | Kit-owned | `scripts/specfold.mjs`, `.specfold/hooks/*`, `.agents/skills/sf-*`, `openspec/schemas/specfold/`, `.claude/hooks/*.sh`, `.github/workflows/specfold-gate.yml`, `.claude/agents/*` | replaced if unchanged locally; if changed, three-way merge against the old shipped version, conflicts left for review |
-| Managed blocks | sections between `<!-- specfold:begin -->` / `<!-- specfold:end -->` in `AGENTS.md` and `CLAUDE.md`; kit keys in `openspec/config.yaml`, `.claude/settings.json`, and the Specfold entry in an existing hook manager's config | only the managed part is replaced; everything outside stays |
+| Managed blocks | sections between `<!-- specfold:start -->` / `<!-- specfold:end -->` in `AGENTS.md` and `CLAUDE.md`; kit keys in `openspec/config.yaml`, `.claude/settings.json`, and the Specfold entry in an existing hook manager's config | only the managed part is replaced; everything outside stays |
 | Project-owned | `knowledge/` content, `openspec/specs/`, `openspec/changes/`, values in `specfold.yaml`, `.specfold/local.yaml` | never touched; content migrations only produce a report and suggested edits |
 
 **`specfold upgrade` flow:**

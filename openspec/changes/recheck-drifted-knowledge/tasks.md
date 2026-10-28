@@ -21,7 +21,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 2.1 Name the managed-block markers `specfold:start` / `specfold:end` in the plan
+- [x] 2.1 Name the managed-block markers `specfold:start` / `specfold:end` in the plan
   - Done when: `git grep "specfold:begin"` finds nothing in `docs/plan.md`
 
 ## 3. Knowledge
