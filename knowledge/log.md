@@ -19,6 +19,7 @@
 * **Change**: 2026-10-28-fix-parallel-run-findings: created 0, updated 4, deprecated 0
 * **Retro**: fix-parallel-run-findings: 0 answers
 * **Change**: 2026-10-28-add-release-automation: created 2, updated 2, deprecated 1
+* **Retro**: add-release-automation: 0 answers
 
 ## 2026-10-27
 
