@@ -25,7 +25,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T18:04:36+01:00 }
    - refused on a dirty working tree or when `specfold/upgrade-<version>` exists;
    - otherwise the plan is written on that new branch, the migrations run in version order, and `kit_version` and the manifest move to the new version.
 6. **Follow-ups:**
-   - `openspec update` (where OpenSpec is set up), `agents sync`, `hooks install`, `index`, `validate` and `gate --local` run with the upgraded CLI;
+   - `openspec update` (where OpenSpec is set up), `agents sync`, `hooks install`, `index`, `validate` and `gate --base <start> --local` run with the upgraded CLI, where `<start>` is the commit the upgrade branch was created from, so the gate checks exactly the upgrade;
    - each one's exit code and last line go into `.specfold/upgrade-report.md`;
    - a failure is reported, not fatal.
 7. **Commit and PR:**

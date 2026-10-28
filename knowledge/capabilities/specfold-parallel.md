@@ -23,7 +23,7 @@ Parallel sessions and subagents multiply token use, and what is affordable depen
 - **One source of truth per machine, shown with its source.** `parallel show` reads the environment variable first, then the local Claude Code settings, then `.specfold/local.yaml`; without any, Claude Code's own default (20) applies and the output says so.
 - **Init asks nothing, agents ask once.** `specfold init` stays prompt-free ([specfold init](/capabilities/specfold-init.md)), so it sets 3 when no limit exists, or the value of `--max-subagents`; `sf-migrate` and the template README have the agent ask the user once and pass the number.
 - **1 means sequential.** `parallel set 1` turns parallel work off; the orchestrator then runs task groups one after another, so the same breakdown works on every plan.
-- **Edits keep the files' other content.** The JSON keeps its other keys, and the YAML is edited as a document, so comments survive.
+- **Edits keep the files' other content.** The JSON keeps its other keys, and the YAML is edited as a document, so comments survive and long lines stay unfolded: the `yaml` library would fold long lines at 80 characters by default, so every YAML rewrite in the CLI writes without folding (found in the sample app's upgrade to rc.2).
 
 # Related
 

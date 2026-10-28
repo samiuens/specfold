@@ -34,6 +34,7 @@ The gate in CI is the enforcement, but its feedback comes late. Hooks run the sa
 - **Project commands stay in one place.** `hooks.extra` in `specfold.yaml` lists extra commands per hook; they run with `sh -c` after Specfold's own checks, with the hook's arguments as `$1`, `$2`. The kit's commit-message check runs this way ([commit convention](/decisions/commit-convention.md)).
 - **Promises due soon are visible at the start.** The session-start hook adds one line with the number of open commitments due within 30 days, overdue ones included, and only when there are any ([specfold commitments](/capabilities/specfold-commitments.md)).
 - **Implementers can't push.** `hook claude-no-push`, wired into the implementer's own frontmatter, refuses a Bash command that runs `git push` or `gh pr` in any segment (also after `git -C <dir>` or variable assignments) and tells the agent to return its branch instead; anything unreadable passes, so the guard never blocks other work.
+- **Manager files keep their shape.** Entries in `lefthook.yml` and `.pre-commit-config.yaml` are added to the parsed document, which is written back without folding: the `yaml` library would fold long lines at 80 characters by default, so every YAML rewrite in the CLI writes without folding (found in the sample app's upgrade to rc.2).
 - **The graph is refreshed, never built.** post-checkout and post-merge run `graphify update .` only when graphify is installed and `graphify-out/graph.json` exists ([graphify](/references/graphify.md)).
 
 # Related
