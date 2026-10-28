@@ -124,4 +124,89 @@ console.log("planned by 0.1.0-rc.2");
     expect(result.code).toBe(2);
     expect(result.stderr).toContain("has no release 9.9.9");
   });
+
+  // spec: specfold-upgrade#dry-run
+  it("prints the plan without --yes and changes nothing", async () => {
+    const { root, base } = repo("");
+    const next = release("0.1.0-rc.2", {
+      "AGENTS.md": "# Agent instructions\n\nRead knowledge, then specs.\n",
+    });
+    const result = await run(["upgrade", "--from", next, "--base-dir", base], root);
+    expect(result.code).toBe(0);
+    expect(result.stdout).toContain("# Specfold upgrade: 0.1.0-rc.1 to 0.1.0-rc.2");
+    expect(result.stdout).toContain("| `AGENTS.md` | replace |");
+    expect(gitOut(root, "status", "--porcelain")).toBe("");
+  });
+
+  // spec: specfold-upgrade#applied-upgrade
+  it("applies the upgrade as one commit on its own branch with the manifest and the report", async () => {
+    const { root, base } = repo("");
+    const next = release("0.1.0-rc.2", { ".agents/skills/sf-upgrade/SKILL.md": "# sf-upgrade\n" });
+    const result = await run(
+      ["upgrade", "--from", next, "--base-dir", base, "--yes", "--ref", "v0.1.0-rc.2"],
+      root,
+    );
+    expect(result.code).toBe(0);
+    expect(gitOut(root, "branch", "--show-current")).toBe("specfold/upgrade-0.1.0-rc.2");
+    expect(gitOut(root, "rev-list", "--count", "main..HEAD")).toBe("1");
+    expect(gitOut(root, "log", "-1", "--format=%s")).toBe("chore: upgrade Specfold to v0.1.0-rc.2");
+    const files = gitOut(root, "show", "--name-only", "--format=", "HEAD").split("\n").sort();
+    expect(files).toEqual([
+      ".agents/skills/sf-upgrade/SKILL.md",
+      ".specfold/manifest.json",
+      ".specfold/upgrade-report.md",
+      "scripts/specfold.mjs",
+      "specfold.yaml",
+    ]);
+    expect(JSON.parse(readFileSync(join(root, ".specfold/manifest.json"), "utf8"))).toMatchObject({
+      kit_version: "0.1.0-rc.2",
+      ref: "v0.1.0-rc.2",
+    });
+    expect(readFileSync(join(root, ".specfold/upgrade-report.md"), "utf8")).toContain(
+      "| `specfold validate` | 0 |",
+    );
+    expect(gitOut(root, "status", "--porcelain")).toBe("");
+  });
+
+  // spec: specfold-upgrade#message-from-the-settings
+  it("takes the commit message from upgrade.commit_message", async () => {
+    const { root, base } = repo(
+      "upgrade:\n  commit_message: 'chore(template): 🔧 upgrade the sample app to v{version}'\n",
+    );
+    await run(["upgrade", "--from", release("0.1.0-rc.2"), "--base-dir", base, "--yes"], root);
+    expect(gitOut(root, "log", "-1", "--format=%s")).toBe(
+      "chore(template): 🔧 upgrade the sample app to v0.1.0-rc.2",
+    );
+  });
+
+  it("refuses --yes on a dirty tree or an existing branch and writes nothing", async () => {
+    const { root, base } = repo("");
+    write(root, "notes.txt", "wip\n");
+    const dirty = await run(["upgrade", "--from", release("0.1.0-rc.2"), "--base-dir", base, "--yes"], root);
+    expect(dirty.code).toBe(2);
+    expect(dirty.stderr).toContain("uncommitted changes");
+    execFileSync("git", ["clean", "-qfd"], { cwd: root });
+    execFileSync("git", ["branch", "specfold/upgrade-0.1.0-rc.2"], { cwd: root });
+    const exists = await run(["upgrade", "--from", release("0.1.0-rc.2"), "--yes"], root);
+    expect(exists.code).toBe(2);
+    expect(exists.stderr).toContain("already exists");
+    expect(existsSync(join(root, ".specfold/upgrade-report.md"))).toBe(false);
+  });
+
+  it("exits with 1 when the applied upgrade left conflicts", async () => {
+    const { root, base } = repo("");
+    write(
+      root,
+      ".claude/agents/verifier.md",
+      "# Verifier\n\nRun the unit tests.\n\nRun the gate.\n\nReport findings.\n",
+    );
+    commitAll(root);
+    const next = release("0.1.0-rc.2", {
+      ".claude/agents/verifier.md": "# Verifier\n\nRun all tests.\n\nRun the gate.\n\nReport findings.\n",
+    });
+    const result = await run(["upgrade", "--from", next, "--base-dir", base, "--yes"], root);
+    expect(result.code).toBe(1);
+    expect(result.stdout).toContain("1 conflict");
+    expect(readFileSync(join(root, ".claude/agents/verifier.md"), "utf8")).toContain("<<<<<<< local");
+  });
 });
