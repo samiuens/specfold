@@ -13,7 +13,7 @@ agent: implementer
   - Done when: scenarios unknown-subcommand and template-behind-the-package pass in `release.test.ts`
 - [x] 1.2 Pack the template and `upgrade/` into the release tarball with its checksum
   - Done when: scenarios pack-a-release and version-mismatch pass in `release.test.ts`
-- [ ] 1.3 Print the upgrade notes of a version
+- [x] 1.3 Print the upgrade notes of a version
   - Done when: scenarios notes-present and no-notes pass in `release.test.ts`, and `upgrade/README.md` explains `notes/` and `migrations/`
 
 ## 2. release-please setup

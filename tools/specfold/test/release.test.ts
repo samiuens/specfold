@@ -73,4 +73,21 @@ describe("release.mjs", () => {
     expect(release(kit("0.1.0-rc.1", "0.0.0"), "pack", "0.1.0-rc.1").code).toBe(2);
     expect(readdirSync(root)).not.toContain("dist");
   });
+
+  // spec: specfold-release#notes-present
+  it("prints the notes file under Upgrade notes", () => {
+    const root = kit("0.1.0-rc.2");
+    write(root, "upgrade/notes/0.1.0-rc.2.md", "Run `specfold index` once.\n");
+    expect(release(root, "notes", "0.1.0-rc.2")).toMatchObject({
+      code: 0,
+      stdout: "## Upgrade notes\n\nRun `specfold index` once.\n",
+    });
+  });
+
+  // spec: specfold-release#no-notes
+  it("says there are no manual steps when the version has no notes file", () => {
+    expect(release(kit("0.1.0-rc.1"), "notes", "0.1.0-rc.1").stdout).toBe(
+      "## Upgrade notes\n\nNo manual steps.\n",
+    );
+  });
 });
