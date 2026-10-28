@@ -61,7 +61,7 @@ agent: implementer
 
 - [x] 5.1 Check `due` in `fromJson(text)` when it is not null with the same function `add` uses (`isCalendarDate` from `src/todo.js`, imported, not copied), throwing `entry <i>: due must be a YYYY-MM-DD date`
   - Done when: scenario invalid-due-date-names-its-index passes in `test/import-json.test.js` and `npm test` passes
-- [ ] 5.2 Rethrow a JSON parse error as `TypeError` in `fromJson`
+- [x] 5.2 Rethrow a JSON parse error as `TypeError` in `fromJson`
   - Done when: scenario non-json-text passes in `test/import-json.test.js` and `npm test` passes
 
 ## 6. Knowledge
