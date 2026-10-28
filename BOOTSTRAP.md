@@ -5,7 +5,7 @@ Paste this whole file into your coding agent, started at the root of the reposit
 The kit is fetched at one pinned commit of `samiuens/specfold`:
 
 ```sh
-KIT_REF=9324a380844c17779ebc0a726cd6e88049ebf901
+KIT_REF=4da7d283a6264b3538a0764f9f2734932c624a79
 ```
 
 ## Instructions for the agent
@@ -16,7 +16,7 @@ Rather ask than assume: whenever a step leaves a decision open, ask the user in 
 2. **Fetch the kit** into a new temporary folder, outside the repository. Run nothing from it yet.
 
    ```sh
-   KIT_REF=9324a380844c17779ebc0a726cd6e88049ebf901
+   KIT_REF=4da7d283a6264b3538a0764f9f2734932c624a79
    KIT=$(mktemp -d)
    gh api "repos/samiuens/specfold/tarball/$KIT_REF" > "$KIT/kit.tar.gz"
    tar -xzf "$KIT/kit.tar.gz" -C "$KIT" --strip-components=1
