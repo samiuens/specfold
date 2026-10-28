@@ -87,7 +87,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 7.1 Name this change below the record's findings
+- [x] 7.1 Name this change below the record's findings
   - Done when: the record's findings section ends with a line naming `fix-parallel-run-findings`
 
 ## 8. Knowledge

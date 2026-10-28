@@ -84,3 +84,5 @@ Eight implementer branches were merged into `add-pattern-2-run` with `git merge 
 8. **Worktree skill noise.** While the worktrees existed under `.claude/worktrees/`, Claude Code also listed their copies of the sample app's skills as scoped skills in the main session. It was harmless, but noisy.
 
 The run itself needed none of these fixed to finish. They are listed so a follow-up change can address them.
+
+All eight are addressed by the kit change `fix-parallel-run-findings`.
