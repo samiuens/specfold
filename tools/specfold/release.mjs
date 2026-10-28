@@ -3,7 +3,18 @@
 // Run from the kit root. see knowledge: /capabilities/specfold-release.md
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  copyFileSync,
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readlinkSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -65,7 +76,10 @@ function pack(root, version, outDir, out) {
     for (const file of tracked) {
       const target = join(top, file.startsWith("template/") ? file.slice("template/".length) : file);
       mkdirSync(dirname(target), { recursive: true });
-      cpSync(join(root, file), target, { verbatimSymlinks: true });
+      // git tracks symlinks (the skill links) as files: keep them links, never follow them
+      const source = join(root, file);
+      if (lstatSync(source).isSymbolicLink()) symlinkSync(readlinkSync(source), target);
+      else copyFileSync(source, target);
     }
     mkdirSync(outDir, { recursive: true });
     const tarball = join(outDir, `${name}.tar.gz`);
