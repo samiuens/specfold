@@ -31,7 +31,7 @@ register({
   name: "migrate",
   summary: "bring an existing repository into Specfold: own branch, state, inventory, kit install",
   usage:
-    "specfold migrate start [--default-branch <name>] | inventory | install --from <dir> [--tools <list>] [--stack <text>] [--source-glob <glob>]... [--ref <ref>] | mark <step> | status  [--json]",
+    "specfold migrate start [--default-branch <name>] | inventory | install --from <dir> [--tools <list>] [--stack <text>] [--source-glob <glob>]... [--ref <ref>] [--upgrade-workflow] | mark <step> | status  [--json]",
   options: {
     "default-branch": { type: "string" },
     from: { type: "string" },
@@ -39,6 +39,7 @@ register({
     stack: { type: "string" },
     "source-glob": { type: "string", multiple: true },
     ref: { type: "string" },
+    "upgrade-workflow": { type: "boolean" },
     json: { type: "boolean" },
   },
   run: ({ io, values, positionals }) => {
@@ -160,6 +161,7 @@ register({
       stack: values.stack as string | undefined,
       sourceGlobs: globs,
       ref: values.ref as string | undefined,
+      upgradeWorkflow: values["upgrade-workflow"] === true,
     });
     const ok = result.conflicts.length === 0;
     if (ok) state = markStep(state, "install", now);

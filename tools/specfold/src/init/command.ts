@@ -12,12 +12,13 @@ register({
   name: "init",
   summary: "finish setting up a repository made from the template: settings, OpenSpec skills, links, hooks",
   usage:
-    "specfold init [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--max-subagents <n>] [--dry-run] [--json]",
+    "specfold init [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--max-subagents <n>] [--upgrade-workflow] [--dry-run] [--json]",
   options: {
     stack: { type: "string" },
     "source-glob": { type: "string", multiple: true },
     tools: { type: "string" },
     "max-subagents": { type: "string" },
+    "upgrade-workflow": { type: "boolean" },
     "dry-run": { type: "boolean" },
     json: { type: "boolean" },
   },
@@ -33,6 +34,7 @@ register({
       stack: values.stack as string | undefined,
       sourceGlobs: values["source-glob"] as unknown as string[] | undefined,
       maxSubagents: max === undefined ? undefined : Number(max),
+      upgradeWorkflow: values["upgrade-workflow"] === true,
     };
     const plan = planInit(options);
     const dryRun = values["dry-run"] === true;
