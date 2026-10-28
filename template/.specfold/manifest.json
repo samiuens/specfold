@@ -26,6 +26,7 @@
     ".claude/agents/verifier.md": "sha256:5cbcef592fbe6a56cbce430d622f426b2b7175c5c66dfbfa6866e5e73290703e",
     ".github/workflows/specfold-gate-comment.yml": "sha256:a409026835daf5afdf752a18a7cbd9565198c347c1f6b119719b348f16eecc5b",
     ".github/workflows/specfold-gate.yml": "sha256:edb62a79c29bbb629d7d14a70436f62b2a996122da8399b234ce199047fb7669",
+    ".specfold/workflows/specfold-upgrade.yml": "sha256:f42b96127b5611af6db14395e395dee9d4eb4d653503229a39960149729120d6",
     "openspec/schemas/specfold/schema.yaml": "sha256:1e125cb0ebebadf1e1447e3b35a38cc2e587bd410fd873853c268969d0dc269b",
     "openspec/schemas/specfold/templates/brief.md": "sha256:49c6b6e984a81d4237f981e0661c62936cea140f5bf3ee0149ed611c3cc95d9b",
     "openspec/schemas/specfold/templates/design.md": "sha256:48aaa6670d991574e1600fd757c44b0c47be2993b32ca8ffecac48ad8413c828",

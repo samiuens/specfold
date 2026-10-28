@@ -76,12 +76,16 @@ export function filesUnder(base: string, dir: string): string[] {
     .sort();
 }
 
-/** The files only the kit changes: the CLI, the schema, the skills, the gate workflows and the planner. */
+/**
+ * The files only the kit changes: the CLI, the schema, the skills, the gate workflows, the inactive
+ * upgrade workflow and the planner.
+ */
 export function kitOwned(from: string, tools: Tool[]): string[] {
   return [
     "scripts/specfold.mjs",
     "openspec/schemas/specfold",
     ".agents/skills",
+    ".specfold/workflows",
     ".github/workflows/specfold-gate.yml",
     ".github/workflows/specfold-gate-comment.yml",
     ...(tools.includes("claude") ? [".claude/agents"] : []),
