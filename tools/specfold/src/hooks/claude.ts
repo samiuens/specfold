@@ -107,3 +107,30 @@ export function stop({ config, io }: HookContext): number {
   io.stderr(renderGate(findings));
   return 2;
 }
+
+const PUSH_REASON = "pushing and pull requests are the orchestrator's job; return your branch name instead";
+
+/** Whether one shell segment runs `git push` or `gh pr`, after `env`, assignments or `git -C <dir>`. */
+function pushes(segment: string): boolean {
+  const words = segment.trim().split(/\s+/);
+  while (words[0] === "env" || /^[A-Za-z_][A-Za-z0-9_]*=/.test(words[0] ?? "")) words.shift();
+  if (words[0] === "gh") return words[1] === "pr";
+  if (words[0] !== "git") return false;
+  let i = 1;
+  while (words[i]?.startsWith("-")) i += words[i] === "-C" || words[i] === "-c" ? 2 : 1;
+  return words[i] === "push";
+}
+
+/** The implementer's PreToolUse guard: no `git push` and no `gh pr` in a Bash command. */
+export async function noPush({ io }: HookContext): Promise<number> {
+  let event: { tool_input?: { command?: unknown } };
+  try {
+    event = JSON.parse((await io.readStdin?.()) ?? "");
+  } catch {
+    return 0;
+  }
+  const command = event.tool_input?.command;
+  if (typeof command !== "string" || !command.split(/&&|\|\||;|\||\n/).some(pushes)) return 0;
+  io.stderr(`${PUSH_REASON}\n`);
+  return 2;
+}

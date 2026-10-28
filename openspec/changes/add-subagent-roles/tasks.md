@@ -21,7 +21,7 @@ scenarios: [specfold-hooks#push-refused, specfold-hooks#other-commands-pass]
 agent: implementer
 ```
 
-- [ ] 2.1 Refuse `git push` and `gh pr` in a PreToolUse event
+- [x] 2.1 Refuse `git push` and `gh pr` in a PreToolUse event
   - Done when: scenarios push-refused and other-commands-pass pass in `hooks-no-push.test.ts`
 
 ## 3. Roles
