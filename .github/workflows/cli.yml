@@ -39,13 +39,13 @@ jobs:
         run: node scripts/specfold.mjs index --check
       - name: Kit schema copy matches the template
         run: diff -r template/openspec/schemas/specfold openspec/schemas/specfold || { echo "::error::openspec/schemas/specfold differs from template/openspec/schemas/specfold; copy the template schema over"; exit 1; }
-      - name: Kit skills and planner match the template
+      - name: Kit skills and agents match the template
         run: |
           for skill in template/.agents/skills/*/; do
             name=$(basename "$skill")
             diff -r "$skill" ".agents/skills/$name" || { echo "::error::.agents/skills/$name differs from the template; copy it over"; exit 1; }
           done
-          diff template/.claude/agents/planner.md .claude/agents/planner.md
+          diff -r template/.claude/agents .claude/agents || { echo "::error::.claude/agents differs from template/.claude/agents; copy it over"; exit 1; }
       - name: Kit gate setup matches the template
         run: |
           for path in .claude/settings.json .github/workflows/specfold-gate-comment.yml .github/pull_request_template.md; do
