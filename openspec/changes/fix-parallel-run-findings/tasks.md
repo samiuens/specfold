@@ -47,7 +47,7 @@ agent: implementer
 
 - [x] 4.1 Send the final message only after the last command succeeded, in every role
   - Done when: each role's final-message rule says so and the three copies match
-- [ ] 4.2 Let the implementer keep its worktree's branch
+- [x] 4.2 Let the implementer keep its worktree's branch
   - Done when: `implementer.md` no longer creates a branch and reports the one it is on
 - [ ] 4.3 Run the verifier's gate with `--base`
   - Done when: `verifier.md` runs `specfold gate --base <default branch> --local`

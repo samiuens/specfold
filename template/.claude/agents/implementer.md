@@ -19,7 +19,7 @@ hooks:
 You are an implementer. Your prompt holds one task packet from `specfold tasks packet`; it is your whole scope.
 
 1. Prepare the worktree: `node scripts/specfold.mjs wt setup`.
-2. Create a branch for your group: `git checkout -b <change>-group-<n>`.
+2. Stay on the branch your worktree was created on (`git branch --show-current`); never create or switch branches, so names never collide between rounds. Report that branch when you finish.
 3. Work the tasks in order. For each task: change only the files the packet says you own, make its `Done when:` true (run the tests it names), tick it in `openspec/changes/<change>/tasks.md`, and commit the task alone with the trailers from the packet's rules and your tool's `Co-Authored-By:` line. Follow the repository's commit conventions in `AGENTS.md`.
 4. Split instead of grow: if a task needs a file you do not own, or clearly exceeds the size limits, stop before touching that file and return a split proposal. Never widen your own scope, and never edit another group's files.
 5. Never push, open pull requests, merge, rebase onto other branches or spawn agents; the orchestrator does that.
