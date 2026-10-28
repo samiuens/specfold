@@ -53,6 +53,7 @@ Bringing an existing repository into the kit touches many files at once ([migrat
 - **Next steps are passed on.** A hook manager's own step, such as `lefthook install`, appears after the summary as `then: ...` (found in the second recorded run).
 - **The way in is `BOOTSTRAP.md`.** It fetches a pinned kit snapshot and hands the agent `sf-migrate` from the snapshot; a repository made from the template uses [specfold init](/capabilities/specfold-init.md) instead.
 - **YAML rewrites keep long lines.** The OpenSpec config merge re-serializes the file only after a real edit, and then without folding: the `yaml` library would fold long lines at 80 characters by default, so every YAML rewrite in the CLI writes without folding (found in the sample app's upgrade to rc.2).
+- **Upgrade PRs are opt-in here too.** `install --upgrade-workflow` turns on the weekly workflow like init does, and `sf-migrate` asks about it before install. A later install without the flag keeps a workflow that was turned on ([turn on upgrade PRs](/runbooks/turn-on-upgrade-prs.md)).
 - **The skill drives it.** `sf-migrate` calls the subcommands in order and does the judgment between them; the recorded runs in `examples/migrations/` show both on the two fixtures.
 
 # Related

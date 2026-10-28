@@ -33,6 +33,18 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T18:04:36+01:00 }
    - `--pr` pushes and opens a PR with the report as its body;
    - the exit code is 1 when conflicts remain.
 
+**Reminder:**
+- the Claude Code session-start hook asks the source at most once a day, within 2 seconds, and caches the answer in the gitignored `.specfold/local-state.json`. A failed check counts too, so an offline machine waits until the next day;
+- when the channel has something newer, it prints one line naming the version and `specfold upgrade`;
+- `upgrade.reminder: false` turns it off; the kit itself sets that, because it is the source.
+
+**Weekly workflow:** when a team turns it on ([turn on upgrade PRs](/runbooks/turn-on-upgrade-prs.md)), `.github/workflows/specfold-upgrade.yml` runs the check every Monday and opens the PR. The turned-on copy is a kit-owned file whose release copy is `.specfold/workflows/specfold-upgrade.yml`.
+
+**Kit CI:**
+- job `upgrade-fixtures` builds a repository from each of the previous two releases with that release's own `init`, and adds a team edit to `.claude/agents/verifier.md`;
+- it upgrades each one to the PR's packed build, and fails when the upgrade fails, touches a path that isn't the kit's, or loses the edit;
+- on PRs that leave the kit's payload alone, it ends green without work.
+
 **Version skew:** every other command checks the manifest first. When it was written by a newer kit than the running CLI, write commands stop and point to `specfold upgrade`, and read commands keep working.
 
 # Related
