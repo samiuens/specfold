@@ -6,6 +6,7 @@
 * **Retro**: add-bootstrap: 0 answers
 * **Change**: 2026-10-28-recheck-drifted-knowledge: created 0, updated 5, deprecated 0
 * **Retro**: recheck-drifted-knowledge: 0 answers
+* **Change**: 2026-10-28-add-specfold-stats: created 1, updated 2, deprecated 0
 
 ## 2026-10-27
 
