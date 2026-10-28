@@ -40,7 +40,7 @@
     ".github/pull_request_template.md": "sha256:9d4bb9d55402391ab54b048a68650ba2ab6c426bb35410a584f437e44d8e544e",
     ".gitignore": "sha256:4431f7931069ef5823c95db55d7e6ea6185cde00c1a29902844d7c7b29cda57d",
     ".worktreeinclude": "sha256:098461b02af190467ac6a6ff0f49dadef3fd07a6c648c4f109241acbf7daf795",
-    "AGENTS.md": "sha256:a87903064a840d6e24a895d8ff5c32dd68d4bf56cb33a220a922b4e6a5232398",
+    "AGENTS.md": "sha256:a6bd30b8c573182e415f78c84cb89847f8c3e3e92cf4c312906174bc74b11339",
     "CLAUDE.md": "sha256:4137e4cc72fd622d72a6ded0921c27752cddcb98b6fd667d44e88c2e1f68d06c"
   }
 }

@@ -62,16 +62,28 @@ agent: implementer
 - [x] 5.2 Rebuild the bundle, its copies and the template manifest
   - Done when: the copies equal `scripts/specfold.mjs` and `template-manifest.test.ts` passes
 
-## 6. Knowledge
+## 6. Template instructions
+
+```yaml
+files: [template/AGENTS.md, examples/sample-app/AGENTS.md, template/.specfold/manifest.json]
+depends: [5]
+scenarios: []
+agent: implementer
+```
+
+- [x] 6.1 Name `sf-apply` in the template's workflow *(added with the user while applying)*
+  - Done when: step 2 of the template's `AGENTS.md` names `sf-apply` and the sample app's copy matches
+
+## 7. Knowledge
 
 ```yaml
 files: [knowledge/**]
-depends: [5]
+depends: [5, 6]
 scenarios: []
 agent: knowledge-curator
 ```
 
-- [x] 6.1 Write the concept updates listed in `knowledge.md`, and check the role prompts against them
+- [x] 7.1 Write the concept updates listed in `knowledge.md`, and check the role prompts against them
   - Done when: `node scripts/specfold.mjs validate` exits 0
 
 ## Workflow follow-up
