@@ -13,6 +13,7 @@ import { generateIndexes } from "../indexes/generate.ts";
 import { locationsByConcept, scanReferences } from "../indexes/refs.ts";
 import type { OpenSpecBinary } from "../openspec.ts";
 import type { Config } from "../repo.ts";
+import { alwaysLoaded, loadedFiles, OPENSPEC_CONFIG, overBudget } from "../stats/stats.ts";
 import { planSync } from "../sync/plan.ts";
 import { checkChangeTasks } from "../tasks/command.ts";
 import type { TaskFinding } from "../tasks/rules.ts";
@@ -283,6 +284,26 @@ export const g16: GateRule = (ctx) => {
     );
 };
 
+const SKILL_FILE = /^\.agents\/skills\/[^/]+\/SKILL\.md$/;
+
+/** G11: a branch that touches the always-loaded set while the head exceeds one of its budgets. */
+export const g11: GateRule = (ctx) => {
+  const set = new Set([
+    ...loadedFiles(ctx.config.root).map((f) => f.path),
+    OPENSPEC_CONFIG,
+    ".claude/settings.json",
+  ]);
+  if (!ctx.diff.files.some((f) => set.has(f) || SKILL_FILE.test(f))) return [];
+  return overBudget(alwaysLoaded(ctx.config), ctx.config.statsBudget).map((o) => ({
+    rule: "G11",
+    effect: "warn",
+    path: o.item && "path" in o.item ? o.item.path : null,
+    line: null,
+    message: `${o.item ? "" : "always-loaded set: "}about ${o.tokens} tokens, over the budget of ${o.limit} (stats.budget.${o.budget})`,
+    fix: "shorten it or move details into on-demand files; see specfold stats",
+  }));
+};
+
 const COMMITMENTS_HEADING = /^##\s+Commitments\s*$/;
 const COMMITMENT_LINK = /(?:\]\(|`)(\/[^)\s`]+\.md)[)`]/;
 const VERDICT = /^\s*:\s*(kept|blocked)\b(?:\s*:\s*(.*))?/;
@@ -520,7 +541,26 @@ export const g14: GateRule = (ctx) => {
   });
 };
 
-export const RULES: GateRule[] = [g1, g2, g3, g4, g5, g6, g7, g8, g9, g10, g12, g13, g14, g15, g16, g17, g18];
+export const RULES: GateRule[] = [
+  g1,
+  g2,
+  g3,
+  g4,
+  g5,
+  g6,
+  g7,
+  g8,
+  g9,
+  g10,
+  g11,
+  g12,
+  g13,
+  g14,
+  g15,
+  g16,
+  g17,
+  g18,
+];
 
 const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 const ruleNumber = (rule: string) => Number.parseInt(rule.slice(1), 10);
