@@ -59,6 +59,8 @@ export const BLOCK_FILES = [
   ".github/pull_request_template.md",
   ".gitignore",
   ".github/CODEOWNERS",
+  ".gitattributes",
+  ".worktreeinclude",
 ];
 export const sha256 = (data: string | Buffer) => `sha256:${createHash("sha256").update(data).digest("hex")}`;
 

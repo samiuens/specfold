@@ -62,6 +62,10 @@ describe("migrate install: files", () => {
     ).toBe(true);
     expect(read(root, ".gitignore")).toContain("# specfold:start\n");
     expect(read(root, ".gitignore")).toContain(".specfold/migration/state.json\n");
+    for (const p of [".gitattributes", ".worktreeinclude"]) {
+      expect(read(root, p).match(/# specfold:start/g)).toHaveLength(1);
+      expect(read(root, p)).toContain(read(TEMPLATE, p).trimEnd());
+    }
   });
 
   // spec: specfold-migrate#existing-permissions
@@ -147,9 +151,11 @@ describe("migrate install: OpenSpec, hooks and manifest", () => {
     expect(manifest).toMatchObject({ manifest_version: 1, kit_version: "0.0.0", ref: "abc123" });
     expect(manifest.files["scripts/specfold.mjs"]).toBe(`sha256:${hash}`);
     expect(Object.keys(manifest.blocks)).toEqual([
+      ".gitattributes",
       ".github/CODEOWNERS",
       ".github/pull_request_template.md",
       ".gitignore",
+      ".worktreeinclude",
       "AGENTS.md",
       "CLAUDE.md",
     ]);
