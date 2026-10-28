@@ -49,7 +49,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 4.1 Ignore `graphify-out/` in the template and add the graphify runbook to its bundle
+- [x] 4.1 Ignore `graphify-out/` in the template and add the graphify runbook to its bundle
   - Done when: `node ../scripts/specfold.mjs validate` and `index --check` pass in `template/`
 - [ ] 4.2 Rebuild the bundle, its copies and the template manifest
   - Done when: the copies equal `scripts/specfold.mjs` and `template-manifest.test.ts` passes

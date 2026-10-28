@@ -6,3 +6,6 @@
 
 # sf-migrate progress, local to one migration run
 .specfold/migration/state.json
+
+# graphify code graph, rebuilt in every clone (specfold graphify setup)
+graphify-out/
