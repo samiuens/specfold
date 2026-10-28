@@ -52,12 +52,17 @@ function unpack(tarball, dir) {
   must("tar", ["-xzf", tarball, "-C", dir, "--strip-components=1"]);
 }
 
-const manifestFiles = (dir) => Object.keys(JSON.parse(read(join(dir, ".specfold/manifest.json"))).files ?? {});
+const manifestFiles = (dir) =>
+  Object.keys(JSON.parse(read(join(dir, ".specfold/manifest.json"))).files ?? {});
 
 /** Builds a repository from the release in `kit`, edits it, upgrades it to `next`; returns the problems found. */
 function upgradeFixture(version, kit, next, target, work) {
   const repo = join(work, `${version}-repo`);
-  cpSync(kit, repo, { recursive: true, verbatimSymlinks: true, filter: (src) => src !== join(kit, "upgrade") });
+  cpSync(kit, repo, {
+    recursive: true,
+    verbatimSymlinks: true,
+    filter: (src) => src !== join(kit, "upgrade"),
+  });
   must("git", ["init", "-q", "-b", "main"], repo);
   must(process.execPath, ["scripts/specfold.mjs", "init"], repo);
   must("git", ["add", "-A"], repo);
@@ -68,10 +73,21 @@ function upgradeFixture(version, kit, next, target, work) {
 
   const upgrade = run(
     process.execPath,
-    [join(next, "scripts/specfold.mjs"), "upgrade", "--from", next, "--base-dir", kit, "--to", target, "--yes"],
+    [
+      join(next, "scripts/specfold.mjs"),
+      "upgrade",
+      "--from",
+      next,
+      "--base-dir",
+      kit,
+      "--to",
+      target,
+      "--yes",
+    ],
     repo,
   );
-  if (upgrade.status !== 0) return [`upgrade exited with ${upgrade.status}:\n${upgrade.stdout}${upgrade.stderr}`];
+  if (upgrade.status !== 0)
+    return [`upgrade exited with ${upgrade.status}:\n${upgrade.stdout}${upgrade.stderr}`];
   const allowed = new Set([...before, ...manifestFiles(repo), ...BLOCK_FILES, ...OTHER_FILES]);
   const changed = must("git", ["diff", "--name-only", "HEAD~1", "HEAD"], repo).split("\n").filter(Boolean);
   const problems = changed
@@ -104,8 +120,21 @@ try {
   for (const tag of tags) {
     const version = tag.replace(/^v/, "");
     const dir = join(work, version);
-    must("gh", ["release", "download", tag, "--repo", REPO, "--pattern", "specfold-template-*", "--dir", dir]);
-    const tarball = join(dir, readdirSync(dir).find((f) => f.endsWith(".tar.gz")));
+    must("gh", [
+      "release",
+      "download",
+      tag,
+      "--repo",
+      REPO,
+      "--pattern",
+      "specfold-template-*",
+      "--dir",
+      dir,
+    ]);
+    const tarball = join(
+      dir,
+      readdirSync(dir).find((f) => f.endsWith(".tar.gz")),
+    );
     unpack(tarball, join(dir, "kit"));
     const problems = upgradeFixture(version, join(dir, "kit"), next, target, work);
     failed ||= problems.length > 0;
