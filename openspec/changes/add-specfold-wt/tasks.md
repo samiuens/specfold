@@ -59,7 +59,7 @@ scenarios: [specfold-migrate#worktree-base-kept, specfold-migrate#existing-agent
 agent: implementer
 ```
 
-- [ ] 5.1 Merge missing top-level keys and env entries into Claude Code settings
+- [x] 5.1 Merge missing top-level keys and env entries into Claude Code settings
   - Done when: scenario worktree-base-kept passes in `migrate-merge.test.ts`
 - [ ] 5.2 Manage `.gitattributes` and `.worktreeinclude` as blocks
   - Done when: `migrate-install.test.ts` shows both files with one Specfold block after two installs
