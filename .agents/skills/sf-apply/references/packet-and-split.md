@@ -13,7 +13,7 @@ SPLIT PROPOSAL
 task: 2.3
 needs: src/todo.js, for a one-line export the import module calls
 proposal: new group "Export hook" owning src/todo.js, depends [], task "export the item factory"; group 2 then depends on it
-done so far: branch add-exports-group-2, commits for 2.1 and 2.2
+done so far: branch worktree-agent-a52181cc, commits for 2.1 and 2.2
 ```
 
 ## Handling it
