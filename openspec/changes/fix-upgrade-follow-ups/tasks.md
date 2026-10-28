@@ -35,7 +35,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 3.1 Ship the rebuilt bundle and set `release-as` to `0.1.0-rc.3`
+- [x] 3.1 Ship the rebuilt bundle and set `release-as` to `0.1.0-rc.3`
   - Done when: both bundle copies match the build, the template manifest test passes, and `release-as` is `0.1.0-rc.3`
 
 ## 4. Knowledge
