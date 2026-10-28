@@ -27,6 +27,13 @@ The upgrader SHALL fetch releases from `source.github` through `gh` or a `GITHUB
 - **WHEN** `source.path` names a folder holding `specfold-template-v0.1.0-rc.2.tar.gz` and its `.sha256`
 - **THEN** `specfold upgrade --to 0.1.0-rc.2` uses that tarball
 
+### Requirement: Mirror index
+For `source.url` the upgrader SHALL read the versions and their notes from `releases.json` below that URL. For `source.path` it SHALL read `releases.json` in that folder when present, and otherwise list its `specfold-template-v<version>.tar.gz` files.
+
+#### Scenario: Url mirror
+- **WHEN** `source.url` serves a `releases.json` listing `0.1.0-rc.2` with its notes, and `kit_version` is `0.1.0-rc.1` on channel `next`
+- **THEN** `--check` prints `0.1.0-rc.2` and those notes, and exits with 1
+
 ### Requirement: Checksum
 The upgrader SHALL check each downloaded tarball against its `.sha256` file and SHALL stop with exit 2, writing nothing, when they differ or the file is missing.
 
@@ -93,6 +100,13 @@ With `--yes`, the upgrader SHALL update `.specfold/manifest.json` and `kit_versi
 #### Scenario: Applied upgrade
 - **WHEN** `specfold upgrade --to 0.1.0-rc.2 --yes` runs without conflicts
 - **THEN** branch `specfold/upgrade-0.1.0-rc.2` has one commit with the changed files, the manifest at `0.1.0-rc.2` and the report
+
+### Requirement: Commit message
+The upgrade commit SHALL use `upgrade.commit_message` from `specfold.yaml` with `{version}` replaced by the target version, and `chore: upgrade Specfold to v{version}` when the key is absent.
+
+#### Scenario: Message from the settings
+- **WHEN** `upgrade.commit_message` is `chore(template): 🔧 upgrade the sample app to v{version}` and the target is `0.1.0-rc.2`
+- **THEN** the commit message is `chore(template): 🔧 upgrade the sample app to v0.1.0-rc.2`
 
 ### Requirement: Version skew
 When `.specfold/manifest.json` records a newer `kit_version` than the running CLI, commands that write files SHALL refuse with exit 2 and name `specfold upgrade`, while read-only commands keep working.
