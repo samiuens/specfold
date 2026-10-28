@@ -3,10 +3,11 @@ type: Backlog Item
 title: Fix the parallel run findings
 description: "Eight kit gaps found by the pattern-2 run: packets, branch names, the gate in a nested root, the verifier's base and sf-apply wording."
 status: draft
-state: open
+state: promoted
+change: fix-parallel-run-findings
 priority: high
 origin: implementation
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T10:32:31+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T10:45:04+01:00 }
 ---
 
 # Idea
@@ -23,6 +24,8 @@ The recorded pattern-2 run (`examples/runs/pattern-2/README.md`) met M8's done-w
 8. Worktrees under `.claude/worktrees/` make Claude Code list their copies of skills in the main session.
 
 Decided with the user after the run (2026-10-28): finish the proof PR first, then this change.
+
+Fixed by `fix-parallel-run-findings` on 2026-10-28.
 
 # Related
 
