@@ -18,6 +18,10 @@ Reads to-do entries from JSON text and checks them with the same rules as adding
 - **WHEN** `fromJson('{"title":"Pay rent"}')` is called
 - **THEN** a `TypeError` is thrown
 
+#### Scenario: Non-JSON text
+- **WHEN** `fromJson("not json")` is called
+- **THEN** a `TypeError` is thrown
+
 ### Requirement: Invalid entry rejected with its index
 `fromJson` SHALL throw a `TypeError` whose message starts with `entry <index>:`, the entry's array index counted from 0, when an entry's `title` is not a string or is empty after trimming, or when its `due` is given and is not a real `YYYY-MM-DD` calendar date, checked as `add` checks it. No entries SHALL be returned.
 
