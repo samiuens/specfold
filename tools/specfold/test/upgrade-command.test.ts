@@ -168,6 +168,16 @@ console.log("planned by 0.1.0-rc.2");
     expect(gitOut(root, "status", "--porcelain")).toBe("");
   });
 
+  // spec: specfold-upgrade#gate-with-the-branch-s-start
+  it("runs the gate follow-up against the commit the upgrade branch started from", async () => {
+    const { root, base } = repo("");
+    const start = gitOut(root, "rev-parse", "HEAD");
+    await run(["upgrade", "--from", release("0.1.0-rc.2"), "--base-dir", base, "--yes"], root);
+    expect(readFileSync(join(root, ".specfold/upgrade-report.md"), "utf8")).toContain(
+      `| \`specfold gate --base ${start} --local\` | 0 |`,
+    );
+  });
+
   // spec: specfold-upgrade#message-from-the-settings
   it("takes the commit message from upgrade.commit_message", async () => {
     const { root, base } = repo(

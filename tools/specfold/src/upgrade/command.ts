@@ -58,14 +58,23 @@ function followUp(root: string, label: string, command: string, args: string[]):
   };
 }
 
-/** The commands an applied upgrade runs with the upgraded CLI; `openspec update` only where OpenSpec is set up. */
-function followUps(root: string): FollowUp[] {
+/**
+ * The commands an applied upgrade runs with the upgraded CLI; `openspec update` only where OpenSpec is set up,
+ * and the gate against `start`, the commit the upgrade branch was created from.
+ */
+function followUps(root: string, start: string): FollowUp[] {
   const cli = (...args: string[]) =>
     followUp(root, `specfold ${args.join(" ")}`, process.execPath, ["scripts/specfold.mjs", ...args]);
   const results: FollowUp[] = [];
   if (existsSync(join(root, "openspec/config.yaml")))
     results.push(followUp(root, "openspec update", openspecBinary(root).command, ["update"]));
-  for (const args of [["agents", "sync"], ["hooks", "install"], ["index"], ["validate"], ["gate", "--local"]])
+  for (const args of [
+    ["agents", "sync"],
+    ["hooks", "install"],
+    ["index"],
+    ["validate"],
+    ["gate", "--base", start, "--local"],
+  ])
     results.push(cli(...args));
   return results;
 }
@@ -102,11 +111,12 @@ async function inner(
   const branch = branchFor(target);
   if (gitSucceeds(root, ["rev-parse", "--verify", "--quiet", `refs/heads/${branch}`]))
     throw new EnvError(`branch ${branch} already exists; delete it or finish that upgrade first`);
+  const start = git(root, ["rev-parse", "HEAD"]).trim();
   git(root, ["switch", "-q", "-c", branch]);
   applyPlan(root, plan, ref);
   const lines: { version: string; line: string }[] = [];
   await runMigrations(root, from, plan.migrations, (version, line) => lines.push({ version, line }));
-  const results = followUps(root);
+  const results = followUps(root, start);
   const report = reportText(plan, { migrations: lines, followUps: results });
   mkdirSync(dirname(join(root, REPORT_PATH)), { recursive: true });
   writeFileSync(join(root, REPORT_PATH), report);
