@@ -39,7 +39,7 @@ agent: implementer
   - Done when: scenarios unchanged-file-replaced, local-edit-kept, conflicting-edit and text-outside-the-block-kept pass in `upgrade-plan.test.ts`
 - [x] 3.2 Merge the kit keys of `.claude/settings.json` and `openspec/config.yaml` three ways
   - Done when: `upgrade-config.test.ts` covers deny rules, hook groups, env values, rules keys and the context with its `Stack:` line
-- [ ] 3.3 Apply a plan, run migrations and write the report
+- [x] 3.3 Apply a plan, run migrations and write the report
   - Done when: scenarios knowledge-unchanged and two-migrations-in-order pass in `upgrade-apply.test.ts`
 
 ## 4. Upgrade command
