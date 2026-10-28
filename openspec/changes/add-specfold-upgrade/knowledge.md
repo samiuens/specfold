@@ -21,6 +21,10 @@ ops:
     type: Runbook
     summary: How the sample app is upgraded from each release candidate with the released upgrader, and how the run is recorded.
   - op: update
+    path: architecture/specfold-cli.md
+    type: Component
+    summary: Module src/upgrade/ and the version-skew check in cli.ts.
+  - op: update
     path: capabilities/specfold-release.md
     type: Capability
     summary: release.mjs index writes releases.json for a mirror.

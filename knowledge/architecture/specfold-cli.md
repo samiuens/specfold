@@ -18,7 +18,7 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | Module | Role |
 | --- | --- |
 | `src/bin.ts` | entry point of the bundle: wires `process` to `main` |
-| `src/cli.ts` | argument parsing with `node:util` `parseArgs`, command registry, exit codes 0/1/2 |
+| `src/cli.ts` | argument parsing with `node:util` `parseArgs`, command registry, the version-skew check before write commands, exit codes 0/1/2 |
 | `src/commands.ts` | imports every command module; the entry point and the tests load the same list |
 | `src/errors.ts` | `UsageError` and `EnvError`, both mapped to exit code 2 |
 | `src/repo.ts` | finds the repository root (nearest `specfold.yaml`) and loads the config |
@@ -51,6 +51,7 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/parallel/` | the `parallel` command: the personal subagent limit, read from the environment, `.claude/settings.local.json` and `.specfold/local.yaml`, written to both files |
 | `src/sync/` | the `sync` command: resolves archived changes, plans (`planSync`, also used by the gate) and applies delta ops, edits frontmatter line by line, then indexes and log |
 | `src/tasks/` | the `tasks check`, `status` and `resume` commands: the `tasks.md` parser, rules T0 to T11, file overlap between parallel groups, task commits from git trailers, group progress |
+| `src/upgrade/` | the `upgrade` command: versions and channels, the `github`, `url` and `path` sources with checksums, the hand-off to the target release's CLI, the plan with three-way merges, migrations, the report, and the table of write commands for the skew check |
 | `src/wt/` | the `wt` command: batches active changes by capability and owned files, creates worktrees with their included files, installs dependencies and the worktree index, removes merged clean worktrees |
 
 # How commands work
@@ -78,6 +79,7 @@ Under Node, `yaml` resolves to its CommonJS build, so the bundle banner provides
 - [specfold index](/capabilities/specfold-index.md)
 - [specfold log](/capabilities/specfold-log.md)
 - [specfold lookup](/capabilities/specfold-lookup.md)
+- [specfold upgrade](/capabilities/specfold-upgrade.md)
 - [specfold new](/capabilities/specfold-new.md)
 - [specfold tasks](/capabilities/specfold-tasks.md)
 - [specfold sync](/capabilities/specfold-sync.md)
