@@ -13,7 +13,7 @@ import { taskFindingLine } from "../tasks/command.ts";
 import { validate } from "../validate/index.ts";
 import { isConcept } from "../validate/okf.ts";
 import { localBase } from "./base.ts";
-import { noPush, postToolUse, sessionStart, stop } from "./claude.ts";
+import { noPush, postToolUse, sessionStartWithReminder, stop } from "./claude.ts";
 
 export interface HookContext {
   config: Config;
@@ -99,7 +99,7 @@ const OWN_CHECKS: Record<string, OwnHook> = {
   "pre-push": prePush,
   "post-checkout": refreshGraph,
   "post-merge": refreshGraph,
-  "claude-session-start": sessionStart,
+  "claude-session-start": sessionStartWithReminder,
   "claude-post-tool-use": postToolUse,
   "claude-stop": stop,
   "claude-no-push": noPush,

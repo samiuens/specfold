@@ -3,7 +3,7 @@
 ## 1. Session-start reminder
 
 ```yaml
-files: [tools/specfold/src/upgrade/reminder.ts, tools/specfold/src/upgrade/source.ts, tools/specfold/src/hooks/claude.ts, tools/specfold/src/repo.ts, tools/specfold/test/upgrade-reminder.test.ts, tools/specfold/test/repo.test.ts, tools/specfold/test/change-knowledge.test.ts]
+files: [tools/specfold/src/upgrade/reminder.ts, tools/specfold/src/upgrade/source.ts, tools/specfold/src/hooks/claude.ts, tools/specfold/src/hooks/run.ts, tools/specfold/src/repo.ts, tools/specfold/test/upgrade-reminder.test.ts, tools/specfold/test/repo.test.ts, tools/specfold/test/change-knowledge.test.ts]
 depends: []
 scenarios: [specfold-hooks#release-waiting, specfold-hooks#offline, specfold-hooks#turned-off]
 agent: implementer
@@ -11,7 +11,7 @@ agent: implementer
 
 - [x] 1.1 Read `upgrade.reminder` and give release sources a time limit
   - Done when: `repo.test.ts` covers the default and `false`, and a source query past its limit fails with an environment error
-- [ ] 1.2 Remind of a waiting release at session start, at most once a day
+- [x] 1.2 Remind of a waiting release at session start, at most once a day
   - Done when: scenarios release-waiting, offline and turned-off pass in `upgrade-reminder.test.ts`
 
 ## 2. Opt-in upgrade workflow
