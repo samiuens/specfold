@@ -9,7 +9,7 @@ scenarios: [specfold-release#unknown-subcommand, specfold-release#template-behin
 agent: implementer
 ```
 
-- [ ] 1.1 Add `release.mjs` with its version check
+- [x] 1.1 Add `release.mjs` with its version check
   - Done when: scenarios unknown-subcommand and template-behind-the-package pass in `release.test.ts`
 - [ ] 1.2 Pack the template and `upgrade/` into the release tarball with its checksum
   - Done when: scenarios pack-a-release and version-mismatch pass in `release.test.ts`
