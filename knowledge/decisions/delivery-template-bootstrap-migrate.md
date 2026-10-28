@@ -15,6 +15,8 @@ sources:
 
 New projects start from the template repo and run `specfold init`. Repos without the kit paste `BOOTSTRAP.md` into any agent, which downloads a pinned release and runs `sf-migrate`. Both install from the same release tarball of `template/`.
 
+Until the first release (v0.1.0), `BOOTSTRAP.md` pins a full commit sha of the kit and fetches its tarball through the user's `gh` login, which works while the kit repo is private ([private kit repo](/decisions/private-kit-repo.md)); the pin moves in its own PR after each template change ([runbook](/runbooks/move-bootstrap-pin.md)). The template carries `.specfold/manifest.json`, so a repository made from it knows what came from the kit just like a migrated one.
+
 # Why
 
 The kit has to reach new and existing codebases alike, and every path should install the same files from one source.
@@ -23,3 +25,4 @@ The kit has to reach new and existing codebases alike, and every path should ins
 
 - [Migration on own branch](/decisions/migration-on-own-branch.md)
 - [Private kit repo](/decisions/private-kit-repo.md)
+- [specfold init](/capabilities/specfold-init.md)

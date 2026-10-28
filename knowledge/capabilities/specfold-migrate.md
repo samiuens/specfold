@@ -35,6 +35,7 @@ Bringing an existing repository into the kit touches many files at once ([migrat
 - **The migration PR passes G4.** The gate treats a branch whose merge base has no `specfold.yaml` as an adoption PR ([specfold gate](/capabilities/specfold-gate.md)).
 - **A conflict keeps its base.** When a kit file or block is in conflict on a later install, its manifest entry keeps the hash it was installed with, so the upgrader still knows the base (found in the first recorded run).
 - **Next steps are passed on.** A hook manager's own step, such as `lefthook install`, appears after the summary as `then: ...` (found in the second recorded run).
+- **The way in is `BOOTSTRAP.md`.** It fetches a pinned kit snapshot and hands the agent `sf-migrate` from the snapshot; a repository made from the template uses [specfold init](/capabilities/specfold-init.md) instead.
 - **The skill drives it.** `sf-migrate` calls the subcommands in order and does the judgment between them; the recorded runs in `examples/migrations/` show both on the two fixtures.
 
 # Related
