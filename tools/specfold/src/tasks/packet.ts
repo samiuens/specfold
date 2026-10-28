@@ -11,7 +11,7 @@ export interface Packet {
   change: string;
   group: number;
   name: string;
-  tasks: { id: string; text: string; doneWhen: string | null }[];
+  tasks: { id: string; text: string; doneWhen: string | null; done: boolean }[];
   files: string[];
   depends: number[];
   scenarios: { id: string; text: string | null }[];
@@ -64,7 +64,7 @@ export function buildPacket(config: Config, change: string, groupNumber: number)
     change,
     group: group.number,
     name: group.name,
-    tasks: group.tasks.map((t) => ({ id: t.id, text: t.text, doneWhen: t.doneWhen ?? null })),
+    tasks: group.tasks.map((t) => ({ id: t.id, text: t.text, doneWhen: t.doneWhen ?? null, done: t.done })),
     files: group.meta?.files ?? [],
     depends: group.meta?.depends ?? [],
     scenarios: (group.meta?.scenarios ?? []).map((id) => {
@@ -85,7 +85,10 @@ export function renderPacket(p: Packet): string {
     "",
     "## Tasks",
     "",
-    ...p.tasks.flatMap((t) => [`- ${t.id} ${t.text}`, `  - Done when: ${t.doneWhen ?? "(not stated)"}`]),
+    ...p.tasks.flatMap((t) => [
+      `- ${t.done ? "[done] " : ""}${t.id} ${t.text}`,
+      `  - Done when: ${t.doneWhen ?? "(not stated)"}`,
+    ]),
     "",
     "## Files you own",
     "",
@@ -120,7 +123,7 @@ export function renderPacket(p: Packet): string {
     "",
     "## Rules",
     "",
-    `- Work the tasks in order; tick each in \`openspec/changes/${p.change}/tasks.md\` and commit it alone with the trailer \`Task: ${p.change}#${p.group}.<m>\`.`,
+    `- Start at the first task not marked [done] and work in order; tick each in \`openspec/changes/${p.change}/tasks.md\` and commit it alone with the trailer \`Task: ${p.change}#${p.group}.<m>\`.`,
     "- Change only the files you own (and the tick in tasks.md).",
     "- If a task needs another file or clearly exceeds its size, stop and return a SPLIT PROPOSAL instead of widening your scope.",
     "",
