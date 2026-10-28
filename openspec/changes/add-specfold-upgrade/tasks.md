@@ -69,7 +69,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 5.1 Add skill `sf-upgrade` to the template and the kit, with its links
+- [x] 5.1 Add skill `sf-upgrade` to the template and the kit, with its links
   - Done when: `check-skills.mjs` passes on both skill folders and `agents sync --check` passes in the kit and the template
 - [ ] 5.2 Document `upgrade.commit_message` and ship the rebuilt bundle and manifest
   - Done when: the template's specfold.yaml documents the key, both bundle copies match the build, and the template manifest test passes
