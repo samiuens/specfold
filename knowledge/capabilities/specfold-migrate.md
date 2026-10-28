@@ -5,7 +5,7 @@ description: Why the mechanical steps of a migration are CLI code, and how insta
 status: draft
 spec: openspec/specs/specfold-migrate/spec.md
 resource: ../../openspec/specs/specfold-migrate/spec.md
-change: 2026-10-28-fix-upgrade-follow-ups
+change: 2026-10-28-add-upgrade-workflow
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-27T12:25:39+01:00 }
 sources:
   - id: proposal-2026-10-27-add-specfold-migrate
@@ -30,6 +30,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-10-28-add-specfold-wt/design.md
   - id: proposal-2026-10-28-fix-upgrade-follow-ups
     resource: ../../openspec/changes/archive/2026-10-28-fix-upgrade-follow-ups/proposal.md
+  - id: proposal-2026-10-28-add-upgrade-workflow
+    resource: ../../openspec/changes/archive/2026-10-28-add-upgrade-workflow/proposal.md
+  - id: design-2026-10-28-add-upgrade-workflow
+    resource: ../../openspec/changes/archive/2026-10-28-add-upgrade-workflow/design.md
 ---
 
 # Why
