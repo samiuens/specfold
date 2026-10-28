@@ -75,7 +75,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 6.1 Rebuild the bundle, its copies and the template manifest
+- [x] 6.1 Rebuild the bundle, its copies and the template manifest
   - Done when: the copies equal `scripts/specfold.mjs` and `template-manifest.test.ts` passes
 
 ## 7. Run record
