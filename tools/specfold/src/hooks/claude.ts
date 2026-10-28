@@ -6,6 +6,7 @@ import { dueDate, listItems } from "../future/items.ts";
 import { localGate, renderGate } from "../gate/command.ts";
 import { resolveBundleRoot } from "../repo.ts";
 import { taskFindingLine } from "../tasks/command.ts";
+import { upgradeReminder } from "../upgrade/reminder.ts";
 import { validate } from "../validate/index.ts";
 import { isConcept } from "../validate/okf.ts";
 import { localBase } from "./base.ts";
@@ -53,6 +54,14 @@ export function sessionStart({ config, io }: HookContext): number {
       : out;
   io.stdout(`${shown.join("\n")}\n`);
   return 0;
+}
+
+/** The session-start output plus, once a day at most, a line about a newer kit release. */
+export async function sessionStartWithReminder(ctx: HookContext): Promise<number> {
+  const code = sessionStart(ctx);
+  const line = await upgradeReminder(ctx.config);
+  if (line) ctx.io.stdout(`${line}\n`);
+  return code;
 }
 
 interface ToolEvent {
