@@ -23,7 +23,7 @@ scenarios: [specfold-upgrade#gate-with-the-branch-s-start]
 agent: implementer
 ```
 
-- [ ] 2.1 Pass the upgrade branch's start commit to the gate follow-up
+- [x] 2.1 Pass the upgrade branch's start commit to the gate follow-up
   - Done when: scenario gate-with-the-branch-s-start passes in `upgrade-command.test.ts`
 
 ## 3. Release
