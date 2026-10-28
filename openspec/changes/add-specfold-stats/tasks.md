@@ -9,7 +9,7 @@ scenarios: [specfold-stats#rounding, specfold-stats#import-counted-once, specfol
 agent: implementer
 ```
 
-- [ ] 1.1 Read `stats.budget` from `specfold.yaml` with its defaults
+- [x] 1.1 Read `stats.budget` from `specfold.yaml` with its defaults
   - Done when: `stats.test.ts` covers the defaults and a rejected non-integer budget
 - [ ] 1.2 Collect the always-loaded set, the overruns and the knowledge folders
   - Done when: scenarios rounding, import-counted-once, skills-and-hook, agents-md-too-long, openspec-skill-exempt and bundle-folders pass in `stats.test.ts`

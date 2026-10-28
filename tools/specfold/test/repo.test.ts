@@ -39,6 +39,7 @@ describe("repo", () => {
       },
       hooksExtra: {},
       traceTestGlobs: DEFAULT_TEST_GLOBS,
+      statsBudget: { agentsMd: 2000, total: 4000, skillDescription: 60 },
     });
   });
 

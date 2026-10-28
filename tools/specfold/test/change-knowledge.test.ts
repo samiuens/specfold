@@ -57,6 +57,7 @@ function setup(knowledge: string | undefined) {
     },
     hooksExtra: {},
     traceTestGlobs: [],
+    statsBudget: { agentsMd: 2000, total: 4000, skillDescription: 60 },
   };
   return { root, dir, config };
 }
