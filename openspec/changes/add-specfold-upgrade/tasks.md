@@ -57,7 +57,7 @@ agent: implementer
   - Done when: scenarios pr-without-yes, newer-release-on-next, stable-ignores-candidates, url-mirror, local-folder and handed-to-the-new-version pass in `upgrade-command.test.ts`
 - [x] 4.3 Print the plan, or apply it on its own branch with the follow-ups, the report and the commit
   - Done when: scenarios dry-run, applied-upgrade and message-from-the-settings pass in `upgrade-command.test.ts`
-- [ ] 4.4 Refuse write commands when the manifest is newer than the CLI
+- [x] 4.4 Refuse write commands when the manifest is newer than the CLI
   - Done when: scenario old-cli-refuses-to-write passes in `upgrade-skew.test.ts`
 
 ## 5. Template and release
