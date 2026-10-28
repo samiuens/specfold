@@ -12,6 +12,7 @@ Write `.specfold/migration/report.md` after validation passes.
 - Concepts written: <n> (<n> Decision, <n> Convention, ...), all draft
 - Seeded from code: <n> of the cap <cap>
 - Checks: specfold validate, specfold index --check and openspec validate --strict pass
+- Always loaded: <n> tokens (estimate from specfold stats); budgets exceeded: <none, or each with its tokens and limit>
 
 ## Needs human verification
 
