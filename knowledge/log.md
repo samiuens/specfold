@@ -10,6 +10,7 @@
 * **Retro**: add-specfold-stats: 0 answers
 * **Change**: 2026-10-28-add-token-recipes: created 1, updated 4, deprecated 0
 * **Retro**: add-token-recipes: 0 answers
+* **Change**: 2026-10-28-add-specfold-wt: created 2, updated 3, deprecated 0
 
 ## 2026-10-27
 

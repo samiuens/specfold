@@ -3,7 +3,15 @@ type: Capability
 title: specfold parallel
 description: Why the subagent limit is a personal setting in files git ignores, and how init and agents set it.
 status: draft
+spec: openspec/specs/specfold-parallel/spec.md
+resource: ../../openspec/specs/specfold-parallel/spec.md
+change: 2026-10-28-add-specfold-wt
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T09:57:10+01:00 }
+sources:
+  - id: proposal-2026-10-28-add-specfold-wt
+    resource: ../../openspec/changes/archive/2026-10-28-add-specfold-wt/proposal.md
+  - id: design-2026-10-28-add-specfold-wt
+    resource: ../../openspec/changes/archive/2026-10-28-add-specfold-wt/design.md
 ---
 
 # Why
