@@ -45,7 +45,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 4.1 Send the final message only after the last command succeeded, in every role
+- [x] 4.1 Send the final message only after the last command succeeded, in every role
   - Done when: each role's final-message rule says so and the three copies match
 - [ ] 4.2 Let the implementer keep its worktree's branch
   - Done when: `implementer.md` no longer creates a branch and reports the one it is on
