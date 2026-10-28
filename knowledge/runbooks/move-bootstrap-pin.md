@@ -2,12 +2,15 @@
 type: Runbook
 title: Move the bootstrap pin
 description: How to move the kit commit BOOTSTRAP.md pins after a change to template/ merges.
-status: draft
+status: deprecated
 stale_after: 2027-01-26T08:14:46+01:00
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T08:14:46+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T11:38:47+01:00 }
 ---
 
 # When to use
+
+Deprecated: since `add-release-automation`, `BOOTSTRAP.md` installs the newest release instead of a pinned commit ([cut a release](/runbooks/cut-a-release.md)).
+
 
 After a PR that changes `template/` (skills, CLI bundle, schema, template files) is merged, so that `BOOTSTRAP.md` hands out the new snapshot. Rebase merges give the merged commits new shas, so the pin cannot move inside the PR itself; it always follows in a small PR of its own. M9 replaces the sha with a release tag.
 
