@@ -13,7 +13,7 @@ import { taskFindingLine } from "../tasks/command.ts";
 import { validate } from "../validate/index.ts";
 import { isConcept } from "../validate/okf.ts";
 import { localBase } from "./base.ts";
-import { postToolUse, sessionStart, stop } from "./claude.ts";
+import { noPush, postToolUse, sessionStart, stop } from "./claude.ts";
 
 export interface HookContext {
   config: Config;
@@ -102,6 +102,7 @@ const OWN_CHECKS: Record<string, OwnHook> = {
   "claude-session-start": sessionStart,
   "claude-post-tool-use": postToolUse,
   "claude-stop": stop,
+  "claude-no-push": noPush,
 };
 
 /** Runs each `hooks.extra.<name>` command with `sh -c`, the hook's arguments as `$1`, `$2`, ...; stops at the first failure. */
