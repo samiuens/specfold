@@ -87,7 +87,7 @@ To repeat the promotion on a fresh copy: `node scripts/specfold.mjs backlog add 
 
 ## Token numbers
 
-Measured on 2026-10-28 on a scratch copy of this folder with graphify 0.9.97; nothing of graphify is committed here, because the sample app's skills must stay equal to the template's. Estimates from `node scripts/specfold.mjs stats` (characters / 4):
+Measured on 2026-10-28 on a scratch copy of this folder with graphify 0.9.97; nothing of graphify is committed here, because the sample app's kit files come only from kit releases. Estimates from `node scripts/specfold.mjs stats` (characters / 4):
 
 | Always-loaded item | Before setup | After `graphify setup` |
 | --- | --- | --- |
@@ -102,3 +102,26 @@ Measured on 2026-10-28 on a scratch copy of this folder with graphify 0.9.97; no
 `graphify setup` took about 4 seconds, changed five things (skill, link, `.graphifyignore`, the guard in `.claude/settings.json`, the code-only graph) and reported "everything is up to date" on a second run. The skill costs 91 tokens in every session; its guard adds a short hint only when a search or read runs.
 
 The task run with and without graphify is not recorded yet: the app has 164 lines of code, where the graph can save little. It is the backlog item `/backlog/measure-a-task-run-with-and-without-graphify.md` in the kit.
+
+## Upgrade runs
+
+The sample app gets its kit files only by upgrading from each release, with the released upgrader (see the kit's runbook "Upgrade the sample app"). Each run is one commit by the upgrader on `specfold/upgrade-<version>`, plus its record here. `.specfold/upgrade-report.md` holds the last run's report.
+
+### 0.1.0-rc.1 to 0.1.0-rc.2 (2026-10-28)
+
+- **How:** rc.1 has no `upgrade` command, so the rc.2 CLI ran from its tarball, with the rc.1 tarball as the merge base, as the rc.2 upgrade notes describe. Both tarballs passed their checksums.
+- **Result:** no conflicts, exit 0. The upgrade:
+  - added the `sf-upgrade` skill with its link and the two gate workflows;
+  - replaced the CLI bundle;
+  - added the `rules.design` key to `openspec/config.yaml`, which the sample app had been missing;
+  - moved `kit_version` and the manifest to rc.2.
+
+  `npm test`, `validate`, `index --check`, `openspec validate --all --strict` and `agents sync --check` pass.
+- **Expected follow-up failures:**
+  - `openspec update` could not run, because OpenSpec is installed at the kit root, not on the PATH or in the sample app;
+  - `hooks install` exited with 2, because the sample app is nested inside the kit's git repository.
+- **Upgrader bugs found:**
+  - the `gate --local` follow-up exited with 2 because it passed no `--base`;
+  - merging `openspec/config.yaml` rewrapped its long list items at 80 characters. The content is equal, but the formatting changed.
+
+  Both get fixed in the kit before rc.3. This commit is left exactly as the rc.2 upgrader made it.
