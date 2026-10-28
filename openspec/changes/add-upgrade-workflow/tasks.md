@@ -17,13 +17,13 @@ agent: implementer
 ## 2. Opt-in upgrade workflow
 
 ```yaml
-files: [template/.specfold/workflows/specfold-upgrade.yml, tools/specfold/src/migrate/install.ts, tools/specfold/src/migrate/command.ts, tools/specfold/src/init/init.ts, tools/specfold/src/init/command.ts, tools/specfold/src/upgrade/plan.ts, tools/specfold/test/init.test.ts, tools/specfold/test/migrate-install.test.ts, tools/specfold/test/upgrade-plan.test.ts]
+files: [template/.specfold/workflows/specfold-upgrade.yml, template/.specfold/manifest.json, tools/specfold/src/migrate/install.ts, tools/specfold/src/migrate/command.ts, tools/specfold/src/init/init.ts, tools/specfold/src/init/command.ts, tools/specfold/src/upgrade/plan.ts, tools/specfold/test/init.test.ts, tools/specfold/test/migrate-install.test.ts, tools/specfold/test/upgrade-plan.test.ts]
 depends: []
 scenarios: [specfold-init#not-a-template-repository, specfold-init#workflow-turned-on, specfold-init#workflow-off-by-default, specfold-migrate#install-with-the-workflow, specfold-upgrade#turned-on-workflow-replaced, specfold-upgrade#not-turned-on]
 agent: implementer
 ```
 
-- [ ] 2.1 Ship the weekly upgrade workflow in `.specfold/workflows/`
+- [x] 2.1 Ship the weekly upgrade workflow in `.specfold/workflows/`
   - Done when: the workflow ends green with a notice without `SPECFOLD_TOKEN`, opens the upgrade PR as `github-actions[bot]`, skips an existing branch, closes older upgrade PRs, and `.specfold/workflows/` is kit-owned
 - [ ] 2.2 Turn the workflow on with `init --upgrade-workflow` and `migrate install --upgrade-workflow`
   - Done when: scenarios not-a-template-repository, workflow-turned-on, workflow-off-by-default and install-with-the-workflow pass in `init.test.ts` and `migrate-install.test.ts`
