@@ -9,7 +9,7 @@ scenarios: [specfold-parallel#not-a-number, specfold-parallel#existing-local-set
 agent: implementer
 ```
 
-- [ ] 1.1 Read and write the personal limit and add `specfold parallel`
+- [x] 1.1 Read and write the personal limit and add `specfold parallel`
   - Done when: scenarios not-a-number, existing-local-settings and from-local-settings pass in `parallel.test.ts`
 
 ## 2. Worktree commands
