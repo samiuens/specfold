@@ -12,7 +12,7 @@ After M6, `specfold drift` flags 30 of the kit's 71 checked concepts. Twenty-eig
   - `conventions/test-fixtures.md`: `specfold trace` exists now, and `run` takes optional stdin;
   - `decisions/skills-symlinked-for-claude.md`: OpenSpec's own skill copies in `.claude/skills/` are real folders that `agents sync` keeps.
 - **`runbooks/move-bootstrap-pin.md`** names `BOOTSTRAP.md` in its steps instead of in `sources`.
-- **The 24 concepts that still hold** are listed in the PR with a one-line reason each; the user verifies the ones they agree with using `specfold verify`.
+- **The concepts that still hold** (24, plus two that the plan fix re-flags) are listed in the PR with a one-line reason each; the user verifies the ones they agree with using `specfold verify`.
 
 ## Capabilities
 
