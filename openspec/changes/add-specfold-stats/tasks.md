@@ -35,7 +35,7 @@ scenarios: [specfold-gate#agents-md-grows-past-its-budget, specfold-gate#set-unt
 agent: implementer
 ```
 
-- [ ] 3.1 Warn per overrun when the diff touches the always-loaded set
+- [x] 3.1 Warn per overrun when the diff touches the always-loaded set
   - Done when: scenarios agents-md-grows-past-its-budget and set-untouched pass in `gate-g11.test.ts`
 
 ## 4. Settings, skill and bundle
