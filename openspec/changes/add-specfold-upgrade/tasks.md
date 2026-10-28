@@ -23,7 +23,7 @@ agent: implementer
 
 - [x] 2.1 Compare versions, filter by channel and compute the upgrade path
   - Done when: `upgrade-version.test.ts` covers prerelease ordering, both channels and a step across a major
-- [ ] 2.2 List, download, check and unpack releases from `github`, `url` and `path` sources
+- [x] 2.2 List, download, check and unpack releases from `github`, `url` and `path` sources
   - Done when: scenario tampered-tarball passes in `upgrade-source.test.ts`, and the three sources are covered with a local folder and a local HTTP server
 
 ## 3. Plan and apply
