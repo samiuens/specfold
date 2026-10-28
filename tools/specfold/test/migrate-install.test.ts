@@ -148,7 +148,8 @@ describe("migrate install: OpenSpec, hooks and manifest", () => {
     const hash = createHash("sha256")
       .update(readFileSync(join(TEMPLATE, "scripts/specfold.mjs")))
       .digest("hex");
-    expect(manifest).toMatchObject({ manifest_version: 1, kit_version: "0.0.0", ref: "abc123" });
+    const { kit_version } = parse(readFileSync(join(TEMPLATE, "specfold.yaml"), "utf8"));
+    expect(manifest).toMatchObject({ manifest_version: 1, kit_version, ref: "abc123" });
     expect(manifest.files["scripts/specfold.mjs"]).toBe(`sha256:${hash}`);
     expect(Object.keys(manifest.blocks)).toEqual([
       ".gitattributes",
