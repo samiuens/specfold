@@ -85,7 +85,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 6.1 Stop copying kit files into the sample app
+- [x] 6.1 Stop copying kit files into the sample app
   - Done when: `release.yml` no longer copies the bundle into the sample app and `cli.yml` no longer compares the sample app with the template
 - [ ] 6.2 Give the sample app a manifest at `0.1.0-rc.1`
   - Done when: the sample app has `kit_version: 0.1.0-rc.1`, `channel: next`, an `upgrade.commit_message` that passes the kit's commit check, and a manifest from `specfold init`

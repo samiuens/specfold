@@ -70,11 +70,6 @@ jobs:
           node ../scripts/specfold.mjs index --check
       - name: Template bundle matches the kit's CLI
         run: diff scripts/specfold.mjs template/scripts/specfold.mjs || { echo "::error::template/scripts/specfold.mjs is stale; copy scripts/specfold.mjs over"; exit 1; }
-      - name: Sample app copies match the template
-        run: |
-          for path in AGENTS.md CLAUDE.md scripts/specfold.mjs openspec/schemas/specfold .agents/skills .claude/skills .claude/agents .claude/settings.json knowledge/conventions/code-comments.md; do
-            diff -r "template/$path" "examples/sample-app/$path" || { echo "::error::examples/sample-app/$path differs from template/$path"; exit 1; }
-          done
       - name: Sample app passes the workflow checks
         working-directory: examples/sample-app
         run: |
