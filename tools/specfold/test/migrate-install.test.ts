@@ -69,7 +69,8 @@ describe("migrate install: files", () => {
     const root = fixtureRepo("cursor-openspec");
     install(root);
     const data = JSON.parse(read(root, ".claude/settings.json"));
-    expect(data.permissions).toEqual({ deny: ["Read(./.env)"] });
+    const templateDeny = JSON.parse(read(TEMPLATE, ".claude/settings.json")).permissions.deny;
+    expect(data.permissions).toEqual({ deny: ["Read(./.env)", ...templateDeny] });
     expect(Object.keys(data.hooks)).toEqual(["SessionStart", "PostToolUse", "Stop"]);
   });
 

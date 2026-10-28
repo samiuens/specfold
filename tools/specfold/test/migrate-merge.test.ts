@@ -57,7 +57,7 @@ describe("settings merge", () => {
     const merged = mergeSettings(existing, template);
     if ("conflict" in merged) throw new Error(merged.conflict);
     const data = JSON.parse(merged.text);
-    expect(data.permissions).toEqual({ deny: ["Read(./.env)"] });
+    expect(data.permissions.deny).toEqual(["Read(./.env)", ...JSON.parse(template).permissions.deny]);
     expect(Object.keys(data.hooks).sort()).toEqual(["PostToolUse", "SessionStart", "Stop"]);
     expect(data.hooks.Stop).toHaveLength(2);
     expect(mergeSettings(merged.text, template)).toEqual({ text: merged.text, changed: false });
