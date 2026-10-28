@@ -131,6 +131,15 @@ describe("OpenSpec config merge", () => {
     });
   });
 
+  // spec: specfold-migrate#long-context-line-kept
+  it("keeps a long context line on one line when it adds the rules", () => {
+    const line = `Accounts service for the shop, written in TypeScript, deployed as one container per region ${"x".repeat(30)}`;
+    expect(line.length).toBeGreaterThan(120);
+    const merged = mergeOpenspecConfig(`schema: spec-driven\ncontext: ${line}\n`, template, undefined);
+    if ("conflict" in merged) throw new Error(merged.conflict);
+    expect(merged.text).toContain(`context: ${line}\n`);
+  });
+
   it("copies context and rules when they are missing, and fills the stack", () => {
     const merged = mergeOpenspecConfig("schema: spec-driven\n", template, "Go");
     if ("conflict" in merged) throw new Error(merged.conflict);
