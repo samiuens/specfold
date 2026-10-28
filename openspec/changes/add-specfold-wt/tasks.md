@@ -23,7 +23,7 @@ agent: implementer
 
 - [x] 2.1 Batch active changes in `wt plan`
   - Done when: scenarios two-independent-changes and shared-capability pass in `wt-plan.test.ts`
-- [ ] 2.2 Create, set up and clean worktrees
+- [x] 2.2 Create, set up and clean worktrees
   - Done when: scenarios unknown-subcommand, worktree-for-a-change, npm-worktree and merged-and-unmerged pass in `wt.test.ts`
 
 ## 3. Commands registry
