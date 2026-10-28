@@ -32,7 +32,7 @@
   - `writeLimit(root, n)` updates both files: the JSON with two-space indentation and a trailing newline, the YAML through `parseDocument`, so comments and other keys stay;
   - the env value is a string, as Claude Code's `env` requires.
 - **`wt plan`:**
-  - active changes are the folders in `openspec/changes/` except `archive`; a change's capabilities are its `specs/<capability>/` folders, and its files are the union of its groups' `files`;
+  - active changes are the folders in `openspec/changes/` except `archive`; a change's capabilities are its `specs/<capability>/` folders, and its files are the union of its groups' `files` without the "Knowledge" group, whose `knowledge/**` every change owns; concept edits rarely collide, and indexes are regenerated after each merge (found while building);
   - pairs conflict on a shared capability, on `sharedFiles`, or when either change has no `tasks.md`;
   - batches are built greedily in name order, each change going into the first batch without a conflict and below the limit; with no limit set, Claude Code's default of 20 is used and named in the output.
 - **`wt new <change>`:**

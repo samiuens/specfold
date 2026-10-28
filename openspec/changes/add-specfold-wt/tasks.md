@@ -21,7 +21,7 @@ scenarios: [specfold-wt#unknown-subcommand, specfold-wt#two-independent-changes,
 agent: implementer
 ```
 
-- [ ] 2.1 Batch active changes in `wt plan`
+- [x] 2.1 Batch active changes in `wt plan`
   - Done when: scenarios two-independent-changes and shared-capability pass in `wt-plan.test.ts`
 - [ ] 2.2 Create, set up and clean worktrees
   - Done when: scenarios unknown-subcommand, worktree-for-a-change, npm-worktree and merged-and-unmerged pass in `wt.test.ts`
