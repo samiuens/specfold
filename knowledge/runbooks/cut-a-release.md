@@ -19,7 +19,9 @@ When a change that should ship has been merged to `main`, and for each M9 releas
 4. **The rebuild commit.** Job `rebuild` runs on that PR and pushes `build(release): 📦️ rebuild the bundle for vX.Y.Z`, with the rebuilt bundle copies, the lockfile and the template manifest. If release-please rewrites the branch, the job runs again.
 5. **Merge** the release PR by rebase once all checks pass, including `release.mjs check` and the bundle and manifest checks.
 6. **Publishing** is automatic. Job `publish` packs `specfold-template-vX.Y.Z.tar.gz` with its `.sha256`, uploads both to the GitHub release, and appends the upgrade notes. Versions with `-rc` are marked as prereleases.
-7. **From `0.1.0` on**, add `--exclude-pre-releases` to the release lookup in `BOOTSTRAP.md`, so it installs only stable releases.
+7. **Upgrade the sample app** with the released upgrader, in a follow-up PR ([upgrade the sample app](/runbooks/upgrade-the-sample-app.md)). The kit no longer copies its files into the sample app.
+8. **Mirrors:** to fill a `source.url` mirror, copy the tarballs and checksums into one folder, run `node tools/specfold/release.mjs index <folder>`, and serve the folder with its `releases.json`.
+9. **From `0.1.0` on**, add `--exclude-pre-releases` to the release lookup in `BOOTSTRAP.md`, so it installs only stable releases.
 
 # Verify
 

@@ -23,6 +23,7 @@
 * [specfold sync](specfold-sync.md) - Why sync applies the mechanical part of a knowledge delta after archive, and where its contract lives.
 * [specfold tasks](specfold-tasks.md) - Why tasks.md is a checked breakdown of task groups, and where the contract for tasks check, status and resume lives.
 * [specfold trace](specfold-trace.md) - Why scenarios carry stable ids that tests cite, and where the contract for specfold trace lives.
+* [specfold upgrade](specfold-upgrade.md) - Why upgrades run in two stages with the target release's own CLI, merge local edits three ways and refuse version skew.
 * [specfold validate](specfold-validate.md) - Why the kit has its own OKF and profile validator, and where its contract lives.
 * [specfold verify](specfold-verify.md) - Why specfold verify writes human verification for the person at the keyboard, and where its contract lives.
 * [specfold wt](specfold-wt.md) - Why worktrees get their own commands, how wt plan batches changes, and why wt clean never forces a removal.

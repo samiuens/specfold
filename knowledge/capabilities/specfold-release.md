@@ -24,6 +24,7 @@ Every install and upgrade path starts from a release: `BOOTSTRAP.md`, the templa
 - **Three version fields, one check.** The package version, `kit_version` in `template/specfold.yaml` and the template manifest's `kit_version` must agree. `release.mjs check` runs in CI on every PR, so a release PR without its rebuild commit can't merge ([cut a release](/runbooks/cut-a-release.md)).
 - **Tracked files only.** `pack` copies `git ls-files template upgrade`, so local build output or `node_modules` never ships. It uses `tar -C` with a staged top folder, which works with GNU and BSD tar alike.
 - **`sha256sum` format.** The `.sha256` file is `<hex>  <file>`, so `sha256sum -c` works on Linux, and `BOOTSTRAP.md` checks it with a `node -e` one-liner that works anywhere.
+- **Mirror index.** `release.mjs index <dir>` writes `releases.json`, listing every tarball in a folder (newest first) with its upgrade notes. A `source.url` mirror is filled by copying the release files and running it, because a plain HTTPS folder can't list its files ([specfold upgrade](/capabilities/specfold-upgrade.md)).
 - **Notes live with the change.** Upgrade notes are written as `upgrade/notes/<version>.md` in the change that needs them, because release-please regenerates its changelog and PR; `notes` adds them to the release body, or says "No manual steps."
 
 # Related
