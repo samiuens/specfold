@@ -69,3 +69,11 @@ tasks:
 # Extra commands per git hook, run after Specfold's own checks.
 hooks:
   extra: {}
+
+# Token budgets of the always-loaded set (AGENTS.md, CLAUDE.md, config context, skill descriptions,
+# SessionStart output); `specfold stats` reports them and gate rule G11 warns when a PR exceeds one.
+stats:
+  budget:
+    agents_md: 2000
+    total: 4000
+    skill_description: 60

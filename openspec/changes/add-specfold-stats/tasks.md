@@ -47,7 +47,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 4.1 Add the `stats.budget` defaults to the template, kit and sample app settings
+- [x] 4.1 Add the `stats.budget` defaults to the template, kit and sample app settings
   - Done when: `node scripts/specfold.mjs stats` exits 0 in the kit, the template and the sample app
 - [ ] 4.2 Run stats in `sf-migrate` step 8 and add it to the report template
   - Done when: the skill copies match the template and `check-skills.mjs` passes

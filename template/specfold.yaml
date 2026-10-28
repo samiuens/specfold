@@ -76,6 +76,14 @@ tasks:
   max_files_per_task: 5
   max_tasks_per_group: 8
 
+# Token budgets of the always-loaded set (AGENTS.md, CLAUDE.md, config context, skill descriptions,
+# SessionStart output); `specfold stats` reports them and gate rule G11 warns when a PR exceeds one.
+stats:
+  budget:
+    agents_md: 2000
+    total: 4000
+    skill_description: 60
+
 # Files whose `spec: <capability>#<scenario>` comments count as tests (specfold trace, gate G15).
 trace:
   test_globs: ["**/*.test.*", "**/*.spec.*", "**/*_test.*", "**/test/**", "**/tests/**", "**/spec/**"]
