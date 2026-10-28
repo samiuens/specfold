@@ -25,3 +25,10 @@ The CLI SHALL provide `specfold parallel set <n> | show [--json]`, run inside a 
 #### Scenario: From local settings
 - **WHEN** only `.claude/settings.local.json` sets the limit to 2
 - **THEN** `parallel show` prints 2 and names `.claude/settings.local.json`
+
+### Requirement: Local settings keep long lines
+When `specfold parallel set` writes `.specfold/local.yaml`, it SHALL keep the file's other values on the lines they had, without folding long lines.
+
+#### Scenario: Long value kept
+- **WHEN** `.specfold/local.yaml` holds a 100-character string value and `parallel set 4` runs
+- **THEN** that value is still on one line
