@@ -25,7 +25,7 @@
     "openspec/schemas/specfold/templates/proposal.md": "sha256:0dd70e35db5c696ba8ac3cc3a53e2d6561865c1e4e7d49db5a1eaa3e4a6ad86e",
     "openspec/schemas/specfold/templates/spec.md": "sha256:1cccfb573f031c6352bed2a879b7035ff710bc909112fc23d10bdcfcdd8d4318",
     "openspec/schemas/specfold/templates/tasks.md": "sha256:2ef32ccb374fd2470cfea280eb0dd247679d46ac569a719d7e1afc3cae9f3529",
-    "scripts/specfold.mjs": "sha256:e2938651e22fac27d70dda9cafec8e903b789850c11646f8b3529b6b9002ca1e"
+    "scripts/specfold.mjs": "sha256:6591073c5964cd89074728d2a803b0e5156f41e9051207b6d3be199ec8aadbc4"
   },
   "blocks": {
     ".github/CODEOWNERS": "sha256:67066f65a9740d8f546b033e48458f634c835883bf2dd18502c075bda8db5be6",
