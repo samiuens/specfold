@@ -11,7 +11,8 @@
   - it runs `specfold upgrade --check --json` and, when a newer release exists, `specfold upgrade --yes --pr` with the `SPECFOLD_TOKEN` secret;
   - without the secret it ends green with a notice saying how to add one;
   - an existing open upgrade PR is updated rather than duplicated.
-- **`specfold init --upgrade-workflow`** copies it to `.github/workflows/`, records it in the manifest as kit-owned, and prints the secret's setup. `BOOTSTRAP.md` asks whether to turn it on.
+- **`specfold init --upgrade-workflow`** and **`specfold migrate install --upgrade-workflow`** copy it to `.github/workflows/`, record it in the manifest as kit-owned, and print the secret's setup. `BOOTSTRAP.md` and `sf-migrate` ask whether to turn it on, and upgrades keep the turned-on copy current.
+- **The workflow's PRs:** commits are authored by `github-actions[bot]`, and a new upgrade PR closes older open ones.
 - **Session-start reminder:**
   - `specfold hook claude-session-start` prints one line when a newer release is on the channel;
   - it checks at most once a day, gives up after 2 seconds, and caches the answer in the gitignored `.specfold/local-state.json`;
@@ -30,6 +31,8 @@
 ### Modified Capabilities
 - `specfold-init`: the `--upgrade-workflow` flag.
 - `specfold-hooks`: the upgrade reminder at session start.
+- `specfold-migrate`: the `--upgrade-workflow` flag of `install`.
+- `specfold-upgrade`: the turned-on workflow file is upgraded from `.specfold/workflows/`.
 
 ## Out of scope
 
@@ -38,10 +41,10 @@
 ## Open points
 
 1. **Fixture repositories:** made in CI by unpacking an old tarball and running its own `specfold init`. Then one kit file is edited and the repository is committed, so the job needs no stored fixtures.
-2. **Release PRs and CI:** the job's trigger depends on how `add-release-automation` gets checks to run on release-please's PRs.
+2. **Release PRs and CI:** release-please's PRs run every check, because it uses a PAT. The job always reports and skips its work on PRs that don't touch the kit's payload.
 
 ## Impact
 
 - New: `template/.specfold/workflows/specfold-upgrade.yml`, `src/upgrade/reminder.ts`, the `upgrade-fixtures` job in `.github/workflows/cli.yml` and its script.
-- Changed: `src/init/`, `src/hooks/claude.ts`, the template's `specfold.yaml` (`upgrade.reminder`) and `.gitignore`, `BOOTSTRAP.md`, the template manifest.
-- Knowledge: the upgrade architecture, the init and hooks cards.
+- Changed: `src/init/`, `src/migrate/`, `src/upgrade/plan.ts` and `source.ts`, `src/repo.ts`, `src/hooks/claude.ts`, the template's `specfold.yaml` (`upgrade.reminder`) and `.gitignore`, `BOOTSTRAP.md`, `sf-migrate`, the template manifest.
+- Knowledge: the upgrade flow, a runbook for turning the workflow on, and the init, migrate, hooks and upgrade cards.
