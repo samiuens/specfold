@@ -42,6 +42,7 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/hooks/` | the `hooks install` and `hook` commands: built-in hooks or hook-manager entries (lefthook, husky, pre-commit), the pre-commit, pre-push and graph checks, `hooks.extra`, and the Claude Code session, edit and stop hooks |
 | `src/indexes/` | the `index` command: index generation, `see knowledge:` scan, write and check modes |
 | `src/log/` | the `log add` command and the insertion of entries into date sections |
+| `src/init/` | the `init` command: fills detected settings in a template repository, runs `openspec init` when its skills are missing, wraps untouched shared files in markers, then links, hooks and the manifest from the template's own |
 | `src/migrate/` | the `migrate` command: git root, branch rule and resumable state, inventory and stack detection (shared with `init`), managed blocks, the settings and OpenSpec config merges, kit installation and the install manifest |
 | `src/lookup/` | the `lookup` command: frontmatter search, weighted ranking, trust flags including `drift` |
 | `src/new/` | the `new` command: per-type templates, override files, frontmatter rendering |

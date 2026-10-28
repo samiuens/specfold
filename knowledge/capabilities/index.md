@@ -10,6 +10,7 @@
 * [specfold gate](specfold-gate.md) - Why specfold gate gives one merge verdict, and where the contract for its rules lives.
 * [specfold hooks](specfold-hooks.md) - Why Specfold ships its own git and Claude Code hook entry points, and where their contract lives.
 * [specfold index](specfold-index.md) - Why bundle indexes are generated instead of written, and where the contract for specfold index lives.
+* [specfold init](specfold-init.md) - Why a repository made from the template needs init, and how it fills detected values and sets up OpenSpec, markers and the manifest without prompts.
 * [specfold log](specfold-log.md) - Why log entries are written by a command, and where the contract for specfold log add lives.
 * [specfold lookup](specfold-lookup.md) - Why agents search knowledge by frontmatter first, and where the contract for specfold lookup lives.
 * [specfold migrate](specfold-migrate.md) - Why the mechanical steps of a migration are CLI code, and how install brings in the kit without overwriting a repository's own files.
