@@ -55,7 +55,7 @@ agent: implementer
   - Done when: the template's specfold.yaml documents the key, the kit's sets it to `false`, and both `.gitignore` files list `.specfold/local-state.json`
 - [x] 4.2 Ask about the upgrade workflow in `BOOTSTRAP.md` and `sf-migrate`
   - Done when: both ask the user and pass `--upgrade-workflow` on a yes, and `check-skills.mjs` passes
-- [ ] 4.3 Ship the rebuilt bundle and manifest
+- [x] 4.3 Ship the rebuilt bundle and manifest
   - Done when: both bundle copies match the build and the template manifest test passes
 
 ## 5. Knowledge

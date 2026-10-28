@@ -7813,7 +7813,8 @@ function loadConfig(root) {
     kitVersion: typeof data.kit_version === "string" ? data.kit_version : "",
     channel,
     source: releaseSource(data.source),
-    upgradeCommitMessage: typeof upgrade.commit_message === "string" && upgrade.commit_message.trim() !== "" ? upgrade.commit_message : DEFAULT_UPGRADE_MESSAGE
+    upgradeCommitMessage: typeof upgrade.commit_message === "string" && upgrade.commit_message.trim() !== "" ? upgrade.commit_message : DEFAULT_UPGRADE_MESSAGE,
+    upgradeReminder: upgrade.reminder !== false
   };
 }
 function requireConfig(cwd) {
@@ -8015,6 +8016,11 @@ function literal(text3) {
 // src/migrate/install.ts
 var TOOLS = ["agents", "claude"];
 var MANIFEST_PATH = ".specfold/manifest.json";
+var UPGRADE_WORKFLOW = {
+  shipped: ".specfold/workflows/specfold-upgrade.yml",
+  active: ".github/workflows/specfold-upgrade.yml"
+};
+var UPGRADE_WORKFLOW_NOTE = "add the SPECFOLD_TOKEN secret (Settings > Secrets and variables > Actions): a token that can read the Specfold kit's releases and write contents, pull requests and workflows in this repository; a fine-grained token works when both repositories have the same owner, otherwise use a classic token with repo and workflow";
 function parseTools(value) {
   if (value === void 0) return [...TOOLS];
   const tools = value.split(",").map((t) => t.trim());
@@ -8047,6 +8053,7 @@ function kitOwned(from, tools) {
     "scripts/specfold.mjs",
     "openspec/schemas/specfold",
     ".agents/skills",
+    ".specfold/workflows",
     ".github/workflows/specfold-gate.yml",
     ".github/workflows/specfold-gate-comment.yml",
     ...tools.includes("claude") ? [".claude/agents"] : []
@@ -8150,6 +8157,20 @@ function installKit(o) {
       continue;
     }
     manifest.files[p] = sha256(data);
+  }
+  const workflow = join6(o.from, UPGRADE_WORKFLOW.shipped);
+  if ((o.upgradeWorkflow || previous.files[UPGRADE_WORKFLOW.active]) && existsSync6(workflow)) {
+    const p = UPGRADE_WORKFLOW.active;
+    const data = readFileSync4(workflow);
+    if (!existsSync6(abs(p))) {
+      put(p, data);
+      act(p, "write");
+      result.notes.push(UPGRADE_WORKFLOW_NOTE);
+      manifest.files[p] = sha256(data);
+    } else if (!readFileSync4(abs(p)).equals(data)) {
+      conflict(p, "differs from the kit's copy; left unchanged");
+      if (previous.files[p]) manifest.files[p] = previous.files[p];
+    } else manifest.files[p] = sha256(data);
   }
   for (const p of BLOCK_FILES) {
     if (p === "CLAUDE.md" && !claude) continue;
@@ -11768,8 +11789,8 @@ register({
 });
 
 // src/gate/command.ts
-import { existsSync as existsSync37, readFileSync as readFileSync31, writeFileSync as writeFileSync11 } from "node:fs";
-import { resolve as resolve7 } from "node:path";
+import { existsSync as existsSync39, readFileSync as readFileSync33, writeFileSync as writeFileSync13 } from "node:fs";
+import { resolve as resolve8 } from "node:path";
 
 // src/gate/diff.ts
 import { existsSync as existsSync28, statSync as statSync8 } from "node:fs";
@@ -11869,21 +11890,254 @@ async function fetchPullRequest(env, number) {
 }
 
 // src/gate/rules.ts
-import { existsSync as existsSync36, readFileSync as readFileSync30 } from "node:fs";
-import { join as join41, relative as relative18, sep as sep18 } from "node:path";
+import { existsSync as existsSync38, readFileSync as readFileSync32 } from "node:fs";
+import { join as join43, relative as relative18, sep as sep18 } from "node:path";
 
 // src/stats/stats.ts
 var import_yaml13 = __toESM(require_dist(), 1);
-import { existsSync as existsSync31, readdirSync as readdirSync7, readFileSync as readFileSync25, statSync as statSync10 } from "node:fs";
-import { dirname as dirname8, join as join35, relative as relative14, resolve as resolve6, sep as sep14 } from "node:path";
+import { existsSync as existsSync33, readdirSync as readdirSync8, readFileSync as readFileSync27, statSync as statSync10 } from "node:fs";
+import { dirname as dirname9, join as join37, relative as relative14, resolve as resolve7, sep as sep14 } from "node:path";
 
 // src/hooks/claude.ts
-import { existsSync as existsSync30, readdirSync as readdirSync6, readFileSync as readFileSync24, statSync as statSync9 } from "node:fs";
-import { isAbsolute, join as join34, relative as relative13, resolve as resolve5, sep as sep13 } from "node:path";
+import { existsSync as existsSync32, readdirSync as readdirSync7, readFileSync as readFileSync26, statSync as statSync9 } from "node:fs";
+import { isAbsolute, join as join36, relative as relative13, resolve as resolve6, sep as sep13 } from "node:path";
+
+// src/upgrade/reminder.ts
+import { existsSync as existsSync30, mkdirSync as mkdirSync7, readFileSync as readFileSync25, writeFileSync as writeFileSync11 } from "node:fs";
+import { dirname as dirname8, join as join35 } from "node:path";
+
+// src/upgrade/source.ts
+import { execFileSync as execFileSync7 } from "node:child_process";
+import { createHash as createHash2 } from "node:crypto";
+import { copyFileSync, existsSync as existsSync29, mkdirSync as mkdirSync6, readdirSync as readdirSync6, readFileSync as readFileSync24, writeFileSync as writeFileSync10 } from "node:fs";
+import { join as join34, resolve as resolve4 } from "node:path";
+var tarballName = (version) => `specfold-template-v${version}.tar.gz`;
+function ghLoggedIn(timeoutMs) {
+  try {
+    execFileSync7("gh", ["auth", "status", "--hostname", "github.com"], {
+      stdio: "ignore",
+      ...timeoutMs ? { timeout: timeoutMs } : {}
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+function fromIndex(data, where) {
+  const releases = data?.releases;
+  if (!Array.isArray(releases)) throw new EnvError(`${where} has no 'releases' list`);
+  return new Map(
+    releases.filter((r) => typeof r.version === "string" && isVersion(r.version)).map((r) => [r.version, typeof r.notes === "string" ? r.notes : ""])
+  );
+}
+async function get(url, headers = {}, timeoutMs) {
+  let response;
+  try {
+    response = await fetch(url, {
+      headers: { "user-agent": "specfold", ...headers },
+      ...timeoutMs ? { signal: AbortSignal.timeout(timeoutMs) } : {}
+    });
+  } catch (error) {
+    throw new EnvError(`could not reach ${url}: ${error.message}`);
+  }
+  if (!response.ok) throw new EnvError(`${url} answered ${response.status}`);
+  return response;
+}
+async function save(url, file, headers = {}) {
+  writeFileSync10(file, Buffer.from(await (await get(url, headers)).arrayBuffer()));
+}
+async function getJson(url, headers = {}, timeoutMs) {
+  try {
+    return await (await get(url, headers, timeoutMs)).json();
+  } catch (error) {
+    if (error instanceof EnvError) throw error;
+    throw new EnvError(`could not read ${url}: ${error.message}`);
+  }
+}
+function pathSource(dir) {
+  const indexFile = join34(dir, "releases.json");
+  const index = () => existsSync29(indexFile) ? fromIndex(JSON.parse(readFileSync24(indexFile, "utf8")), indexFile) : void 0;
+  return {
+    label: `path ${dir}`,
+    versions: async () => {
+      if (!existsSync29(dir)) throw new EnvError(`source.path ${dir} does not exist`);
+      const listed = index();
+      if (listed) return [...listed.keys()];
+      return readdirSync6(dir).map((f) => /^specfold-template-v(.+)\.tar\.gz$/.exec(f)?.[1]).filter((v) => v !== void 0 && isVersion(v));
+    },
+    notes: async (version) => index()?.get(version) ?? "",
+    download: async (version, to) => {
+      for (const name of [tarballName(version), `${tarballName(version)}.sha256`]) {
+        if (!existsSync29(join34(dir, name))) throw new EnvError(`${join34(dir, name)} does not exist`);
+        copyFileSync(join34(dir, name), join34(to, name));
+      }
+      return join34(to, tarballName(version));
+    },
+    tag: () => void 0
+  };
+}
+function urlSource(base, timeoutMs) {
+  const root = base.replace(/\/+$/, "");
+  let cached;
+  const index = async () => {
+    cached ??= fromIndex(await getJson(`${root}/releases.json`, {}, timeoutMs), `${root}/releases.json`);
+    return cached;
+  };
+  return {
+    label: `url ${root}`,
+    versions: async () => [...(await index()).keys()],
+    notes: async (version) => (await index()).get(version) ?? "",
+    download: async (version, to) => {
+      for (const name of [tarballName(version), `${tarballName(version)}.sha256`])
+        await save(`${root}/${name}`, join34(to, name));
+      return join34(to, tarballName(version));
+    },
+    tag: () => void 0
+  };
+}
+function githubSource(repo, o) {
+  const env = o.env ?? process.env;
+  const token = env.SPECFOLD_TOKEN || env.GITHUB_TOKEN;
+  const api = (env.GITHUB_API_URL || "https://api.github.com").replace(/\/+$/, "");
+  const headers = (accept) => ({
+    accept,
+    ...token ? { authorization: `Bearer ${token}` } : {}
+  });
+  const gh = (args) => execFileSync7("gh", [...args, "--repo", repo], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    ...o.timeoutMs ? { timeout: o.timeoutMs } : {}
+  });
+  let cached;
+  const releases = async () => {
+    if (cached) return cached;
+    if (o.gh) {
+      const listed = JSON.parse(gh(["release", "list", "--limit", "100", "--json", "tagName"]));
+      cached = listed.map((r) => ({ tag_name: r.tagName }));
+    } else {
+      const url = `${api}/repos/${repo}/releases?per_page=100`;
+      cached = await getJson(url, headers("application/vnd.github+json"), o.timeoutMs);
+    }
+    return cached;
+  };
+  const find = async (version) => {
+    const release = (await releases()).find((r) => r.tag_name === `v${version}`);
+    if (!release) throw new EnvError(`${repo} has no release v${version}`);
+    return release;
+  };
+  return {
+    label: `github ${repo}`,
+    versions: async () => (await releases()).map((r) => r.tag_name.replace(/^v/, "")).filter((v) => isVersion(v)),
+    notes: async (version) => {
+      if (o.gh) return JSON.parse(gh(["release", "view", `v${version}`, "--json", "body"])).body ?? "";
+      return (await find(version)).body ?? "";
+    },
+    download: async (version, to) => {
+      const names = [tarballName(version), `${tarballName(version)}.sha256`];
+      if (o.gh) {
+        for (const name of names)
+          gh(["release", "download", `v${version}`, "--pattern", name, "--dir", to, "--clobber"]);
+      } else {
+        const assets = (await find(version)).assets ?? [];
+        for (const name of names) {
+          const asset = assets.find((a) => a.name === name);
+          if (!asset) throw new EnvError(`release v${version} of ${repo} has no ${name}`);
+          await save(asset.url, join34(to, name), headers("application/octet-stream"));
+        }
+      }
+      return join34(to, tarballName(version));
+    },
+    tag: (version) => `v${version}`
+  };
+}
+function openSource(source, root, o = {}) {
+  if ("path" in source) return pathSource(resolve4(root, source.path));
+  if ("url" in source) return urlSource(source.url, o.timeoutMs);
+  return githubSource(source.github, o);
+}
+function verifyChecksum(tarball) {
+  const file = `${tarball}.sha256`;
+  if (!existsSync29(file)) throw new EnvError(`${file} is missing; the tarball can't be checked`);
+  const expected = readFileSync24(file, "utf8").trim().split(/\s+/)[0];
+  const actual = createHash2("sha256").update(readFileSync24(tarball)).digest("hex");
+  if (actual !== expected) throw new EnvError(`${tarball} does not match its .sha256; nothing was changed`);
+}
+function unpack(tarball, dir) {
+  mkdirSync6(dir, { recursive: true });
+  try {
+    execFileSync7("tar", ["-xzf", tarball, "-C", dir, "--strip-components=1"], { stdio: "pipe" });
+  } catch (error) {
+    throw new EnvError(
+      `could not unpack ${tarball}: ${String(error.stderr).trim()}`
+    );
+  }
+}
+async function fetchRelease(source, version, work) {
+  const downloads = join34(work, "downloads");
+  mkdirSync6(downloads, { recursive: true });
+  const tarball = await source.download(version, downloads);
+  verifyChecksum(tarball);
+  const dir = join34(work, version);
+  unpack(tarball, dir);
+  return dir;
+}
+
+// src/upgrade/reminder.ts
+var STATE_FILE = ".specfold/local-state.json";
+var LIMIT_MS = 2e3;
+var localDate2 = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+function readState(root) {
+  try {
+    const data = JSON.parse(readFileSync25(join35(root, STATE_FILE), "utf8"));
+    return typeof data === "object" && data !== null && !Array.isArray(data) ? data : {};
+  } catch {
+    return {};
+  }
+}
+function within(promise, ms) {
+  return new Promise((resolve13, reject) => {
+    const timer = setTimeout(() => reject(new Error("timed out")), ms);
+    timer.unref();
+    promise.then(resolve13, reject).finally(() => clearTimeout(timer));
+  });
+}
+async function upgradeReminder(config, o = {}) {
+  if (!config.upgradeReminder || !config.source || !isVersion(config.kitVersion)) return void 0;
+  const today = localDate2(o.now ?? /* @__PURE__ */ new Date());
+  const state = readState(config.root);
+  let versions;
+  if (state.upgrade_check?.date === today) {
+    versions = Array.isArray(state.upgrade_check.versions) ? state.upgrade_check.versions : null;
+  } else {
+    const timeoutMs = o.timeoutMs ?? LIMIT_MS;
+    try {
+      const source = o.source ?? openSource(config.source, config.root, {
+        timeoutMs,
+        gh: "github" in config.source ? ghLoggedIn(timeoutMs) : false
+      });
+      versions = await within(source.versions(), timeoutMs);
+    } catch {
+      versions = null;
+    }
+    try {
+      const file = join35(config.root, STATE_FILE);
+      if (!existsSync30(dirname8(file))) mkdirSync7(dirname8(file), { recursive: true });
+      writeFileSync11(
+        file,
+        `${JSON.stringify({ ...state, upgrade_check: { date: today, versions } }, null, 2)}
+`
+      );
+    } catch {
+    }
+  }
+  if (!versions) return void 0;
+  const newest = upgradePath(config.kitVersion, versions, config.channel).at(-1);
+  return newest === void 0 ? void 0 : `Specfold ${newest} is available (installed ${config.kitVersion}): run node scripts/specfold.mjs upgrade (skill sf-upgrade)`;
+}
 
 // src/validate/index.ts
-import { existsSync as existsSync29 } from "node:fs";
-import { relative as relative12, resolve as resolve4, sep as sep12 } from "node:path";
+import { existsSync as existsSync31 } from "node:fs";
+import { relative as relative12, resolve as resolve5, sep as sep12 } from "node:path";
 var okfRules = [okf1, okf2, okf3Index, okf3Log];
 var profileRules = [p1, p2, p3, p4, p5, p6, p7, p9, p10, p11, p12, p13, p14, l1, l2];
 var profileBundleRules = [p8];
@@ -11919,12 +12173,12 @@ register({
     const config = okfOnly ? void 0 : requireConfig(io.cwd);
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle, config);
     const paths = positionals.map((p) => {
-      const abs = resolve4(io.cwd, p);
+      const abs = resolve5(io.cwd, p);
       const rel = relative12(bundleRoot, abs);
-      if (rel.startsWith("..") || resolve4(bundleRoot, rel) !== abs) {
+      if (rel.startsWith("..") || resolve5(bundleRoot, rel) !== abs) {
         throw new UsageError(`path is outside the bundle ${bundleRoot}: ${p}`);
       }
-      if (!existsSync29(abs)) throw new UsageError(`path not found: ${p}`);
+      if (!existsSync31(abs)) throw new UsageError(`path not found: ${p}`);
       return abs;
     });
     const { findings, checked } = validate({ bundleRoot, paths, okfOnly, ...config ? { config } : {} });
@@ -11948,9 +12202,9 @@ var MAX_LINES = 40;
 var DUE_WINDOW_MS = 30 * 24 * 60 * 60 * 1e3;
 var EDIT_TOOLS = /* @__PURE__ */ new Set(["Edit", "Write"]);
 var activeChanges = (root) => {
-  const dir = join34(root, "openspec", "changes");
-  if (!existsSync30(dir)) return [];
-  return readdirSync6(dir).filter((d) => d !== "archive" && !d.startsWith(".") && statSync9(join34(dir, d)).isDirectory()).sort();
+  const dir = join36(root, "openspec", "changes");
+  if (!existsSync32(dir)) return [];
+  return readdirSync7(dir).filter((d) => d !== "archive" && !d.startsWith(".") && statSync9(join36(dir, d)).isDirectory()).sort();
 };
 var dueSoon = (bundleRoot, now = Date.now()) => listItems(bundleRoot, "commitments").filter((c) => {
   const due = dueDate(c.data.trigger);
@@ -11958,8 +12212,8 @@ var dueSoon = (bundleRoot, now = Date.now()) => listItems(bundleRoot, "commitmen
 }).length;
 function sessionStart({ config, io }) {
   const bundleRoot = resolveBundleRoot(config.root, void 0, config);
-  const index = join34(bundleRoot, "index.md");
-  const sections = existsSync30(index) ? readFileSync24(index, "utf8").split("\n").filter((l) => /^\* \[/.test(l)) : [];
+  const index = join36(bundleRoot, "index.md");
+  const sections = existsSync32(index) ? readFileSync26(index, "utf8").split("\n").filter((l) => /^\* \[/.test(l)) : [];
   const changes = activeChanges(config.root);
   const due = dueSoon(bundleRoot);
   const out = [
@@ -11973,6 +12227,13 @@ function sessionStart({ config, io }) {
 `);
   return 0;
 }
+async function sessionStartWithReminder(ctx) {
+  const code = sessionStart(ctx);
+  const line = await upgradeReminder(ctx.config);
+  if (line) ctx.io.stdout(`${line}
+`);
+  return code;
+}
 async function postToolUse({ config, io }) {
   let event;
   try {
@@ -11984,16 +12245,16 @@ async function postToolUse({ config, io }) {
   if (typeof event.tool_name !== "string" || !EDIT_TOOLS.has(event.tool_name) || typeof file !== "string")
     return 0;
   const base = typeof event.cwd === "string" ? event.cwd : config.root;
-  const rel = relative13(config.root, isAbsolute(file) ? file : resolve5(base, file)).split(sep13).join("/");
+  const rel = relative13(config.root, isAbsolute(file) ? file : resolve6(base, file)).split(sep13).join("/");
   const bundleRoot = resolveBundleRoot(config.root, void 0, config);
   const prefix = relative13(config.root, bundleRoot).split(sep13).join("/");
   let errors = [];
   if (rel.startsWith(`${prefix}/`) && rel.endsWith(".md") && isConcept(rel.slice(prefix.length + 1))) {
-    if (!existsSync30(join34(config.root, rel))) return 0;
-    errors = validate({ bundleRoot, paths: [join34(config.root, rel)], okfOnly: false, config }).findings.filter((f) => f.severity === "error").map((f) => findingLine({ ...f, path: `${prefix}/${f.path}` }));
+    if (!existsSync32(join36(config.root, rel))) return 0;
+    errors = validate({ bundleRoot, paths: [join36(config.root, rel)], okfOnly: false, config }).findings.filter((f) => f.severity === "error").map((f) => findingLine({ ...f, path: `${prefix}/${f.path}` }));
   } else {
     const change = /^openspec\/changes\/([^/]+)\//.exec(rel)?.[1];
-    if (!change || change === "archive" || !existsSync30(join34(config.root, "openspec", "changes", change)))
+    if (!change || change === "archive" || !existsSync32(join36(config.root, "openspec", "changes", change)))
       return 0;
     errors = checkPlannedChange(config, bundleRoot, change).filter((f) => f.severity === "error").map(taskFindingLine);
   }
@@ -12048,12 +12309,12 @@ function loadedFiles(root) {
   const seen = /* @__PURE__ */ new Map();
   const visit = (path) => {
     if (seen.has(path)) return;
-    const abs = join35(root, path);
-    const exists = existsSync31(abs) && statSync10(abs).isFile();
+    const abs = join37(root, path);
+    const exists = existsSync33(abs) && statSync10(abs).isFile();
     seen.set(path, !exists);
     if (!exists) return;
-    for (const target of importsOf(readFileSync25(abs, "utf8"))) {
-      const resolved = resolve6(dirname8(abs), target);
+    for (const target of importsOf(readFileSync27(abs, "utf8"))) {
+      const resolved = resolve7(dirname9(abs), target);
       const rel = posix2(relative14(root, resolved));
       if (rel.startsWith("..") || rel === "") continue;
       visit(rel);
@@ -12063,11 +12324,11 @@ function loadedFiles(root) {
   return [...seen].map(([path, missing]) => ({ path, missing }));
 }
 function contextItem(root) {
-  const abs = join35(root, OPENSPEC_CONFIG);
-  if (!existsSync31(abs)) return { kind: "context", path: OPENSPEC_CONFIG, tokens: 0, missing: true };
+  const abs = join37(root, OPENSPEC_CONFIG);
+  if (!existsSync33(abs)) return { kind: "context", path: OPENSPEC_CONFIG, tokens: 0, missing: true };
   let context;
   try {
-    context = (0, import_yaml13.parse)(readFileSync25(abs, "utf8"))?.context;
+    context = (0, import_yaml13.parse)(readFileSync27(abs, "utf8"))?.context;
   } catch {
     context = void 0;
   }
@@ -12078,11 +12339,11 @@ function contextItem(root) {
   };
 }
 function skillItems(root) {
-  const dir = join35(root, SKILLS_DIR2);
-  if (!existsSync31(dir)) return [];
-  return readdirSync7(dir).filter((name) => !name.startsWith(".") && existsSync31(join35(dir, name, "SKILL.md"))).sort().map((name) => {
+  const dir = join37(root, SKILLS_DIR2);
+  if (!existsSync33(dir)) return [];
+  return readdirSync8(dir).filter((name) => !name.startsWith(".") && existsSync33(join37(dir, name, "SKILL.md"))).sort().map((name) => {
     const path = `${SKILLS_DIR2}/${name}/SKILL.md`;
-    const data = parseText(path, readFileSync25(join35(root, path), "utf8")).frontmatter?.data;
+    const data = parseText(path, readFileSync27(join37(root, path), "utf8")).frontmatter?.data;
     const text3 = `${String(data?.name ?? "")}${String(data?.description ?? "")}`;
     return { kind: "skill", name, path, tokens: estimate(text3) };
   });
@@ -12098,7 +12359,7 @@ function hookItem(config) {
 }
 function alwaysLoaded(config) {
   const files = loadedFiles(config.root).map(
-    ({ path, missing }) => missing ? { kind: "file", path, tokens: 0, missing: true } : { kind: "file", path, tokens: estimate(readFileSync25(join35(config.root, path), "utf8")) }
+    ({ path, missing }) => missing ? { kind: "file", path, tokens: 0, missing: true } : { kind: "file", path, tokens: estimate(readFileSync27(join37(config.root, path), "utf8")) }
   );
   return [...files, contextItem(config.root), ...skillItems(config.root), hookItem(config)];
 }
@@ -12121,7 +12382,7 @@ function knowledgeFolders(bundleRoot) {
   for (const e of walk(bundleRoot)) {
     if (e.isDir) continue;
     const folder = e.rel.includes("/") ? e.rel.split("/")[0] : "(root)";
-    sums.set(folder, (sums.get(folder) ?? 0) + estimate(readFileSync25(join35(bundleRoot, e.rel), "utf8")));
+    sums.set(folder, (sums.get(folder) ?? 0) + estimate(readFileSync27(join37(bundleRoot, e.rel), "utf8")));
   }
   return [...sums].sort(([a], [b]) => a === "(root)" ? -1 : b === "(root)" ? 1 : a < b ? -1 : 1).map(([folder, tokens]) => ({ folder, tokens }));
 }
@@ -12129,20 +12390,20 @@ function estimateFiles(root, paths) {
   const files = /* @__PURE__ */ new Set();
   const add = (abs) => {
     if (statSync10(abs).isDirectory()) {
-      for (const name of readdirSync7(abs)) add(join35(abs, name));
+      for (const name of readdirSync8(abs)) add(join37(abs, name));
     } else files.add(abs);
   };
-  for (const p of paths) add(resolve6(root, p));
-  return [...files].map((abs) => ({ path: posix2(relative14(root, abs)), tokens: estimate(readFileSync25(abs, "utf8")) })).sort((a, b) => a.path < b.path ? -1 : 1);
+  for (const p of paths) add(resolve7(root, p));
+  return [...files].map((abs) => ({ path: posix2(relative14(root, abs)), tokens: estimate(readFileSync27(abs, "utf8")) })).sort((a, b) => a.path < b.path ? -1 : 1);
 }
 
 // src/sync/plan.ts
-import { existsSync as existsSync33, readFileSync as readFileSync27 } from "node:fs";
-import { join as join37, relative as relative16, sep as sep16 } from "node:path";
+import { existsSync as existsSync35, readFileSync as readFileSync29 } from "node:fs";
+import { join as join39, relative as relative16, sep as sep16 } from "node:path";
 
 // src/sync/apply.ts
-import { existsSync as existsSync32, mkdirSync as mkdirSync6, readFileSync as readFileSync26, writeFileSync as writeFileSync10 } from "node:fs";
-import { dirname as dirname9, join as join36, relative as relative15, sep as sep15 } from "node:path";
+import { existsSync as existsSync34, mkdirSync as mkdirSync8, readFileSync as readFileSync28, writeFileSync as writeFileSync12 } from "node:fs";
+import { dirname as dirname10, join as join38, relative as relative15, sep as sep15 } from "node:path";
 var posix3 = (p) => p.split(sep15).join("/");
 var CAPABILITY = /^capabilities\/(.+)\.md$/;
 function editsFor(op, abs, ctx) {
@@ -12150,16 +12411,16 @@ function editsFor(op, abs, ctx) {
   const addSources = [];
   if (op.op === "deprecate") set.status = "deprecated";
   const cap = op.type === "Capability" ? CAPABILITY.exec(op.path)?.[1] : void 0;
-  const archive = join36(ctx.repoRoot, "openspec", "changes", "archive", ctx.archivedId);
-  const fromCard = (target) => posix3(relative15(dirname9(abs), target));
+  const archive = join38(ctx.repoRoot, "openspec", "changes", "archive", ctx.archivedId);
+  const fromCard = (target) => posix3(relative15(dirname10(abs), target));
   if (cap) {
-    const spec = join36(ctx.repoRoot, "openspec", "specs", cap, "spec.md");
+    const spec = join38(ctx.repoRoot, "openspec", "specs", cap, "spec.md");
     set.spec = posix3(relative15(ctx.repoRoot, spec));
     set.resource = fromCard(spec);
     set.change = ctx.archivedId;
     for (const artifact of ["proposal", "design"]) {
-      const file = join36(archive, `${artifact}.md`);
-      if (existsSync32(file))
+      const file = join38(archive, `${artifact}.md`);
+      if (existsSync34(file))
         addSources.push({ id: `${artifact}-${ctx.archivedId}`, resource: fromCard(file) });
     }
   }
@@ -12169,12 +12430,12 @@ function editsFor(op, abs, ctx) {
 function planOps(ops, ctx) {
   const plan = { actions: [], writes: /* @__PURE__ */ new Map() };
   for (const op of ops) {
-    const abs = join36(ctx.bundleRoot, op.path);
+    const abs = join38(ctx.bundleRoot, op.path);
     const shown = posix3(relative15(ctx.repoRoot, abs));
     let original;
     let text3;
-    if (existsSync32(abs)) {
-      original = readFileSync26(abs, "utf8");
+    if (existsSync34(abs)) {
+      original = readFileSync28(abs, "utf8");
       text3 = original;
     } else if (op.op === "create") {
       text3 = renderConcept(ctx.repoRoot, {
@@ -12197,21 +12458,21 @@ function planOps(ops, ctx) {
 }
 function applyWrites(plan) {
   for (const [abs, content] of plan.writes) {
-    mkdirSync6(dirname9(abs), { recursive: true });
-    writeFileSync10(abs, content);
+    mkdirSync8(dirname10(abs), { recursive: true });
+    writeFileSync12(abs, content);
   }
 }
 
 // src/sync/plan.ts
 function planSync(config, bundleRoot, id, now = /* @__PURE__ */ new Date()) {
   const relDir = `openspec/changes/archive/${id}`;
-  const { findings, ops } = checkKnowledge(config, bundleRoot, join37(config.root, relDir), {
+  const { findings, ops } = checkKnowledge(config, bundleRoot, join39(config.root, relDir), {
     relDir,
     archived: true
   });
-  const logPath = join37(bundleRoot, "log.md");
+  const logPath = join39(bundleRoot, "log.md");
   const logRel = relative16(config.root, logPath).split(sep16).join("/");
-  const logText = existsSync33(logPath) ? readFileSync27(logPath, "utf8") : void 0;
+  const logText = existsSync35(logPath) ? readFileSync29(logPath, "utf8") : void 0;
   if (findings.length > 0)
     return { findings, ops, plan: void 0, logPath, logRel, logText, needsLog: false };
   const model = process.env.SPECFOLD_MODEL;
@@ -12221,12 +12482,12 @@ function planSync(config, bundleRoot, id, now = /* @__PURE__ */ new Date()) {
 }
 
 // src/trace/trace.ts
-import { existsSync as existsSync34, readdirSync as readdirSync8 } from "node:fs";
-import { join as join39 } from "node:path";
+import { existsSync as existsSync36, readdirSync as readdirSync9 } from "node:fs";
+import { join as join41 } from "node:path";
 
 // src/trace/refs.ts
-import { readFileSync as readFileSync28, statSync as statSync11 } from "node:fs";
-import { join as join38 } from "node:path";
+import { readFileSync as readFileSync30, statSync as statSync11 } from "node:fs";
+import { join as join40 } from "node:path";
 var MAX_BYTES2 = 1024 * 1024;
 var REFERENCE2 = /(?<![\w-])spec:\s*([a-z0-9][a-z0-9/-]*#[a-z0-9-]+)/g;
 var NEVER = /^(?:knowledge|openspec)\//;
@@ -12235,9 +12496,9 @@ function scanTestReferences(repoRoot, testGlobs) {
   const refs = [];
   for (const file of walkFiles(repoRoot)) {
     if (NEVER.test(file) || !patterns.some((p) => p.test(file))) continue;
-    const abs = join38(repoRoot, file);
+    const abs = join40(repoRoot, file);
     if (statSync11(abs).size > MAX_BYTES2) continue;
-    const text3 = readFileSync28(abs, "utf8");
+    const text3 = readFileSync30(abs, "utf8");
     if (text3.includes("\0")) continue;
     text3.split("\n").forEach((content, i) => {
       for (const match of content.matchAll(REFERENCE2))
@@ -12248,8 +12509,8 @@ function scanTestReferences(repoRoot, testGlobs) {
 }
 
 // src/trace/trace.ts
-var CHANGES = join39("openspec", "changes");
-var activeChangeNames = (root) => existsSync34(join39(root, CHANGES)) ? readdirSync8(join39(root, CHANGES), { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort() : [];
+var CHANGES = join41("openspec", "changes");
+var activeChangeNames = (root) => existsSync36(join41(root, CHANGES)) ? readdirSync9(join41(root, CHANGES), { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort() : [];
 var changeSpecs = (root, changeRel) => parseSpecs(root, `${changeRel}/specs`, true);
 function buildTraceIndex(config) {
   const root = config.root;
@@ -12279,8 +12540,8 @@ function traceReport(index, scope) {
 }
 
 // src/gate/claims.ts
-import { existsSync as existsSync35, readFileSync as readFileSync29 } from "node:fs";
-import { join as join40, relative as relative17, sep as sep17 } from "node:path";
+import { existsSync as existsSync37, readFileSync as readFileSync31 } from "node:fs";
+import { join as join42, relative as relative17, sep as sep17 } from "node:path";
 var BRIEF = /^openspec\/changes\/(?:archive\/)?[^/]+\/brief\.md$/;
 var ARCHIVED_BRIEF = /^openspec\/changes\/archive\/\d{4}-\d{2}-\d{2}-([^/]+)\/brief\.md$/;
 var CONFIRMED_BY = /^confirmed_by:[ \t]*(\S+)/;
@@ -12320,8 +12581,8 @@ function addedClaims(root, bundleRoot, diff) {
   const bundlePrefix = `${relative17(root, bundleRoot).split(sep17).join("/")}/`;
   const out = [];
   for (const file of diff.files) {
-    const abs = join40(root, file);
-    if (!existsSync35(abs)) continue;
+    const abs = join42(root, file);
+    if (!existsSync37(abs)) continue;
     let extract;
     if (BRIEF.test(file)) extract = briefClaims;
     else if (file.startsWith(bundlePrefix) && file.endsWith(".md") && isConcept(file.slice(bundlePrefix.length)))
@@ -12335,7 +12596,7 @@ function addedClaims(root, bundleRoot, diff) {
         return base === void 0 ? [] : extract(file, base).map((c) => c.login.toLowerCase());
       })
     );
-    for (const claim of extract(file, readFileSync29(abs, "utf8")))
+    for (const claim of extract(file, readFileSync31(abs, "utf8")))
       if (!before.has(claim.login.toLowerCase())) out.push(claim);
   }
   return out;
@@ -12388,7 +12649,7 @@ function inRepo(ctx, bundleRel) {
 }
 function changedConcepts(ctx) {
   const prefix = `${relative18(ctx.config.root, ctx.bundleRoot).split(sep18).join("/")}/`;
-  return ctx.diff.files.filter((f) => f.startsWith(prefix) && f.endsWith(".md")).map((f) => f.slice(prefix.length)).filter((rel) => isConcept(rel) && existsSync36(join41(ctx.bundleRoot, rel)));
+  return ctx.diff.files.filter((f) => f.startsWith(prefix) && f.endsWith(".md")).map((f) => f.slice(prefix.length)).filter((rel) => isConcept(rel) && existsSync38(join43(ctx.bundleRoot, rel)));
 }
 var fromBundle = (ctx, rule, effect, f) => ({
   rule,
@@ -12480,7 +12741,7 @@ var g4 = (ctx) => {
   ];
 };
 var plannedChanges = (ctx) => ctx.diff.activeChanges.filter(
-  (change) => existsSync36(join41(ctx.config.root, "openspec", "changes", change, "tasks.md"))
+  (change) => existsSync38(join43(ctx.config.root, "openspec", "changes", change, "tasks.md"))
 );
 var touchedChanges = (ctx, changes = ctx.diff.activeChanges) => changes.map((change) => checkChange(ctx.config, ctx.bundleRoot, change));
 var g5 = (ctx) => touchedChanges(ctx, plannedChanges(ctx)).flatMap(
@@ -12498,7 +12759,7 @@ var g15 = (ctx) => {
   const covered = new Set(index.refs.map((r) => r.id));
   const checked = /* @__PURE__ */ new Set();
   const findings = [];
-  const archived = ctx.diff.archivedChanges.map((id) => `openspec/changes/archive/${id}`).filter((rel) => existsSync36(join41(root, rel, "tasks.md")));
+  const archived = ctx.diff.archivedChanges.map((id) => `openspec/changes/archive/${id}`).filter((rel) => existsSync38(join43(root, rel, "tasks.md")));
   const changes = [
     ...plannedChanges(ctx).map(
       (name) => index.active.get(name) ?? changeSpecs(root, `openspec/changes/${name}`)
@@ -12591,8 +12852,8 @@ var g17 = (ctx) => {
   const warn = (path, line, message, fix) => findings.push({ rule: "G17", effect: "warn", path, line, message, fix });
   for (const change of ctx.diff.activeChanges) {
     const rel = `openspec/changes/${change}/design.md`;
-    if (!existsSync36(join41(root, rel))) continue;
-    const entries = commitmentEntries(readFileSync30(join41(root, rel), "utf8"));
+    if (!existsSync38(join43(root, rel))) continue;
+    const entries = commitmentEntries(readFileSync32(join43(root, rel), "utf8"));
     if (entries === void 0) {
       if (open.length > 0)
         warn(
@@ -12615,7 +12876,7 @@ var g17 = (ctx) => {
         continue;
       }
       const target = link[1].slice(1);
-      const data = existsSync36(join41(ctx.bundleRoot, target)) ? parseFile(ctx.bundleRoot, target).frontmatter?.data : void 0;
+      const data = existsSync38(join43(ctx.bundleRoot, target)) ? parseFile(ctx.bundleRoot, target).frontmatter?.data : void 0;
       if (!isRecord3(data) || data.type !== "Deferred Commitment" || data.state !== "open")
         warn(
           rel,
@@ -12742,8 +13003,8 @@ var g12 = (ctx) => auditBundle(ctx.config, ctx.bundleRoot, ctx.now).filter((f) =
 var g14 = (ctx) => {
   const changed = new Set(ctx.diff.files);
   return scanReferences(ctx.config.root, ctx.config.sourceGlobs).flatMap((ref) => {
-    const abs = join41(ctx.bundleRoot, ref.concept);
-    if (!existsSync36(abs))
+    const abs = join43(ctx.bundleRoot, ref.concept);
+    if (!existsSync38(abs))
       return [
         {
           rule: "G14",
@@ -12875,7 +13136,7 @@ register({
     const base = values.base;
     if (!base) throw new UsageError("missing --base <ref>");
     const bodyFile = values["pr-body"];
-    if (bodyFile !== void 0 && !existsSync37(resolve7(io.cwd, bodyFile)))
+    if (bodyFile !== void 0 && !existsSync39(resolve8(io.cwd, bodyFile)))
       throw new UsageError(`PR body file not found: ${bodyFile}`);
     const prArg = values.pr;
     if (prArg !== void 0 && !/^[1-9]\d*$/.test(prArg))
@@ -12886,7 +13147,7 @@ register({
     const ctx = gateContext(config, io.cwd, base, {
       local,
       labels: values.label ?? [],
-      prBody: bodyFile === void 0 ? void 0 : readFileSync31(resolve7(io.cwd, bodyFile), "utf8"),
+      prBody: bodyFile === void 0 ? void 0 : readFileSync33(resolve8(io.cwd, bodyFile), "utf8"),
       pr
     });
     const findings = runGate(ctx);
@@ -12894,7 +13155,7 @@ register({
     const notes = adoption ? ["adoption PR: the base has no specfold.yaml, so G4 is skipped"] : [];
     const summary = values.summary;
     if (summary !== void 0)
-      writeFileSync11(resolve7(io.cwd, summary), renderSummary(findings, verdict(findings), notes));
+      writeFileSync13(resolve8(io.cwd, summary), renderSummary(findings, verdict(findings), notes));
     const counts = countFindings(findings);
     const ok2 = counts.block === 0;
     if (values.json) {
@@ -12909,8 +13170,8 @@ register({
 
 // src/hooks/run.ts
 import { spawnSync as spawnSync2 } from "node:child_process";
-import { existsSync as existsSync38, statSync as statSync12 } from "node:fs";
-import { join as join42, relative as relative19, sep as sep19 } from "node:path";
+import { existsSync as existsSync40, statSync as statSync12 } from "node:fs";
+import { join as join44, relative as relative19, sep as sep19 } from "node:path";
 var ACTIVE_CHANGE = /^openspec\/changes\/([^/]+)\//;
 var lines2 = (text3) => text3.split("\n").filter((l) => l !== "");
 function preCommit({ config, io }) {
@@ -12920,7 +13181,7 @@ function preCommit({ config, io }) {
   const bundleRoot = resolveBundleRoot(config.root, void 0, config);
   const prefix = relative19(config.root, bundleRoot).split(sep19).join("/");
   const errors = [];
-  const concepts2 = staged.filter((f) => f.startsWith(`${prefix}/`) && f.endsWith(".md") && isConcept(f.slice(prefix.length + 1))).map((f) => join42(config.root, f));
+  const concepts2 = staged.filter((f) => f.startsWith(`${prefix}/`) && f.endsWith(".md") && isConcept(f.slice(prefix.length + 1))).map((f) => join44(config.root, f));
   if (concepts2.length > 0) {
     const { findings } = validate({ bundleRoot, paths: concepts2, okfOnly: false, config });
     for (const f of findings.filter((x) => x.severity === "error"))
@@ -12929,8 +13190,8 @@ function preCommit({ config, io }) {
   const changes = new Set(
     staged.flatMap((f) => {
       const name = ACTIVE_CHANGE.exec(f)?.[1];
-      const dir = name ? join42(config.root, "openspec", "changes", name) : "";
-      return name && name !== "archive" && existsSync38(dir) && statSync12(dir).isDirectory() ? [name] : [];
+      const dir = name ? join44(config.root, "openspec", "changes", name) : "";
+      return name && name !== "archive" && existsSync40(dir) && statSync12(dir).isDirectory() ? [name] : [];
     })
   );
   for (const change of changes)
@@ -12960,7 +13221,7 @@ function prePush({ config, io }) {
   return 1;
 }
 function refreshGraph({ config }) {
-  if (!existsSync38(join42(config.root, "graphify-out", "graph.json"))) return 0;
+  if (!existsSync40(join44(config.root, "graphify-out", "graph.json"))) return 0;
   spawnSync2("graphify", ["update", "."], {
     cwd: config.root,
     env: { ...process.env, GRAPHIFY_BACKEND: "none" },
@@ -12974,7 +13235,7 @@ var OWN_CHECKS = {
   "pre-push": prePush,
   "post-checkout": refreshGraph,
   "post-merge": refreshGraph,
-  "claude-session-start": sessionStart,
+  "claude-session-start": sessionStartWithReminder,
   "claude-post-tool-use": postToolUse,
   "claude-stop": stop,
   "claude-no-push": noPush
@@ -13045,8 +13306,8 @@ register({
 });
 
 // src/init/command.ts
-import { existsSync as existsSync41, readFileSync as readFileSync34 } from "node:fs";
-import { join as join45 } from "node:path";
+import { existsSync as existsSync43, readFileSync as readFileSync36 } from "node:fs";
+import { join as join47 } from "node:path";
 
 // src/migrate/repo.ts
 var MIGRATION_BRANCH = "specfold/migration";
@@ -13086,8 +13347,8 @@ function dirtyPaths(root) {
 
 // src/parallel/limit.ts
 var import_yaml14 = __toESM(require_dist(), 1);
-import { existsSync as existsSync39, mkdirSync as mkdirSync7, readFileSync as readFileSync32, writeFileSync as writeFileSync12 } from "node:fs";
-import { dirname as dirname10, join as join43 } from "node:path";
+import { existsSync as existsSync41, mkdirSync as mkdirSync9, readFileSync as readFileSync34, writeFileSync as writeFileSync14 } from "node:fs";
+import { dirname as dirname11, join as join45 } from "node:path";
 var LIMIT_VARIABLE = "CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS";
 var LOCAL_SETTINGS = ".claude/settings.local.json";
 var TOOL_DEFAULT = 20;
@@ -13097,10 +13358,10 @@ var positive = (v) => {
   return Number.isInteger(n) && n > 0 ? n : void 0;
 };
 function readJson(path) {
-  if (!existsSync39(path)) return {};
+  if (!existsSync41(path)) return {};
   let data;
   try {
-    data = JSON.parse(readFileSync32(path, "utf8"));
+    data = JSON.parse(readFileSync34(path, "utf8"));
   } catch {
     throw new EnvError(`${LOCAL_SETTINGS} is not valid JSON`);
   }
@@ -13108,7 +13369,7 @@ function readJson(path) {
   return data;
 }
 function readYaml(path) {
-  const doc = (0, import_yaml14.parseDocument)(existsSync39(path) ? readFileSync32(path, "utf8") : "");
+  const doc = (0, import_yaml14.parseDocument)(existsSync41(path) ? readFileSync34(path, "utf8") : "");
   if (doc.errors[0]) throw new EnvError(`${LOCAL_FILE}: ${doc.errors[0].message.split("\n")[0]}`);
   if (doc.contents !== null && !(0, import_yaml14.isMap)(doc.contents))
     throw new EnvError(`${LOCAL_FILE} is not a YAML mapping`);
@@ -13117,30 +13378,30 @@ function readYaml(path) {
 function readLimit(root, env = process.env) {
   const fromEnv = positive(env[LIMIT_VARIABLE]);
   if (fromEnv !== void 0) return { value: fromEnv, source: `${LIMIT_VARIABLE} in the environment` };
-  const settings = readJson(join43(root, LOCAL_SETTINGS));
+  const settings = readJson(join45(root, LOCAL_SETTINGS));
   const fromSettings = positive(isRecord6(settings.env) ? settings.env[LIMIT_VARIABLE] : void 0);
   if (fromSettings !== void 0) return { value: fromSettings, source: LOCAL_SETTINGS };
-  const fromLocal = positive(readYaml(join43(root, LOCAL_FILE)).getIn(["parallel", "max_subagents"]));
+  const fromLocal = positive(readYaml(join45(root, LOCAL_FILE)).getIn(["parallel", "max_subagents"]));
   if (fromLocal !== void 0) return { value: fromLocal, source: LOCAL_FILE };
   return { value: void 0, source: "tool default" };
 }
 function writeLimit(root, n) {
   const changed = [];
   const put = (rel, text3) => {
-    const path = join43(root, rel);
-    if (existsSync39(path) && readFileSync32(path, "utf8") === text3) return;
-    mkdirSync7(dirname10(path), { recursive: true });
-    writeFileSync12(path, text3);
+    const path = join45(root, rel);
+    if (existsSync41(path) && readFileSync34(path, "utf8") === text3) return;
+    mkdirSync9(dirname11(path), { recursive: true });
+    writeFileSync14(path, text3);
     changed.push(rel);
   };
-  const settings = readJson(join43(root, LOCAL_SETTINGS));
+  const settings = readJson(join45(root, LOCAL_SETTINGS));
   const env = isRecord6(settings.env) ? settings.env : {};
   put(
     LOCAL_SETTINGS,
     `${JSON.stringify({ ...settings, env: { ...env, [LIMIT_VARIABLE]: String(n) } }, null, 2)}
 `
   );
-  const doc = readYaml(join43(root, LOCAL_FILE));
+  const doc = readYaml(join45(root, LOCAL_FILE));
   doc.setIn(["parallel", "max_subagents"], n);
   put(LOCAL_FILE, yamlText(doc));
   return changed;
@@ -13148,9 +13409,9 @@ function writeLimit(root, n) {
 
 // src/init/init.ts
 var import_yaml16 = __toESM(require_dist(), 1);
-import { execFileSync as execFileSync7 } from "node:child_process";
-import { existsSync as existsSync40, readFileSync as readFileSync33, writeFileSync as writeFileSync13 } from "node:fs";
-import { join as join44 } from "node:path";
+import { execFileSync as execFileSync8 } from "node:child_process";
+import { existsSync as existsSync42, mkdirSync as mkdirSync10, readFileSync as readFileSync35, writeFileSync as writeFileSync15 } from "node:fs";
+import { dirname as dirname12, join as join46 } from "node:path";
 var OPENSPEC_CONFIG2 = "openspec/config.yaml";
 var DEFAULT_LIMIT = 3;
 var REQUIRED2 = [CONFIG_FILE, OPENSPEC_CONFIG2, MANIFEST_PATH];
@@ -13162,18 +13423,18 @@ var openspecSkills = (tools) => [
   ...tools.includes("claude") ? [".claude/skills/openspec-propose/SKILL.md"] : []
 ];
 function planInit(o) {
-  const abs = (p) => join44(o.root, p);
-  const missing = REQUIRED2.filter((p) => !existsSync40(abs(p)));
+  const abs = (p) => join46(o.root, p);
+  const missing = REQUIRED2.filter((p) => !existsSync42(abs(p)));
   if (missing.length > 0)
     throw new EnvError(
       `not a Specfold template repository (missing ${missing.join(", ")}): copy the template files, or use sf-migrate for a repository with its own files`
     );
-  const read = (p) => readFileSync33(abs(p), "utf8");
-  const openspec = openspecSkills(o.tools).some((p) => !existsSync40(abs(p)));
+  const read = (p) => readFileSync35(abs(p), "utf8");
+  const openspec = openspecSkills(o.tools).some((p) => !existsSync42(abs(p)));
   if (openspec) {
     const bin = openspecBinary(o.root);
     try {
-      execFileSync7(bin.command, ["--version"], { stdio: "ignore" });
+      execFileSync8(bin.command, ["--version"], { stdio: "ignore" });
     } catch {
       throw new EnvError(`openspec is not installed (looked for ${bin.command}); init runs openspec init`);
     }
@@ -13221,7 +13482,7 @@ function planInit(o) {
   for (const p of BLOCK_FILES) {
     const hash = shipped.blocks?.[p];
     if (hash === void 0 || p === "CLAUDE.md" && !o.tools.includes("claude")) continue;
-    if (!existsSync40(abs(p))) {
+    if (!existsSync42(abs(p))) {
       plan.skipped.push({ path: p, reason: "missing; left out of the manifest" });
       continue;
     }
@@ -13237,23 +13498,34 @@ function planInit(o) {
         reason: "differs from the template; no markers added, left out of the manifest"
       });
   }
-  plan.manifest = manifestText(shipped.kit_version ?? "", shipped.ref, {
-    files: shipped.files ?? {},
-    blocks
-  });
+  const files = { ...shipped.files ?? {} };
+  if (o.upgradeWorkflow) {
+    const { shipped: from, active } = UPGRADE_WORKFLOW;
+    if (!existsSync42(abs(from)))
+      plan.skipped.push({ path: active, reason: `${from} is missing; copy it from the template` });
+    else {
+      const text3 = read(from);
+      if (!existsSync42(abs(active)) || read(active) !== text3)
+        plan.edits.push({ path: active, action: "write", text: text3 });
+      files[active] = sha256(text3);
+    }
+  }
+  plan.manifest = manifestText(shipped.kit_version ?? "", shipped.ref, { files, blocks });
   return plan;
 }
 function runInit(o, plan) {
   const result = { actions: [], skipped: [...plan.skipped], notes: [] };
   const act = (path, action) => result.actions.push({ path, action });
   for (const e of plan.edits) {
-    writeFileSync13(join44(o.root, e.path), e.text);
+    mkdirSync10(dirname12(join46(o.root, e.path)), { recursive: true });
+    writeFileSync15(join46(o.root, e.path), e.text);
     act(e.path, e.action);
+    if (e.path === UPGRADE_WORKFLOW.active) result.notes.push(UPGRADE_WORKFLOW_NOTE);
   }
   if (plan.openspec) {
-    const config = readFileSync33(join44(o.root, OPENSPEC_CONFIG2), "utf8");
+    const config = readFileSync35(join46(o.root, OPENSPEC_CONFIG2), "utf8");
     openspecInit(o.root, o.tools);
-    writeIfChanged(join44(o.root, OPENSPEC_CONFIG2), config);
+    writeIfChanged(join46(o.root, OPENSPEC_CONFIG2), config);
     act("openspec/", `run openspec init --tools ${o.tools.join(",")}`);
   }
   const settings = loadConfig(o.root);
@@ -13273,7 +13545,7 @@ function runInit(o, plan) {
   }
   if (plan.limit !== void 0 && writeLimit(o.root, plan.limit).length > 0)
     act(LOCAL_SETTINGS, `set subagent limit to ${plan.limit}`);
-  if (writeIfChanged(join44(o.root, MANIFEST_PATH), plan.manifest)) act(MANIFEST_PATH, "write");
+  if (writeIfChanged(join46(o.root, MANIFEST_PATH), plan.manifest)) act(MANIFEST_PATH, "write");
   return result;
 }
 
@@ -13281,12 +13553,13 @@ function runInit(o, plan) {
 register({
   name: "init",
   summary: "finish setting up a repository made from the template: settings, OpenSpec skills, links, hooks",
-  usage: "specfold init [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--max-subagents <n>] [--dry-run] [--json]",
+  usage: "specfold init [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--max-subagents <n>] [--upgrade-workflow] [--dry-run] [--json]",
   options: {
     stack: { type: "string" },
     "source-glob": { type: "string", multiple: true },
     tools: { type: "string" },
     "max-subagents": { type: "string" },
+    "upgrade-workflow": { type: "boolean" },
     "dry-run": { type: "boolean" },
     json: { type: "boolean" }
   },
@@ -13301,7 +13574,8 @@ register({
       tools: parseTools(values.tools),
       stack: values.stack,
       sourceGlobs: values["source-glob"],
-      maxSubagents: max === void 0 ? void 0 : Number(max)
+      maxSubagents: max === void 0 ? void 0 : Number(max),
+      upgradeWorkflow: values["upgrade-workflow"] === true
     };
     const plan = planInit(options);
     const dryRun = values["dry-run"] === true;
@@ -13313,8 +13587,8 @@ register({
     const skippedLines = (skipped) => skipped.map((s) => `${s.path}: skipped: ${s.reason}`);
     const filled2 = { stack: stack.value, source_globs: sourceGlobs.value };
     if (dryRun) {
-      const manifestPath = join45(root, MANIFEST_PATH);
-      const manifestChanges = !existsSync41(manifestPath) || readFileSync34(manifestPath, "utf8") !== plan.manifest;
+      const manifestPath = join47(root, MANIFEST_PATH);
+      const manifestChanges = !existsSync43(manifestPath) || readFileSync36(manifestPath, "utf8") !== plan.manifest;
       const actions = [
         ...plan.edits.map((e) => ({ path: e.path, action: e.action })),
         ...plan.openspec ? [{ path: "openspec/", action: `run openspec init --tools ${options.tools.join(",")}` }] : [],
@@ -13361,11 +13635,11 @@ register({
 });
 
 // src/migrate/command.ts
-import { resolve as resolve8 } from "node:path";
+import { resolve as resolve9 } from "node:path";
 
 // src/migrate/inventory.ts
-import { readFileSync as readFileSync35 } from "node:fs";
-import { join as join46 } from "node:path";
+import { readFileSync as readFileSync37 } from "node:fs";
+import { join as join48 } from "node:path";
 var AGENT_RULES = [
   "AGENTS.md",
   "CLAUDE.md",
@@ -13402,7 +13676,7 @@ function inventory(root) {
     if (!kind) continue;
     let text3 = "";
     try {
-      text3 = readFileSync35(join46(root, path), "utf8");
+      text3 = readFileSync37(join48(root, path), "utf8");
     } catch {
     }
     out.push({ path, kind, tokens: estimateTokens(text3) });
@@ -13411,23 +13685,23 @@ function inventory(root) {
 }
 
 // src/migrate/state.ts
-import { existsSync as existsSync42, mkdirSync as mkdirSync8, readFileSync as readFileSync36, writeFileSync as writeFileSync14 } from "node:fs";
-import { dirname as dirname11, join as join47 } from "node:path";
+import { existsSync as existsSync44, mkdirSync as mkdirSync11, readFileSync as readFileSync38, writeFileSync as writeFileSync16 } from "node:fs";
+import { dirname as dirname13, join as join49 } from "node:path";
 var STEPS = ["start", "inventory", "plan", "install", "convert", "seed", "report"];
 var MARKABLE = ["plan", "convert", "seed", "report"];
-function readState(root) {
-  const path = join47(root, STATE_PATH);
-  if (!existsSync42(path)) return { state_version: 1, default_branch: null, base: null, steps: {} };
+function readState2(root) {
+  const path = join49(root, STATE_PATH);
+  if (!existsSync44(path)) return { state_version: 1, default_branch: null, base: null, steps: {} };
   try {
-    return JSON.parse(readFileSync36(path, "utf8"));
+    return JSON.parse(readFileSync38(path, "utf8"));
   } catch (error) {
     throw new EnvError(`${STATE_PATH}: ${error.message}`);
   }
 }
 function writeState(root, state) {
-  const path = join47(root, STATE_PATH);
-  mkdirSync8(dirname11(path), { recursive: true });
-  writeFileSync14(path, `${JSON.stringify(state, null, 2)}
+  const path = join49(root, STATE_PATH);
+  mkdirSync11(dirname13(path), { recursive: true });
+  writeFileSync16(path, `${JSON.stringify(state, null, 2)}
 `);
 }
 function markStep(state, step, now) {
@@ -13455,7 +13729,7 @@ var head = (root) => {
 register({
   name: "migrate",
   summary: "bring an existing repository into Specfold: own branch, state, inventory, kit install",
-  usage: "specfold migrate start [--default-branch <name>] | inventory | install --from <dir> [--tools <list>] [--stack <text>] [--source-glob <glob>]... [--ref <ref>] | mark <step> | status  [--json]",
+  usage: "specfold migrate start [--default-branch <name>] | inventory | install --from <dir> [--tools <list>] [--stack <text>] [--source-glob <glob>]... [--ref <ref>] [--upgrade-workflow] | mark <step> | status  [--json]",
   options: {
     "default-branch": { type: "string" },
     from: { type: "string" },
@@ -13463,6 +13737,7 @@ register({
     stack: { type: "string" },
     "source-glob": { type: "string", multiple: true },
     ref: { type: "string" },
+    "upgrade-workflow": { type: "boolean" },
     json: { type: "boolean" }
   },
   run: ({ io, values, positionals }) => {
@@ -13485,7 +13760,7 @@ register({
       return 1;
     };
     const now = /* @__PURE__ */ new Date();
-    let state = readState(root);
+    let state = readState2(root);
     const next = () => {
       const step = nextStep(state);
       return step === null ? "all migration steps are done" : `next: ${NEXT[step]}`;
@@ -13575,11 +13850,12 @@ register({
     const globs = values["source-glob"];
     const result = installKit({
       root,
-      from: resolve8(io.cwd, from),
+      from: resolve9(io.cwd, from),
       tools: parseTools(values.tools),
       stack: values.stack,
       sourceGlobs: globs,
-      ref: values.ref
+      ref: values.ref,
+      upgradeWorkflow: values["upgrade-workflow"] === true
     });
     const ok2 = result.conflicts.length === 0;
     if (ok2) state = markStep(state, "install", now);
@@ -13790,8 +14066,8 @@ register({
 });
 
 // src/stats/command.ts
-import { existsSync as existsSync43 } from "node:fs";
-import { resolve as resolve9 } from "node:path";
+import { existsSync as existsSync45 } from "node:fs";
+import { resolve as resolve10 } from "node:path";
 var label = (item) => item.kind === "skill" ? `skill ${item.name}` : item.kind === "hook" ? "SessionStart hook output" : item.kind === "context" ? `${item.path} context` : item.path;
 var overLine = (o) => `over budget: ${o.item ? label(o.item) : "always-loaded set"} ${o.tokens} > ${o.limit} (stats.budget.${o.budget})`;
 function table(rows) {
@@ -13812,8 +14088,8 @@ register({
 ` : `${lines3.join("\n")}
 `);
     if (positionals.length > 0) {
-      const paths = positionals.map((p) => resolve9(io.cwd, p));
-      const missing = positionals.filter((_, i) => !existsSync43(paths[i]));
+      const paths = positionals.map((p) => resolve10(io.cwd, p));
+      const missing = positionals.filter((_, i) => !existsSync45(paths[i]));
       if (missing.length > 0) throw new EnvError(`no such file or folder: ${missing.join(", ")}`);
       const files = estimateFiles(config.root, paths);
       const sum2 = files.reduce((s, f) => s + f.tokens, 0);
@@ -13874,19 +14150,19 @@ register({
 });
 
 // src/sync/command.ts
-import { existsSync as existsSync44, readdirSync as readdirSync9, writeFileSync as writeFileSync15 } from "node:fs";
-import { join as join48 } from "node:path";
+import { existsSync as existsSync46, readdirSync as readdirSync10, writeFileSync as writeFileSync17 } from "node:fs";
+import { join as join50 } from "node:path";
 var NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 var ARCHIVED2 = /^(\d{4}-\d{2}-\d{2})-([a-z0-9]+(?:-[a-z0-9]+)*)$/;
 function resolveArchived(config, arg) {
   if (!arg) throw new UsageError("missing change name");
-  const archive = join48(config.root, "openspec", "changes", "archive");
-  if (ARCHIVED2.test(arg) && existsSync44(join48(archive, arg))) return arg;
+  const archive = join50(config.root, "openspec", "changes", "archive");
+  if (ARCHIVED2.test(arg) && existsSync46(join50(archive, arg))) return arg;
   if (!NAME.test(arg)) throw new UsageError(`'${arg}' is not a change name or archived change id`);
-  const ids = existsSync44(archive) ? readdirSync9(archive).filter((d) => ARCHIVED2.exec(d)?.[2] === arg).sort() : [];
+  const ids = existsSync46(archive) ? readdirSync10(archive).filter((d) => ARCHIVED2.exec(d)?.[2] === arg).sort() : [];
   const newest = ids.at(-1);
   if (newest) return newest;
-  if (existsSync44(join48(config.root, "openspec", "changes", arg)))
+  if (existsSync46(join50(config.root, "openspec", "changes", arg)))
     throw new EnvError(`change '${arg}' is not archived yet: run 'openspec archive ${arg}' first`);
   throw new EnvError(`unknown change '${arg}': no archived folder openspec/changes/archive/<date>-${arg}/`);
 }
@@ -13924,7 +14200,7 @@ register({
       if (needsLog) {
         const count = (kind) => ops.filter((o) => o.op === kind).length;
         const entry = `* **Change**: ${id}: created ${count("create")}, updated ${count("update")}, deprecated ${count("deprecate")}`;
-        writeFileSync15(logPath, insertEntry(logText, localDate(), entry));
+        writeFileSync17(logPath, insertEntry(logText, localDate(), entry));
       }
     }
     if (needsLog) actions.push({ path: logRel, action: "add log entry" });
@@ -13943,8 +14219,8 @@ register({
 });
 
 // src/tasks/progress-command.ts
-import { existsSync as existsSync45, readdirSync as readdirSync10, readFileSync as readFileSync37 } from "node:fs";
-import { join as join49 } from "node:path";
+import { existsSync as existsSync47, readdirSync as readdirSync11, readFileSync as readFileSync39 } from "node:fs";
+import { join as join51 } from "node:path";
 
 // src/tasks/progress.ts
 function progressOf(tasks) {
@@ -13968,13 +14244,13 @@ function progressOf(tasks) {
 
 // src/tasks/progress-command.ts
 function readTasks(config, change) {
-  const path = join49(changeDir(config, change), "tasks.md");
-  return existsSync45(path) ? parseTasks(readFileSync37(path, "utf8")) : void 0;
+  const path = join51(changeDir(config, change), "tasks.md");
+  return existsSync47(path) ? parseTasks(readFileSync39(path, "utf8")) : void 0;
 }
 function activeChanges2(config) {
-  const dir = join49(config.root, "openspec", "changes");
-  if (!existsSync45(dir)) return [];
-  return readdirSync10(dir, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort();
+  const dir = join51(config.root, "openspec", "changes");
+  if (!existsSync47(dir)) return [];
+  return readdirSync11(dir, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort();
 }
 function commitsByTask(config, change) {
   const out = /* @__PURE__ */ new Map();
@@ -14181,37 +14457,37 @@ register({
 // src/upgrade/command.ts
 var import_yaml19 = __toESM(require_dist(), 1);
 import { spawnSync as spawnSync3 } from "node:child_process";
-import { existsSync as existsSync49, mkdirSync as mkdirSync11, mkdtempSync as mkdtempSync2, readFileSync as readFileSync41, rmSync as rmSync3, writeFileSync as writeFileSync19 } from "node:fs";
+import { existsSync as existsSync50, mkdirSync as mkdirSync13, mkdtempSync as mkdtempSync2, readFileSync as readFileSync42, rmSync as rmSync3, writeFileSync as writeFileSync20 } from "node:fs";
 import { tmpdir as tmpdir2 } from "node:os";
-import { dirname as dirname13, join as join55, resolve as resolve11 } from "node:path";
+import { dirname as dirname15, join as join56, resolve as resolve11 } from "node:path";
 
 // src/upgrade/apply.ts
-import { chmodSync as chmodSync3, existsSync as existsSync46, mkdirSync as mkdirSync9, readFileSync as readFileSync38, rmSync, writeFileSync as writeFileSync16 } from "node:fs";
-import { dirname as dirname12, join as join50 } from "node:path";
+import { chmodSync as chmodSync3, existsSync as existsSync48, mkdirSync as mkdirSync12, readFileSync as readFileSync40, rmSync, writeFileSync as writeFileSync18 } from "node:fs";
+import { dirname as dirname14, join as join52 } from "node:path";
 var setKitVersion = (text3, version) => text3.replace(/^(kit_version:\s*)("?)[^"\s#]+("?)/m, `$1$2${version}$3`);
 function applyPlan(root, plan, ref) {
   const put = (p, data, mode) => {
-    mkdirSync9(dirname12(join50(root, p)), { recursive: true });
-    writeFileSync16(join50(root, p), data);
-    if (mode !== void 0) chmodSync3(join50(root, p), mode);
+    mkdirSync12(dirname14(join52(root, p)), { recursive: true });
+    writeFileSync18(join52(root, p), data);
+    if (mode !== void 0) chmodSync3(join52(root, p), mode);
   };
   for (const f of plan.files) {
-    if (f.action === "remove") rmSync(join50(root, f.path), { force: true });
+    if (f.action === "remove") rmSync(join52(root, f.path), { force: true });
     else if (f.data !== void 0) put(f.path, f.data, f.mode);
   }
   for (const step of [...plan.blocks, ...plan.configs])
     if (step.text !== void 0) put(step.path, step.text);
-  const settings = join50(root, CONFIG_FILE);
-  if (existsSync46(settings)) put(CONFIG_FILE, setKitVersion(readFileSync38(settings, "utf8"), plan.to));
+  const settings = join52(root, CONFIG_FILE);
+  if (existsSync48(settings)) put(CONFIG_FILE, setKitVersion(readFileSync40(settings, "utf8"), plan.to));
   put(MANIFEST_PATH, manifestText(plan.to, ref, plan.manifest));
 }
 
 // src/upgrade/migrations.ts
-import { join as join51 } from "node:path";
+import { join as join53 } from "node:path";
 import { pathToFileURL } from "node:url";
 async function runMigrations(root, from, versions, report) {
   for (const version of versions) {
-    const file = join51(from, "upgrade/migrations", `${version}.mjs`);
+    const file = join53(from, "upgrade/migrations", `${version}.mjs`);
     try {
       const module = await import(pathToFileURL(file).href);
       if (typeof module.default !== "function") throw new Error("has no default export function");
@@ -14223,8 +14499,8 @@ async function runMigrations(root, from, versions, report) {
 }
 
 // src/upgrade/plan.ts
-import { existsSync as existsSync47, readdirSync as readdirSync11, readFileSync as readFileSync39, statSync as statSync13 } from "node:fs";
-import { join as join53 } from "node:path";
+import { existsSync as existsSync49, readdirSync as readdirSync12, readFileSync as readFileSync41, statSync as statSync13 } from "node:fs";
+import { join as join55 } from "node:path";
 
 // src/upgrade/config.ts
 var import_yaml17 = __toESM(require_dist(), 1);
@@ -14348,17 +14624,17 @@ function upgradeOpenspecConfig(local, base, next) {
 }
 
 // src/upgrade/merge.ts
-import { execFileSync as execFileSync8 } from "node:child_process";
-import { mkdtempSync, rmSync as rmSync2, writeFileSync as writeFileSync17 } from "node:fs";
+import { execFileSync as execFileSync9 } from "node:child_process";
+import { mkdtempSync, rmSync as rmSync2, writeFileSync as writeFileSync19 } from "node:fs";
 import { tmpdir } from "node:os";
-import { join as join52 } from "node:path";
+import { join as join54 } from "node:path";
 function mergeThreeWay(local, base, next) {
-  const dir = mkdtempSync(join52(tmpdir(), "specfold-merge-"));
+  const dir = mkdtempSync(join54(tmpdir(), "specfold-merge-"));
   try {
-    const files = { local: join52(dir, "local"), base: join52(dir, "base"), next: join52(dir, "next") };
-    writeFileSync17(files.local, local);
-    writeFileSync17(files.base, base);
-    writeFileSync17(files.next, next);
+    const files = { local: join54(dir, "local"), base: join54(dir, "base"), next: join54(dir, "next") };
+    writeFileSync19(files.local, local);
+    writeFileSync19(files.base, base);
+    writeFileSync19(files.next, next);
     const args = [
       "merge-file",
       "-p",
@@ -14374,7 +14650,7 @@ function mergeThreeWay(local, base, next) {
     ];
     try {
       return {
-        text: execFileSync8("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }),
+        text: execFileSync9("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }),
         conflict: false
       };
     } catch (error) {
@@ -14391,7 +14667,7 @@ function mergeThreeWay(local, base, next) {
 // src/upgrade/plan.ts
 function readInstalled(root) {
   try {
-    const data = JSON.parse(readFileSync39(join53(root, MANIFEST_PATH), "utf8"));
+    const data = JSON.parse(readFileSync41(join55(root, MANIFEST_PATH), "utf8"));
     return { ...data, files: data.files ?? {}, blocks: data.blocks ?? {} };
   } catch {
     return { files: {}, blocks: {} };
@@ -14412,29 +14688,32 @@ function blockContent(text3, path) {
 var sameBlock = (content, hash) => hash !== void 0 && [content, `${content}
 `].some((c) => sha256(c) === hash);
 function versionsIn(dir, ext, installed, target) {
-  if (!existsSync47(dir)) return [];
-  return readdirSync11(dir).filter((f) => f.endsWith(ext)).map((f) => f.slice(0, -ext.length)).filter(
+  if (!existsSync49(dir)) return [];
+  return readdirSync12(dir).filter((f) => f.endsWith(ext)).map((f) => f.slice(0, -ext.length)).filter(
     (v) => isVersion(v) && (!isVersion(installed) || compareVersions(v, installed) > 0) && compareVersions(v, target) <= 0
   ).sort(compareVersions);
 }
+var copyOf = (p) => p === UPGRADE_WORKFLOW.active ? UPGRADE_WORKFLOW.shipped : p;
 function planUpgrade(o) {
   const installed = readInstalled(o.root);
   const tools = toolsOf(installed);
   const files = [];
   const blocks = [];
   const manifest = { files: {}, blocks: {} };
-  const local = (p) => join53(o.root, p);
+  const local = (p) => join55(o.root, p);
   const baseCopy = (p, hash) => {
-    if (!o.base || hash === void 0 || !existsSync47(join53(o.base, p))) return void 0;
-    const data = readFileSync39(join53(o.base, p));
+    if (!o.base || hash === void 0 || !existsSync49(join55(o.base, copyOf(p)))) return void 0;
+    const data = readFileSync41(join55(o.base, copyOf(p)));
     return sha256(data) === hash ? data : void 0;
   };
   const shipped = new Set(kitOwned(o.from, tools));
+  if (installed.files[UPGRADE_WORKFLOW.active] && existsSync49(join55(o.from, UPGRADE_WORKFLOW.shipped)))
+    shipped.add(UPGRADE_WORKFLOW.active);
   const paths = [.../* @__PURE__ */ new Set([...shipped, ...Object.keys(installed.files)])].sort();
   for (const p of paths) {
     const recorded = installed.files[p];
-    const exists = existsSync47(local(p));
-    const current = exists ? readFileSync39(local(p)) : void 0;
+    const exists = existsSync49(local(p));
+    const current = exists ? readFileSync41(local(p)) : void 0;
     const changed = current !== void 0 && sha256(current) !== recorded;
     if (!shipped.has(p)) {
       if (current === void 0) continue;
@@ -14447,8 +14726,8 @@ function planUpgrade(o) {
         });
       continue;
     }
-    const next = readFileSync39(join53(o.from, p));
-    const mode = statSync13(join53(o.from, p)).mode & 511;
+    const next = readFileSync41(join55(o.from, copyOf(p)));
+    const mode = statSync13(join55(o.from, copyOf(p))).mode & 511;
     const hash = sha256(next);
     if (current === void 0) {
       files.push({ path: p, action: "add", data: next, mode });
@@ -14482,10 +14761,10 @@ function planUpgrade(o) {
   }
   for (const p of BLOCK_FILES) {
     if (p === "CLAUDE.md" && !tools.includes("claude")) continue;
-    if (!existsSync47(join53(o.from, p))) continue;
-    const next = readFileSync39(join53(o.from, p), "utf8");
+    if (!existsSync49(join55(o.from, p))) continue;
+    const next = readFileSync41(join55(o.from, p), "utf8");
     const recorded = installed.blocks[p];
-    const text3 = existsSync47(local(p)) ? readFileSync39(local(p), "utf8") : void 0;
+    const text3 = existsSync49(local(p)) ? readFileSync41(local(p), "utf8") : void 0;
     if (recorded === void 0) {
       if (text3 !== void 0)
         blocks.push({ path: p, action: "unmanaged", reason: "not in the manifest; left as it is" });
@@ -14509,7 +14788,7 @@ function planUpgrade(o) {
       const applied = applyBlock(text3, next, style);
       blocks.push({ path: p, action: "replace", text: "text" in applied ? applied.text : text3 });
     } else {
-      const base = o.base && existsSync47(join53(o.base, p)) ? readFileSync39(join53(o.base, p), "utf8") : void 0;
+      const base = o.base && existsSync49(join55(o.base, p)) ? readFileSync41(join55(o.base, p), "utf8") : void 0;
       if (base === void 0 || sha256(base) !== recorded) {
         blocks.push({
           path: p,
@@ -14537,19 +14816,19 @@ function planUpgrade(o) {
   const merges = [["openspec/config.yaml", upgradeOpenspecConfig]];
   if (tools.includes("claude")) merges.unshift([".claude/settings.json", upgradeSettings]);
   for (const [p, merge] of merges) {
-    if (!existsSync47(local(p)) || !existsSync47(join53(o.from, p))) continue;
-    const base = o.base && existsSync47(join53(o.base, p)) ? readFileSync39(join53(o.base, p), "utf8") : void 0;
-    const result = merge(readFileSync39(local(p), "utf8"), base, readFileSync39(join53(o.from, p), "utf8"));
+    if (!existsSync49(local(p)) || !existsSync49(join55(o.from, p))) continue;
+    const base = o.base && existsSync49(join55(o.base, p)) ? readFileSync41(join55(o.base, p), "utf8") : void 0;
+    const result = merge(readFileSync41(local(p), "utf8"), base, readFileSync41(join55(o.from, p), "utf8"));
     if ("conflict" in result)
       configs.push({ path: p, action: "conflict", reason: result.conflict, notes: [] });
     else if (result.changed)
       configs.push({ path: p, action: "merge", text: result.text, notes: result.notes });
     else configs.push({ path: p, action: "unchanged", notes: result.notes });
   }
-  const migrations = versionsIn(join53(o.from, "upgrade/migrations"), ".mjs", o.installed, o.target);
-  const notes = versionsIn(join53(o.from, "upgrade/notes"), ".md", o.installed, o.target).map((version) => ({
+  const migrations = versionsIn(join55(o.from, "upgrade/migrations"), ".mjs", o.installed, o.target);
+  const notes = versionsIn(join55(o.from, "upgrade/notes"), ".md", o.installed, o.target).map((version) => ({
     version,
-    text: readFileSync39(join53(o.from, "upgrade/notes", `${version}.md`), "utf8").trimEnd()
+    text: readFileSync41(join55(o.from, "upgrade/notes", `${version}.md`), "utf8").trimEnd()
   }));
   return {
     from: o.installed,
@@ -14614,167 +14893,6 @@ function reportText(plan, extras = {}) {
 `;
 }
 
-// src/upgrade/source.ts
-import { execFileSync as execFileSync9 } from "node:child_process";
-import { createHash as createHash2 } from "node:crypto";
-import { copyFileSync, existsSync as existsSync48, mkdirSync as mkdirSync10, readdirSync as readdirSync12, readFileSync as readFileSync40, writeFileSync as writeFileSync18 } from "node:fs";
-import { join as join54, resolve as resolve10 } from "node:path";
-var tarballName = (version) => `specfold-template-v${version}.tar.gz`;
-function ghLoggedIn() {
-  try {
-    execFileSync9("gh", ["auth", "status", "--hostname", "github.com"], { stdio: "ignore" });
-    return true;
-  } catch {
-    return false;
-  }
-}
-function fromIndex(data, where) {
-  const releases = data?.releases;
-  if (!Array.isArray(releases)) throw new EnvError(`${where} has no 'releases' list`);
-  return new Map(
-    releases.filter((r) => typeof r.version === "string" && isVersion(r.version)).map((r) => [r.version, typeof r.notes === "string" ? r.notes : ""])
-  );
-}
-async function get(url, headers = {}) {
-  let response;
-  try {
-    response = await fetch(url, { headers: { "user-agent": "specfold", ...headers } });
-  } catch (error) {
-    throw new EnvError(`could not reach ${url}: ${error.message}`);
-  }
-  if (!response.ok) throw new EnvError(`${url} answered ${response.status}`);
-  return response;
-}
-async function save(url, file, headers = {}) {
-  writeFileSync18(file, Buffer.from(await (await get(url, headers)).arrayBuffer()));
-}
-function pathSource(dir) {
-  const indexFile = join54(dir, "releases.json");
-  const index = () => existsSync48(indexFile) ? fromIndex(JSON.parse(readFileSync40(indexFile, "utf8")), indexFile) : void 0;
-  return {
-    label: `path ${dir}`,
-    versions: async () => {
-      if (!existsSync48(dir)) throw new EnvError(`source.path ${dir} does not exist`);
-      const listed = index();
-      if (listed) return [...listed.keys()];
-      return readdirSync12(dir).map((f) => /^specfold-template-v(.+)\.tar\.gz$/.exec(f)?.[1]).filter((v) => v !== void 0 && isVersion(v));
-    },
-    notes: async (version) => index()?.get(version) ?? "",
-    download: async (version, to) => {
-      for (const name of [tarballName(version), `${tarballName(version)}.sha256`]) {
-        if (!existsSync48(join54(dir, name))) throw new EnvError(`${join54(dir, name)} does not exist`);
-        copyFileSync(join54(dir, name), join54(to, name));
-      }
-      return join54(to, tarballName(version));
-    },
-    tag: () => void 0
-  };
-}
-function urlSource(base) {
-  const root = base.replace(/\/+$/, "");
-  let cached;
-  const index = async () => {
-    cached ??= fromIndex(await (await get(`${root}/releases.json`)).json(), `${root}/releases.json`);
-    return cached;
-  };
-  return {
-    label: `url ${root}`,
-    versions: async () => [...(await index()).keys()],
-    notes: async (version) => (await index()).get(version) ?? "",
-    download: async (version, to) => {
-      for (const name of [tarballName(version), `${tarballName(version)}.sha256`])
-        await save(`${root}/${name}`, join54(to, name));
-      return join54(to, tarballName(version));
-    },
-    tag: () => void 0
-  };
-}
-function githubSource(repo, o) {
-  const env = o.env ?? process.env;
-  const token = env.SPECFOLD_TOKEN || env.GITHUB_TOKEN;
-  const api = (env.GITHUB_API_URL || "https://api.github.com").replace(/\/+$/, "");
-  const headers = (accept) => ({
-    accept,
-    ...token ? { authorization: `Bearer ${token}` } : {}
-  });
-  const gh = (args) => execFileSync9("gh", [...args, "--repo", repo], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
-  let cached;
-  const releases = async () => {
-    if (cached) return cached;
-    if (o.gh) {
-      const listed = JSON.parse(gh(["release", "list", "--limit", "100", "--json", "tagName"]));
-      cached = listed.map((r) => ({ tag_name: r.tagName }));
-    } else {
-      const response = await get(
-        `${api}/repos/${repo}/releases?per_page=100`,
-        headers("application/vnd.github+json")
-      );
-      cached = await response.json();
-    }
-    return cached;
-  };
-  const find = async (version) => {
-    const release = (await releases()).find((r) => r.tag_name === `v${version}`);
-    if (!release) throw new EnvError(`${repo} has no release v${version}`);
-    return release;
-  };
-  return {
-    label: `github ${repo}`,
-    versions: async () => (await releases()).map((r) => r.tag_name.replace(/^v/, "")).filter((v) => isVersion(v)),
-    notes: async (version) => {
-      if (o.gh) return JSON.parse(gh(["release", "view", `v${version}`, "--json", "body"])).body ?? "";
-      return (await find(version)).body ?? "";
-    },
-    download: async (version, to) => {
-      const names = [tarballName(version), `${tarballName(version)}.sha256`];
-      if (o.gh) {
-        for (const name of names)
-          gh(["release", "download", `v${version}`, "--pattern", name, "--dir", to, "--clobber"]);
-      } else {
-        const assets = (await find(version)).assets ?? [];
-        for (const name of names) {
-          const asset = assets.find((a) => a.name === name);
-          if (!asset) throw new EnvError(`release v${version} of ${repo} has no ${name}`);
-          await save(asset.url, join54(to, name), headers("application/octet-stream"));
-        }
-      }
-      return join54(to, tarballName(version));
-    },
-    tag: (version) => `v${version}`
-  };
-}
-function openSource(source, root, o = {}) {
-  if ("path" in source) return pathSource(resolve10(root, source.path));
-  if ("url" in source) return urlSource(source.url);
-  return githubSource(source.github, o);
-}
-function verifyChecksum(tarball) {
-  const file = `${tarball}.sha256`;
-  if (!existsSync48(file)) throw new EnvError(`${file} is missing; the tarball can't be checked`);
-  const expected = readFileSync40(file, "utf8").trim().split(/\s+/)[0];
-  const actual = createHash2("sha256").update(readFileSync40(tarball)).digest("hex");
-  if (actual !== expected) throw new EnvError(`${tarball} does not match its .sha256; nothing was changed`);
-}
-function unpack(tarball, dir) {
-  mkdirSync10(dir, { recursive: true });
-  try {
-    execFileSync9("tar", ["-xzf", tarball, "-C", dir, "--strip-components=1"], { stdio: "pipe" });
-  } catch (error) {
-    throw new EnvError(
-      `could not unpack ${tarball}: ${String(error.stderr).trim()}`
-    );
-  }
-}
-async function fetchRelease(source, version, work) {
-  const downloads = join54(work, "downloads");
-  mkdirSync10(downloads, { recursive: true });
-  const tarball = await source.download(version, downloads);
-  verifyChecksum(tarball);
-  const dir = join54(work, version);
-  unpack(tarball, dir);
-  return dir;
-}
-
 // src/upgrade/command.ts
 var REPORT_PATH = ".specfold/upgrade-report.md";
 var branchFor = (version) => `specfold/upgrade-${version}`;
@@ -14807,7 +14925,7 @@ ${r.stderr ?? ""}`.split("\n").filter((l) => l.trim() !== "");
 function followUps(root, start) {
   const cli = (...args) => followUp(root, `specfold ${args.join(" ")}`, process.execPath, ["scripts/specfold.mjs", ...args]);
   const results = [];
-  if (existsSync49(join55(root, "openspec/config.yaml")))
+  if (existsSync50(join56(root, "openspec/config.yaml")))
     results.push(followUp(root, "openspec update", openspecBinary(root).command, ["update"]));
   for (const args of [
     ["agents", "sync"],
@@ -14822,9 +14940,9 @@ function followUps(root, start) {
 async function inner(io, config, f, from, base, ref) {
   const root = config.root;
   for (const p of [CONFIG_FILE, "scripts/specfold.mjs"])
-    if (!existsSync49(join55(from, p)))
+    if (!existsSync50(join56(from, p)))
       throw new EnvError(`--from ${from} is not a Specfold release: missing ${p}`);
-  const shipped = (0, import_yaml19.parse)(readFileSync41(join55(from, CONFIG_FILE), "utf8"))?.kit_version;
+  const shipped = (0, import_yaml19.parse)(readFileSync42(join56(from, CONFIG_FILE), "utf8"))?.kit_version;
   const target = f.to ?? (typeof shipped === "string" ? shipped : void 0);
   if (!target) throw new EnvError(`--from ${from} has no kit_version; pass --to <version>`);
   const plan = planUpgrade({ root, from, base, installed: installedVersion(config), target });
@@ -14848,8 +14966,8 @@ async function inner(io, config, f, from, base, ref) {
   await runMigrations(root, from, plan.migrations, (version, line) => lines3.push({ version, line }));
   const results = followUps(root, start);
   const report = reportText(plan, { migrations: lines3, followUps: results });
-  mkdirSync11(dirname13(join55(root, REPORT_PATH)), { recursive: true });
-  writeFileSync19(join55(root, REPORT_PATH), report);
+  mkdirSync13(dirname15(join56(root, REPORT_PATH)), { recursive: true });
+  writeFileSync20(join56(root, REPORT_PATH), report);
   const message = config.upgradeCommitMessage.replaceAll("{version}", target);
   git(root, ["add", "-A", "--", "."]);
   git(root, ["commit", "-q", "-m", message]);
@@ -14858,7 +14976,7 @@ async function inner(io, config, f, from, base, ref) {
     git(root, ["push", "-q", "-u", "origin", branch]);
     const r = spawnSync3(
       "gh",
-      ["pr", "create", "--head", branch, "--title", message, "--body-file", join55(root, REPORT_PATH)],
+      ["pr", "create", "--head", branch, "--title", message, "--body-file", join56(root, REPORT_PATH)],
       {
         cwd: root,
         encoding: "utf8"
@@ -14920,12 +15038,12 @@ async function outer(io, config, f, passThrough) {
 `);
     return 0;
   }
-  const work = mkdtempSync2(join55(tmpdir2(), "specfold-upgrade-"));
+  const work = mkdtempSync2(join56(tmpdir2(), "specfold-upgrade-"));
   try {
-    const next = await fetchRelease(source, target, join55(work, "target"));
+    const next = await fetchRelease(source, target, join56(work, "target"));
     let base;
     try {
-      base = await fetchRelease(source, installed, join55(work, "installed"));
+      base = await fetchRelease(source, installed, join56(work, "installed"));
     } catch (error) {
       io.stderr(
         `specfold: the installed release ${installed} is not available (${error.message}); locally changed kit files become conflicts
@@ -14934,7 +15052,7 @@ async function outer(io, config, f, passThrough) {
     }
     const ref = source.tag(target);
     const args = [
-      join55(next, "scripts/specfold.mjs"),
+      join56(next, "scripts/specfold.mjs"),
       "upgrade",
       "--from",
       next,
@@ -14996,11 +15114,11 @@ register({
 });
 
 // src/verify/command.ts
-import { existsSync as existsSync50, readFileSync as readFileSync42, statSync as statSync14, writeFileSync as writeFileSync20 } from "node:fs";
-import { join as join56, relative as relative21, resolve as resolve12, sep as sep21 } from "node:path";
+import { existsSync as existsSync51, readFileSync as readFileSync43, statSync as statSync14, writeFileSync as writeFileSync21 } from "node:fs";
+import { join as join57, relative as relative21, resolve as resolve12, sep as sep21 } from "node:path";
 function check(arg, root, bundleRoot) {
   const inBundle = [resolve12(root, arg), resolve12(bundleRoot, arg)].map((abs) => relative21(bundleRoot, abs).split(sep21).join("/")).filter((rel2) => rel2 !== "" && !rel2.startsWith("..") && !rel2.startsWith("/"));
-  const rel = inBundle.find((r) => existsSync50(join56(bundleRoot, r)) && statSync14(join56(bundleRoot, r)).isFile());
+  const rel = inBundle.find((r) => existsSync51(join57(bundleRoot, r)) && statSync14(join57(bundleRoot, r)).isFile());
   if (!rel)
     return { arg, reason: inBundle.length === 0 ? "outside the bundle" : "no such file in the bundle" };
   if (!rel.endsWith(".md") || !isConcept(rel))
@@ -15032,10 +15150,10 @@ register({
     if (refused.length === 0) {
       const at = isoWithOffset(/* @__PURE__ */ new Date());
       const written = targets.map((t) => {
-        const abs = join56(bundleRoot, t.rel);
-        return { abs, text: verifyText(readFileSync42(abs, "utf8"), login, at) };
+        const abs = join57(bundleRoot, t.rel);
+        return { abs, text: verifyText(readFileSync43(abs, "utf8"), login, at) };
       });
-      for (const w of written) writeFileSync20(w.abs, w.text);
+      for (const w of written) writeFileSync21(w.abs, w.text);
       verified.push(...targets.map(shown));
     }
     const ok2 = refused.length === 0;
@@ -15064,15 +15182,15 @@ register({
 });
 
 // src/wt/plan.ts
-import { existsSync as existsSync51, readdirSync as readdirSync13, readFileSync as readFileSync43, statSync as statSync15 } from "node:fs";
-import { join as join57 } from "node:path";
+import { existsSync as existsSync52, readdirSync as readdirSync13, readFileSync as readFileSync44, statSync as statSync15 } from "node:fs";
+import { join as join58 } from "node:path";
 var CHANGES2 = "openspec/changes";
-var dirs = (path) => existsSync51(path) ? readdirSync13(path).filter((d) => !d.startsWith(".") && statSync15(join57(path, d)).isDirectory()).sort() : [];
+var dirs = (path) => existsSync52(path) ? readdirSync13(path).filter((d) => !d.startsWith(".") && statSync15(join58(path, d)).isDirectory()).sort() : [];
 function activeChanges3(root) {
-  return dirs(join57(root, CHANGES2)).filter((d) => d !== "archive").map((name) => {
-    const tasks = join57(root, CHANGES2, name, "tasks.md");
-    const files = existsSync51(tasks) ? parseTasks(readFileSync43(tasks, "utf8")).groups.filter((g) => g.name !== KNOWLEDGE_GROUP).flatMap((g) => g.meta?.files ?? []) : void 0;
-    return { name, capabilities: dirs(join57(root, CHANGES2, name, "specs")), files };
+  return dirs(join58(root, CHANGES2)).filter((d) => d !== "archive").map((name) => {
+    const tasks = join58(root, CHANGES2, name, "tasks.md");
+    const files = existsSync52(tasks) ? parseTasks(readFileSync44(tasks, "utf8")).groups.filter((g) => g.name !== KNOWLEDGE_GROUP).flatMap((g) => g.meta?.files ?? []) : void 0;
+    return { name, capabilities: dirs(join58(root, CHANGES2, name, "specs")), files };
   });
 }
 function conflictOf(a, b, repoFiles) {
@@ -15113,8 +15231,8 @@ function planBatches(root, limit) {
 
 // src/wt/worktrees.ts
 import { spawnSync as spawnSync4 } from "node:child_process";
-import { cpSync, existsSync as existsSync52, readFileSync as readFileSync44, realpathSync as realpathSync2 } from "node:fs";
-import { basename as basename2, join as join58, relative as relative22, sep as sep22 } from "node:path";
+import { cpSync, existsSync as existsSync53, readFileSync as readFileSync45, realpathSync as realpathSync2 } from "node:fs";
+import { basename as basename2, join as join59, relative as relative22, sep as sep22 } from "node:path";
 var WORKTREES = ".claude/worktrees";
 var INDEX_FILE = ".specfold/wt-index";
 var INCLUDE_FILE = ".worktreeinclude";
@@ -15141,7 +15259,7 @@ function listWorktrees(cwd) {
 function setupWorktree(cwd, log) {
   const top = git(cwd, ["rev-parse", "--show-toplevel"]).trim();
   const lines3 = [];
-  const lock = LOCKFILES.find(([file]) => existsSync52(join58(top, file)));
+  const lock = LOCKFILES.find(([file]) => existsSync53(join59(top, file)));
   if (lock) {
     const [command, ...args] = lock[1];
     const run = spawnSync4(command, args, { cwd: top, encoding: "utf8" });
@@ -15152,8 +15270,8 @@ function setupWorktree(cwd, log) {
       );
     lines3.push(`install: ${lock[1].join(" ")}`);
   } else lines3.push("install: no lockfile found, nothing installed");
-  const index = listWorktrees(top).findIndex((w) => existsSync52(w.path) && same(w.path, top));
-  writeIfChanged(join58(top, INDEX_FILE), `${index}
+  const index = listWorktrees(top).findIndex((w) => existsSync53(w.path) && same(w.path, top));
+  writeIfChanged(join59(top, INDEX_FILE), `${index}
 `);
   lines3.push(`index: ${index} (${INDEX_FILE})`);
   return { lines: lines3, ok: true };
@@ -15166,20 +15284,20 @@ function includes(pattern, entry) {
   return globToRegExp(p).test(path);
 }
 function copyIncluded(root, target) {
-  const file = join58(root, INCLUDE_FILE);
-  if (!existsSync52(file)) return [];
-  const patterns = readFileSync44(file, "utf8").split("\n").map((l) => l.trim()).filter((l) => l !== "" && !l.startsWith("#"));
+  const file = join59(root, INCLUDE_FILE);
+  if (!existsSync53(file)) return [];
+  const patterns = readFileSync45(file, "utf8").split("\n").map((l) => l.trim()).filter((l) => l !== "" && !l.startsWith("#"));
   const ignored = git(root, ["ls-files", "--others", "--ignored", "--exclude-standard", "--directory"]).split("\n").filter(Boolean);
   const copied = ignored.filter((entry) => patterns.some((p) => includes(p, entry)));
-  for (const entry of copied) cpSync(join58(root, entry), join58(target, entry), { recursive: true });
+  for (const entry of copied) cpSync(join59(root, entry), join59(target, entry), { recursive: true });
   return copied;
 }
 function newWorktree(root, change, log) {
-  const path = join58(root, WORKTREES, change);
+  const path = join59(root, WORKTREES, change);
   const rel = posix4(relative22(root, path));
   if (!activeChanges3(root).some((c) => c.name === change))
     return { lines: [`'${change}' is not an active change in openspec/changes/`], ok: false };
-  if (existsSync52(path)) return { lines: [`${rel} already exists`], ok: false };
+  if (existsSync53(path)) return { lines: [`${rel} already exists`], ok: false };
   if (git(root, ["branch", "--list", change]).trim() !== "")
     return { lines: [`branch '${change}' already exists`], ok: false };
   git(root, ["worktree", "add", "--quiet", "-b", change, path, "HEAD"]);
@@ -15192,9 +15310,9 @@ var unmerged = (root, base, branch) => git(root, ["cherry", base, branch]).split
 function cleanWorktrees(root, ref) {
   if (ref !== void 0 && !gitSucceeds(root, ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`]))
     throw new EnvError(`unknown base '${ref}'; nothing was removed`);
-  const folder = join58(root, WORKTREES);
+  const folder = join59(root, WORKTREES);
   const isCandidate = (w) => {
-    if (!existsSync52(folder) || !existsSync52(w.path)) return false;
+    if (!existsSync53(folder) || !existsSync53(w.path)) return false;
     const rel = relative22(realpathSync2(folder), realpathSync2(w.path));
     return rel !== "" && !rel.startsWith("..") && !rel.includes(sep22);
   };
