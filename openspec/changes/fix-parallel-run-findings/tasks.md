@@ -63,7 +63,7 @@ agent: implementer
 
 - [x] 5.1 Clean merged worktrees after each merge round and note the skill copies
   - Done when: `sf-apply` runs `wt clean --base <change branch>` after merging and says the listed worktree skills are harmless
-- [ ] 5.2 Say who owns the branch and who runs the retro
+- [x] 5.2 Say who owns the branch and who runs the retro
   - Done when: `sf-apply` says a background subagent on the change branch owns it until it reports, step 9 gives the retro to the main session, and `check-skills.mjs` passes
 
 ## 6. Bundle
