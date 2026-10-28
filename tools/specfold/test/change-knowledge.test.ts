@@ -58,6 +58,10 @@ function setup(knowledge: string | undefined) {
     hooksExtra: {},
     traceTestGlobs: [],
     statsBudget: { agentsMd: 2000, total: 4000, skillDescription: 60 },
+    kitVersion: "",
+    channel: "stable",
+    source: undefined,
+    upgradeCommitMessage: "chore: upgrade Specfold to v{version}",
   };
   return { root, dir, config };
 }

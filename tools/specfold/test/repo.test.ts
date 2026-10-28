@@ -40,6 +40,10 @@ describe("repo", () => {
       hooksExtra: {},
       traceTestGlobs: DEFAULT_TEST_GLOBS,
       statsBudget: { agentsMd: 2000, total: 4000, skillDescription: 60 },
+      kitVersion: "",
+      channel: "stable",
+      source: undefined,
+      upgradeCommitMessage: "chore: upgrade Specfold to v{version}",
     });
   });
 
@@ -146,5 +150,38 @@ describe("repo", () => {
     expect(requireConfig(root).traceTestGlobs).toEqual(["test/**/*.test.ts"]);
     writeFileSync(join(root, "specfold.yaml"), "trace:\n  test_globs: test\n");
     expect(() => requireConfig(root)).toThrow(EnvError);
+  });
+
+  it("reads the upgrade settings with their defaults", () => {
+    const root = tempDir();
+    writeFileSync(
+      join(root, "specfold.yaml"),
+      "kit_version: 0.1.0-rc.1\nchannel: next\nsource:\n  github: acme/kit\n  path: ../mirror\nupgrade:\n  commit_message: 'chore(kit): upgrade to v{version}'\n",
+    );
+    expect(requireConfig(root)).toMatchObject({
+      kitVersion: "0.1.0-rc.1",
+      channel: "next",
+      source: { path: "../mirror" },
+      upgradeCommitMessage: "chore(kit): upgrade to v{version}",
+    });
+    writeFileSync(
+      join(root, "specfold.yaml"),
+      "source:\n  url: https://mirror.example/kit\n  github: acme/kit\n",
+    );
+    expect(requireConfig(root).source).toEqual({ url: "https://mirror.example/kit" });
+    writeFileSync(join(root, "specfold.yaml"), "source:\n  github: acme/kit\n");
+    expect(requireConfig(root).source).toEqual({ github: "acme/kit" });
+  });
+
+  it("fails with an environment error on a bad channel or source", () => {
+    const root = tempDir();
+    for (const bad of [
+      "channel: beta\n",
+      "source:\n  url: http://mirror.example\n",
+      "source:\n  github: acme\n",
+    ]) {
+      writeFileSync(join(root, "specfold.yaml"), bad);
+      expect(() => requireConfig(root)).toThrow(EnvError);
+    }
   });
 });
