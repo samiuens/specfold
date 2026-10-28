@@ -3,7 +3,15 @@ type: Capability
 title: specfold upgrade
 description: Why upgrades run in two stages with the target release's own CLI, merge local edits three ways and refuse version skew.
 status: draft
+spec: openspec/specs/specfold-upgrade/spec.md
+resource: ../../openspec/specs/specfold-upgrade/spec.md
+change: 2026-10-28-add-specfold-upgrade
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T18:04:36+01:00 }
+sources:
+  - id: proposal-2026-10-28-add-specfold-upgrade
+    resource: ../../openspec/changes/archive/2026-10-28-add-specfold-upgrade/proposal.md
+  - id: design-2026-10-28-add-specfold-upgrade
+    resource: ../../openspec/changes/archive/2026-10-28-add-specfold-upgrade/design.md
 ---
 
 # Why
