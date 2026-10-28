@@ -9,7 +9,7 @@ scenarios: [specfold-release#unknown-subcommand, specfold-release#index-two-rele
 agent: implementer
 ```
 
-- [ ] 1.1 Write `releases.json` with `release.mjs index <dir>`
+- [x] 1.1 Write `releases.json` with `release.mjs index <dir>`
   - Done when: scenarios unknown-subcommand and index-two-releases pass in `release.test.ts`
 
 ## 2. Versions and sources

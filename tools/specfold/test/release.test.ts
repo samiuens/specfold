@@ -39,7 +39,7 @@ describe("release.mjs", () => {
   it("exits with 2 on an unknown subcommand and names the three", () => {
     const result = release(kit("0.1.0-rc.1"), "publish");
     expect(result.code).toBe(2);
-    expect(result.stderr).toContain("unknown subcommand 'publish': check, pack or notes");
+    expect(result.stderr).toContain("unknown subcommand 'publish': check, pack, notes or index");
   });
 
   // spec: specfold-release#template-behind-the-package
@@ -97,5 +97,24 @@ describe("release.mjs", () => {
     expect(release(kit("0.1.0-rc.1"), "notes", "0.1.0-rc.1").stdout).toBe(
       "## Upgrade notes\n\nNo manual steps.\n",
     );
+  });
+
+  // spec: specfold-release#index-two-releases
+  it("indexes the tarballs of a folder, newest first, with their notes", () => {
+    const root = kit("0.1.0-rc.2");
+    write(root, "upgrade/notes/0.1.0-rc.2.md", "Run the rc.2 CLI once.\n");
+    for (const v of ["0.1.0-rc.1", "0.1.0-rc.10", "0.1.0-rc.2", "0.1.0"])
+      write(root, `mirror/specfold-template-v${v}.tar.gz`, "");
+    write(root, "mirror/specfold-template-v0.1.0-rc.2.tar.gz.sha256", "");
+    expect(release(root, "index", "mirror").code).toBe(0);
+    const { releases } = JSON.parse(readFileSync(join(root, "mirror/releases.json"), "utf8"));
+    expect(releases.map((r: { version: string }) => r.version)).toEqual([
+      "0.1.0",
+      "0.1.0-rc.10",
+      "0.1.0-rc.2",
+      "0.1.0-rc.1",
+    ]);
+    expect(releases[2].notes).toBe("## Upgrade notes\n\nRun the rc.2 CLI once.\n");
+    expect(releases[3].notes).toBe("## Upgrade notes\n\nNo manual steps.\n");
   });
 });
