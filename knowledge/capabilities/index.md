@@ -8,6 +8,7 @@
 * [specfold doctor](specfold-doctor.md) - Why setup problems are checked in one command, and where the contract for specfold doctor lives.
 * [specfold drift](specfold-drift.md) - Why drift is computed from git alone, and where the contract for specfold drift lives.
 * [specfold gate](specfold-gate.md) - Why specfold gate gives one merge verdict, and where the contract for its rules lives.
+* [specfold graphify setup](specfold-graphify.md) - Why graphify setup is one CLI step, code-only, with a guard that never fails for teammates who don't have graphify installed.
 * [specfold hooks](specfold-hooks.md) - Why Specfold ships its own git and Claude Code hook entry points, and where their contract lives.
 * [specfold index](specfold-index.md) - Why bundle indexes are generated instead of written, and where the contract for specfold index lives.
 * [specfold init](specfold-init.md) - Why a repository made from the template needs init, and how it fills detected values and sets up OpenSpec, markers and the manifest without prompts.

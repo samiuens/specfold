@@ -13,7 +13,7 @@ sources:
 
 # Decision
 
-graphify stays optional; the gate never requires it. It runs with `GRAPHIFY_BACKEND=none` (and `graphify extract --code-only` for the first build), so nothing leaves the machine. It is installed with `graphify install --project --platform agents`, which writes only the skill. For Claude Code, Specfold registers graphify's PreToolUse guard (`graphify hook-guard`) in `.claude/settings.json`. `graphify claude install` and `graphify agents install` are not used. Refresh runs `graphify update .` from Specfold's post-checkout and post-merge hooks.
+graphify stays optional; the gate never requires it. It runs with `GRAPHIFY_BACKEND=none` (`graphify extract . --code-only` plus `graphify cluster-only . --no-label` for the first build), so nothing leaves the machine. It is installed with `graphify install --project --platform agents`, which writes only the skill. For Claude Code, Specfold registers graphify's PreToolUse guard (`graphify hook-guard search` on `Bash|Grep`, `graphify hook-guard read` on `Read|Glob`) in `.claude/settings.json`, wrapped so it does nothing where graphify is not installed. `graphify claude install` and `graphify install --platform claude` are not used. Refresh runs `graphify update .` from Specfold's post-checkout and post-merge hooks, and `graphify-out/` is not committed. `specfold graphify setup` does all of this ([specfold graphify setup](/capabilities/specfold-graphify.md)); the commands were checked with graphify 0.9.97 on 2026-10-28.
 
 # Why
 
@@ -27,3 +27,4 @@ The semantic pass would send documents to an LLM and duplicate `knowledge/`. gra
 # Related
 
 - [Graphify](/references/graphify.md)
+- [specfold graphify setup](/capabilities/specfold-graphify.md)
