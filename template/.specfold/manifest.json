@@ -17,6 +17,7 @@
     ".agents/skills/sf-plan/SKILL.md": "sha256:de2ae600f9c15750a9075b82fd2c2bf37d32cba228d08d0735276445cff66b38",
     ".agents/skills/sf-sync/SKILL.md": "sha256:cbf5d77f9e3c10e8ea0676a4dfabcd3e7ad7b6fb002c91bd238b6b8a21e0b1c7",
     ".agents/skills/sf-sync/references/retro.md": "sha256:3dada32dec2a382198e4b0bad21ba927bd68843fbc58db2b4688e785e08ae0d5",
+    ".agents/skills/sf-upgrade/SKILL.md": "sha256:c0ffd4554dce9952b357205e71ed2077770e8077fb64f210a07d2158618b525e",
     ".claude/agents/implementer.md": "sha256:56ad36e09c6b61ecbe9ed67d942f31aec948912702748f4f529411027d98d480",
     ".claude/agents/knowledge-curator.md": "sha256:30901c2b84572455295badb2d8bf0f3ec3578c0faa73a413fbd0b72990565180",
     ".claude/agents/planner.md": "sha256:c0028a2b5e144ad9de1cf5c02d5264dddd91e51947fef5c653651c3742a70e82",
@@ -32,7 +33,7 @@
     "openspec/schemas/specfold/templates/proposal.md": "sha256:0dd70e35db5c696ba8ac3cc3a53e2d6561865c1e4e7d49db5a1eaa3e4a6ad86e",
     "openspec/schemas/specfold/templates/spec.md": "sha256:1cccfb573f031c6352bed2a879b7035ff710bc909112fc23d10bdcfcdd8d4318",
     "openspec/schemas/specfold/templates/tasks.md": "sha256:2ef32ccb374fd2470cfea280eb0dd247679d46ac569a719d7e1afc3cae9f3529",
-    "scripts/specfold.mjs": "sha256:dc02f59f0cb0144d05199cc0990edaa1b0c4ef3b27b3824248ecd032ecb4b6b0"
+    "scripts/specfold.mjs": "sha256:b9129ccd0dc0e3c7c010cfe3ae2b5a9b17da31aa373512d6c79d93359f90c612"
   },
   "blocks": {
     ".gitattributes": "sha256:1bf32920694d48900b707f228d8b154e37439df8994b68e4a4badc87d98e1d58",

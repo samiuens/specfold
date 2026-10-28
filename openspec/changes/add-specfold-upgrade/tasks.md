@@ -71,7 +71,7 @@ agent: implementer
 
 - [x] 5.1 Add skill `sf-upgrade` to the template and the kit, with its links
   - Done when: `check-skills.mjs` passes on both skill folders and `agents sync --check` passes in the kit and the template
-- [ ] 5.2 Document `upgrade.commit_message` and ship the rebuilt bundle and manifest
+- [x] 5.2 Document `upgrade.commit_message` and ship the rebuilt bundle and manifest
   - Done when: the template's specfold.yaml documents the key, both bundle copies match the build, and the template manifest test passes
 - [ ] 5.3 Write the upgrade notes of `0.1.0-rc.2` and set `release-as`
   - Done when: `upgrade/notes/0.1.0-rc.2.md` explains the one-time upgrade from rc.1 with the rc.2 CLI, and `release-as` is `0.1.0-rc.2`
