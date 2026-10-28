@@ -7268,7 +7268,7 @@ var require_public_api = __commonJS({
       }
       return doc;
     }
-    function parse7(src, reviver, options) {
+    function parse8(src, reviver, options) {
       let _reviver = void 0;
       if (typeof reviver === "function") {
         _reviver = reviver;
@@ -7309,7 +7309,7 @@ var require_public_api = __commonJS({
         return value.toString(options);
       return new Document2.Document(value, _replacer, options).toString(options);
     }
-    exports.parse = parse7;
+    exports.parse = parse8;
     exports.parseAllDocuments = parseAllDocuments;
     exports.parseDocument = parseDocument5;
     exports.stringify = stringify2;
@@ -12149,8 +12149,59 @@ register({
   }
 });
 
-// src/migrate/command.ts
-import { resolve as resolve7 } from "node:path";
+// src/init/command.ts
+import { existsSync as existsSync37, readFileSync as readFileSync29 } from "node:fs";
+import { join as join40 } from "node:path";
+
+// src/migrate/install.ts
+var import_yaml10 = __toESM(require_dist(), 1);
+import { execFileSync as execFileSync5 } from "node:child_process";
+import { createHash } from "node:crypto";
+import {
+  chmodSync as chmodSync2,
+  existsSync as existsSync35,
+  mkdirSync as mkdirSync6,
+  readdirSync as readdirSync7,
+  readFileSync as readFileSync27,
+  statSync as statSync11,
+  writeFileSync as writeFileSync10
+} from "node:fs";
+import { dirname as dirname8, join as join38 } from "node:path";
+
+// src/migrate/blocks.ts
+var MARKERS = {
+  markdown: ["<!-- specfold:start -->", "<!-- specfold:end -->"],
+  hash: ["# specfold:start", "# specfold:end"]
+};
+var blockStyle = (path) => path.endsWith(".md") ? "markdown" : "hash";
+var hasBlock = (text3, style) => text3.split("\n").some((l) => l.trim() === MARKERS[style][0]);
+function applyBlock(existing, content, style) {
+  const [start, end] = MARKERS[style];
+  const block = [start, ...content.replace(/\s+$/, "").split("\n"), end];
+  if (existing === void 0 || existing === "") return { text: `${block.join("\n")}
+`, changed: true };
+  const lines3 = existing.split("\n");
+  const from = lines3.findIndex((l) => l.trim() === start);
+  const to = lines3.findIndex((l, i) => i > from && l.trim() === end);
+  const strayEnd = lines3.some((l) => l.trim() === end);
+  let text3;
+  if (from !== -1 && to !== -1) {
+    text3 = [...lines3.slice(0, from), ...block, ...lines3.slice(to + 1)].join("\n");
+  } else if (from !== -1 || strayEnd) {
+    return {
+      conflict: `has a ${from !== -1 ? "specfold:start marker without an end" : "stray specfold:end marker"}`
+    };
+  } else if (style === "markdown") {
+    text3 = `${block.join("\n")}
+
+${existing}`;
+  } else {
+    text3 = `${existing}${existing.endsWith("\n") ? "" : "\n"}
+${block.join("\n")}
+`;
+  }
+  return { text: text3, changed: text3 !== existing };
+}
 
 // src/migrate/detect.ts
 import { existsSync as existsSync34, readFileSync as readFileSync26 } from "node:fs";
@@ -12197,55 +12248,6 @@ function detect(root) {
     sourceGlobs: globs.length > 0 ? globs : ["src/**"],
     globsFallback: globs.length === 0
   };
-}
-
-// src/migrate/install.ts
-var import_yaml10 = __toESM(require_dist(), 1);
-import { execFileSync as execFileSync5 } from "node:child_process";
-import { createHash } from "node:crypto";
-import {
-  chmodSync as chmodSync2,
-  existsSync as existsSync35,
-  mkdirSync as mkdirSync6,
-  readdirSync as readdirSync7,
-  readFileSync as readFileSync27,
-  statSync as statSync11,
-  writeFileSync as writeFileSync10
-} from "node:fs";
-import { dirname as dirname8, join as join38 } from "node:path";
-
-// src/migrate/blocks.ts
-var MARKERS = {
-  markdown: ["<!-- specfold:start -->", "<!-- specfold:end -->"],
-  hash: ["# specfold:start", "# specfold:end"]
-};
-var blockStyle = (path) => path.endsWith(".md") ? "markdown" : "hash";
-function applyBlock(existing, content, style) {
-  const [start, end] = MARKERS[style];
-  const block = [start, ...content.replace(/\s+$/, "").split("\n"), end];
-  if (existing === void 0 || existing === "") return { text: `${block.join("\n")}
-`, changed: true };
-  const lines3 = existing.split("\n");
-  const from = lines3.findIndex((l) => l.trim() === start);
-  const to = lines3.findIndex((l, i) => i > from && l.trim() === end);
-  const strayEnd = lines3.some((l) => l.trim() === end);
-  let text3;
-  if (from !== -1 && to !== -1) {
-    text3 = [...lines3.slice(0, from), ...block, ...lines3.slice(to + 1)].join("\n");
-  } else if (from !== -1 || strayEnd) {
-    return {
-      conflict: `has a ${from !== -1 ? "specfold:start marker without an end" : "stray specfold:end marker"}`
-    };
-  } else if (style === "markdown") {
-    text3 = `${block.join("\n")}
-
-${existing}`;
-  } else {
-    text3 = `${existing}${existing.endsWith("\n") ? "" : "\n"}
-${block.join("\n")}
-`;
-  }
-  return { text: text3, changed: text3 !== existing };
 }
 
 // src/migrate/merge.ts
@@ -12321,6 +12323,14 @@ function literal(text3) {
 // src/migrate/install.ts
 var TOOLS = ["agents", "claude"];
 var MANIFEST_PATH = ".specfold/manifest.json";
+function parseTools(value) {
+  if (value === void 0) return [...TOOLS];
+  const tools = value.split(",").map((t) => t.trim());
+  const unknown = tools.filter((t) => !TOOLS.includes(t));
+  if (unknown.length > 0 || !tools.includes("agents"))
+    throw new UsageError(`--tools takes 'agents' or 'agents,claude', got '${value}'`);
+  return tools;
+}
 var REQUIRED = [CONFIG_FILE, "scripts/specfold.mjs", "openspec/schemas/specfold"];
 var BLOCK_FILES = [
   "AGENTS.md",
@@ -12383,9 +12393,26 @@ function openspecInit(root, tools) {
     throw new EnvError(`openspec init failed${reason ? `: ${reason}` : ""}`);
   }
 }
+var setSourceGlobs = (text3, globs) => text3.replace(/^source_globs:.*$/m, `source_globs: ${JSON.stringify(globs)}`);
+var clearAgentTargets = (text3) => text3.replace(/^(agents:\n(?:#.*\n)*\s+targets:).*$/m, "$1 []");
 function projectSettings(text3, globs, tools) {
-  const out = text3.replace(/^source_globs:.*$/m, `source_globs: ${JSON.stringify(globs)}`);
-  return tools.includes("claude") ? out : out.replace(/^(agents:\n(?:#.*\n)*\s+targets:).*$/m, "$1 []");
+  const out = setSourceGlobs(text3, globs);
+  return tools.includes("claude") ? out : clearAgentTargets(out);
+}
+function manifestText(kitVersion, ref, m) {
+  const sorted = (r) => Object.fromEntries(Object.entries(r).sort(([a], [b]) => a < b ? -1 : 1));
+  return `${JSON.stringify(
+    {
+      manifest_version: 1,
+      kit_version: kitVersion,
+      ...ref ? { ref } : {},
+      files: sorted(m.files),
+      blocks: sorted(m.blocks)
+    },
+    null,
+    2
+  )}
+`;
 }
 function installKit(o) {
   preflight(o);
@@ -12477,68 +12504,9 @@ function installKit(o) {
     conflict("git hooks", error.message);
   }
   const kitVersion = String((0, import_yaml10.parse)(template(CONFIG_FILE)).kit_version ?? "");
-  const sorted = (r) => Object.fromEntries(Object.entries(r).sort(([a], [b]) => a < b ? -1 : 1));
-  const text3 = `${JSON.stringify(
-    {
-      manifest_version: 1,
-      kit_version: kitVersion,
-      ...o.ref ? { ref: o.ref } : {},
-      files: sorted(manifest.files),
-      blocks: sorted(manifest.blocks)
-    },
-    null,
-    2
-  )}
-`;
+  const text3 = manifestText(kitVersion, o.ref, manifest);
   if (writeIfChanged(abs(MANIFEST_PATH), text3)) act(MANIFEST_PATH, "write");
   return result;
-}
-
-// src/migrate/inventory.ts
-import { readFileSync as readFileSync28 } from "node:fs";
-import { join as join39 } from "node:path";
-var AGENT_RULES = [
-  "AGENTS.md",
-  "CLAUDE.md",
-  "GEMINI.md",
-  ".cursorrules",
-  ".windsurfrules",
-  ".clinerules",
-  ".cursor/rules/**",
-  ".github/copilot-instructions.md"
-];
-var SPEC_TOOLS = ["openspec/**", ".specify/**", ".kiro/specs/**"];
-var MARKDOWN = /\.(md|mdx|markdown)$/i;
-var DOC_TEXT = /\.(md|mdx|markdown|rst|adoc|txt)$/i;
-var ADR_FOLDERS = /* @__PURE__ */ new Set(["adr", "adrs", "decisions", "decision-records"]);
-function classify(path) {
-  const parts2 = path.split("/");
-  const name = parts2.at(-1);
-  const folders = parts2.slice(0, -1);
-  if (matchesAny(path, AGENT_RULES)) return "agent-rules";
-  if (matchesAny(path, SPEC_TOOLS)) return "spec-tool";
-  if (MARKDOWN.test(name) && folders.some((f) => ADR_FOLDERS.has(f.toLowerCase()))) return "adr";
-  if (MARKDOWN.test(name) && folders.some((f) => f.toLowerCase() === "wiki")) return "wiki";
-  if (/^readme(\.|$)/i.test(name)) return "readme";
-  if (/^contributing(\.|$)/i.test(name)) return "contributing";
-  if (DOC_TEXT.test(name) && (folders[0] === "docs" || folders[0] === "doc")) return "docs";
-  return void 0;
-}
-var estimateTokens = (text3) => Math.ceil(text3.length / 4);
-function inventory(root) {
-  const tracked = git(root, ["ls-files", "-z"]).split("\0").filter(Boolean).sort();
-  const out = [];
-  for (const path of tracked) {
-    const kind = classify(path);
-    if (!kind) continue;
-    let text3 = "";
-    try {
-      text3 = readFileSync28(join39(root, path), "utf8");
-    } catch {
-    }
-    out.push({ path, kind, tokens: estimateTokens(text3) });
-  }
-  return out;
 }
 
 // src/migrate/repo.ts
@@ -12577,24 +12545,278 @@ function dirtyPaths(root) {
   return git(root, ["status", "--porcelain", "--untracked-files=all"]).split("\n").filter((l) => l !== "").map((l) => l.slice(3)).filter((p) => p !== STATE_PATH);
 }
 
+// src/init/init.ts
+var import_yaml11 = __toESM(require_dist(), 1);
+import { execFileSync as execFileSync6 } from "node:child_process";
+import { existsSync as existsSync36, readFileSync as readFileSync28, writeFileSync as writeFileSync11 } from "node:fs";
+import { join as join39 } from "node:path";
+var OPENSPEC_CONFIG = "openspec/config.yaml";
+var REQUIRED2 = [CONFIG_FILE, OPENSPEC_CONFIG, MANIFEST_PATH];
+var PLACEHOLDER = "<filled by specfold init or sf-migrate>";
+var STACK_LINE = /^(\s*)Stack: (.*)$/m;
+var TEMPLATE_GLOBS = JSON.stringify(["src/**"]);
+var openspecSkills = (tools) => [
+  ".agents/skills/openspec-propose/SKILL.md",
+  ...tools.includes("claude") ? [".claude/skills/openspec-propose/SKILL.md"] : []
+];
+function planInit(o) {
+  const abs = (p) => join39(o.root, p);
+  const missing = REQUIRED2.filter((p) => !existsSync36(abs(p)));
+  if (missing.length > 0)
+    throw new EnvError(
+      `not a Specfold template repository (missing ${missing.join(", ")}): copy the template files, or use sf-migrate for a repository with its own files`
+    );
+  const read = (p) => readFileSync28(abs(p), "utf8");
+  const openspec = openspecSkills(o.tools).some((p) => !existsSync36(abs(p)));
+  if (openspec) {
+    const bin = openspecBinary(o.root);
+    try {
+      execFileSync6(bin.command, ["--version"], { stdio: "ignore" });
+    } catch {
+      throw new EnvError(`openspec is not installed (looked for ${bin.command}); init runs openspec init`);
+    }
+  }
+  const plan = {
+    values: { stack: { value: null, source: "" }, sourceGlobs: { value: [], source: "" } },
+    edits: [],
+    openspec,
+    skipped: [],
+    manifest: ""
+  };
+  const edit = (path, before, after, action) => {
+    if (after !== before) plan.edits.push({ path, action, text: after });
+  };
+  const found = detect(o.root);
+  const config = read(OPENSPEC_CONFIG);
+  const line = STACK_LINE.exec(config);
+  if (!line) {
+    plan.skipped.push({ path: OPENSPEC_CONFIG, reason: "has no 'Stack:' line in its context" });
+    plan.values.stack = { value: o.stack ?? null, source: "no Stack: line" };
+  } else {
+    const current2 = line[2].trim();
+    const detected = found.stack.length > 0 ? found.stack.join(", ") : void 0;
+    const [value2, source2] = o.stack !== void 0 ? [o.stack, "--stack"] : current2 !== PLACEHOLDER ? [current2, "kept"] : detected ? [detected, "detected"] : [null, "not detected; placeholder kept"];
+    plan.values.stack = { value: value2, source: source2 };
+    if (value2 !== null)
+      edit(OPENSPEC_CONFIG, config, config.replace(STACK_LINE, `$1Stack: ${value2}`), "fill");
+  }
+  const settings = read(CONFIG_FILE);
+  const globs = (0, import_yaml11.parse)(settings).source_globs;
+  const current = Array.isArray(globs) ? globs.map(String) : [];
+  const [value, source] = o.sourceGlobs !== void 0 && o.sourceGlobs.length > 0 ? [o.sourceGlobs, "--source-glob"] : JSON.stringify(current) !== TEMPLATE_GLOBS ? [current, "kept"] : found.globsFallback ? [current, "fallback: no code folder found"] : [found.sourceGlobs, "detected"];
+  plan.values.sourceGlobs = { value, source };
+  let nextSettings = source === "kept" ? settings : setSourceGlobs(settings, value);
+  if (!o.tools.includes("claude")) nextSettings = clearAgentTargets(nextSettings);
+  edit(CONFIG_FILE, settings, nextSettings, "fill");
+  let shipped;
+  try {
+    shipped = JSON.parse(read(MANIFEST_PATH));
+  } catch {
+    throw new EnvError(`${MANIFEST_PATH} is not valid JSON: copy it from the template again`);
+  }
+  const blocks = {};
+  for (const p of BLOCK_FILES) {
+    const hash = shipped.blocks?.[p];
+    if (hash === void 0 || p === "CLAUDE.md" && !o.tools.includes("claude")) continue;
+    if (!existsSync36(abs(p))) {
+      plan.skipped.push({ path: p, reason: "missing; left out of the manifest" });
+      continue;
+    }
+    const text3 = read(p);
+    const style = blockStyle(p);
+    if (hasBlock(text3, style)) blocks[p] = hash;
+    else if (sha256(text3) === hash) {
+      edit(p, text3, applyBlock(void 0, text3, style).text, "block");
+      blocks[p] = hash;
+    } else
+      plan.skipped.push({
+        path: p,
+        reason: "differs from the template; no markers added, left out of the manifest"
+      });
+  }
+  plan.manifest = manifestText(shipped.kit_version ?? "", shipped.ref, {
+    files: shipped.files ?? {},
+    blocks
+  });
+  return plan;
+}
+function runInit(o, plan) {
+  const result = { actions: [], skipped: [...plan.skipped], notes: [] };
+  const act = (path, action) => result.actions.push({ path, action });
+  for (const e of plan.edits) {
+    writeFileSync11(join39(o.root, e.path), e.text);
+    act(e.path, e.action);
+  }
+  if (plan.openspec) {
+    const config = readFileSync28(join39(o.root, OPENSPEC_CONFIG), "utf8");
+    openspecInit(o.root, o.tools);
+    writeIfChanged(join39(o.root, OPENSPEC_CONFIG), config);
+    act("openspec/", `run openspec init --tools ${o.tools.join(",")}`);
+  }
+  const settings = loadConfig(o.root);
+  const skills = listSkills(o.root);
+  if (skills) {
+    const links = planLinks(o.root, skills, settings.agentTargets).filter((l) => l.action !== "kept");
+    applyLinks(o.root, links);
+    for (const l of links) act(l.path, l.action);
+  }
+  try {
+    const hooks = installHooks(settings);
+    for (const a of hooks.actions) act(a.path, a.action);
+    if (hooks.next) result.notes.push(hooks.next);
+  } catch (error) {
+    if (!(error instanceof EnvError)) throw error;
+    result.skipped.push({ path: "git hooks", reason: error.message });
+  }
+  if (writeIfChanged(join39(o.root, MANIFEST_PATH), plan.manifest)) act(MANIFEST_PATH, "write");
+  return result;
+}
+
+// src/init/command.ts
+register({
+  name: "init",
+  summary: "finish setting up a repository made from the template: settings, OpenSpec skills, links, hooks",
+  usage: "specfold init [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--dry-run] [--json]",
+  options: {
+    stack: { type: "string" },
+    "source-glob": { type: "string", multiple: true },
+    tools: { type: "string" },
+    "dry-run": { type: "boolean" },
+    json: { type: "boolean" }
+  },
+  run: ({ io, values, positionals }) => {
+    if (positionals.length > 0) throw new UsageError(`unexpected argument '${positionals[0]}'`);
+    const root = gitRoot(io.cwd);
+    const options = {
+      root,
+      tools: parseTools(values.tools),
+      stack: values.stack,
+      sourceGlobs: values["source-glob"]
+    };
+    const plan = planInit(options);
+    const dryRun = values["dry-run"] === true;
+    const { stack, sourceGlobs } = plan.values;
+    const valueLines = [
+      `stack: ${stack.value ?? "unknown"} (${stack.source})`,
+      `source globs: ${sourceGlobs.value.join(", ")} (${sourceGlobs.source})`
+    ];
+    const skippedLines = (skipped) => skipped.map((s) => `${s.path}: skipped: ${s.reason}`);
+    const filled2 = { stack: stack.value, source_globs: sourceGlobs.value };
+    if (dryRun) {
+      const manifestPath = join40(root, MANIFEST_PATH);
+      const manifestChanges = !existsSync37(manifestPath) || readFileSync29(manifestPath, "utf8") !== plan.manifest;
+      const actions = [
+        ...plan.edits.map((e) => ({ path: e.path, action: e.action })),
+        ...plan.openspec ? [{ path: "openspec/", action: `run openspec init --tools ${options.tools.join(",")}` }] : [],
+        { path: ".agents/skills", action: "run agents sync" },
+        { path: "git hooks", action: "run hooks install" },
+        ...manifestChanges ? [{ path: MANIFEST_PATH, action: "write" }] : []
+      ];
+      if (values.json)
+        io.stdout(
+          `${JSON.stringify({ ok: true, dry_run: true, values: filled2, actions, skipped: plan.skipped, notes: [] }, null, 2)}
+`
+        );
+      else
+        io.stdout(
+          `${[
+            ...valueLines,
+            ...actions.map((a) => `${a.path}: would ${a.action}`),
+            ...skippedLines(plan.skipped),
+            "init: dry run, nothing written"
+          ].join("\n")}
+`
+        );
+      return 0;
+    }
+    const result = runInit(options, plan);
+    if (values.json) {
+      io.stdout(`${JSON.stringify({ ok: true, dry_run: false, values: filled2, ...result }, null, 2)}
+`);
+      return 0;
+    }
+    io.stdout(
+      `${[
+        ...valueLines,
+        ...result.actions.map((a) => `${a.path}: ${a.action}`),
+        ...skippedLines(result.skipped),
+        result.actions.length === 0 ? "init: everything is up to date" : `init: ${plural(result.actions.length, "change")}`,
+        ...result.notes.map((n) => `then: ${n}`)
+      ].join("\n")}
+`
+    );
+    return 0;
+  }
+});
+
+// src/migrate/command.ts
+import { resolve as resolve7 } from "node:path";
+
+// src/migrate/inventory.ts
+import { readFileSync as readFileSync30 } from "node:fs";
+import { join as join41 } from "node:path";
+var AGENT_RULES = [
+  "AGENTS.md",
+  "CLAUDE.md",
+  "GEMINI.md",
+  ".cursorrules",
+  ".windsurfrules",
+  ".clinerules",
+  ".cursor/rules/**",
+  ".github/copilot-instructions.md"
+];
+var SPEC_TOOLS = ["openspec/**", ".specify/**", ".kiro/specs/**"];
+var MARKDOWN = /\.(md|mdx|markdown)$/i;
+var DOC_TEXT = /\.(md|mdx|markdown|rst|adoc|txt)$/i;
+var ADR_FOLDERS = /* @__PURE__ */ new Set(["adr", "adrs", "decisions", "decision-records"]);
+function classify(path) {
+  const parts2 = path.split("/");
+  const name = parts2.at(-1);
+  const folders = parts2.slice(0, -1);
+  if (matchesAny(path, AGENT_RULES)) return "agent-rules";
+  if (matchesAny(path, SPEC_TOOLS)) return "spec-tool";
+  if (MARKDOWN.test(name) && folders.some((f) => ADR_FOLDERS.has(f.toLowerCase()))) return "adr";
+  if (MARKDOWN.test(name) && folders.some((f) => f.toLowerCase() === "wiki")) return "wiki";
+  if (/^readme(\.|$)/i.test(name)) return "readme";
+  if (/^contributing(\.|$)/i.test(name)) return "contributing";
+  if (DOC_TEXT.test(name) && (folders[0] === "docs" || folders[0] === "doc")) return "docs";
+  return void 0;
+}
+var estimateTokens = (text3) => Math.ceil(text3.length / 4);
+function inventory(root) {
+  const tracked = git(root, ["ls-files", "-z"]).split("\0").filter(Boolean).sort();
+  const out = [];
+  for (const path of tracked) {
+    const kind = classify(path);
+    if (!kind) continue;
+    let text3 = "";
+    try {
+      text3 = readFileSync30(join41(root, path), "utf8");
+    } catch {
+    }
+    out.push({ path, kind, tokens: estimateTokens(text3) });
+  }
+  return out;
+}
+
 // src/migrate/state.ts
-import { existsSync as existsSync36, mkdirSync as mkdirSync7, readFileSync as readFileSync29, writeFileSync as writeFileSync11 } from "node:fs";
-import { dirname as dirname9, join as join40 } from "node:path";
+import { existsSync as existsSync38, mkdirSync as mkdirSync7, readFileSync as readFileSync31, writeFileSync as writeFileSync12 } from "node:fs";
+import { dirname as dirname9, join as join42 } from "node:path";
 var STEPS = ["start", "inventory", "plan", "install", "convert", "seed", "report"];
 var MARKABLE = ["plan", "convert", "seed", "report"];
 function readState(root) {
-  const path = join40(root, STATE_PATH);
-  if (!existsSync36(path)) return { state_version: 1, default_branch: null, base: null, steps: {} };
+  const path = join42(root, STATE_PATH);
+  if (!existsSync38(path)) return { state_version: 1, default_branch: null, base: null, steps: {} };
   try {
-    return JSON.parse(readFileSync29(path, "utf8"));
+    return JSON.parse(readFileSync31(path, "utf8"));
   } catch (error) {
     throw new EnvError(`${STATE_PATH}: ${error.message}`);
   }
 }
 function writeState(root, state) {
-  const path = join40(root, STATE_PATH);
+  const path = join42(root, STATE_PATH);
   mkdirSync7(dirname9(path), { recursive: true });
-  writeFileSync11(path, `${JSON.stringify(state, null, 2)}
+  writeFileSync12(path, `${JSON.stringify(state, null, 2)}
 `);
 }
 function markStep(state, step, now) {
@@ -12612,14 +12834,6 @@ var NEXT = {
   seed: "seed concepts from the code, then specfold migrate mark seed",
   report: "validate and write .specfold/migration/report.md, then specfold migrate mark report"
 };
-function parseTools(value) {
-  if (value === void 0) return [...TOOLS];
-  const tools = value.split(",").map((t) => t.trim());
-  const unknown = tools.filter((t) => !TOOLS.includes(t));
-  if (unknown.length > 0 || !tools.includes("agents"))
-    throw new UsageError(`--tools takes 'agents' or 'agents,claude', got '${value}'`);
-  return tools;
-}
 var head = (root) => {
   try {
     return git(root, ["rev-parse", "--verify", "--quiet", "HEAD"]).trim();
@@ -12931,19 +13145,19 @@ register({
 });
 
 // src/sync/command.ts
-import { existsSync as existsSync37, readdirSync as readdirSync8, writeFileSync as writeFileSync12 } from "node:fs";
-import { join as join41 } from "node:path";
+import { existsSync as existsSync39, readdirSync as readdirSync8, writeFileSync as writeFileSync13 } from "node:fs";
+import { join as join43 } from "node:path";
 var NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 var ARCHIVED2 = /^(\d{4}-\d{2}-\d{2})-([a-z0-9]+(?:-[a-z0-9]+)*)$/;
 function resolveArchived(config, arg) {
   if (!arg) throw new UsageError("missing change name");
-  const archive = join41(config.root, "openspec", "changes", "archive");
-  if (ARCHIVED2.test(arg) && existsSync37(join41(archive, arg))) return arg;
+  const archive = join43(config.root, "openspec", "changes", "archive");
+  if (ARCHIVED2.test(arg) && existsSync39(join43(archive, arg))) return arg;
   if (!NAME.test(arg)) throw new UsageError(`'${arg}' is not a change name or archived change id`);
-  const ids = existsSync37(archive) ? readdirSync8(archive).filter((d) => ARCHIVED2.exec(d)?.[2] === arg).sort() : [];
+  const ids = existsSync39(archive) ? readdirSync8(archive).filter((d) => ARCHIVED2.exec(d)?.[2] === arg).sort() : [];
   const newest = ids.at(-1);
   if (newest) return newest;
-  if (existsSync37(join41(config.root, "openspec", "changes", arg)))
+  if (existsSync39(join43(config.root, "openspec", "changes", arg)))
     throw new EnvError(`change '${arg}' is not archived yet: run 'openspec archive ${arg}' first`);
   throw new EnvError(`unknown change '${arg}': no archived folder openspec/changes/archive/<date>-${arg}/`);
 }
@@ -12981,7 +13195,7 @@ register({
       if (needsLog) {
         const count = (kind) => ops.filter((o) => o.op === kind).length;
         const entry = `* **Change**: ${id}: created ${count("create")}, updated ${count("update")}, deprecated ${count("deprecate")}`;
-        writeFileSync12(logPath, insertEntry(logText, localDate(), entry));
+        writeFileSync13(logPath, insertEntry(logText, localDate(), entry));
       }
     }
     if (needsLog) actions.push({ path: logRel, action: "add log entry" });
@@ -13000,8 +13214,8 @@ register({
 });
 
 // src/tasks/progress-command.ts
-import { existsSync as existsSync38, readdirSync as readdirSync9, readFileSync as readFileSync30 } from "node:fs";
-import { join as join42 } from "node:path";
+import { existsSync as existsSync40, readdirSync as readdirSync9, readFileSync as readFileSync32 } from "node:fs";
+import { join as join44 } from "node:path";
 
 // src/tasks/progress.ts
 function progressOf(tasks) {
@@ -13025,12 +13239,12 @@ function progressOf(tasks) {
 
 // src/tasks/progress-command.ts
 function readTasks(config, change) {
-  const path = join42(changeDir(config, change), "tasks.md");
-  return existsSync38(path) ? parseTasks(readFileSync30(path, "utf8")) : void 0;
+  const path = join44(changeDir(config, change), "tasks.md");
+  return existsSync40(path) ? parseTasks(readFileSync32(path, "utf8")) : void 0;
 }
 function activeChanges2(config) {
-  const dir = join42(config.root, "openspec", "changes");
-  if (!existsSync38(dir)) return [];
+  const dir = join44(config.root, "openspec", "changes");
+  if (!existsSync40(dir)) return [];
   return readdirSync9(dir, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort();
 }
 function commitsByTask(config, change) {
@@ -13236,11 +13450,11 @@ register({
 });
 
 // src/verify/command.ts
-import { existsSync as existsSync39, readFileSync as readFileSync31, statSync as statSync12, writeFileSync as writeFileSync13 } from "node:fs";
-import { join as join43, relative as relative20, resolve as resolve8, sep as sep20 } from "node:path";
+import { existsSync as existsSync41, readFileSync as readFileSync33, statSync as statSync12, writeFileSync as writeFileSync14 } from "node:fs";
+import { join as join45, relative as relative20, resolve as resolve8, sep as sep20 } from "node:path";
 function check(arg, root, bundleRoot) {
   const inBundle = [resolve8(root, arg), resolve8(bundleRoot, arg)].map((abs) => relative20(bundleRoot, abs).split(sep20).join("/")).filter((rel2) => rel2 !== "" && !rel2.startsWith("..") && !rel2.startsWith("/"));
-  const rel = inBundle.find((r) => existsSync39(join43(bundleRoot, r)) && statSync12(join43(bundleRoot, r)).isFile());
+  const rel = inBundle.find((r) => existsSync41(join45(bundleRoot, r)) && statSync12(join45(bundleRoot, r)).isFile());
   if (!rel)
     return { arg, reason: inBundle.length === 0 ? "outside the bundle" : "no such file in the bundle" };
   if (!rel.endsWith(".md") || !isConcept(rel))
@@ -13272,10 +13486,10 @@ register({
     if (refused.length === 0) {
       const at = isoWithOffset(/* @__PURE__ */ new Date());
       const written = targets.map((t) => {
-        const abs = join43(bundleRoot, t.rel);
-        return { abs, text: verifyText(readFileSync31(abs, "utf8"), login, at) };
+        const abs = join45(bundleRoot, t.rel);
+        return { abs, text: verifyText(readFileSync33(abs, "utf8"), login, at) };
       });
-      for (const w of written) writeFileSync13(w.abs, w.text);
+      for (const w of written) writeFileSync14(w.abs, w.text);
       verified.push(...targets.map(shown));
     }
     const ok2 = refused.length === 0;

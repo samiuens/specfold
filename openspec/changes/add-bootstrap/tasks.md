@@ -25,7 +25,7 @@ agent: implementer
   - Done when: scenarios not-a-template-repository, typescript-project, flag-wins and preview pass in `init.test.ts`
 - [x] 2.2 Apply the plan: settings, OpenSpec skills, markers, links, hooks and the manifest
   - Done when: scenarios fresh-template-repository and rerun pass in `init.test.ts`, and an edited `AGENTS.md` is reported as skipped
-- [ ] 2.3 Register `specfold init` and rebuild the bundle and its copies
+- [x] 2.3 Register `specfold init` and rebuild the bundle and its copies
   - Done when: `node scripts/specfold.mjs init --help` prints the usage and the template and sample app copies equal `scripts/specfold.mjs`
 
 ## 3. Bootstrap prompt
