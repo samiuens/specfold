@@ -9,7 +9,7 @@ scenarios: [csv-export#header-and-rows, csv-export#empty-due, csv-export#comma-q
 agent: implementer
 ```
 
-- [ ] 1.1 Add `toCsv(items)` with quoting
+- [x] 1.1 Add `toCsv(items)` with quoting
   - Done when: the five csv-export scenarios pass in `test/export-csv.test.js` and `npm test` passes
 
 ## 2. JSON import
