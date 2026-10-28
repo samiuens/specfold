@@ -80,3 +80,38 @@ jobs:
           for dir in openspec/changes/archive/*/; do
             node ../../scripts/specfold.mjs sync "$(basename "$dir")" --dry-run | tee /dev/stderr | grep -q "nothing to change" || { echo "::error::$(basename "$dir") is not fully synced; run specfold sync"; exit 1; }
           done
+
+  # Upgrades repositories built from the previous two releases to this PR's build. It always reports,
+  # and skips its work when the PR leaves the kit's payload alone, so it can become a required check.
+  # see knowledge: /architecture/upgrade-flow.md
+  upgrade-fixtures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Kit payload changed
+        id: scope
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ "$EVENT" != pull_request ] || git diff --name-only "$BASE"...HEAD | grep -qE '^(template/|upgrade/|tools/specfold/|scripts/)'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "No changes to the kit's payload; nothing to upgrade."
+          fi
+      - uses: actions/setup-node@v4
+        if: steps.scope.outputs.run == 'true'
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install
+        if: steps.scope.outputs.run == 'true'
+        run: npm ci --ignore-scripts
+      - name: Upgrade fixtures from the previous two releases
+        if: steps.scope.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node tools/specfold/upgrade-fixtures.mjs

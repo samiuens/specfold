@@ -39,7 +39,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 3.1 Upgrade fixtures from the previous two releases to the PR's build
+- [x] 3.1 Upgrade fixtures from the previous two releases to the PR's build
   - Done when: `upgrade-fixtures.mjs` builds, edits and upgrades one fixture per release and fails on an unexpected file or a lost team edit, and job `upgrade-fixtures` runs it on PRs touching the kit's payload and reports green otherwise
 
 ## 4. Template, settings and docs
