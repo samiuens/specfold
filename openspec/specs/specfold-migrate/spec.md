@@ -74,14 +74,14 @@ The migrate commands SHALL record finished steps in `.specfold/migration/state.j
 - **THEN** the file is unchanged, the output names it as a conflict, and the command exits with 1
 
 ### Requirement: Managed blocks
-`migrate install` SHALL put Specfold's content for `AGENTS.md`, `CLAUDE.md`, `.github/pull_request_template.md`, `.gitignore` and `.github/CODEOWNERS` between `specfold:start` and `specfold:end` markers, creating a missing file, keeping all text outside the markers, and replacing only the block on a rerun.
+`migrate install` SHALL put Specfold's content for `AGENTS.md`, `CLAUDE.md`, `.github/pull_request_template.md`, `.gitignore`, `.github/CODEOWNERS`, `.gitattributes` and `.worktreeinclude` between `specfold:start` and `specfold:end` markers, creating a missing file, keeping all text outside the markers, and replacing only the block on a rerun.
 
 #### Scenario: Existing AGENTS.md
 - **WHEN** `AGENTS.md` holds the team's own rules and install runs twice
 - **THEN** `AGENTS.md` starts with one Specfold block and still holds the team's rules unchanged after it
 
 ### Requirement: Claude settings merge
-With the `claude` tool, `migrate install` SHALL add each Specfold hook from the template's `.claude/settings.json` whose command is not yet present, and each `permissions.deny` rule of the template that is not yet present, to the repository's settings, keeping every other key and rule, and SHALL report a file that is not valid JSON without changing it.
+With the `claude` tool, `migrate install` SHALL add each Specfold hook from the template's `.claude/settings.json` whose command is not yet present, each `permissions.deny` rule of the template that is not yet present, each `env` entry whose name is not yet set and each other top-level key the repository's settings lack, keeping every other key, rule and value, and SHALL report a file that is not valid JSON without changing it.
 
 #### Scenario: Existing permissions
 - **WHEN** `.claude/settings.json` holds only a `permissions` block
@@ -90,6 +90,10 @@ With the `claude` tool, `migrate install` SHALL add each Specfold hook from the 
 #### Scenario: Deny rules merged
 - **WHEN** `.claude/settings.json` holds `permissions.deny: ["Read(./.env)"]`
 - **THEN** after install `permissions.deny` starts with `Read(./.env)` followed by each of the template's deny rules once
+
+#### Scenario: Worktree base kept
+- **WHEN** `.claude/settings.json` sets `worktree.baseRef` to `"fresh"`
+- **THEN** after install it still says `"fresh"`, and a repository without a `worktree` key gets the template's `"head"`
 
 ### Requirement: Existing OpenSpec setup
 When `openspec/config.yaml` exists, `migrate install` SHALL add the `specfold` schema, set `schema: specfold`, keep `context`, every existing rules key, specs and changes, and add a Specfold rules key only where it is missing. Without `openspec/`, it SHALL run `openspec init --tools <tools>` and then write the template's `config.yaml`.
