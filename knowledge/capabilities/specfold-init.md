@@ -31,7 +31,6 @@ A repository made with "Use this template" holds every kit file but still has pl
 - **Never stops halfway on a known issue.** A foreign `core.hooksPath` or an edited block file is reported as skipped with exit 0; only a repository without the template files or a missing OpenSpec is exit 2, before any write.
 - **A default subagent limit.** Init sets the personal limit to 3 when none exists, or to `--max-subagents`; a limit someone already set stays ([specfold parallel](/capabilities/specfold-parallel.md)).
 - **`--dry-run` writes nothing** and lists the values and every step it would take.
-
 - **Upgrade PRs are opt-in.** `--upgrade-workflow` copies the inactive `.specfold/workflows/specfold-upgrade.yml` to `.github/workflows/`, records it in the manifest so upgrades keep it current, and prints the `SPECFOLD_TOKEN` setup. A plain template copy never runs it ([turn on upgrade PRs](/runbooks/turn-on-upgrade-prs.md)).
 
 # Related
