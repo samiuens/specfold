@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Kit repo only: checks release versions, packs the template tarball and prints upgrade notes.
+// Kit repo only: checks release versions, packs the template tarball, prints upgrade notes and indexes a mirror.
 // Run from the kit root. see knowledge: /capabilities/specfold-release.md
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -9,6 +9,7 @@ import {
   lstatSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   readlinkSync,
   rmSync,
@@ -19,7 +20,8 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
-const USAGE = "usage: node tools/specfold/release.mjs check | pack <version> [--out <dir>] | notes <version>";
+const USAGE =
+  "usage: node tools/specfold/release.mjs check | pack <version> [--out <dir>] | notes <version> | index <dir>";
 
 class Exit extends Error {
   constructor(code, message) {
@@ -93,9 +95,48 @@ function pack(root, version, outDir, out) {
   return 0;
 }
 
-function notes(root, version, out) {
+const notesText = (root, version) => {
   const file = join(root, "upgrade/notes", `${version}.md`);
-  out(`## Upgrade notes\n\n${existsSync(file) ? read(file).trimEnd() : "No manual steps."}\n`);
+  return `## Upgrade notes\n\n${existsSync(file) ? read(file).trimEnd() : "No manual steps."}\n`;
+};
+
+function notes(root, version, out) {
+  out(notesText(root, version));
+  return 0;
+}
+
+/** Orders `a` before `b` when it is the newer version; a prerelease sorts below its final release. */
+function newerFirst(a, b) {
+  const split = (v) => {
+    const [core, pre] = v.split("-", 2);
+    return { core: core.split(".").map(Number), pre: pre?.split(".") };
+  };
+  const x = split(a);
+  const y = split(b);
+  for (let i = 0; i < 3; i++) if (x.core[i] !== y.core[i]) return y.core[i] - x.core[i];
+  if (!x.pre || !y.pre) return (x.pre ? 1 : 0) - (y.pre ? 1 : 0);
+  for (let i = 0; i < Math.max(x.pre.length, y.pre.length); i++) {
+    const [p, q] = [x.pre[i], y.pre[i]];
+    if (p === q) continue;
+    if (p === undefined || q === undefined) return p === undefined ? 1 : -1;
+    const numeric = /^\d+$/.test(p) && /^\d+$/.test(q);
+    return numeric ? Number(q) - Number(p) : q < p ? -1 : 1;
+  }
+  return 0;
+}
+
+/** Writes `<dir>/releases.json`, the index a `source.url` mirror serves. */
+function index(root, dir, out) {
+  if (!existsSync(dir)) throw new Exit(2, `${dir} does not exist`);
+  const versions = readdirSync(dir)
+    .map((f) => /^specfold-template-v(.+)\.tar\.gz$/.exec(f)?.[1])
+    .filter(Boolean)
+    .sort(newerFirst);
+  const releases = versions.map((version) => ({ version, notes: notesText(root, version) }));
+  writeFileSync(join(dir, "releases.json"), `${JSON.stringify({ releases }, null, 2)}\n`);
+  out(
+    `indexed ${versions.length} release${versions.length === 1 ? "" : "s"} in ${join(dir, "releases.json")}\n`,
+  );
   return 0;
 }
 
@@ -108,11 +149,12 @@ export function release(argv, root, out) {
   if (sub === "pack" && args.length === 1 && (outAt === -1 || rest[outAt + 1]))
     return pack(root, args[0], outDir, out);
   if (sub === "notes" && args.length === 1) return notes(root, args[0], out);
+  if (sub === "index" && args.length === 1) return index(root, resolve(root, args[0]), out);
   throw new Exit(
     2,
-    ["check", "pack", "notes"].includes(sub)
+    ["check", "pack", "notes", "index"].includes(sub)
       ? USAGE
-      : `${sub ? `unknown subcommand '${sub}'` : "missing subcommand"}: check, pack or notes\n${USAGE}`,
+      : `${sub ? `unknown subcommand '${sub}'` : "missing subcommand"}: check, pack, notes or index\n${USAGE}`,
   );
 }
 
