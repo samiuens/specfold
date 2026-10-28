@@ -5,13 +5,17 @@ description: Why a repository made from the template needs init, and how it fill
 status: draft
 spec: openspec/specs/specfold-init/spec.md
 resource: ../../openspec/specs/specfold-init/spec.md
-change: 2026-10-28-add-bootstrap
+change: 2026-10-28-add-specfold-wt
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T08:14:46+01:00 }
 sources:
   - id: proposal-2026-10-28-add-bootstrap
     resource: ../../openspec/changes/archive/2026-10-28-add-bootstrap/proposal.md
   - id: design-2026-10-28-add-bootstrap
     resource: ../../openspec/changes/archive/2026-10-28-add-bootstrap/design.md
+  - id: proposal-2026-10-28-add-specfold-wt
+    resource: ../../openspec/changes/archive/2026-10-28-add-specfold-wt/proposal.md
+  - id: design-2026-10-28-add-specfold-wt
+    resource: ../../openspec/changes/archive/2026-10-28-add-specfold-wt/design.md
 ---
 
 # Why
