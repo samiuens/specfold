@@ -24,6 +24,7 @@
 * **Retro**: add-specfold-upgrade: 0 answers
 * **Change**: 2026-10-28-fix-upgrade-follow-ups: created 0, updated 5, deprecated 0
 * **Retro**: fix-upgrade-follow-ups: 0 answers
+* **Change**: 2026-10-28-add-upgrade-workflow: created 1, updated 6, deprecated 0
 
 ## 2026-10-27
 
