@@ -50,6 +50,8 @@ export interface Config {
   source: { path: string } | { url: string } | { github: string } | undefined;
   /** `upgrade.commit_message`, with `{version}` as a placeholder. */
   upgradeCommitMessage: string;
+  /** `upgrade.reminder`: whether the session-start hook checks for a newer release once a day. */
+  upgradeReminder: boolean;
 }
 
 export const DEFAULT_UPGRADE_MESSAGE = "chore: upgrade Specfold to v{version}";
@@ -212,6 +214,7 @@ export function loadConfig(root: string): Config {
       typeof upgrade.commit_message === "string" && upgrade.commit_message.trim() !== ""
         ? upgrade.commit_message
         : DEFAULT_UPGRADE_MESSAGE,
+    upgradeReminder: upgrade.reminder !== false,
   };
 }
 

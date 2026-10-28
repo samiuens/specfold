@@ -9,7 +9,7 @@ scenarios: [specfold-hooks#release-waiting, specfold-hooks#offline, specfold-hoo
 agent: implementer
 ```
 
-- [ ] 1.1 Read `upgrade.reminder` and give release sources a time limit
+- [x] 1.1 Read `upgrade.reminder` and give release sources a time limit
   - Done when: `repo.test.ts` covers the default and `false`, and a source query past its limit fails with an environment error
 - [ ] 1.2 Remind of a waiting release at session start, at most once a day
   - Done when: scenarios release-waiting, offline and turned-off pass in `upgrade-reminder.test.ts`

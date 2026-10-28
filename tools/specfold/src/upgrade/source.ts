@@ -27,14 +27,19 @@ export interface SourceOptions {
   env?: NodeJS.ProcessEnv;
   /** Use the gh CLI for `github` sources; decided by the caller with `ghLoggedIn()`. */
   gh?: boolean;
+  /** Gives up on each request or gh call after this many milliseconds. */
+  timeoutMs?: number;
 }
 
 export const tarballName = (version: string) => `specfold-template-v${version}.tar.gz`;
 
-/** Whether `gh` is installed and logged in to github.com. */
-export function ghLoggedIn(): boolean {
+/** Whether `gh` is installed and logged in to github.com, answering within `timeoutMs` when given. */
+export function ghLoggedIn(timeoutMs?: number): boolean {
   try {
-    execFileSync("gh", ["auth", "status", "--hostname", "github.com"], { stdio: "ignore" });
+    execFileSync("gh", ["auth", "status", "--hostname", "github.com"], {
+      stdio: "ignore",
+      ...(timeoutMs ? { timeout: timeoutMs } : {}),
+    });
     return true;
   } catch {
     return false;
@@ -56,10 +61,13 @@ function fromIndex(data: unknown, where: string): Map<string, string> {
   );
 }
 
-async function get(url: string, headers: Record<string, string> = {}): Promise<Response> {
+async function get(url: string, headers: Record<string, string> = {}, timeoutMs?: number): Promise<Response> {
   let response: Response;
   try {
-    response = await fetch(url, { headers: { "user-agent": "specfold", ...headers } });
+    response = await fetch(url, {
+      headers: { "user-agent": "specfold", ...headers },
+      ...(timeoutMs ? { signal: AbortSignal.timeout(timeoutMs) } : {}),
+    });
   } catch (error) {
     throw new EnvError(`could not reach ${url}: ${(error as Error).message}`);
   }
@@ -69,6 +77,20 @@ async function get(url: string, headers: Record<string, string> = {}): Promise<R
 
 async function save(url: string, file: string, headers: Record<string, string> = {}): Promise<void> {
   writeFileSync(file, Buffer.from(await (await get(url, headers)).arrayBuffer()));
+}
+
+/** A JSON body, within `timeoutMs` when given; the body is read under the same limit. */
+async function getJson(
+  url: string,
+  headers: Record<string, string> = {},
+  timeoutMs?: number,
+): Promise<unknown> {
+  try {
+    return await (await get(url, headers, timeoutMs)).json();
+  } catch (error) {
+    if (error instanceof EnvError) throw error;
+    throw new EnvError(`could not read ${url}: ${(error as Error).message}`);
+  }
 }
 
 function pathSource(dir: string): ReleaseSource {
@@ -97,11 +119,11 @@ function pathSource(dir: string): ReleaseSource {
   };
 }
 
-function urlSource(base: string): ReleaseSource {
+function urlSource(base: string, timeoutMs?: number): ReleaseSource {
   const root = base.replace(/\/+$/, "");
   let cached: Map<string, string> | undefined;
   const index = async () => {
-    cached ??= fromIndex(await (await get(`${root}/releases.json`)).json(), `${root}/releases.json`);
+    cached ??= fromIndex(await getJson(`${root}/releases.json`, {}, timeoutMs), `${root}/releases.json`);
     return cached;
   };
   return {
@@ -132,7 +154,11 @@ function githubSource(repo: string, o: SourceOptions): ReleaseSource {
     ...(token ? { authorization: `Bearer ${token}` } : {}),
   });
   const gh = (args: string[]) =>
-    execFileSync("gh", [...args, "--repo", repo], { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
+    execFileSync("gh", [...args, "--repo", repo], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+      ...(o.timeoutMs ? { timeout: o.timeoutMs } : {}),
+    });
   let cached: GithubRelease[] | undefined;
   const releases = async (): Promise<GithubRelease[]> => {
     if (cached) return cached;
@@ -142,11 +168,8 @@ function githubSource(repo: string, o: SourceOptions): ReleaseSource {
       }[];
       cached = listed.map((r) => ({ tag_name: r.tagName }));
     } else {
-      const response = await get(
-        `${api}/repos/${repo}/releases?per_page=100`,
-        headers("application/vnd.github+json"),
-      );
-      cached = (await response.json()) as GithubRelease[];
+      const url = `${api}/repos/${repo}/releases?per_page=100`;
+      cached = (await getJson(url, headers("application/vnd.github+json"), o.timeoutMs)) as GithubRelease[];
     }
     return cached;
   };
@@ -185,7 +208,7 @@ function githubSource(repo: string, o: SourceOptions): ReleaseSource {
 /** The release source for `source`; a relative `path` is resolved against the Specfold root. */
 export function openSource(source: Source, root: string, o: SourceOptions = {}): ReleaseSource {
   if ("path" in source) return pathSource(resolve(root, source.path));
-  if ("url" in source) return urlSource(source.url);
+  if ("url" in source) return urlSource(source.url, o.timeoutMs);
   return githubSource(source.github, o);
 }
 
