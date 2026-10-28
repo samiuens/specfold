@@ -25,6 +25,7 @@ A repository made with "Use this template" holds every kit file but still has pl
 - **The template ships its manifest.** `template/.specfold/manifest.json` is what an install into an empty repository records, kept current by a vitest file snapshot. Init compares the shared files against its block hashes: an untouched file gets the [managed block](/decisions/managed-blocks.md) markers around its whole text, an edited one is reported as skipped and left out of the manifest, so an upgrade never treats the user's text as kit text. Its file hashes stay as the upgrade base.
 - **OpenSpec only when missing.** `openspec init` runs only while the OpenSpec skills are absent; it keeps the template's `config.yaml` (checked with 1.15.0), and init restores the file anyway if a run changed it.
 - **Never stops halfway on a known issue.** A foreign `core.hooksPath` or an edited block file is reported as skipped with exit 0; only a repository without the template files or a missing OpenSpec is exit 2, before any write.
+- **A default subagent limit.** Init sets the personal limit to 3 when none exists, or to `--max-subagents`; a limit someone already set stays ([specfold parallel](/capabilities/specfold-parallel.md)).
 - **`--dry-run` writes nothing** and lists the values and every step it would take.
 
 # Related
