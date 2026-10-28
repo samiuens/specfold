@@ -28,7 +28,7 @@ Who does what:
 - `spec-writer` writes `tasks.md` in this shape.
 - `planner` turns it into the execution plan (dependency graph, parallel groups) that the user approves at the end of `sf-interview`.
 - `plan-critic` flags groups too big for one subagent, tasks without a done check and hidden dependencies.
-- The orchestrator dispatches one group per implementer with a compact **task packet**: the group's tasks, owned files, linked scenarios, the relevant part of `brief.md` and the knowledge concepts linked from the proposal.
+- The orchestrator dispatches one group per implementer with a compact **task packet**: the group's tasks, owned files, linked scenarios, the relevant part of `brief.md` and the knowledge concepts linked from the proposal. `specfold tasks packet <change> <group>` builds it, so every tool hands over the same text (since `add-subagent-roles`).
 - **Split instead of grow:** an implementer that needs files outside its group or clearly exceeds the limits stops and returns a split proposal. The orchestrator has `spec-writer` update `tasks.md` (asking the user if scope changes) before re-dispatching. Implementers never widen their own scope.
 - Without parallelism (`specfold parallel set 1`, or tools without subagents) the same groups run one after another.
 

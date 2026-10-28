@@ -71,7 +71,7 @@ scenarios: []
 agent: knowledge-curator
 ```
 
-- [ ] 6.1 Write the concept updates listed in `knowledge.md`, and check the role prompts against them
+- [x] 6.1 Write the concept updates listed in `knowledge.md`, and check the role prompts against them
   - Done when: `node scripts/specfold.mjs validate` exits 0
 
 ## Workflow follow-up
