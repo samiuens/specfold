@@ -1,5 +1,6 @@
 import { execFileSync, spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { write } from "./gate-helpers.ts";
@@ -46,5 +47,30 @@ describe("release.mjs", () => {
       code: 0,
       stdout: "versions agree: 0.1.0-rc.1\n",
     });
+  });
+
+  // spec: specfold-release#pack-a-release
+  it("packs the template and upgrade/ below one top folder, with a matching sha256 file", () => {
+    const root = kit("0.1.0-rc.1");
+    const result = release(root, "pack", "0.1.0-rc.1", "--out", "dist");
+    expect(result.code).toBe(0);
+    const tarball = join(root, "dist/specfold-template-v0.1.0-rc.1.tar.gz");
+    const listing = execFileSync("tar", ["-tzf", tarball], { encoding: "utf8" }).split("\n");
+    expect(listing).toContain("specfold-template-v0.1.0-rc.1/scripts/specfold.mjs");
+    expect(listing).toContain("specfold-template-v0.1.0-rc.1/upgrade/README.md");
+    expect(listing).toContain("specfold-template-v0.1.0-rc.1/specfold.yaml");
+    const hash = createHash("sha256").update(readFileSync(tarball)).digest("hex");
+    expect(readFileSync(`${tarball}.sha256`, "utf8")).toBe(`${hash}  specfold-template-v0.1.0-rc.1.tar.gz\n`);
+  });
+
+  // spec: specfold-release#version-mismatch
+  it("refuses to pack another version and writes nothing", () => {
+    const root = kit("0.1.0-rc.1");
+    const result = release(root, "pack", "0.2.0", "--out", "dist");
+    expect(result.code).toBe(2);
+    expect(result.stderr).toContain("the package version is 0.1.0-rc.1, not 0.2.0");
+    expect(existsSync(join(root, "dist"))).toBe(false);
+    expect(release(kit("0.1.0-rc.1", "0.0.0"), "pack", "0.1.0-rc.1").code).toBe(2);
+    expect(readdirSync(root)).not.toContain("dist");
   });
 });
