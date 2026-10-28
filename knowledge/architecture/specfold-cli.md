@@ -39,6 +39,7 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/trace/` | the `trace` command: scenario ids from main and delta specs (sections, removed requirements), the `spec:` reference scan over `trace.test_globs`, and the report gate rule G15 shares |
 | `src/verify/` | the `verify` command: agent guard, login from `gh` or `.specfold/local.yaml`, path checks, line-level `verified` entries |
 | `src/validate/` | the `validate` command and its rule sets (OKF, profile including P12-P14 for backlog items, commitments and visions, links) |
+| `src/graphify/` | the `graphify setup` command: graphify's project skill and its link, `.graphifyignore`, the wrapped Claude Code guard and the code-only first build |
 | `src/hooks/` | the `hooks install` and `hook` commands: built-in hooks or hook-manager entries (lefthook, husky, pre-commit), the pre-commit, pre-push and graph checks, `hooks.extra`, and the Claude Code session, edit and stop hooks |
 | `src/indexes/` | the `index` command: index generation, `see knowledge:` scan, write and check modes |
 | `src/log/` | the `log add` command and the insertion of entries into date sections |
