@@ -75,7 +75,7 @@ agent: implementer
 
 - [x] 6.1 Add the worktree settings and files to the template and its copies
   - Done when: the copies equal the template and `npx vitest run` passes
-- [ ] 6.2 Ask for the limit in `sf-migrate` and name it in the template README
+- [x] 6.2 Ask for the limit in `sf-migrate` and name it in the template README
   - Done when: the skill copies match and `check-skills.mjs` passes
 - [ ] 6.3 Rebuild the bundle, its copies and the template manifest
   - Done when: the copies equal `scripts/specfold.mjs` and `template-manifest.test.ts` passes
