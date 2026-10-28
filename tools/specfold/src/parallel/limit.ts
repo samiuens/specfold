@@ -3,6 +3,7 @@ import { dirname, join } from "node:path";
 import { isMap, parseDocument } from "yaml";
 import { EnvError } from "../errors.ts";
 import { LOCAL_FILE } from "../verify/login.ts";
+import { yamlText } from "../yaml.ts";
 
 export const LIMIT_VARIABLE = "CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS";
 export const LOCAL_SETTINGS = ".claude/settings.local.json";
@@ -73,6 +74,6 @@ export function writeLimit(root: string, n: number): string[] {
   );
   const doc = readYaml(join(root, LOCAL_FILE));
   doc.setIn(["parallel", "max_subagents"], n);
-  put(LOCAL_FILE, String(doc));
+  put(LOCAL_FILE, yamlText(doc));
   return changed;
 }

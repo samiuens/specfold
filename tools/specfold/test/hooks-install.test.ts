@@ -92,6 +92,16 @@ describe("hooks install: hook managers", () => {
     expect(hooksPath(root)).toBeUndefined();
   });
 
+  // spec: specfold-hooks#long-lefthook-command-kept
+  it("keeps a long lefthook command on one line", async () => {
+    const root = repo();
+    const command = `npx eslint --max-warnings 0 --cache --cache-location .cache/eslint src test scripts ${"w".repeat(16)}`;
+    expect(command.length).toBe(100);
+    write(root, "lefthook.yml", `pre-commit:\n  commands:\n    lint:\n      run: ${command}\n`);
+    await run(["hooks", "install"], root);
+    expect(readFileSync(join(root, "lefthook.yml"), "utf8")).toContain(`      run: ${command}\n`);
+  });
+
   // spec: specfold-hooks#husky-in-use
   it("appends a line to each husky hook", async () => {
     const root = repo();

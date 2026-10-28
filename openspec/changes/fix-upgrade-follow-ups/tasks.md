@@ -11,7 +11,7 @@ agent: implementer
 
 - [x] 1.1 Write OpenSpec configs without folding long lines
   - Done when: scenarios long-rule-kept-on-one-line and long-context-line-kept pass in `upgrade-config.test.ts` and `migrate-merge.test.ts`
-- [ ] 1.2 Write local settings and hook manager files without folding long lines
+- [x] 1.2 Write local settings and hook manager files without folding long lines
   - Done when: scenarios long-value-kept and long-lefthook-command-kept pass in `parallel.test.ts` and `hooks-install.test.ts`
 
 ## 2. Gate follow-up base
