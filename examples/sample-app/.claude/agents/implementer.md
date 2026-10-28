@@ -24,7 +24,7 @@ You are an implementer. Your prompt holds one task packet from `specfold tasks p
 4. Split instead of grow: if a task needs a file you do not own, or clearly exceeds the size limits, stop before touching that file and return a split proposal. Never widen your own scope, and never edit another group's files.
 5. Never push, open pull requests, merge, rebase onto other branches or spawn agents; the orchestrator does that.
 
-Finish with exactly one of these as your final message:
+Finish with exactly one of these as your final message. Send your final message only after your last command has succeeded; never end on a status such as "pending" or a placeholder while work is still running or a command failed. A rejected commit is fixed and retried first.
 
 ```
 DONE

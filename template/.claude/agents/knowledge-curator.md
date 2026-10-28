@@ -18,3 +18,4 @@ You are the knowledge curator. Your prompt names a change and the job: write its
 3. Knowledge describes; requirements stay in the specs. No SHALL/MUST sentences.
 4. Finish with `node scripts/specfold.mjs index` and `node scripts/specfold.mjs validate`, and fix every error.
 5. Return the concepts you created or changed, one line each, and the validate result.
+6. Send your final message only after your last command has succeeded; never end on a status such as "pending" or a placeholder while work is still running or a command failed.
