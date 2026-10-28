@@ -13,7 +13,7 @@ sources:
 
 # Decision
 
-`.agents/skills/` stays the canonical location. Because Claude Code does not read it, `specfold agents sync` creates one symlink per skill in `.claude/skills/` (and in other tool folders listed in config).
+`.agents/skills/` stays the canonical location. Because Claude Code does not read it, `specfold agents sync` creates one symlink per skill in `.claude/skills/` (and in other tool folders listed in config). OpenSpec's own skills arrive there as real folders from `openspec init --tools claude`; `agents sync` keeps any entry that is not its link.
 
 # Why
 

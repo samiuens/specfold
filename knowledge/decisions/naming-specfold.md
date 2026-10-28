@@ -13,7 +13,7 @@ sources:
 
 # Decision
 
-Repo `specfold`, CLI `specfold` (alias `sf`), config `specfold.yaml` and `.specfold/`, skills `sf-*`, schema `specfold`, CI check `specfold-gate`, managed-block markers `specfold:begin`/`specfold:end`. Subagent roles use plain names (`planner`, `scout`, `implementer`, `verifier`). `knowledge/` and `openspec/` keep their names.
+Repo `specfold`, CLI `specfold` (alias `sf`), config `specfold.yaml` and `.specfold/`, skills `sf-*`, schema `specfold`, CI check `specfold-gate`, managed-block markers `specfold:start`/`specfold:end`. Subagent roles use plain names (`planner`, `scout`, `implementer`, `verifier`). `knowledge/` and `openspec/` keep their names.
 
 # Why
 

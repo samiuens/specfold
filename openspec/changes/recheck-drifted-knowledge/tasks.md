@@ -33,7 +33,7 @@ scenarios: []
 agent: knowledge-curator
 ```
 
-- [ ] 3.1 Write the concept updates listed in `knowledge.md`
+- [x] 3.1 Write the concept updates listed in `knowledge.md`
   - Done when: `node scripts/specfold.mjs validate` exits 0 and `specfold drift` flags only the 24 concepts on the verification list
 
 ## Workflow follow-up

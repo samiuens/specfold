@@ -13,7 +13,7 @@ sources:
 
 # Decision
 
-All kit content and all content the kit generates is English. `openspec init --language English` adds a matching line to the OpenSpec context.
+All kit content and all content the kit generates is English. The template's OpenSpec context starts with `Language: English.`, so every artifact OpenSpec writes follows it; `specfold init` and `migrate install` keep that context and pass no `--language` flag to `openspec init`. A migrated repository keeps its own context.
 
 # Why
 
