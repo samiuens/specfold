@@ -4,6 +4,7 @@
 * [Cost per change in stats](cost-per-change-in-stats.md) - specfold stats reports the tokens a change cost, so each person can tune their subagent limit; needs the agent tool's local transcripts.
 * [Escaped pipes in brief tables](escaped-pipes-in-brief-tables.md) - The brief and knowledge table parser splits cells on an escaped pipe, which GFM allows inside a table cell.
 * [Evals for the framework itself](framework-evals.md) - Decide whether and how to evaluate Specfold's skills and agent roles with repeatable evals.
+* [Fix the parallel run findings](fix-the-parallel-run-findings.md) - Eight kit gaps found by the pattern-2 run: packets, branch names, the gate in a nested root, the verifier's base and sf-apply wording.
 * [General code conventions](general-code-conventions.md) - Style, naming and pattern conventions in knowledge/conventions/, with linters as enforcement wherever a tool can check them.
 * [Integrator subagent role](integrator-subagent-role.md) - A cheap subagent that merges implementer branches in order, resolves only generated-file conflicts and escalates real ones.
 * [Measure a task run with and without graphify](measure-a-task-run-with-and-without-graphify.md) - One recorded agent task run with and without graphify, preferably on a repository much larger than the sample app, to complete M7's before/after numbers.
