@@ -2,7 +2,12 @@ import { isCalendarDate } from "./todo.js";
 
 /** Parses a JSON array of `{ title, done?, due? }` into checked entries; throws `TypeError` naming the bad index. */
 export function fromJson(text) {
-  const data = JSON.parse(text);
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (error) {
+    throw new TypeError(`import is not valid JSON: ${error.message}`);
+  }
   if (!Array.isArray(data)) throw new TypeError("import must be a JSON array");
   return data.map((entry, index) => {
     const fail = (message) => new TypeError(`entry ${index}: ${message}`);
