@@ -3,7 +3,15 @@ type: Capability
 title: specfold init
 description: Why a repository made from the template needs init, and how it fills detected values and sets up OpenSpec, markers and the manifest without prompts.
 status: draft
+spec: openspec/specs/specfold-init/spec.md
+resource: ../../openspec/specs/specfold-init/spec.md
+change: 2026-10-28-add-bootstrap
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T08:14:46+01:00 }
+sources:
+  - id: proposal-2026-10-28-add-bootstrap
+    resource: ../../openspec/changes/archive/2026-10-28-add-bootstrap/proposal.md
+  - id: design-2026-10-28-add-bootstrap
+    resource: ../../openspec/changes/archive/2026-10-28-add-bootstrap/design.md
 ---
 
 # Why

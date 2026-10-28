@@ -1,5 +1,9 @@
 # Log
 
+## 2026-10-28
+
+* **Change**: 2026-10-28-add-bootstrap: created 2, updated 3, deprecated 0
+
 ## 2026-10-27
 
 * **Change**: 2026-10-27-add-specfold-migrate: created 2, updated 2, deprecated 0
