@@ -34,9 +34,9 @@ agent: knowledge-curator
 ```
 
 - [x] 3.1 Write the concept updates listed in `knowledge.md`
-  - Done when: `node scripts/specfold.mjs validate` exits 0 and `specfold drift` flags only the concepts on the verification list (24, plus two the marker fix in the plan re-flagged)
+  - Done when: `node scripts/specfold.mjs validate` exits 0 and `specfold drift` flags only the concepts on the verification list (25, plus two the marker fix in the plan re-flagged)
 
 ## Workflow follow-up
 
 - Archive the change, then run `node scripts/specfold.mjs sync recheck-drifted-knowledge` and commit its result in the same PR.
-- The PR body lists the 26 concepts that still hold, with a reason each, for the user to verify.
+- The PR body lists the 27 concepts that still hold, with a reason each, for the user to verify.
