@@ -11,7 +11,7 @@ agent: implementer
 
 - [x] 1.1 Add `toCsv(items)` with quoting
   - Done when: the five csv-export scenarios pass in `test/export-csv.test.js` and `npm test` passes
-- [ ] 1.2 Remove the unrelated `see knowledge:` comment from `src/export-csv.js`
+- [x] 1.2 Remove the unrelated `see knowledge:` comment from `src/export-csv.js`
   - Done when: `npm test` passes and `node scripts/specfold.mjs index` lists no reference from `src/export-csv.js`
 
 ## 2. JSON import

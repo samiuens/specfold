@@ -1,4 +1,3 @@
-// see knowledge: /decisions/dates-as-calendar-strings.md
 const HEADER = "id,title,done,due";
 
 function field(value) {
