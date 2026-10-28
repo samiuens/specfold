@@ -62,6 +62,7 @@ function setup(knowledge: string | undefined) {
     channel: "stable",
     source: undefined,
     upgradeCommitMessage: "chore: upgrade Specfold to v{version}",
+    upgradeReminder: true,
   };
   return { root, dir, config };
 }

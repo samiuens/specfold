@@ -44,6 +44,7 @@ describe("repo", () => {
       channel: "stable",
       source: undefined,
       upgradeCommitMessage: "chore: upgrade Specfold to v{version}",
+      upgradeReminder: true,
     });
   });
 
@@ -163,7 +164,10 @@ describe("repo", () => {
       channel: "next",
       source: { path: "../mirror" },
       upgradeCommitMessage: "chore(kit): upgrade to v{version}",
+      upgradeReminder: true,
     });
+    writeFileSync(join(root, "specfold.yaml"), "upgrade:\n  reminder: false\n");
+    expect(requireConfig(root).upgradeReminder).toBe(false);
     writeFileSync(
       join(root, "specfold.yaml"),
       "source:\n  url: https://mirror.example/kit\n  github: acme/kit\n",
