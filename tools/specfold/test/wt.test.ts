@@ -102,6 +102,34 @@ describe("specfold wt", () => {
     expect(realpathSync(ahead)).toBeTruthy();
   });
 
+  // spec: specfold-wt#merged-into-the-change-branch
+  it("removes a worktree merged into the branch given with --base", async () => {
+    const root = gateRepo({ ".gitignore": "node_modules/\n.claude/\n" });
+    git(root, "checkout", "-q", "-b", "add-exports");
+    const group = join(root, ".claude/worktrees/group");
+    git(root, "worktree", "add", "-q", "-b", "group", group, "HEAD");
+    commit(group, { "src/export.ts": "export const csv = 1;\n" }, "feat: export");
+    git(root, "merge", "-q", "--no-ff", "-m", "merge group", "group");
+    expect((await run(["wt", "clean"], root)).stdout).toBe(
+      "kept .claude/worktrees/group: not merged into main\n",
+    );
+    const result = await run(["wt", "clean", "--base", "add-exports"], root);
+    expect(result).toMatchObject({ code: 0, stdout: "removed .claude/worktrees/group and branch group\n" });
+    expect(existsSync(group)).toBe(false);
+  });
+
+  // spec: specfold-wt#unknown-base
+  it("exits with 2 on an unknown base and removes nothing", async () => {
+    const root = gateRepo({ ".gitignore": "node_modules/\n.claude/\n" });
+    const merged = join(root, ".claude/worktrees/merged");
+    git(root, "worktree", "add", "-q", "-b", "merged", merged, "HEAD");
+    const result = await run(["wt", "clean", "--base", "no-such-branch"], root);
+    expect(result.code).toBe(2);
+    expect(result.stderr).toContain("unknown base 'no-such-branch'");
+    expect(existsSync(merged)).toBe(true);
+    expect((await run(["wt", "plan", "--base", "main"], root)).code).toBe(2);
+  });
+
   it("prints the plan with its limit", async () => {
     const root = gateRepo({ "openspec/changes/add-export/tasks.md": tasks });
     vi.stubEnv("CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS", "2");

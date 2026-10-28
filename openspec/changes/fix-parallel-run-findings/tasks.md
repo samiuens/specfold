@@ -33,7 +33,7 @@ scenarios: [specfold-wt#merged-into-the-change-branch, specfold-wt#unknown-base]
 agent: implementer
 ```
 
-- [ ] 3.1 Add `--base <ref>` to `wt clean`
+- [x] 3.1 Add `--base <ref>` to `wt clean`
   - Done when: scenarios merged-into-the-change-branch and unknown-base pass in `wt.test.ts`
 
 ## 4. Roles
