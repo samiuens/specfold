@@ -71,6 +71,19 @@ describe("task commits", () => {
     expect(readCommits(root, "HEAD", false)[1]?.files).toEqual([]);
   });
 
+  // spec: specfold-tasks#specfold-root-in-a-subfolder
+  it("reads files relative to a Specfold root in a subfolder and ignores files outside it", () => {
+    const root = repo();
+    commit(root, ["app/src/checkout/a.ts", `app/${TASKS_FILE}`, "README.md"], "a\n\nTask: demo#1.1");
+    commit(root, ["app/src/checkout/b.ts"], "b\n\nTask: demo#1.2");
+    const app = join(root, "app");
+    expect(commitsSinceBase(app, "main")[0]?.files).toEqual([
+      "openspec/changes/demo/tasks.md",
+      "src/checkout/a.ts",
+    ]);
+    expect(check(app)).toEqual([]);
+  });
+
   it("fails with an environment error on an unknown base", () => {
     expect(() => commitsSinceBase(repo(), "nope")).toThrow(EnvError);
   });

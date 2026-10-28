@@ -21,7 +21,7 @@ scenarios: [specfold-tasks#specfold-root-in-a-subfolder]
 agent: implementer
 ```
 
-- [ ] 2.1 Read task commit files relative to the Specfold root
+- [x] 2.1 Read task commit files relative to the Specfold root
   - Done when: scenario specfold-root-in-a-subfolder passes in `tasks-git.test.ts`
 
 ## 3. Clean against a base

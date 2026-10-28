@@ -7,7 +7,7 @@ export interface Commit {
   sha: string;
   /** Values of every `Task:` trailer, as written. */
   tasks: string[];
-  /** Files the commit changed, repository-relative. */
+  /** Files the commit changed under the directory git runs in, relative to it. */
   files: string[];
 }
 
@@ -15,11 +15,11 @@ const RECORD = "\x1d";
 const FIELD = "\x1f";
 const VALUE = "\x1e";
 
-/** Commits in `range` (oldest first) with their `Task:` trailers and changed files. */
-export function readCommits(repoRoot: string, range: string, withFiles = true): Commit[] {
+/** Commits in `range` (oldest first) with their `Task:` trailers and the files they changed under `root`. */
+export function readCommits(root: string, range: string, withFiles = true): Commit[] {
   const format = `--format=${RECORD}%H${FIELD}%(trailers:key=Task,valueonly,separator=%x1e)`;
-  const args = ["log", "--reverse", format, ...(withFiles ? ["--name-only"] : []), range, "--"];
-  return git(repoRoot, args)
+  const args = ["log", "--reverse", format, ...(withFiles ? ["--name-only", "--relative"] : []), range, "--"];
+  return git(root, args)
     .split(RECORD)
     .filter((chunk) => chunk.trim() !== "")
     .map((chunk) => {
@@ -37,9 +37,9 @@ export function readCommits(repoRoot: string, range: string, withFiles = true): 
 }
 
 /** Commits from the merge base of `base` and HEAD up to HEAD; an unknown base is an environment error. */
-export function commitsSinceBase(repoRoot: string, base: string): Commit[] {
-  const mergeBase = git(repoRoot, ["merge-base", base, "HEAD"]).trim();
-  return readCommits(repoRoot, `${mergeBase}..HEAD`);
+export function commitsSinceBase(root: string, base: string): Commit[] {
+  const mergeBase = git(root, ["merge-base", base, "HEAD"]).trim();
+  return readCommits(root, `${mergeBase}..HEAD`);
 }
 
 /** Task ids of `change` named by a commit's trailers. */
@@ -48,7 +48,7 @@ export const taskIdsFor = (commit: Commit, change: string): string[] =>
 
 export interface TrailerContext {
   change: string;
-  /** Repository-relative path of the change's tasks.md, never counted against scope or size. */
+  /** Root-relative path of the change's tasks.md, never counted against scope or size. */
   file: string;
   maxFilesPerTask: number;
 }
