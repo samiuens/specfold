@@ -9,15 +9,25 @@ context: |
 
 rules:
   proposal:
-    - Link the knowledge concepts and decisions this change relies on (bundle-absolute paths such as /decisions/x.md).
-    - Check knowledge/decisions/ for a rejected decision covering the same idea; if one exists, say why this differs.
+    - Link the knowledge concepts and decisions this change relies on
+      (bundle-absolute paths such as /decisions/x.md).
+    - Check knowledge/decisions/ for a rejected decision covering the same idea;
+      if one exists, say why this differs.
   specs:
-    - Observable behavior only. Rationale goes to the capability card via knowledge.md.
+    - Observable behavior only. Rationale goes to the capability card via
+      knowledge.md.
   knowledge:
-    - List every concept to create, update or deprecate. An empty list needs a one-line reason.
+    - List every concept to create, update or deprecate. An empty list needs a
+      one-line reason.
   tasks:
-    - Every group owns its files; groups that may run in parallel never share files.
-    - Last task group is always "Knowledge"; `specfold sync <change>` goes into "Workflow follow-up".
+    - Every group owns its files; groups that may run in parallel never share
+      files.
+    - Last task group is always "Knowledge"; `specfold sync <change>` goes into
+      "Workflow follow-up".
+  design:
+    - Look up the open deferred commitments this change touches (specfold
+      commitments list, specfold lookup) and record each in `## Commitments` as
+      kept or blocked; write `none` when none is touched.
 
 operations:
   apply:
@@ -26,4 +36,5 @@ operations:
       - When a task is ambiguous, stop and ask the user instead of guessing.
   archive:
     guidance:
-      - After archiving, run `specfold sync <change>` and commit its result in the same PR.
+      - After archiving, run `specfold sync <change>` and commit its result in
+        the same PR.
