@@ -8,6 +8,7 @@
 * **Retro**: recheck-drifted-knowledge: 0 answers
 * **Change**: 2026-10-28-add-specfold-stats: created 1, updated 2, deprecated 0
 * **Retro**: add-specfold-stats: 0 answers
+* **Change**: 2026-10-28-add-token-recipes: created 1, updated 4, deprecated 0
 
 ## 2026-10-27
 
