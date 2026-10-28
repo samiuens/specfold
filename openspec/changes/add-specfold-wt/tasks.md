@@ -35,8 +35,8 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 3.1 Register `parallel` and `wt`
-  - Done when: `specfold --help` lists both
+- [x] 3.1 Register `parallel` and `wt`
+  - Done when: `specfold --help` lists both *(each was registered in the commit that added it, so the tests could run the command)*
 
 ## 4. Init limit
 
