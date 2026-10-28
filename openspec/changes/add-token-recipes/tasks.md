@@ -21,7 +21,7 @@ scenarios: [specfold-migrate#deny-rules-merged, specfold-migrate#existing-permis
 agent: implementer
 ```
 
-- [ ] 2.1 Merge missing deny rules into existing Claude Code settings
+- [x] 2.1 Merge missing deny rules into existing Claude Code settings
   - Done when: scenarios deny-rules-merged and existing-permissions pass in `migrate-merge.test.ts`
 - [ ] 2.2 Ship the deny list in the template's settings and its copies
   - Done when: the kit's and the sample app's `.claude/settings.json` equal the template's and `npx vitest run` passes

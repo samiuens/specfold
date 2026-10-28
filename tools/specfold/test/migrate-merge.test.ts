@@ -63,6 +63,34 @@ describe("settings merge", () => {
     expect(mergeSettings(merged.text, template)).toEqual({ text: merged.text, changed: false });
   });
 
+  // spec: specfold-migrate#deny-rules-merged
+  it("appends the template's missing deny rules after the existing ones, once", () => {
+    const withDeny = JSON.stringify({
+      permissions: { deny: ["Read(**/yarn.lock)", "Read(**/node_modules/**)"] },
+    });
+    const existing = JSON.stringify({
+      permissions: { deny: ["Read(./.env)", "Read(**/yarn.lock)"], allow: ["Bash(ls)"] },
+    });
+    const merged = mergeSettings(existing, withDeny);
+    if ("conflict" in merged) throw new Error(merged.conflict);
+    expect(JSON.parse(merged.text).permissions).toEqual({
+      deny: ["Read(./.env)", "Read(**/yarn.lock)", "Read(**/node_modules/**)"],
+      allow: ["Bash(ls)"],
+    });
+    expect(mergeSettings(merged.text, withDeny)).toEqual({ text: merged.text, changed: false });
+  });
+
+  // spec: specfold-migrate#existing-permissions
+  it("reports permissions it cannot merge into", () => {
+    const withDeny = JSON.stringify({ permissions: { deny: ["Read(**/yarn.lock)"] } });
+    expect(mergeSettings(JSON.stringify({ permissions: [] }), withDeny)).toEqual({
+      conflict: "has a 'permissions' value that is not an object",
+    });
+    expect(mergeSettings(JSON.stringify({ permissions: { deny: "all" } }), withDeny)).toEqual({
+      conflict: "has a 'permissions.deny' value that is not a list",
+    });
+  });
+
   it("copies the template into a missing file and reports invalid JSON", () => {
     expect(mergeSettings(undefined, template)).toEqual({ text: template, changed: true });
     expect(mergeSettings("{ nope", template)).toEqual({ conflict: "is not valid JSON" });
