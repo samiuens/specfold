@@ -4,10 +4,11 @@ title: Upgrade file classes
 description: Which files an upgrade replaces, merges three ways or never touches, and why the installed release is the merge base.
 status: draft
 decision: accepted
+change: 2026-10-28-add-specfold-upgrade
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T18:04:37+01:00 }
 sources:
   - id: design
-    resource: ../../openspec/changes/add-specfold-upgrade/design.md
+    resource: ../../openspec/changes/archive/2026-10-28-add-specfold-upgrade/design.md
     title: "Design of add-specfold-upgrade, decisions 1, 5 and 12"
 ---
 

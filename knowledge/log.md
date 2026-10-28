@@ -20,6 +20,7 @@
 * **Retro**: fix-parallel-run-findings: 0 answers
 * **Change**: 2026-10-28-add-release-automation: created 2, updated 2, deprecated 1
 * **Retro**: add-release-automation: 0 answers
+* **Change**: 2026-10-28-add-specfold-upgrade: created 4, updated 4, deprecated 0
 
 ## 2026-10-27
 
