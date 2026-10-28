@@ -51,7 +51,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 4.1 Install the newest release in `BOOTSTRAP.md` and drop the pin check
+- [x] 4.1 Install the newest release in `BOOTSTRAP.md` and drop the pin check
   - Done when: `BOOTSTRAP.md` finds, downloads and checks the newest release with `gh`, `$KIT` is the template folder, and `cli.yml` has no pin check
 
 ## 5. Knowledge

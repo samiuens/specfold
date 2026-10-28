@@ -19,7 +19,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # the bootstrap pin check needs main's history
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -70,12 +70,6 @@ jobs:
           node ../scripts/specfold.mjs index --check
       - name: Template bundle matches the kit's CLI
         run: diff scripts/specfold.mjs template/scripts/specfold.mjs || { echo "::error::template/scripts/specfold.mjs is stale; copy scripts/specfold.mjs over"; exit 1; }
-      - name: Bootstrap pin is a commit on main with sf-migrate
-        run: |
-          refs=$(sed -n 's/^ *KIT_REF=\([0-9a-f]\{40\}\)$/\1/p' BOOTSTRAP.md | sort -u)
-          [ "$(echo "$refs" | grep -c .)" = 1 ] || { echo "::error::BOOTSTRAP.md needs one full commit sha in its KIT_REF lines, found: ${refs:-none}"; exit 1; }
-          git merge-base --is-ancestor "$refs" origin/main || { echo "::error::BOOTSTRAP.md pins $refs, which is not a commit on main"; exit 1; }
-          git cat-file -e "${refs}:template/.agents/skills/sf-migrate/SKILL.md" || { echo "::error::BOOTSTRAP.md pins $refs, whose template has no sf-migrate skill"; exit 1; }
       - name: Sample app copies match the template
         run: |
           for path in AGENTS.md CLAUDE.md scripts/specfold.mjs openspec/schemas/specfold .agents/skills .claude/skills .claude/agents .claude/settings.json knowledge/conventions/code-comments.md; do
