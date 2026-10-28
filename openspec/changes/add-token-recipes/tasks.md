@@ -66,8 +66,8 @@ agent: implementer
 ```
 
 - [x] 5.1 Record `specfold stats` before and after setup, and the user's task run, in the sample app's README
-  - Done when: the README's "Token numbers" section holds both sets of numbers
-- [ ] 5.2 Correct the plan's advice on committing `graphify-out/`
+  - Done when: the README's "Token numbers" section holds both sets of numbers *(the user skipped the task run; it is the backlog item `measure-a-task-run-with-and-without-graphify`)*
+- [x] 5.2 Correct the plan's advice on committing `graphify-out/`
   - Done when: `docs/plan.md` names only `graph.json` as shareable, with graphify's merge driver
 
 ## 6. Knowledge

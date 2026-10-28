@@ -498,7 +498,7 @@ The kit recommends **graphify** for code navigation and builds the rest of its t
 - **Code-only by default** (`GRAPHIFY_BACKEND=none` for every command, `graphify extract --code-only` for the first build): free, deterministic, nothing leaves the machine. The semantic pass over docs would send content to an LLM and duplicate what `knowledge/` already provides.
 - Exclude `knowledge/`, `openspec/`, build output and vendored code via `.graphifyignore`.
 - Refresh with `graphify update .` from Specfold's `post-checkout` and `post-merge` hooks instead of `graphify hook install`.
-- Do not commit `graphify-out/` by default (it reveals architecture and grows large); teams may commit `GRAPH_REPORT.md` only.
+- Do not commit `graphify-out/` by default (it reveals architecture and grows large); the template ignores it. Teams that want a shared graph follow graphify's commit-with-code workflow: commit only `graphify-out/graph.json`, with graphify's merge driver, and never `GRAPH_REPORT.md` (corrected 2026-10-28 from graphify's team-workflows guide).
 - One instruction block only: `AGENTS.md` defines the lookup order above. If a repo already has a `## graphify` section from graphify's installers, `sf-migrate` merges it into that one block.
 - Published savings vary by repo (reports range from about 70% to about 70x on large codebases); small repos gain little. `specfold stats` plus a before/after task run is the honest measure.
 
