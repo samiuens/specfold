@@ -6,6 +6,10 @@ channel: stable
 source:
   github: samiuens/specfold
 
+# specfold upgrade commits with this message; {version} is the new version.
+# upgrade:
+#   commit_message: "chore: upgrade Specfold to v{version}"
+
 requires:
   openspec: ">=1.15 <2"
   okf: "0.2"
