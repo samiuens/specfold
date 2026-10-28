@@ -25,6 +25,14 @@ test("names the index of a non-string title", () => {
   assert.throws(() => fromJson('[{"title":42}]'), { name: "TypeError", message: /^entry 0:/ });
 });
 
+// spec: json-import#invalid-due-date-names-its-index
+test("names the index of an invalid due date", () => {
+  assert.throws(() => fromJson('[{"title":"Pay rent"},{"title":"Call mom"},{"title":"Read","due":"2026-02-30"}]'), {
+    name: "TypeError",
+    message: /^entry 2:/,
+  });
+});
+
 // spec: json-import#non-boolean-done-names-its-index
 test("names the index of a non-boolean done flag", () => {
   assert.throws(() => fromJson('[{"title":"Pay rent","done":"yes"}]'), {
