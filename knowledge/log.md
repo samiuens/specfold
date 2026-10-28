@@ -22,6 +22,7 @@
 * **Retro**: add-release-automation: 0 answers
 * **Change**: 2026-10-28-add-specfold-upgrade: created 4, updated 4, deprecated 0
 * **Retro**: add-specfold-upgrade: 0 answers
+* **Change**: 2026-10-28-fix-upgrade-follow-ups: created 0, updated 5, deprecated 0
 
 ## 2026-10-27
 
