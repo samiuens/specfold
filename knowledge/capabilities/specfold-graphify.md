@@ -3,7 +3,15 @@ type: Capability
 title: specfold graphify setup
 description: Why graphify setup is one CLI step, code-only, with a guard that never fails for teammates who don't have graphify installed.
 status: draft
+spec: openspec/specs/specfold-graphify/spec.md
+resource: ../../openspec/specs/specfold-graphify/spec.md
+change: 2026-10-28-add-token-recipes
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T09:11:59+01:00 }
+sources:
+  - id: proposal-2026-10-28-add-token-recipes
+    resource: ../../openspec/changes/archive/2026-10-28-add-token-recipes/proposal.md
+  - id: design-2026-10-28-add-token-recipes
+    resource: ../../openspec/changes/archive/2026-10-28-add-token-recipes/design.md
 ---
 
 # Why
