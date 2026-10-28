@@ -25,7 +25,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 2.1 Configure release-please for `v0.1.0-rc.1`
+- [x] 2.1 Configure release-please for `v0.1.0-rc.1`
   - Done when: the config sets the title pattern, changelog sections, `bump-minor-pre-major`, `release-as: 0.1.0-rc.1` and the extra-files, the root package has a version, `template/specfold.yaml` carries the version marker, and `release.mjs check` passes
 
 ## 3. Release workflow
