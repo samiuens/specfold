@@ -14,7 +14,7 @@
 
 ## Decisions
 
-- **Edits only where the text is wrong:** the four mismatches and the runbook source. The other 24 concepts stay unchanged, so their flags clear only when the user verifies them.
+- **Edits only where the text is wrong:** the four mismatches and the runbook source. The other 25 concepts stay unchanged, so their flags clear only when the user verifies them.
 - **The English line** goes first in the template's context, word for word as in the kit's config, and into the sample app's config, which mirrors the template. `config.yaml` is not in the install manifest, and migrate keeps a repository's own context, so only new and template repositories get it.
 - **The verification list** goes into the PR body: one line per concept with the plan edits that flagged it and why the concept still holds.
 
