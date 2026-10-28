@@ -1,4 +1,25 @@
 {
+  "permissions": {
+    "deny": [
+      "Read(**/package-lock.json)",
+      "Read(**/pnpm-lock.yaml)",
+      "Read(**/yarn.lock)",
+      "Read(**/bun.lockb)",
+      "Read(**/Cargo.lock)",
+      "Read(**/poetry.lock)",
+      "Read(**/uv.lock)",
+      "Read(**/go.sum)",
+      "Read(**/composer.lock)",
+      "Read(**/Gemfile.lock)",
+      "Read(**/node_modules/**)",
+      "Read(**/coverage/**)",
+      "Read(**/__snapshots__/**)",
+      "Read(**/*.min.js)",
+      "Read(**/*.map)",
+      "Read(/graphify-out/graph.json)",
+      "Read(/graphify-out/cache/**)"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {
