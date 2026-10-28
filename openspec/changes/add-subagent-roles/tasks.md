@@ -45,7 +45,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 4.1 Write `sf-apply` with its split-proposal reference, copy and link it
+- [x] 4.1 Write `sf-apply` with its split-proposal reference, copy and link it
   - Done when: `check-skills.mjs` passes and `agents sync --check` passes in the kit, the template and the sample app
 
 ## 5. Settings and bundle
