@@ -14,6 +14,7 @@
 * [Everything that must be correct is deterministic code](deterministic-cli.md) - Validation, indexing and gate checks live in the specfold CLI; skills call it and never re-implement its checks.
 * [First specs are OpenSpec changes, not baseline specs](specs-start-as-changes.md) - Specs for not-yet-built commands are written as OpenSpec changes and only reach openspec/specs/ when implemented and archived.
 * [graphify is optional, code-only, and writes no instruction blocks](graphify-code-only.md) - The kit recommends graphify for code navigation, in code-only mode, installed as a skill plus a Claude Code guard and never as an instruction block.
+  * Referenced from code: tools/specfold/src/graphify/setup.ts:9
 * [Kit content in repo-owned files lives in managed blocks](managed-blocks.md) - Specfold writes its part of AGENTS.md, CLAUDE.md and similar files between specfold markers, the only part upgrades rewrite.
   * Referenced from code: tools/specfold/src/migrate/blocks.ts:1
 * [Kit knowledge at the root, payload in template/](dogfooding-split.md) - The kit repo keeps its own knowledge, specs and settings at the root; everything shipped to user repos lives in template/.
