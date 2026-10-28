@@ -9484,10 +9484,10 @@ import { join as join22 } from "node:path";
 var RECORD = "";
 var FIELD = "";
 var VALUE = "";
-function readCommits(repoRoot, range, withFiles = true) {
+function readCommits(root, range, withFiles = true) {
   const format = `--format=${RECORD}%H${FIELD}%(trailers:key=Task,valueonly,separator=%x1e)`;
-  const args = ["log", "--reverse", format, ...withFiles ? ["--name-only"] : [], range, "--"];
-  return git(repoRoot, args).split(RECORD).filter((chunk) => chunk.trim() !== "").map((chunk) => {
+  const args = ["log", "--reverse", format, ...withFiles ? ["--name-only", "--relative"] : [], range, "--"];
+  return git(root, args).split(RECORD).filter((chunk) => chunk.trim() !== "").map((chunk) => {
     const [header = "", ...rest] = chunk.split("\n");
     const [sha = "", values = ""] = header.split(FIELD);
     return {
@@ -9497,9 +9497,9 @@ function readCommits(repoRoot, range, withFiles = true) {
     };
   });
 }
-function commitsSinceBase(repoRoot, base) {
-  const mergeBase = git(repoRoot, ["merge-base", base, "HEAD"]).trim();
-  return readCommits(repoRoot, `${mergeBase}..HEAD`);
+function commitsSinceBase(root, base) {
+  const mergeBase = git(root, ["merge-base", base, "HEAD"]).trim();
+  return readCommits(root, `${mergeBase}..HEAD`);
 }
 var taskIdsFor = (commit, change) => commit.tasks.filter((t) => t.startsWith(`${change}#`)).map((t) => t.slice(change.length + 1));
 function checkTrailers(tasks, commits, ctx) {
@@ -9893,7 +9893,7 @@ function buildPacket(config, change, groupNumber) {
     change,
     group: group.number,
     name: group.name,
-    tasks: group.tasks.map((t) => ({ id: t.id, text: t.text, doneWhen: t.doneWhen ?? null })),
+    tasks: group.tasks.map((t) => ({ id: t.id, text: t.text, doneWhen: t.doneWhen ?? null, done: t.done })),
     files: group.meta?.files ?? [],
     depends: group.meta?.depends ?? [],
     scenarios: (group.meta?.scenarios ?? []).map((id) => {
@@ -9912,7 +9912,10 @@ function renderPacket(p) {
     "",
     "## Tasks",
     "",
-    ...p.tasks.flatMap((t) => [`- ${t.id} ${t.text}`, `  - Done when: ${t.doneWhen ?? "(not stated)"}`]),
+    ...p.tasks.flatMap((t) => [
+      `- ${t.done ? "[done] " : ""}${t.id} ${t.text}`,
+      `  - Done when: ${t.doneWhen ?? "(not stated)"}`
+    ]),
     "",
     "## Files you own",
     "",
@@ -9945,7 +9948,7 @@ function renderPacket(p) {
     "",
     "## Rules",
     "",
-    `- Work the tasks in order; tick each in \`openspec/changes/${p.change}/tasks.md\` and commit it alone with the trailer \`Task: ${p.change}#${p.group}.<m>\`.`,
+    `- Start at the first task not marked [done] and work in order; tick each in \`openspec/changes/${p.change}/tasks.md\` and commit it alone with the trailer \`Task: ${p.change}#${p.group}.<m>\`.`,
     "- Change only the files you own (and the tick in tasks.md).",
     "- If a task needs another file or clearly exceeds its size, stop and return a SPLIT PROPOSAL instead of widening your scope.",
     ""
@@ -14254,7 +14257,9 @@ function newWorktree(root, change, log) {
   return { lines: lines3, ok: true };
 }
 var unmerged = (root, base, branch) => git(root, ["cherry", base, branch]).split("\n").filter((l) => l.startsWith("+")).length;
-function cleanWorktrees(root) {
+function cleanWorktrees(root, ref) {
+  if (ref !== void 0 && !gitSucceeds(root, ["rev-parse", "--verify", "--quiet", `${ref}^{commit}`]))
+    throw new EnvError(`unknown base '${ref}'; nothing was removed`);
   const folder = join51(root, WORKTREES);
   const isCandidate = (w) => {
     if (!existsSync48(folder) || !existsSync48(w.path)) return false;
@@ -14263,7 +14268,7 @@ function cleanWorktrees(root) {
   };
   const candidates = listWorktrees(root).filter(isCandidate);
   if (candidates.length === 0) return { lines: [`no worktrees under ${WORKTREES}/`], ok: true };
-  const base = defaultBranch(root, void 0);
+  const base = ref ?? defaultBranch(root, void 0);
   const lines3 = [];
   let ok2 = true;
   for (const w of candidates) {
@@ -14286,8 +14291,8 @@ var SUBCOMMANDS = ["plan", "new", "setup", "clean"];
 register({
   name: "wt",
   summary: "plan, create, set up and clean worktrees for parallel changes and task groups",
-  usage: "specfold wt plan | new <change> | setup | clean [--json]",
-  options: { json: { type: "boolean" } },
+  usage: "specfold wt plan | new <change> | setup | clean [--base <ref>] [--json]",
+  options: { base: { type: "string" }, json: { type: "boolean" } },
   run: ({ io, values, positionals }) => {
     const [sub, ...args] = positionals;
     if (sub === void 0 || !SUBCOMMANDS.includes(sub))
@@ -14299,6 +14304,7 @@ register({
       throw new UsageError(
         sub === "new" ? "wt new takes one change name" : `unexpected argument '${args[0]}'`
       );
+    if (values.base !== void 0 && sub !== "clean") throw new UsageError("--base works only with wt clean");
     const root = requireConfig(io.cwd).root;
     const print = (lines3, json) => io.stdout(values.json ? `${JSON.stringify(json, null, 2)}
 ` : `${lines3.join("\n")}
@@ -14322,7 +14328,7 @@ register({
       );
       return 0;
     }
-    const outcome = sub === "new" ? newWorktree(root, args[0], log) : sub === "setup" ? setupWorktree(io.cwd, log) : cleanWorktrees(root);
+    const outcome = sub === "new" ? newWorktree(root, args[0], log) : sub === "setup" ? setupWorktree(io.cwd, log) : cleanWorktrees(root, values.base);
     if (sub === "new" && !outcome.ok) {
       if (values.json) print([], { ok: false, error: outcome.lines.join("; ") });
       else io.stderr(`specfold: ${outcome.lines.join("; ")}; nothing was created
