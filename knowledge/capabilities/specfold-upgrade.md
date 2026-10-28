@@ -29,6 +29,7 @@ A repository installed with `specfold init` or sf-migrate keeps the kit of that 
 - **Channels:** `stable` sees final releases only, `next` also sees release candidates. Upgrades take one major step per run, so each step's notes and migrations land in their own commit.
 - **Always a commit, never a push:** `--yes` commits on `specfold/upgrade-<version>`, conflicts included with their markers, and `--pr` is explicit. A dirty tree is refused, so the commit holds only the upgrade.
 - **Version skew guard:** a CLI older than the manifest refuses write commands, so a teammate on an old bundle can't rewrite files in the old format.
+- **Follow-ups check the upgrade itself.** The gate runs against the commit the upgrade branch started from, and config merges keep long lines, so the commit's diff shows only real changes. Both were fixed after the sample app's upgrade to rc.2.
 - **Skill `sf-upgrade`** walks an agent through the check, the plan, the conflicts and the release's manual steps, and leaves the push to the user.
 
 # Related
