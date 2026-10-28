@@ -35,6 +35,27 @@ describe("migrate install: files", () => {
   });
 
   // spec: specfold-migrate#differing-cli-copy
+  // spec: specfold-migrate#install-with-the-workflow
+  it("turns on the upgrade workflow only with --upgrade-workflow", () => {
+    const off = fixtureRepo("adr-docs");
+    install(off);
+    expect(existsSync(join(off, ".github/workflows/specfold-upgrade.yml"))).toBe(false);
+    expect(existsSync(join(off, ".specfold/workflows/specfold-upgrade.yml"))).toBe(true);
+    const on = fixtureRepo("adr-docs");
+    const result = install(on, { upgradeWorkflow: true });
+    expect(read(on, ".github/workflows/specfold-upgrade.yml")).toBe(
+      read(TEMPLATE, ".specfold/workflows/specfold-upgrade.yml"),
+    );
+    expect(JSON.parse(read(on, ".specfold/manifest.json")).files).toHaveProperty([
+      ".github/workflows/specfold-upgrade.yml",
+    ]);
+    expect(result.notes.join("\n")).toContain("SPECFOLD_TOKEN");
+    expect(install(on).actions.map((a) => a.path)).not.toContain(".github/workflows/specfold-upgrade.yml");
+    expect(JSON.parse(read(on, ".specfold/manifest.json")).files).toHaveProperty([
+      ".github/workflows/specfold-upgrade.yml",
+    ]);
+  });
+
   it("reports a differing kit-owned file as a conflict and installs the rest", () => {
     const root = fixtureRepo("adr-docs");
     write(root, "scripts/specfold.mjs", "// our own script\n");

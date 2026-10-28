@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { parse } from "yaml";
 import { applyLinks, listSkills, planLinks } from "../agents/sync.ts";
 import { EnvError } from "../errors.ts";
@@ -16,6 +16,8 @@ import {
   setSourceGlobs,
   sha256,
   type Tool,
+  UPGRADE_WORKFLOW,
+  UPGRADE_WORKFLOW_NOTE,
 } from "../migrate/install.ts";
 import { openspecBinary } from "../openspec.ts";
 import { LOCAL_SETTINGS, readLimit, writeLimit } from "../parallel/limit.ts";
@@ -29,6 +31,8 @@ export interface InitOptions {
   sourceGlobs?: string[] | undefined;
   /** `--max-subagents`; without it, 3 is set only when no limit exists yet. */
   maxSubagents?: number | undefined;
+  /** `--upgrade-workflow`: turn on the weekly upgrade workflow. */
+  upgradeWorkflow?: boolean | undefined;
 }
 
 export interface InitPlan {
@@ -168,10 +172,19 @@ export function planInit(o: InitOptions): InitPlan {
         reason: "differs from the template; no markers added, left out of the manifest",
       });
   }
-  plan.manifest = manifestText(shipped.kit_version ?? "", shipped.ref, {
-    files: shipped.files ?? {},
-    blocks,
-  });
+  const files = { ...(shipped.files ?? {}) };
+  if (o.upgradeWorkflow) {
+    const { shipped: from, active } = UPGRADE_WORKFLOW;
+    if (!existsSync(abs(from)))
+      plan.skipped.push({ path: active, reason: `${from} is missing; copy it from the template` });
+    else {
+      const text = read(from);
+      if (!existsSync(abs(active)) || read(active) !== text)
+        plan.edits.push({ path: active, action: "write", text });
+      files[active] = sha256(text);
+    }
+  }
+  plan.manifest = manifestText(shipped.kit_version ?? "", shipped.ref, { files, blocks });
   return plan;
 }
 
@@ -180,8 +193,10 @@ export function runInit(o: InitOptions, plan: InitPlan): InitResult {
   const result: InitResult = { actions: [], skipped: [...plan.skipped], notes: [] };
   const act = (path: string, action: string) => result.actions.push({ path, action });
   for (const e of plan.edits) {
+    mkdirSync(dirname(join(o.root, e.path)), { recursive: true });
     writeFileSync(join(o.root, e.path), e.text);
     act(e.path, e.action);
+    if (e.path === UPGRADE_WORKFLOW.active) result.notes.push(UPGRADE_WORKFLOW_NOTE);
   }
   if (plan.openspec) {
     // openspec init keeps an existing config.yaml; restoring it guards against a version that does not

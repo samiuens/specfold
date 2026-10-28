@@ -43,6 +43,30 @@ describe("specfold init", () => {
     expect(status(root)).toBe("");
   });
 
+  // spec: specfold-init#workflow-turned-on
+  it("turns on the upgrade workflow with --upgrade-workflow", async () => {
+    const root = templateRepo(TS_PROJECT);
+    const result = await run(["init", "--upgrade-workflow"], root);
+    expect(result.code).toBe(0);
+    expect(read(root, ".github/workflows/specfold-upgrade.yml")).toBe(
+      read(root, ".specfold/workflows/specfold-upgrade.yml"),
+    );
+    expect(JSON.parse(read(root, ".specfold/manifest.json")).files).toHaveProperty([
+      ".github/workflows/specfold-upgrade.yml",
+    ]);
+    expect(result.stdout).toContain("SPECFOLD_TOKEN");
+  });
+
+  // spec: specfold-init#workflow-off-by-default
+  it("leaves the upgrade workflow off without the flag", async () => {
+    const root = templateRepo(TS_PROJECT);
+    expect((await run(["init"], root)).code).toBe(0);
+    expect(existsSync(join(root, ".github/workflows/specfold-upgrade.yml"))).toBe(false);
+    expect(JSON.parse(read(root, ".specfold/manifest.json")).files).not.toHaveProperty([
+      ".github/workflows/specfold-upgrade.yml",
+    ]);
+  });
+
   // spec: specfold-init#typescript-project
   it("fills the detected stack and source globs", async () => {
     const root = templateRepo(TS_PROJECT);

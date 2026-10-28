@@ -24,6 +24,14 @@ export const TOOLS = ["agents", "claude"] as const;
 export type Tool = (typeof TOOLS)[number];
 export const MANIFEST_PATH = ".specfold/manifest.json";
 
+/** The weekly upgrade workflow: shipped inactive, turned on by copying it to `active`. */
+export const UPGRADE_WORKFLOW = {
+  shipped: ".specfold/workflows/specfold-upgrade.yml",
+  active: ".github/workflows/specfold-upgrade.yml",
+} as const;
+export const UPGRADE_WORKFLOW_NOTE =
+  "add the SPECFOLD_TOKEN secret (Settings > Secrets and variables > Actions): a token that can read the Specfold kit's releases and write contents, pull requests and workflows in this repository; a fine-grained token works when both repositories have the same owner, otherwise use a classic token with repo and workflow";
+
 /** The `--tools` value of migrate install and init; `agents` is always set up. */
 export function parseTools(value: string | undefined): Tool[] {
   if (value === undefined) return [...TOOLS];
@@ -43,6 +51,8 @@ export interface InstallOptions {
   stack?: string | undefined;
   sourceGlobs?: string[] | undefined;
   ref?: string | undefined;
+  /** `--upgrade-workflow`: turn on the weekly upgrade workflow. */
+  upgradeWorkflow?: boolean | undefined;
 }
 
 export interface InstallResult {
@@ -218,6 +228,22 @@ export function installKit(o: InstallOptions): InstallResult {
       continue;
     }
     manifest.files[p] = sha256(data);
+  }
+
+  // the upgrade workflow is on with the flag, or when an earlier install turned it on
+  const workflow = join(o.from, UPGRADE_WORKFLOW.shipped);
+  if ((o.upgradeWorkflow || previous.files[UPGRADE_WORKFLOW.active]) && existsSync(workflow)) {
+    const p = UPGRADE_WORKFLOW.active;
+    const data = readFileSync(workflow);
+    if (!existsSync(abs(p))) {
+      put(p, data);
+      act(p, "write");
+      result.notes.push(UPGRADE_WORKFLOW_NOTE);
+      manifest.files[p] = sha256(data);
+    } else if (!readFileSync(abs(p)).equals(data)) {
+      conflict(p, "differs from the kit's copy; left unchanged");
+      if (previous.files[p]) manifest.files[p] = previous.files[p];
+    } else manifest.files[p] = sha256(data);
   }
 
   for (const p of BLOCK_FILES) {
