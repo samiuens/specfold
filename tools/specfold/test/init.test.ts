@@ -145,4 +145,28 @@ describe("specfold init", () => {
     expect(result.stdout).toContain("stack: Deno (kept)\n");
     expect(result.stdout).toContain("source globs: lib/** (kept)\n");
   });
+
+  // spec: specfold-init#default-limit
+  it("sets a subagent limit of 3 when none exists", async () => {
+    vi.stubEnv("CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS", "");
+    const root = templateRepo(TS_PROJECT);
+    const result = await run(["init"], root);
+    expect(result.stdout).toContain(".claude/settings.local.json: set subagent limit to 3\n");
+    expect(JSON.parse(read(root, ".claude/settings.local.json")).env).toEqual({
+      CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS: "3",
+    });
+  });
+
+  // spec: specfold-init#existing-limit-kept
+  it("keeps an existing limit unless the flag sets one", async () => {
+    vi.stubEnv("CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS", "");
+    const root = templateRepo(TS_PROJECT);
+    await run(["init", "--max-subagents", "5"], root);
+    const rerun = await run(["init"], root);
+    expect(rerun.stdout).not.toContain("subagent limit");
+    expect(
+      JSON.parse(read(root, ".claude/settings.local.json")).env.CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS,
+    ).toBe("5");
+    expect((await run(["init", "--max-subagents", "lots"], root)).code).toBe(2);
+  });
 });

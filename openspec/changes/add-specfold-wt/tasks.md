@@ -47,7 +47,7 @@ scenarios: [specfold-init#not-a-template-repository, specfold-init#default-limit
 agent: implementer
 ```
 
-- [ ] 4.1 Add `--max-subagents` and the default limit to init
+- [x] 4.1 Add `--max-subagents` and the default limit to init
   - Done when: scenarios default-limit and existing-limit-kept pass in `init.test.ts`
 
 ## 5. Migrate merge

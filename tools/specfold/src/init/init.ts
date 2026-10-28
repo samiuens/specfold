@@ -18,6 +18,7 @@ import {
   type Tool,
 } from "../migrate/install.ts";
 import { openspecBinary } from "../openspec.ts";
+import { LOCAL_SETTINGS, readLimit, writeLimit } from "../parallel/limit.ts";
 import { CONFIG_FILE, loadConfig } from "../repo.ts";
 
 export interface InitOptions {
@@ -26,6 +27,8 @@ export interface InitOptions {
   tools: Tool[];
   stack?: string | undefined;
   sourceGlobs?: string[] | undefined;
+  /** `--max-subagents`; without it, 3 is set only when no limit exists yet. */
+  maxSubagents?: number | undefined;
 }
 
 export interface InitPlan {
@@ -40,6 +43,8 @@ export interface InitPlan {
   openspec: boolean;
   skipped: { path: string; reason: string }[];
   manifest: string;
+  /** The subagent limit to write, or undefined to leave the current one. */
+  limit: number | undefined;
 }
 
 export interface InitResult {
@@ -50,6 +55,8 @@ export interface InitResult {
 }
 
 const OPENSPEC_CONFIG = "openspec/config.yaml";
+/** The subagent limit init sets when none exists; each person changes it with `specfold parallel set`. */
+export const DEFAULT_LIMIT = 3;
 const REQUIRED = [CONFIG_FILE, OPENSPEC_CONFIG, MANIFEST_PATH];
 const PLACEHOLDER = "<filled by specfold init or sf-migrate>";
 const STACK_LINE = /^(\s*)Stack: (.*)$/m;
@@ -91,6 +98,7 @@ export function planInit(o: InitOptions): InitPlan {
     openspec,
     skipped: [],
     manifest: "",
+    limit: o.maxSubagents ?? (readLimit(o.root).value === undefined ? DEFAULT_LIMIT : undefined),
   };
   const edit = (path: string, before: string, after: string, action: string) => {
     if (after !== before) plan.edits.push({ path, action, text: after });
@@ -197,6 +205,8 @@ export function runInit(o: InitOptions, plan: InitPlan): InitResult {
     if (!(error instanceof EnvError)) throw error;
     result.skipped.push({ path: "git hooks", reason: error.message });
   }
+  if (plan.limit !== undefined && writeLimit(o.root, plan.limit).length > 0)
+    act(LOCAL_SETTINGS, `set subagent limit to ${plan.limit}`);
   if (writeIfChanged(join(o.root, MANIFEST_PATH), plan.manifest)) act(MANIFEST_PATH, "write");
   return result;
 }
