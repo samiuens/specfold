@@ -77,7 +77,6 @@ jobs:
           npm ci --ignore-scripts
           npm run build -w specfold
           cp scripts/specfold.mjs template/scripts/specfold.mjs
-          cp scripts/specfold.mjs examples/sample-app/scripts/specfold.mjs
           (cd tools/specfold && npx vitest run test/template-manifest.test.ts -u)
           node tools/specfold/release.mjs check
       - name: Commit when something changed
