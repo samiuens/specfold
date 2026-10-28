@@ -16,12 +16,15 @@ sources:
 
 When Specfold has to put its content into a file the repository already owns (`AGENTS.md`, `CLAUDE.md`, the PR template, `.gitignore`, `CODEOWNERS`), it writes the template file's text between `specfold:start` and `specfold:end` markers: HTML comments in Markdown, at the top; hash comments elsewhere, at the end. Text outside the markers is never changed, a rerun replaces only the block, and a start marker without an end is reported instead of guessed at.
 
+A repository made from the template gets its markers from `specfold init`: a shared file still equal to the template's text, by the block hash in the template's own manifest, gets the markers around its whole text; an edited one gets none and stays out of the manifest.
+
 # Why
 
 A team's own instructions must survive the migration word for word, and M9's upgrader needs to know exactly which part of a shared file is Specfold's to rewrite. The block's hash in `.specfold/manifest.json` tells it whether someone edited the block since.
 
 # Rejected alternatives
 
+- Shipping the markers inside the template files: migrate would have to strip them before inserting its own block (rejected while planning `add-bootstrap`).
 - Replacing the file with Specfold's and moving the old text into a section below: the team's text would move, and an upgrade could not tell kit text from team text.
 
 # Related
