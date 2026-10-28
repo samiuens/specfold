@@ -53,7 +53,7 @@ agent: implementer
   - Done when: `node ../scripts/specfold.mjs validate` and `index --check` pass in `template/`
 - [x] 4.2 Rebuild the bundle, its copies and the template manifest
   - Done when: the copies equal `scripts/specfold.mjs` and `template-manifest.test.ts` passes
-- [ ] 4.3 Run `graphify setup` with real graphify 0.9.97 on a scratch copy of the sample app
+- [x] 4.3 Run `graphify setup` with real graphify 0.9.97 on a scratch copy of the sample app
   - Done when: the setup writes the skill, ignore file, guard and graph, and a second run is up to date
 
 ## 5. Numbers and plan
