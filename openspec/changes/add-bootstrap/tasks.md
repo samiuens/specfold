@@ -41,7 +41,7 @@ agent: implementer
   - Done when: the commands in it fetch and unpack the pinned snapshot in a scratch folder
 - [x] 3.2 Check the pin in CI
   - Done when: the cli workflow fails for a sha that is not on `main` and passes for the pinned one
-- [ ] 3.3 Name both entry points in the template README
+- [x] 3.3 Name both entry points in the template README
   - Done when: `template/README.md` points to "Use this template" plus `specfold init`, and to `BOOTSTRAP.md`
 
 ## 4. Knowledge
