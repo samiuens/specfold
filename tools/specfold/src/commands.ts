@@ -14,6 +14,7 @@ import "./log/command.ts";
 import "./migrate/command.ts";
 import "./lookup/command.ts";
 import "./new/command.ts";
+import "./stats/command.ts";
 import "./sync/command.ts";
 import "./tasks/command.ts";
 import "./tasks/progress-command.ts";
