@@ -16,6 +16,7 @@
 * [specfold migrate](specfold-migrate.md) - Why the mechanical steps of a migration are CLI code, and how install brings in the kit without overwriting a repository's own files.
 * [specfold new](specfold-new.md) - Why concepts are created from templates, and where the contract for specfold new lives.
 * [specfold schema](specfold-schema.md) - Why changes use the specfold OpenSpec schema with brief and knowledge artifacts, and where its contract lives.
+* [specfold stats](specfold-stats.md) - Why the always-loaded set is measured, what counts in it, and why OpenSpec's own skills count only toward the total.
 * [specfold sync](specfold-sync.md) - Why sync applies the mechanical part of a knowledge delta after archive, and where its contract lives.
 * [specfold tasks](specfold-tasks.md) - Why tasks.md is a checked breakdown of task groups, and where the contract for tasks check, status and resume lives.
 * [specfold trace](specfold-trace.md) - Why scenarios carry stable ids that tests cite, and where the contract for specfold trace lives.

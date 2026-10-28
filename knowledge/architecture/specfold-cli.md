@@ -46,6 +46,7 @@ The CLI lives in the npm workspace `tools/specfold` (package `specfold`, bins `s
 | `src/migrate/` | the `migrate` command: git root, branch rule and resumable state, inventory and stack detection (shared with `init`), managed blocks, the settings and OpenSpec config merges, kit installation and the install manifest |
 | `src/lookup/` | the `lookup` command: frontmatter search, weighted ranking, trust flags including `drift` |
 | `src/new/` | the `new` command: per-type templates, override files, frontmatter rendering |
+| `src/stats/` | the `stats` command: the always-loaded set (files with their `@` imports, config context, skill descriptions, SessionStart output), the budget check G11 reuses, knowledge per folder and named files |
 | `src/sync/` | the `sync` command: resolves archived changes, plans (`planSync`, also used by the gate) and applies delta ops, edits frontmatter line by line, then indexes and log |
 | `src/tasks/` | the `tasks check`, `status` and `resume` commands: the `tasks.md` parser, rules T0 to T11, file overlap between parallel groups, task commits from git trailers, group progress |
 
