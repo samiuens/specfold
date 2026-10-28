@@ -9,3 +9,9 @@
 
 # graphify code graph, rebuilt in every clone (specfold graphify setup)
 graphify-out/
+
+# personal Claude Code settings, such as the subagent limit (specfold parallel set)
+.claude/settings.local.json
+
+# index of this worktree for test ports (specfold wt setup)
+.specfold/wt-index
