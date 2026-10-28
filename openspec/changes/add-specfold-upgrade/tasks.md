@@ -53,7 +53,7 @@ agent: implementer
 
 - [x] 4.1 Read `channel`, `source` and `upgrade.commit_message` from specfold.yaml
   - Done when: `repo.test.ts` covers the defaults and each source key
-- [ ] 4.2 Add `specfold upgrade --check` and the hand-off to the target release's CLI
+- [x] 4.2 Add `specfold upgrade --check` and the hand-off to the target release's CLI
   - Done when: scenarios pr-without-yes, newer-release-on-next, stable-ignores-candidates, url-mirror, local-folder and handed-to-the-new-version pass in `upgrade-command.test.ts`
 - [ ] 4.3 Print the plan, or apply it on its own branch with the follow-ups, the report and the commit
   - Done when: scenarios dry-run, applied-upgrade and message-from-the-settings pass in `upgrade-command.test.ts`
