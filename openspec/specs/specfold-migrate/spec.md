@@ -136,3 +136,10 @@ When `specfold migrate install` merges an existing `openspec/config.yaml`, it SH
 #### Scenario: Long context line kept
 - **WHEN** install adds the specfold rules to a config whose context has a 120-character line
 - **THEN** that line is unchanged after the merge
+
+### Requirement: Upgrade workflow at install
+`specfold migrate install` SHALL accept `--upgrade-workflow`. With it, install SHALL copy `.specfold/workflows/specfold-upgrade.yml` to `.github/workflows/specfold-upgrade.yml`, record it in the manifest as a kit-owned file, and print how to add the `SPECFOLD_TOKEN` secret. Without the flag it SHALL not create that workflow.
+
+#### Scenario: Install with the workflow
+- **WHEN** `specfold migrate install --from <template> --upgrade-workflow` runs on a repository without that workflow
+- **THEN** `.github/workflows/specfold-upgrade.yml` exists, the manifest lists it, and the output names `SPECFOLD_TOKEN`
