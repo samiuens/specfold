@@ -5,10 +5,6 @@ description: How to move the kit commit BOOTSTRAP.md pins after a change to temp
 status: draft
 stale_after: 2027-01-26T08:14:46+01:00
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T08:14:46+01:00 }
-sources:
-  - id: bootstrap
-    resource: ../../BOOTSTRAP.md
-    title: "BOOTSTRAP.md, the KIT_REF lines"
 ---
 
 # When to use
@@ -18,7 +14,7 @@ After a PR that changes `template/` (skills, CLI bundle, schema, template files)
 # Steps
 
 1. Update `main` and take its full sha: `git rev-parse origin/main`.
-2. On a new branch, replace the sha in both `KIT_REF=` lines of `BOOTSTRAP.md`.
+2. On a new branch, replace the sha in both `KIT_REF=` lines of `BOOTSTRAP.md` at the kit root. The file is deliberately not a source of this runbook: every pin move changes it, and drift would flag the runbook each time.
 3. Commit as `docs(migrate): 📝 pin the bootstrap kit to <short sha>` and open the PR.
 
 # Verify
