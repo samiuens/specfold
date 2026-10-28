@@ -3,7 +3,15 @@ type: Capability
 title: specfold release
 description: Why the kit packs its own template tarball with a checksum, checks its version fields and ships agent-readable upgrade notes.
 status: draft
+spec: openspec/specs/specfold-release/spec.md
+resource: ../../openspec/specs/specfold-release/spec.md
+change: 2026-10-28-add-release-automation
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T11:38:47+01:00 }
+sources:
+  - id: proposal-2026-10-28-add-release-automation
+    resource: ../../openspec/changes/archive/2026-10-28-add-release-automation/proposal.md
+  - id: design-2026-10-28-add-release-automation
+    resource: ../../openspec/changes/archive/2026-10-28-add-release-automation/design.md
 ---
 
 # Why
