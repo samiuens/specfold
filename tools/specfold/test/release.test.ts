@@ -1,6 +1,6 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, symlinkSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { write } from "./gate-helpers.ts";
@@ -20,6 +20,10 @@ function kit(version: string, template = version): string {
   );
   write(root, "template/scripts/specfold.mjs", "#!/usr/bin/env node\n");
   write(root, "upgrade/README.md", "# Upgrade\n");
+  // the template links its skills into .claude/skills, like the real one
+  write(root, "template/.agents/skills/sf-apply/SKILL.md", "# sf-apply\n");
+  write(root, "template/.claude/skills/.keep", "");
+  symlinkSync("../../.agents/skills/sf-apply", join(root, "template/.claude/skills/sf-apply"));
   execFileSync("git", ["init", "-q"], { cwd: root });
   execFileSync("git", ["add", "."], { cwd: root });
   return root;
@@ -59,6 +63,10 @@ describe("release.mjs", () => {
     expect(listing).toContain("specfold-template-v0.1.0-rc.1/scripts/specfold.mjs");
     expect(listing).toContain("specfold-template-v0.1.0-rc.1/upgrade/README.md");
     expect(listing).toContain("specfold-template-v0.1.0-rc.1/specfold.yaml");
+    const link = execFileSync("tar", ["-tvzf", tarball], { encoding: "utf8" })
+      .split("\n")
+      .find((line) => line.includes("/.claude/skills/sf-apply"));
+    expect(link).toMatch(/^l.* -> \.\.\/\.\.\/\.agents\/skills\/sf-apply$/);
     const hash = createHash("sha256").update(readFileSync(tarball)).digest("hex");
     expect(readFileSync(`${tarball}.sha256`, "utf8")).toBe(`${hash}  specfold-template-v0.1.0-rc.1.tar.gz\n`);
   });
