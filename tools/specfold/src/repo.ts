@@ -42,7 +42,17 @@ export interface Config {
   traceTestGlobs: string[];
   /** `stats.budget.*`: token budgets of the always-loaded set; exceeding one only warns (G11). */
   statsBudget: { agentsMd: number; total: number; skillDescription: number };
+  /** `kit_version`: the installed kit release; empty when unset. */
+  kitVersion: string;
+  /** `channel`: `stable` offers final releases only, `next` release candidates too. */
+  channel: "stable" | "next";
+  /** `source`: where upgrades come from; the first of `path`, `url` and `github` that is set. */
+  source: { path: string } | { url: string } | { github: string } | undefined;
+  /** `upgrade.commit_message`, with `{version}` as a placeholder. */
+  upgradeCommitMessage: string;
 }
+
+export const DEFAULT_UPGRADE_MESSAGE = "chore: upgrade Specfold to v{version}";
 
 /** The nearest directory at or above `cwd` that contains specfold.yaml. */
 export function findRepoRoot(cwd: string): string | undefined {
@@ -84,6 +94,32 @@ export const DEFAULT_TEST_GLOBS = [
   "**/spec/**",
 ];
 
+/** `source:` as a release source: `path`, then `url` (https, or http to this machine), then `github`. */
+function releaseSource(v: unknown): Config["source"] {
+  if (v === undefined) return undefined;
+  if (!isRecord(v)) throw new EnvError(`${CONFIG_FILE}: 'source' must be a mapping`);
+  const text = (key: string) => {
+    const value = v[key];
+    if (value === undefined) return undefined;
+    if (typeof value !== "string" || value === "")
+      throw new EnvError(`${CONFIG_FILE}: 'source.${key}' must be a string`);
+    return value;
+  };
+  const [path, url, github] = [text("path"), text("url"), text("github")];
+  if (path !== undefined) return { path };
+  if (url !== undefined) {
+    if (!/^(https:\/\/|http:\/\/(localhost|127\.0\.0\.1)[:/])/.test(url))
+      throw new EnvError(`${CONFIG_FILE}: 'source.url' must be an https URL`);
+    return { url };
+  }
+  if (github !== undefined) {
+    if (!/^[\w.-]+\/[\w.-]+$/.test(github))
+      throw new EnvError(`${CONFIG_FILE}: 'source.github' must be owner/repository`);
+    return { github };
+  }
+  return undefined;
+}
+
 const stringList = (v: unknown, key: string): string[] => {
   if (v === undefined) return [];
   if (!Array.isArray(v) || !v.every((x) => typeof x === "string")) {
@@ -109,6 +145,10 @@ export function loadConfig(root: string): Config {
   const trace = isRecord(data.trace) ? data.trace : {};
   const stats = isRecord(data.stats) ? data.stats : {};
   const budget = isRecord(stats.budget) ? stats.budget : {};
+  const upgrade = isRecord(data.upgrade) ? data.upgrade : {};
+  const channel = data.channel ?? "stable";
+  if (channel !== "stable" && channel !== "next")
+    throw new EnvError(`${CONFIG_FILE}: 'channel' must be 'stable' or 'next'`);
   const extra = hooks.extra === undefined ? {} : hooks.extra;
   if (!isRecord(extra))
     throw new EnvError(`${CONFIG_FILE}: 'hooks.extra' must map hook names to command lists`);
@@ -165,6 +205,13 @@ export function loadConfig(root: string): Config {
       total: positiveInt(budget.total, "stats.budget.total", 4000),
       skillDescription: positiveInt(budget.skill_description, "stats.budget.skill_description", 60),
     },
+    kitVersion: typeof data.kit_version === "string" ? data.kit_version : "",
+    channel,
+    source: releaseSource(data.source),
+    upgradeCommitMessage:
+      typeof upgrade.commit_message === "string" && upgrade.commit_message.trim() !== ""
+        ? upgrade.commit_message
+        : DEFAULT_UPGRADE_MESSAGE,
   };
 }
 

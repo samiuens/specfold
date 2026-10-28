@@ -45,13 +45,13 @@ agent: implementer
 ## 4. Upgrade command
 
 ```yaml
-files: [tools/specfold/src/upgrade/command.ts, tools/specfold/src/upgrade/skew.ts, tools/specfold/src/cli.ts, tools/specfold/src/commands.ts, tools/specfold/src/repo.ts, tools/specfold/test/repo.test.ts, tools/specfold/test/upgrade-command.test.ts, tools/specfold/test/upgrade-skew.test.ts]
+files: [tools/specfold/src/upgrade/command.ts, tools/specfold/src/upgrade/skew.ts, tools/specfold/src/cli.ts, tools/specfold/src/commands.ts, tools/specfold/src/repo.ts, tools/specfold/test/repo.test.ts, tools/specfold/test/change-knowledge.test.ts, tools/specfold/test/upgrade-command.test.ts, tools/specfold/test/upgrade-skew.test.ts]
 depends: [2, 3]
 scenarios: [specfold-upgrade#pr-without-yes, specfold-upgrade#newer-release-on-next, specfold-upgrade#stable-ignores-candidates, specfold-upgrade#local-folder, specfold-upgrade#url-mirror, specfold-upgrade#handed-to-the-new-version, specfold-upgrade#dry-run, specfold-upgrade#applied-upgrade, specfold-upgrade#message-from-the-settings, specfold-upgrade#old-cli-refuses-to-write]
 agent: implementer
 ```
 
-- [ ] 4.1 Read `channel`, `source` and `upgrade.commit_message` from specfold.yaml
+- [x] 4.1 Read `channel`, `source` and `upgrade.commit_message` from specfold.yaml
   - Done when: `repo.test.ts` covers the defaults and each source key
 - [ ] 4.2 Add `specfold upgrade --check` and the hand-off to the target release's CLI
   - Done when: scenarios pr-without-yes, newer-release-on-next, stable-ignores-candidates, url-mirror, local-folder and handed-to-the-new-version pass in `upgrade-command.test.ts`
