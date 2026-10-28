@@ -1,6 +1,7 @@
 schema: specfold
 
 context: |
+  Language: English. All artifacts are written in English; keep OpenSpec headings and SHALL/MUST in English.
   Rather ask than assume: when the request, knowledge or specs leave a decision open, ask the user (one decision per question, recommended option first).
   Project knowledge lives in knowledge/ (OKF v0.2). Start at knowledge/index.md.
   Behavior contracts live in openspec/specs/. Knowledge never restates requirements.

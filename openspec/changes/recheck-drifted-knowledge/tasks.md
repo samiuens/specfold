@@ -9,7 +9,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Add the English line to the OpenSpec context of the template and the sample app
+- [x] 1.1 Add the English line to the OpenSpec context of the template and the sample app
   - Done when: both contexts start with the kit's `Language: English.` line and `npx vitest run` passes
 
 ## 2. Plan
