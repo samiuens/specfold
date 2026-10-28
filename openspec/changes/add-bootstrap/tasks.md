@@ -37,7 +37,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 3.1 Write `BOOTSTRAP.md` with the pinned kit commit and both paths
+- [x] 3.1 Write `BOOTSTRAP.md` with the pinned kit commit and both paths
   - Done when: the commands in it fetch and unpack the pinned snapshot in a scratch folder
 - [ ] 3.2 Check the pin in CI
   - Done when: the cli workflow fails for a sha that is not on `main` and passes for the pinned one
