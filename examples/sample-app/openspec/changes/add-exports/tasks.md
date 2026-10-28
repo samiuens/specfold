@@ -11,6 +11,8 @@ agent: implementer
 
 - [x] 1.1 Add `toCsv(items)` with quoting
   - Done when: the five csv-export scenarios pass in `test/export-csv.test.js` and `npm test` passes
+- [ ] 1.2 Remove the unrelated `see knowledge:` comment from `src/export-csv.js`
+  - Done when: `npm test` passes and `node scripts/specfold.mjs index` lists no reference from `src/export-csv.js`
 
 ## 2. JSON import
 
@@ -53,12 +55,14 @@ agent: implementer
 ```yaml
 files: [src/import-json.js, test/import-json.test.js]
 depends: [2, 4]
-scenarios: [json-import#invalid-due-date-names-its-index]
+scenarios: [json-import#invalid-due-date-names-its-index, json-import#non-json-text]
 agent: implementer
 ```
 
 - [x] 5.1 Check `due` in `fromJson(text)` when it is not null with the same function `add` uses (`isCalendarDate` from `src/todo.js`, imported, not copied), throwing `entry <i>: due must be a YYYY-MM-DD date`
   - Done when: scenario invalid-due-date-names-its-index passes in `test/import-json.test.js` and `npm test` passes
+- [ ] 5.2 Rethrow a JSON parse error as `TypeError` in `fromJson`
+  - Done when: scenario non-json-text passes in `test/import-json.test.js` and `npm test` passes
 
 ## 6. Knowledge
 
