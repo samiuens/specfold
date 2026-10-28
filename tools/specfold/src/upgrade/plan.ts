@@ -2,7 +2,14 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { applyBlock, blockStyle } from "../migrate/blocks.ts";
-import { BLOCK_FILES, kitOwned, MANIFEST_PATH, sha256, type Tool } from "../migrate/install.ts";
+import {
+  BLOCK_FILES,
+  kitOwned,
+  MANIFEST_PATH,
+  sha256,
+  type Tool,
+  UPGRADE_WORKFLOW,
+} from "../migrate/install.ts";
 import { type ConfigMerge, upgradeOpenspecConfig, upgradeSettings } from "./config.ts";
 import { mergeThreeWay } from "./merge.ts";
 import { compareVersions, isVersion } from "./version.ts";
@@ -124,6 +131,9 @@ function versionsIn(dir: string, ext: string, installed: string, target: string)
     .sort(compareVersions);
 }
 
+/** Where a release holds the copy of kit file `p`. */
+const copyOf = (p: string) => (p === UPGRADE_WORKFLOW.active ? UPGRADE_WORKFLOW.shipped : p);
+
 /** What an upgrade from `o.base` to `o.from` changes in `o.root`, without writing anything. */
 export function planUpgrade(o: PlanOptions): UpgradePlan {
   const installed = readInstalled(o.root);
@@ -133,12 +143,15 @@ export function planUpgrade(o: PlanOptions): UpgradePlan {
   const manifest = { files: {} as Record<string, string>, blocks: {} as Record<string, string> };
   const local = (p: string) => join(o.root, p);
   const baseCopy = (p: string, hash: string | undefined) => {
-    if (!o.base || hash === undefined || !existsSync(join(o.base, p))) return undefined;
-    const data = readFileSync(join(o.base, p));
+    if (!o.base || hash === undefined || !existsSync(join(o.base, copyOf(p)))) return undefined;
+    const data = readFileSync(join(o.base, copyOf(p)));
     return sha256(data) === hash ? data : undefined;
   };
 
   const shipped = new Set(kitOwned(o.from, tools));
+  // a turned-on upgrade workflow is kit-owned; its copy in a release is the inactive one
+  if (installed.files[UPGRADE_WORKFLOW.active] && existsSync(join(o.from, UPGRADE_WORKFLOW.shipped)))
+    shipped.add(UPGRADE_WORKFLOW.active);
   const paths = [...new Set([...shipped, ...Object.keys(installed.files)])].sort();
   for (const p of paths) {
     const recorded = installed.files[p];
@@ -156,8 +169,8 @@ export function planUpgrade(o: PlanOptions): UpgradePlan {
         });
       continue;
     }
-    const next = readFileSync(join(o.from, p));
-    const mode = statSync(join(o.from, p)).mode & 0o777;
+    const next = readFileSync(join(o.from, copyOf(p)));
+    const mode = statSync(join(o.from, copyOf(p))).mode & 0o777;
     const hash = sha256(next);
     if (current === undefined) {
       files.push({ path: p, action: "add", data: next, mode });

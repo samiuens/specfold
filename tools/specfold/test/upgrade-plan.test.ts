@@ -138,6 +138,34 @@ describe("upgrade plan", () => {
     expect(step(".gitignore")).toMatchObject({ action: "conflict", reason: "the specfold markers are gone" });
   });
 
+  // spec: specfold-upgrade#turned-on-workflow-replaced
+  it("replaces a turned-on upgrade workflow with the release's inactive copy", () => {
+    const WORKFLOW = ".specfold/workflows/specfold-upgrade.yml";
+    const ACTIVE = ".github/workflows/specfold-upgrade.yml";
+    const base = release("0.1.0-rc.1", { [WORKFLOW]: "name: specfold-upgrade\n" });
+    const next = release("0.1.0-rc.2", { [WORKFLOW]: "name: specfold-upgrade\n# weekly\n" });
+    const root = installed(base, "0.1.0-rc.1");
+    writeFileSync(join(root, ACTIVE), "name: specfold-upgrade\n");
+    const manifest = JSON.parse(readFileSync(join(root, ".specfold/manifest.json"), "utf8"));
+    manifest.files[ACTIVE] = manifest.files[WORKFLOW];
+    writeFileSync(join(root, ".specfold/manifest.json"), JSON.stringify(manifest));
+    const plan = planUpgrade({ root, from: next, base, installed: "0.1.0-rc.1", target: "0.1.0-rc.2" });
+    expect(plan.files.find((f) => f.path === ACTIVE)).toMatchObject({
+      action: "replace",
+      data: Buffer.from("name: specfold-upgrade\n# weekly\n"),
+    });
+    expect(plan.files.find((f) => f.path === WORKFLOW)).toMatchObject({ action: "replace" });
+  });
+
+  // spec: specfold-upgrade#not-turned-on
+  it("does not create the upgrade workflow when it was never turned on", () => {
+    const { plan } = setup({ ".specfold/workflows/specfold-upgrade.yml": "name: specfold-upgrade\n" });
+    expect(plan.files.map((f) => f.path)).not.toContain(".github/workflows/specfold-upgrade.yml");
+    expect(plan.files.find((f) => f.path === ".specfold/workflows/specfold-upgrade.yml")).toMatchObject({
+      action: "add",
+    });
+  });
+
   it("lists the migrations and notes of the versions passed, in order", () => {
     const { plan } = setup({
       "upgrade/migrations/0.1.0-rc.1.mjs": "export default () => {};\n",

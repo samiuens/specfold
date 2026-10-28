@@ -27,7 +27,7 @@ agent: implementer
   - Done when: the workflow ends green with a notice without `SPECFOLD_TOKEN`, opens the upgrade PR as `github-actions[bot]`, skips an existing branch, closes older upgrade PRs, and `.specfold/workflows/` is kit-owned
 - [x] 2.2 Turn the workflow on with `init --upgrade-workflow` and `migrate install --upgrade-workflow`
   - Done when: scenarios not-a-template-repository, workflow-turned-on, workflow-off-by-default and install-with-the-workflow pass in `init.test.ts` and `migrate-install.test.ts`
-- [ ] 2.3 Upgrade the turned-on workflow from the release's copy
+- [x] 2.3 Upgrade the turned-on workflow from the release's copy
   - Done when: scenarios turned-on-workflow-replaced and not-turned-on pass in `upgrade-plan.test.ts`
 
 ## 3. Fixture upgrades in CI
