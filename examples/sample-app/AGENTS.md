@@ -33,7 +33,7 @@ Specs are the behavior contract, knowledge is the context, and nothing is writte
 Every behavior change is an OpenSpec change using the `specfold` schema: brief, proposal, specs, design (only if needed), knowledge, tasks.
 
 1. **Plan:** the planning interview (skill `sf-interview`) until the user approves; then the artifacts. Claude Code: `claude --agent planner --permission-mode plan`. Other tools: skill `sf-plan`.
-2. **Apply:** one task group at a time, one commit per task with the trailer `Task: <change>#<n>.<m>`. Check progress with `node scripts/specfold.mjs status <change>` and `resume <change>`.
+2. **Apply:** by task groups with skill `sf-apply` (parallel implementer subagents in Claude Code, one group at a time elsewhere), one commit per task with the trailer `Task: <change>#<n>.<m>`. Check progress with `node scripts/specfold.mjs status <change>` and `resume <change>`.
 3. **Check:** `node scripts/specfold.mjs change check <change>` and `openspec validate --all --strict`.
 4. **Archive:** `/opsx:archive` (or `openspec archive <change>`), then skill `sf-sync` (`node scripts/specfold.mjs sync <change>`) in the same PR.
 
