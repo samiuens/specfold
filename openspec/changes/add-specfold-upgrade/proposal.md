@@ -11,17 +11,17 @@ A repository installed with `specfold init` or sf-migrate keeps the kit's versio
   - without `--check`, it downloads the target release, checks its SHA-256, and runs **the downloaded CLI's** upgrader on the repository;
   - with no `--yes` it prints the plan (add, replace, merge, remove, migrations); `--yes` applies it on branch `specfold/upgrade-<version>` and commits;
   - `--pr` pushes and opens the PR with `gh`.
-- **Sources:** `source.github` (gh login, `GITHUB_TOKEN` or `SPECFOLD_TOKEN`), `source.url` and `source.path`. A token is never written to disk.
+- **Sources:** `source.github` (gh login, `GITHUB_TOKEN` or `SPECFOLD_TOKEN`), `source.url` (with a `releases.json` index that `release.mjs index` writes) and `source.path`. A token is never written to disk.
 - **Per file class:**
   - an unchanged kit-owned file is replaced, or removed when the new release no longer has it;
   - a locally changed one is merged three ways with `git merge-file`, using the installed release's copy as the base, and a failed merge leaves conflict markers;
   - managed blocks are replaced inside their markers;
   - project-owned files are never touched.
 - **Migrations** `upgrade/migrations/<version>.mjs` run in version order for every version after the installed one, up to the target.
-- **Follow-ups and report:** the manifest and `kit_version` are updated. Then `openspec update`, `agents sync`, `hooks install`, `index`, `validate` and `gate --local` run, and everything lands in `.specfold/upgrade-report.md`.
+- **Follow-ups and report:** the manifest and `kit_version` are updated. Then `openspec update`, `agents sync`, `hooks install`, `index`, `validate` and `gate --local` run, and everything lands in `.specfold/upgrade-report.md`. The commit message comes from `upgrade.commit_message`.
 - **Version skew:** write commands refuse when the manifest was written by a newer kit than the running CLI, and point to `specfold upgrade`.
 - **Skill `sf-upgrade`:** runs the CLI, resolves conflicts with judgment, applies the release's upgrade notes, and stops before merging.
-- **Sample app:** records `kit_version` and is upgraded from rc.1 to rc.2 with the released upgrader. The run is recorded.
+- **Sample app:** stops receiving copies of kit files, records `kit_version` with a manifest, and is upgraded from rc.1 to rc.2 with the released upgrader in a follow-up PR once rc.2 is published. The run is recorded.
 
 ## Capabilities
 
@@ -29,7 +29,7 @@ A repository installed with `specfold init` or sf-migrate keeps the kit's versio
 - `specfold-upgrade`: the upgrade command, sources, file classes, migrations, report and version skew.
 
 ### Modified Capabilities
-- none
+- `specfold-release`: `release.mjs index` writes the mirror index `releases.json`.
 
 ## Out of scope
 
@@ -45,5 +45,5 @@ A repository installed with `specfold init` or sf-migrate keeps the kit's versio
 ## Impact
 
 - New: `src/upgrade/` (sources, plan, apply, merge, migrations, report, command) and tests; `template/.agents/skills/sf-upgrade/` with its copies and links.
-- Changed: `src/cli.ts` (the skew check for write commands), the template manifest, `examples/sample-app/`.
+- Changed: `src/cli.ts` (the skew check for write commands), `src/repo.ts`, `tools/specfold/release.mjs`, the template manifest, `examples/sample-app/`, the CLI and release workflows.
 - Knowledge: an upgrade architecture concept, the capability card, the file-ownership decision.
