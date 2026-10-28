@@ -29,3 +29,7 @@
 * [Specs are the contract, knowledge is context](specs-vs-knowledge.md) - Specs hold normative behavior, knowledge holds descriptive context, and nothing is written twice.
 * [The framework is called Specfold](naming-specfold.md) - Specfold replaces the working names (kb, okf-openspec-kit); the CLI is specfold with alias sf, skills use the sf- prefix.
 * [Tool-neutral first, Claude Code extras on top](tool-neutral-first.md) - The workflow runs on AGENTS.md, .agents/skills/, the CLI and CI; Claude Code hooks, subagents and skills are additions.
+* [Upgrade file classes](upgrade-file-classes.md) - Which files an upgrade replaces, merges three ways or never touches, and why the installed release is the merge base.
+  * Referenced from code: tools/specfold/src/upgrade/apply.ts:1
+  * Referenced from code: tools/specfold/src/upgrade/config.ts:1
+  * Referenced from code: tools/specfold/src/upgrade/plan.ts:1

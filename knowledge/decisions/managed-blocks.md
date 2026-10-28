@@ -18,6 +18,8 @@ When Specfold has to put its content into a file the repository already owns (`A
 
 A repository made from the template gets its markers from `specfold init`: a shared file still equal to the template's text, by the block hash in the template's own manifest, gets the markers around its whole text; an edited one gets none and stays out of the manifest.
 
+An upgrade replaces a block whose content still matches its manifest hash. A block edited inside the markers is merged three ways against the installed release's block, and a block whose markers are gone is reported, not rewritten ([upgrade file classes](/decisions/upgrade-file-classes.md)).
+
 # Why
 
 A team's own instructions must survive the migration word for word, and M9's upgrader needs to know exactly which part of a shared file is Specfold's to rewrite. The block's hash in `.specfold/manifest.json` tells it whether someone edited the block since.
