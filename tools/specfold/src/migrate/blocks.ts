@@ -12,6 +12,10 @@ const MARKERS: Record<BlockStyle, [string, string]> = {
 /** `.gitignore` and `CODEOWNERS` take hash comments; everything else here is Markdown. */
 export const blockStyle = (path: string): BlockStyle => (path.endsWith(".md") ? "markdown" : "hash");
 
+/** Whether `text` has Specfold's start marker. */
+export const hasBlock = (text: string, style: BlockStyle) =>
+  text.split("\n").some((l) => l.trim() === MARKERS[style][0]);
+
 /**
  * Puts `content` between Specfold's markers in `existing`: replaces the block when the markers exist,
  * otherwise adds it at the top (Markdown) or the end (hash comments). Text outside the markers is kept.

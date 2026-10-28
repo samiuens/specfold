@@ -12,7 +12,7 @@ import {
 import { dirname, join } from "node:path";
 import { parse } from "yaml";
 import { applyLinks, listSkills, planLinks } from "../agents/sync.ts";
-import { EnvError } from "../errors.ts";
+import { EnvError, UsageError } from "../errors.ts";
 import { installHooks, writeIfChanged } from "../hooks/install.ts";
 import { openspecBinary } from "../openspec.ts";
 import { CONFIG_FILE, loadConfig } from "../repo.ts";
@@ -23,6 +23,16 @@ import { fillStack, mergeOpenspecConfig, mergeSettings } from "./merge.ts";
 export const TOOLS = ["agents", "claude"] as const;
 export type Tool = (typeof TOOLS)[number];
 export const MANIFEST_PATH = ".specfold/manifest.json";
+
+/** The `--tools` value of migrate install and init; `agents` is always set up. */
+export function parseTools(value: string | undefined): Tool[] {
+  if (value === undefined) return [...TOOLS];
+  const tools = value.split(",").map((t) => t.trim());
+  const unknown = tools.filter((t) => !(TOOLS as readonly string[]).includes(t));
+  if (unknown.length > 0 || !tools.includes("agents"))
+    throw new UsageError(`--tools takes 'agents' or 'agents,claude', got '${value}'`);
+  return tools as Tool[];
+}
 
 export interface InstallOptions {
   /** Git root of the repository being migrated. */
@@ -43,14 +53,14 @@ export interface InstallResult {
 }
 
 const REQUIRED = [CONFIG_FILE, "scripts/specfold.mjs", "openspec/schemas/specfold"];
-const BLOCK_FILES = [
+export const BLOCK_FILES = [
   "AGENTS.md",
   "CLAUDE.md",
   ".github/pull_request_template.md",
   ".gitignore",
   ".github/CODEOWNERS",
 ];
-const sha256 = (data: string | Buffer) => `sha256:${createHash("sha256").update(data).digest("hex")}`;
+export const sha256 = (data: string | Buffer) => `sha256:${createHash("sha256").update(data).digest("hex")}`;
 
 /** Every file below `dir` (dot files included) as a path relative to `base`, sorted. */
 function filesUnder(base: string, dir: string): string[] {
@@ -76,13 +86,13 @@ function kitOwned(from: string, tools: Tool[]): string[] {
   ].flatMap((p) => filesUnder(from, p));
 }
 
-interface Manifest {
+export interface Manifest {
   files: Record<string, string>;
   blocks: Record<string, string>;
 }
 
 /** The file and block hashes of an earlier install; empty when there is none or it cannot be read. */
-function readManifest(path: string): Manifest {
+export function readManifest(path: string): Manifest {
   try {
     const data = JSON.parse(readFileSync(path, "utf8")) as Partial<Manifest>;
     return { files: data.files ?? {}, blocks: data.blocks ?? {} };
@@ -107,7 +117,7 @@ function preflight(o: InstallOptions): void {
   }
 }
 
-function openspecInit(root: string, tools: Tool[]): void {
+export function openspecInit(root: string, tools: Tool[]): void {
   const bin = openspecBinary(root);
   try {
     execFileSync(bin.command, ["init", "--tools", tools.join(",")], {
@@ -124,11 +134,35 @@ function openspecInit(root: string, tools: Tool[]): void {
   }
 }
 
+// line edits keep the template's comments and its JSON-style lists
+export const setSourceGlobs = (text: string, globs: string[]) =>
+  text.replace(/^source_globs:.*$/m, `source_globs: ${JSON.stringify(globs)}`);
+
+/** No skill link targets: the repository does not use Claude Code. */
+export const clearAgentTargets = (text: string) =>
+  text.replace(/^(agents:\n(?:#.*\n)*\s+targets:).*$/m, "$1 []");
+
 /** The template's specfold.yaml with this repository's source globs, and no skill targets without Claude Code. */
 function projectSettings(text: string, globs: string[], tools: Tool[]): string {
-  // line edits keep the template's comments and its JSON-style lists
-  const out = text.replace(/^source_globs:.*$/m, `source_globs: ${JSON.stringify(globs)}`);
-  return tools.includes("claude") ? out : out.replace(/^(agents:\n(?:#.*\n)*\s+targets:).*$/m, "$1 []");
+  const out = setSourceGlobs(text, globs);
+  return tools.includes("claude") ? out : clearAgentTargets(out);
+}
+
+/** The manifest's text: sorted keys and no time, so an unchanged install writes the same bytes. */
+export function manifestText(kitVersion: string, ref: string | undefined, m: Manifest): string {
+  const sorted = (r: Record<string, string>) =>
+    Object.fromEntries(Object.entries(r).sort(([a], [b]) => (a < b ? -1 : 1)));
+  return `${JSON.stringify(
+    {
+      manifest_version: 1,
+      kit_version: kitVersion,
+      ...(ref ? { ref } : {}),
+      files: sorted(m.files),
+      blocks: sorted(m.blocks),
+    },
+    null,
+    2,
+  )}\n`;
 }
 
 /** Installs the kit into `o.root` without overwriting anything the repository already has. */
@@ -231,19 +265,7 @@ export function installKit(o: InstallOptions): InstallResult {
   }
 
   const kitVersion = String((parse(template(CONFIG_FILE)) as { kit_version?: unknown }).kit_version ?? "");
-  const sorted = (r: Record<string, string>) =>
-    Object.fromEntries(Object.entries(r).sort(([a], [b]) => (a < b ? -1 : 1)));
-  const text = `${JSON.stringify(
-    {
-      manifest_version: 1,
-      kit_version: kitVersion,
-      ...(o.ref ? { ref: o.ref } : {}),
-      files: sorted(manifest.files),
-      blocks: sorted(manifest.blocks),
-    },
-    null,
-    2,
-  )}\n`;
+  const text = manifestText(kitVersion, o.ref, manifest);
   if (writeIfChanged(abs(MANIFEST_PATH), text)) act(MANIFEST_PATH, "write");
   return result;
 }

@@ -4,7 +4,7 @@ import { UsageError } from "../errors.ts";
 import { plural } from "../findings.ts";
 import { git } from "../git.ts";
 import { detect } from "./detect.ts";
-import { installKit, TOOLS, type Tool } from "./install.ts";
+import { installKit, parseTools } from "./install.ts";
 import { inventory } from "./inventory.ts";
 import { branchExists, currentBranch, defaultBranch, dirtyPaths, gitRoot, MIGRATION_BRANCH } from "./repo.ts";
 import { MARKABLE, markStep, nextStep, readState, STEPS, type Step, writeState } from "./state.ts";
@@ -18,15 +18,6 @@ const NEXT: Record<Step, string> = {
   seed: "seed concepts from the code, then specfold migrate mark seed",
   report: "validate and write .specfold/migration/report.md, then specfold migrate mark report",
 };
-
-function parseTools(value: string | undefined): Tool[] {
-  if (value === undefined) return [...TOOLS];
-  const tools = value.split(",").map((t) => t.trim());
-  const unknown = tools.filter((t) => !(TOOLS as readonly string[]).includes(t));
-  if (unknown.length > 0 || !tools.includes("agents"))
-    throw new UsageError(`--tools takes 'agents' or 'agents,claude', got '${value}'`);
-  return tools as Tool[];
-}
 
 const head = (root: string) => {
   try {
