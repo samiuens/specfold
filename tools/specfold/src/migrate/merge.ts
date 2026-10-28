@@ -20,8 +20,9 @@ const commandsOf = (groups: unknown): string[] =>
     : [];
 
 /**
- * Adds each hook group of the template whose commands are all missing under its event, and each missing
- * `permissions.deny` rule after the existing ones; keeps every other key.
+ * Adds each hook group of the template whose commands are all missing under its event, each missing
+ * `permissions.deny` rule after the existing ones, each `env` variable not yet set and each other
+ * top-level key the file lacks; keeps every value that is already there.
  */
 export function mergeSettings(existing: string | undefined, template: string): Merged {
   if (existing === undefined) return { text: template, changed: true };
@@ -35,6 +36,8 @@ export function mergeSettings(existing: string | undefined, template: string): M
   const parsed = JSON.parse(template) as {
     hooks?: Record<string, HookGroup[]>;
     permissions?: { deny?: string[] };
+    env?: Record<string, string>;
+    [key: string]: unknown;
   };
   const wanted = parsed.hooks ?? {};
   const wantedDeny = parsed.permissions?.deny ?? [];
@@ -59,8 +62,18 @@ export function mergeSettings(existing: string | undefined, template: string): M
     hooks[event] = [...((current as unknown[]) ?? []), ...added];
     changed = true;
   }
-  if (!changed && missingDeny.length === 0) return { text: existing, changed: false };
+  if (data.env !== undefined && !isRecord(data.env))
+    return { conflict: "has an 'env' value that is not an object" };
+  const env: Record<string, unknown> = isRecord(data.env) ? data.env : {};
+  const missingEnv = Object.entries(parsed.env ?? {}).filter(([name]) => !(name in env));
+  const missingKeys = Object.keys(parsed).filter(
+    (key) => !["hooks", "permissions", "env"].includes(key) && !(key in data),
+  );
+  if (!changed && missingDeny.length === 0 && missingEnv.length === 0 && missingKeys.length === 0)
+    return { text: existing, changed: false };
   const out: Record<string, unknown> = { ...data };
+  for (const key of missingKeys) out[key] = parsed[key];
+  if (missingEnv.length > 0) out.env = { ...env, ...Object.fromEntries(missingEnv) };
   if (missingDeny.length > 0) out.permissions = { ...permissions, deny: [...deny, ...missingDeny] };
   if (changed) out.hooks = hooks;
   return { text: `${JSON.stringify(out, null, 2)}\n`, changed: true };

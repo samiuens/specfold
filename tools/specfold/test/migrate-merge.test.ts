@@ -91,6 +91,20 @@ describe("settings merge", () => {
     });
   });
 
+  // spec: specfold-migrate#worktree-base-kept
+  it("adds missing top-level keys and env entries and keeps the values already set", () => {
+    const extra = JSON.stringify({ worktree: { baseRef: "head" }, env: { A: "1", B: "2" } });
+    const fresh = mergeSettings(JSON.stringify({ env: { A: "mine" } }), extra);
+    if ("conflict" in fresh) throw new Error(fresh.conflict);
+    expect(JSON.parse(fresh.text)).toEqual({ env: { A: "mine", B: "2" }, worktree: { baseRef: "head" } });
+    expect(mergeSettings(fresh.text, extra)).toEqual({ text: fresh.text, changed: false });
+    const own = JSON.stringify({ worktree: { baseRef: "fresh" }, env: { A: "1", B: "2" } });
+    expect(mergeSettings(own, extra)).toEqual({ text: own, changed: false });
+    expect(mergeSettings(JSON.stringify({ env: [] }), extra)).toEqual({
+      conflict: "has an 'env' value that is not an object",
+    });
+  });
+
   it("copies the template into a missing file and reports invalid JSON", () => {
     expect(mergeSettings(undefined, template)).toEqual({ text: template, changed: true });
     expect(mergeSettings("{ nope", template)).toEqual({ conflict: "is not valid JSON" });
