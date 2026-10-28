@@ -126,6 +126,14 @@ operations:
 `);
   });
 
+  // spec: specfold-upgrade#long-rule-kept-on-one-line
+  it("keeps a long rule on one line when it adds a rules key", () => {
+    const rule = `Name the endpoint, its owner and the error budget in every proposal ${"y".repeat(42)}`;
+    expect(rule.length).toBe(110);
+    const local = base.replace("    - Observable behavior only.", `    - ${rule}`);
+    expect(textOf(upgradeOpenspecConfig(local, base, next))).toContain(`    - ${rule}\n`);
+  });
+
   it("keeps a context the team edited and says so", () => {
     const local = base.replace("Language: English.", "Language: English. Use US spelling.");
     const result = upgradeOpenspecConfig(local, base, next);

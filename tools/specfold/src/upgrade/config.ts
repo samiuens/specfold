@@ -1,6 +1,7 @@
 // see knowledge: /decisions/upgrade-file-classes.md
 import { isDeepStrictEqual } from "node:util";
 import { isMap, parse, parseDocument, Scalar } from "yaml";
+import { yamlText } from "../yaml.ts";
 
 /** A config file after an upgrade: its text and whether it changed, or why it was left alone. */
 export type ConfigMerge = { text: string; changed: boolean; notes: string[] } | { conflict: string };
@@ -163,6 +164,6 @@ export function upgradeOpenspecConfig(local: string, base: string | undefined, n
         edit(() => doc.deleteIn([section, key]));
   }
   if (!touched) return { text: local, changed: false, notes };
-  const text = String(doc);
+  const text = yamlText(doc);
   return { text, changed: text !== local, notes };
 }

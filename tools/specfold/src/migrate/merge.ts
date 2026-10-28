@@ -1,4 +1,5 @@
 import { isMap, parse, parseDocument, Scalar } from "yaml";
+import { yamlText } from "../yaml.ts";
 import type { Merged } from "./blocks.ts";
 
 const STACK_PLACEHOLDER = /^(\s*)Stack: <filled by specfold init or sf-migrate>$/m;
@@ -110,7 +111,7 @@ export function mergeOpenspecConfig(existing: string, template: string, stack: s
       if (!doc.hasIn(["rules", key])) edit(() => doc.setIn(["rules", key], doc.createNode(value)));
   }
   if (!touched) return { text: existing, changed: false };
-  const text = String(doc);
+  const text = yamlText(doc);
   return { text, changed: text !== existing };
 }
 
