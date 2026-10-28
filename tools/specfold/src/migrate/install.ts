@@ -65,7 +65,7 @@ export const BLOCK_FILES = [
 export const sha256 = (data: string | Buffer) => `sha256:${createHash("sha256").update(data).digest("hex")}`;
 
 /** Every file below `dir` (dot files included) as a path relative to `base`, sorted. */
-function filesUnder(base: string, dir: string): string[] {
+export function filesUnder(base: string, dir: string): string[] {
   const abs = join(base, dir);
   if (!existsSync(abs)) return [];
   if (!statSync(abs).isDirectory()) return [dir];
@@ -77,7 +77,7 @@ function filesUnder(base: string, dir: string): string[] {
 }
 
 /** The files only the kit changes: the CLI, the schema, the skills, the gate workflows and the planner. */
-function kitOwned(from: string, tools: Tool[]): string[] {
+export function kitOwned(from: string, tools: Tool[]): string[] {
   return [
     "scripts/specfold.mjs",
     "openspec/schemas/specfold",

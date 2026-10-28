@@ -29,13 +29,13 @@ agent: implementer
 ## 3. Plan and apply
 
 ```yaml
-files: [tools/specfold/src/upgrade/plan.ts, tools/specfold/src/upgrade/merge.ts, tools/specfold/src/upgrade/config.ts, tools/specfold/src/upgrade/apply.ts, tools/specfold/src/upgrade/migrations.ts, tools/specfold/src/upgrade/report.ts, tools/specfold/test/upgrade-plan.test.ts, tools/specfold/test/upgrade-config.test.ts, tools/specfold/test/upgrade-apply.test.ts, tools/specfold/test/upgrade-helpers.ts]
+files: [tools/specfold/src/migrate/install.ts, tools/specfold/src/upgrade/plan.ts, tools/specfold/src/upgrade/merge.ts, tools/specfold/src/upgrade/config.ts, tools/specfold/src/upgrade/apply.ts, tools/specfold/src/upgrade/migrations.ts, tools/specfold/src/upgrade/report.ts, tools/specfold/test/upgrade-plan.test.ts, tools/specfold/test/upgrade-config.test.ts, tools/specfold/test/upgrade-apply.test.ts, tools/specfold/test/upgrade-helpers.ts]
 depends: []
 scenarios: [specfold-upgrade#unchanged-file-replaced, specfold-upgrade#local-edit-kept, specfold-upgrade#conflicting-edit, specfold-upgrade#text-outside-the-block-kept, specfold-upgrade#knowledge-unchanged, specfold-upgrade#two-migrations-in-order]
 agent: implementer
 ```
 
-- [ ] 3.1 Plan kit-owned files and blocks against the manifest, merging changed ones three ways
+- [x] 3.1 Plan kit-owned files and blocks against the manifest, merging changed ones three ways
   - Done when: scenarios unchanged-file-replaced, local-edit-kept, conflicting-edit and text-outside-the-block-kept pass in `upgrade-plan.test.ts`
 - [ ] 3.2 Merge the kit keys of `.claude/settings.json` and `openspec/config.yaml` three ways
   - Done when: `upgrade-config.test.ts` covers deny rules, hook groups, env values, rules keys and the context with its `Stack:` line
