@@ -9,7 +9,7 @@ scenarios: []
 agent: spec-writer
 ```
 
-- [ ] 1.1 Plan `add-exports` in the sample app with three module groups
+- [x] 1.1 Plan `add-exports` in the sample app with three module groups
   - Done when: the sample app's `change check add-exports` and `openspec validate add-exports --strict` pass, and the brief is confirmed
 
 ## 2. Parallel run
