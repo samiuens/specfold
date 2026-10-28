@@ -6,6 +6,7 @@ import "./change/command.ts";
 import "./commitments/command.ts";
 import "./doctor/command.ts";
 import "./drift/command.ts";
+import "./graphify/command.ts";
 import "./gate/command.ts";
 import "./hooks/command.ts";
 import "./indexes/command.ts";

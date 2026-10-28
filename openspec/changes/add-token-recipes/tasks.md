@@ -35,9 +35,9 @@ scenarios: [specfold-graphify#graphify-missing, specfold-graphify#fresh-reposito
 agent: implementer
 ```
 
-- [ ] 3.1 Check for graphify and the settings before any write
+- [x] 3.1 Check for graphify and the settings before any write
   - Done when: scenario graphify-missing passes in `graphify.test.ts`
-- [ ] 3.2 Install the skill, write `.graphifyignore`, add the guard and build the graph
+- [x] 3.2 Install the skill, write `.graphifyignore`, add the guard and build the graph
   - Done when: scenarios fresh-repository, guard-added-once, first-build and rerun pass in `graphify.test.ts` with a stub `graphify` on the PATH
 
 ## 4. Template and bundle
