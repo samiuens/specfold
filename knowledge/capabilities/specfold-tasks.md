@@ -3,7 +3,7 @@ type: Capability
 title: specfold tasks
 description: Why tasks.md is a checked breakdown of task groups, and where the contract for tasks check, status and resume lives.
 status: draft
-change: 2026-10-26-add-specfold-tasks
+change: 2026-10-28-add-subagent-roles
 resource: ../../openspec/specs/specfold-tasks/spec.md
 spec: openspec/specs/specfold-tasks/spec.md
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T14:04:00+01:00 }
@@ -12,6 +12,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-tasks/proposal.md
   - id: design-2026-10-26-add-specfold-tasks
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-tasks/design.md
+  - id: proposal-2026-10-28-add-subagent-roles
+    resource: ../../openspec/changes/archive/2026-10-28-add-subagent-roles/proposal.md
+  - id: design-2026-10-28-add-subagent-roles
+    resource: ../../openspec/changes/archive/2026-10-28-add-subagent-roles/design.md
 ---
 
 # Why
