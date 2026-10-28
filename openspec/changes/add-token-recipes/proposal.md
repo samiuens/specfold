@@ -29,6 +29,7 @@ The plan's token layer (M7) recommends graphify for "where in the code" question
 
 ### Modified Capabilities
 - `specfold-migrate`: the settings merge also adds missing deny rules.
+- `specfold-stats`: the per-skill budget also skips `graphify`, whose description (about 91 tokens) graphify writes. *Added when the change started, after measuring graphify 0.9.97's skill.*
 
 ## Out of scope
 
@@ -37,8 +38,8 @@ The plan's token layer (M7) recommends graphify for "where in the code" question
 
 ## Open points
 
-1. **graphify's commands changed:** 0.9.97's help lists no `install --project` and no `hook-guard`, which `/decisions/graphify-code-only.md` names. The design checks how the current release installs a project-level skill for `.agents/skills` and which PreToolUse command `graphify claude install` writes, and the decision is updated to match.
-2. **The deny rules** use Claude Code's `Read(<gitignore-style pattern>)` form; the exact list is fixed in the design.
+1. **graphify's commands changed:** *Resolved in the design: both still exist in 0.9.97, only hidden from the top-level help.* 0.9.97's help lists no `install --project` and no `hook-guard`, which `/decisions/graphify-code-only.md` names. The design checks how the current release installs a project-level skill for `.agents/skills` and which PreToolUse command `graphify claude install` writes, and the decision is updated to match.
+2. **The deny rules** use Claude Code's `Read(<gitignore-style pattern>)` form; the exact list is fixed in the design. *Resolved with the user: generated files only, because a Read deny rule also blocks Edit and Write on that path.*
 3. **Claude Code is detected** by `.claude/skills` in `agents.targets`, as for skill links.
 
 ## Impact
