@@ -5,6 +5,7 @@
 * **Change**: 2026-10-28-add-bootstrap: created 2, updated 3, deprecated 0
 * **Retro**: add-bootstrap: 0 answers
 * **Change**: 2026-10-28-recheck-drifted-knowledge: created 0, updated 5, deprecated 0
+* **Retro**: recheck-drifted-knowledge: 0 answers
 
 ## 2026-10-27
 
