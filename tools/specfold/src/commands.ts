@@ -9,6 +9,7 @@ import "./drift/command.ts";
 import "./gate/command.ts";
 import "./hooks/command.ts";
 import "./indexes/command.ts";
+import "./init/command.ts";
 import "./log/command.ts";
 import "./migrate/command.ts";
 import "./lookup/command.ts";
