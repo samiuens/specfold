@@ -3,7 +3,13 @@ type: Capability
 title: JSON import
 description: Why to-do entries can be imported from JSON with the rules of add, and where the contract lives.
 status: draft
+spec: openspec/specs/json-import/spec.md
+resource: ../../openspec/specs/json-import/spec.md
+change: 2026-10-28-add-exports
 generated: { by: claude-code/claude-sonnet-5-5, at: 2026-10-28T10:24:25+01:00 }
+sources:
+  - id: proposal-2026-10-28-add-exports
+    resource: ../../openspec/changes/archive/2026-10-28-add-exports/proposal.md
 ---
 
 # Why
