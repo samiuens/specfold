@@ -1,5 +1,6 @@
 import { type ParseArgsConfig, parseArgs } from "node:util";
 import { EnvError, UsageError } from "./errors.ts";
+import { refuseSkew, writes } from "./upgrade/skew.ts";
 
 declare const __SPECFOLD_VERSION__: string;
 
@@ -64,11 +65,9 @@ export async function main(argv: string[], io: Io): Promise<number> {
     } catch (error) {
       throw new UsageError((error as Error).message);
     }
-    return await command.run({
-      io,
-      values: parsed.values as CommandContext["values"],
-      positionals: parsed.positionals,
-    });
+    const values = parsed.values as CommandContext["values"];
+    if (writes(name, parsed.positionals, values)) refuseSkew(io.cwd, __SPECFOLD_VERSION__);
+    return await command.run({ io, values, positionals: parsed.positionals });
   } catch (error) {
     if (error instanceof UsageError) {
       io.stderr(`specfold: ${error.message}\nRun 'specfold --help' for usage.\n`);

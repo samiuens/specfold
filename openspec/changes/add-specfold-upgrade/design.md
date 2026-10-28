@@ -95,7 +95,7 @@ Decisions 11 to 14 were asked while designing (user, 2026-10-28); the rest follo
     - the template documents the key in a comment, so existing repositories keep the default until they set it.
 15. **Version skew:**
     - before a command runs, the CLI compares the nearest Specfold root's manifest `kit_version` with its own version. When the manifest is newer, write commands stop with exit 2 and name `specfold upgrade`;
-    - **write commands:** `agents sync` without `--check`, `backlog` (except `list`), `graphify setup`, `hooks install`, `index` without `--check`, `init`, `log add`, `migrate`, `new`, `parallel set`, `sync` without `--dry-run`, `verify`, `wt`;
+    - **write commands:** `agents sync` without `--check`, `backlog` and `commitments` (except `list`), `graphify setup`, `hooks install`, `index` without `--check`, `init` without `--dry-run`, `log add`, `migrate` (except `status`), `new`, `parallel set`, `sync` without `--dry-run`, `verify`, `wt` (except `plan`);
     - the list is one table in `src/upgrade/skew.ts`, so each command module stays unchanged;
     - `upgrade` itself is never refused;
     - a CLI version or manifest version that isn't semver skips the check.
