@@ -23,7 +23,7 @@ Use this in the main session once a change is planned: its brief is confirmed an
 ## Finish
 
 8. **Verify.** Start a `verifier` on the change branch. On `FINDINGS`, send each finding back as a new packet to the group that owns the files, as in steps 3 to 5; never fix findings yourself in the main session.
-9. **Archive and sync.** Archive the change (`/opsx:archive` or `openspec archive <change>`), then start `knowledge-curator` to run sf-sync. Pushing and opening the PR are yours, after the user agrees.
+9. **Archive and sync.** Archive the change (`/opsx:archive` or `openspec archive <change>`), then start `knowledge-curator` to run sf-sync. sf-sync's retro asks the user, which a subagent cannot: run the retro yourself once the curator has reported. Pushing and opening the PR are yours, after the user agrees.
 
 ## Patterns
 
@@ -37,4 +37,6 @@ Agent teams stay off: they do not isolate teammates in worktrees.
 
 - Only the main session spawns subagents; the template's settings enforce it.
 - Subagents return summaries, never raw file contents.
+- Subagents start in the background. One that works on the change branch itself, like the knowledge curator, owns it until it reports: don't commit, merge or switch branches meanwhile.
+- Trust git, not a hand-off: when a final message is neither of the expected forms, check the branch before resuming the subagent.
 - Pass packets verbatim; the packet, not your paraphrase, is the contract.
