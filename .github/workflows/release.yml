@@ -57,3 +57,37 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.release-please.outputs.tag }}
           VERSION: ${{ needs.release-please.outputs.version }}
+
+  # release-please can't build: rebuild the bundle copies, the lockfile and the template manifest on its PR
+  rebuild:
+    if: github.event_name == 'pull_request' && github.head_ref == 'release-please--branches--main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Rebuild
+        run: |
+          npm install --package-lock-only --ignore-scripts
+          npm ci --ignore-scripts
+          npm run build -w specfold
+          cp scripts/specfold.mjs template/scripts/specfold.mjs
+          cp scripts/specfold.mjs examples/sample-app/scripts/specfold.mjs
+          (cd tools/specfold && npx vitest run test/template-manifest.test.ts -u)
+          node tools/specfold/release.mjs check
+      - name: Commit when something changed
+        run: |
+          git diff --quiet && exit 0
+          version=$(node -p 'require("./tools/specfold/package.json").version')
+          git config user.name "$ACTOR"
+          git config user.email "$ACTOR_ID+$ACTOR@users.noreply.github.com"
+          git commit -qam "build(release): 📦️ rebuild the bundle for v$version"
+          git push
+        env:
+          ACTOR: ${{ github.actor }}
+          ACTOR_ID: ${{ github.actor_id }}

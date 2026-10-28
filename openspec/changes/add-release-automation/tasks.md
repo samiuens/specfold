@@ -39,7 +39,7 @@ agent: implementer
 
 - [x] 3.1 Run release-please and publish the tarball, checksum and notes
   - Done when: `release.yml` runs release-please with `RELEASE_PLEASE_TOKEN` on pushes to main, fails clearly without it, and on `release_created` packs, uploads and appends the notes
-- [ ] 3.2 Rebuild the bundle, lockfile and manifest on the release PR
+- [x] 3.2 Rebuild the bundle, lockfile and manifest on the release PR
   - Done when: job `rebuild` commits `build(release): 📦️ rebuild the bundle for v<version>` on release-please's branch only when something changed, and `cli.yml` runs `release.mjs check`
 
 ## 4. Bootstrap from releases
