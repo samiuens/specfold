@@ -6,9 +6,11 @@ channel: stable
 source:
   github: samiuens/specfold
 
-# specfold upgrade commits with this message; {version} is the new version.
+# specfold upgrade commits with this message; {version} is the new version. The Claude Code
+# session start checks for a newer release once a day; set reminder to false to turn that off.
 # upgrade:
 #   commit_message: "chore: upgrade Specfold to v{version}"
+#   reminder: true
 
 requires:
   openspec: ">=1.15 <2"

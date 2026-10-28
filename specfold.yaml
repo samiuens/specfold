@@ -7,6 +7,10 @@ channel: stable
 source:
   github: samiuens/specfold
 
+# the kit is the source of releases and is never upgraded itself
+upgrade:
+  reminder: false
+
 requires:
   openspec: ">=1.15 <2"
   okf: "0.2"
