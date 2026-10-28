@@ -9,7 +9,7 @@ scenarios: [specfold-tasks#packet-for-a-group, specfold-tasks#unknown-group]
 agent: implementer
 ```
 
-- [ ] 1.1 Build a group's packet and add `specfold tasks packet`
+- [x] 1.1 Build a group's packet and add `specfold tasks packet`
   - Done when: scenarios packet-for-a-group and unknown-group pass in `tasks-packet.test.ts`
 
 ## 2. No-push hook
