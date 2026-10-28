@@ -23,7 +23,7 @@ scenarios: [specfold-stats#within-budget, specfold-stats#named-files, specfold-s
 agent: implementer
 ```
 
-- [ ] 2.1 Add `specfold stats` with text and JSON output
+- [x] 2.1 Add `specfold stats` with text and JSON output
   - Done when: scenarios within-budget, named-files and json-over-budget pass in `stats-command.test.ts`
 
 ## 3. Gate rule G11
