@@ -1,6 +1,6 @@
 {
   "name": "specfold",
-  "version": "0.1.0-rc.1",
+  "version": "0.1.0-rc.2",
   "private": true,
   "description": "Specs and knowledge folded into one agent workflow: OKF knowledge bundles plus OpenSpec.",
   "type": "module",

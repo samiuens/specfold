@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.0-rc.2](https://github.com/samiuens/specfold/compare/v0.1.0-rc.1...v0.1.0-rc.2) (2026-10-28)
+
+
+### Features
+
+* **cli:** ✨ read the channel, source and upgrade commit message ([d994163](https://github.com/samiuens/specfold/commit/d994163641b925d9960ebad272fb925fdcbd3e81))
+* **cli:** ✨ refuse write commands under a newer manifest ([1e4a160](https://github.com/samiuens/specfold/commit/1e4a1608918cd10fb82fa01a6b198657c0aaf89f))
+* **release:** ✨ write the mirror index with `release.mjs index` ([f896c0b](https://github.com/samiuens/specfold/commit/f896c0b16db2e775e3c3a3c3501f1b846079f9fd))
+* **skills:** ✨ add the sf-upgrade skill ([1311297](https://github.com/samiuens/specfold/commit/13112972180c30aca5915a65c11994c8eb393c4d))
+* **upgrade:** ✨ add `specfold upgrade` with its hand-off ([20e9ec0](https://github.com/samiuens/specfold/commit/20e9ec0b82090c0706684b7282d2ab7c9db01c03))
+* **upgrade:** ✨ apply a plan, run migrations and write the report ([724288c](https://github.com/samiuens/specfold/commit/724288cf8d5b8e607151c2d6713b4832fc08ba63))
+* **upgrade:** ✨ compute the upgrade path per channel ([00cc00c](https://github.com/samiuens/specfold/commit/00cc00c49e05369547cecf85c6031d2a334f0ce9))
+* **upgrade:** ✨ fetch checked releases from github, url or path ([d23d968](https://github.com/samiuens/specfold/commit/d23d968b0be7fd715cc1acb422b8e91f5bb9d61c))
+* **upgrade:** ✨ merge the kit keys of claude and openspec settings ([bed2f44](https://github.com/samiuens/specfold/commit/bed2f4499b5eef0a6910d0031525637def2209ab))
+* **upgrade:** ✨ plan kit files and blocks with three-way merges ([89f83b1](https://github.com/samiuens/specfold/commit/89f83b1205a0063e44c7bd8b172f35c1564822f6))
+
 ## 0.1.0-rc.1 (2026-10-28)
 
 
