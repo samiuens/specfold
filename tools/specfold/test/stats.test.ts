@@ -117,6 +117,16 @@ describe("budgets", () => {
   });
 });
 
+// spec: specfold-stats#graphify-skill-exempt
+it("exempts the graphify skill from the per-skill budget", () => {
+  const root = tempDir("valid");
+  skill(root, "graphify", "z".repeat(360));
+  const config = requireConfig(root);
+  const set = alwaysLoaded(config);
+  expect(overBudget(set, config.statsBudget)).toEqual([]);
+  expect(set.find((i) => i.kind === "skill")?.tokens).toBeGreaterThan(60);
+});
+
 describe("knowledge folders", () => {
   // spec: specfold-stats#bundle-folders
   it("sums the bundle per top-level folder, root files first", () => {

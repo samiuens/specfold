@@ -112,13 +112,16 @@ export function alwaysLoaded(config: Config): SetItem[] {
 
 export const total = (set: SetItem[]) => set.reduce((sum, i) => sum + i.tokens, 0);
 
-/** Each exceeded budget; skills named `openspec-*` count only toward the total. */
+/** Skills other tools write (OpenSpec, graphify); their descriptions are not ours to shorten. */
+const otherToolsSkill = (name: string) => name.startsWith("openspec-") || name === "graphify";
+
+/** Each exceeded budget; skills other tools write count only toward the total. */
 export function overBudget(set: SetItem[], budget: Config["statsBudget"]): Overrun[] {
   const out: Overrun[] = [];
   for (const item of set) {
     if (item.kind === "file" && item.path === "AGENTS.md" && item.tokens > budget.agentsMd)
       out.push({ budget: "agents_md", item, tokens: item.tokens, limit: budget.agentsMd });
-    if (item.kind === "skill" && !item.name.startsWith("openspec-") && item.tokens > budget.skillDescription)
+    if (item.kind === "skill" && !otherToolsSkill(item.name) && item.tokens > budget.skillDescription)
       out.push({ budget: "skill_description", item, tokens: item.tokens, limit: budget.skillDescription });
   }
   const sum = total(set);
