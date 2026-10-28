@@ -51,7 +51,7 @@ agent: implementer
   - Done when: `node scripts/specfold.mjs stats` exits 0 in the kit, the template and the sample app
 - [x] 4.2 Run stats in `sf-migrate` step 8 and add it to the report template
   - Done when: the skill copies match the template and `check-skills.mjs` passes
-- [ ] 4.3 Rebuild the bundle, its copies and the template manifest
+- [x] 4.3 Rebuild the bundle, its copies and the template manifest
   - Done when: the template and sample app copies equal `scripts/specfold.mjs` and `template-manifest.test.ts` passes
 
 ## 5. Knowledge
