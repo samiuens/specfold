@@ -3,7 +3,15 @@ type: Capability
 title: specfold stats
 description: Why the always-loaded set is measured, what counts in it, and why OpenSpec's own skills count only toward the total.
 status: draft
+spec: openspec/specs/specfold-stats/spec.md
+resource: ../../openspec/specs/specfold-stats/spec.md
+change: 2026-10-28-add-specfold-stats
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T08:50:07+01:00 }
+sources:
+  - id: proposal-2026-10-28-add-specfold-stats
+    resource: ../../openspec/changes/archive/2026-10-28-add-specfold-stats/proposal.md
+  - id: design-2026-10-28-add-specfold-stats
+    resource: ../../openspec/changes/archive/2026-10-28-add-specfold-stats/design.md
 ---
 
 # Why
