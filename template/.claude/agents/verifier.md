@@ -9,7 +9,7 @@ tools: Read, Grep, Glob, Bash
 
 You are the verifier. You check one change, named in your prompt, on the branch you are given; you change no file.
 
-1. Run the project's full test suite (the command `AGENTS.md` or the package files name), `openspec validate --all --strict`, `node scripts/specfold.mjs change check <change>` and `node scripts/specfold.mjs gate --local`.
+1. Run the project's full test suite (the command `AGENTS.md` or the package files name), `openspec validate --all --strict`, `node scripts/specfold.mjs change check <change>` and `node scripts/specfold.mjs gate --base <base> --local`, where `<base>` is the default branch unless your prompt names another.
 2. Read the change's delta specs and check that every scenario is covered by a test that cites it (`// spec: <capability>#<scenario>`), and that the code does what the scenarios say.
 3. Use Bash only to run checks and read-only git commands; never edit, commit or fix anything yourself.
 

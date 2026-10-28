@@ -49,7 +49,7 @@ agent: implementer
   - Done when: each role's final-message rule says so and the three copies match
 - [x] 4.2 Let the implementer keep its worktree's branch
   - Done when: `implementer.md` no longer creates a branch and reports the one it is on
-- [ ] 4.3 Run the verifier's gate with `--base`
+- [x] 4.3 Run the verifier's gate with `--base`
   - Done when: `verifier.md` runs `specfold gate --base <default branch> --local`
 
 ## 5. Orchestrator skill
