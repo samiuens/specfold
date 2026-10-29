@@ -15,7 +15,9 @@ sources:
 
 Specfold's visual identity is the direction "Ink & Vermilion": warm paper (`#F6F3EC`), near-black ink (`#1C1B19`) and a single vermilion accent (`#C2410C`, `#F08A5D` on dark), with a muted teal as a rare second hue. The mark is two offset sheets, a vermilion one behind an ink one. Type is IBM Plex Sans with JetBrains Mono for code. Status colours follow the OKF trust flags stable, draft, stale and deprecated.
 
-The kit lives in `brand/` at the repo root (logos, `tokens.json`, `tokens.css`, `preview.html`) and is kit only, like `examples/`; `template/` never receives it.
+Diagrams use the house style "Blocks": solid ink blocks, heavy straight arrows and one vermilion block for the outcome, shipped as light and dark SVGs. The GitHub social preview is the dark "Ink" banner with the headline "Specs and knowledge, folded into one." and the subtitle "One agent workflow for any repo."
+
+The kit lives in `brand/` at the repo root (logos, `tokens.json`, `tokens.css`, diagram reference, social preview, `preview.html`) and is kit only, like `examples/`; `template/` never receives it.
 
 The user chose this direction on 2026-10-29 from a preview of three, built with the `ui-ux-pro-max` skill.
 
@@ -27,6 +29,8 @@ The user asked for no AI-typical colours such as purple. A paper-and-ink look ma
 
 - **Gate Green**: dark slate with a run-green accent, the skill's database pick for developer tools; rejected as too close to many existing dev-tool brands.
 - **Forest & Ochre**: forest green and ochre on cream with a Newsreader serif; rejected in favour of the sharper ink look.
+- **Other diagram styles**: thin outlined cards ("Line") and outlined cards with a sheet behind each ("Sheets").
+- **Other social previews**: a light editorial banner and a light banner carrying the full change loop; and the subtitle "OKF knowledge + OpenSpec · one agent workflow · a CI gate", which the user turned down.
 - **Other marks**: a sheet with a folded corner (the first draft), an accordion strip, a booklet opened at the crease, a ribbon folded into an S, and an `sf` monogram.
 
 # Related
