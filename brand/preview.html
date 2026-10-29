@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Specfold brand kit</title>
+<link rel="icon" href="logo/app-icon.svg">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--sf-background); color: var(--sf-foreground); font: 16px/1.5 var(--sf-font-sans); }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: var(--sf-space-7) var(--sf-space-4); }
+  header { display: flex; justify-content: space-between; align-items: center; gap: var(--sf-space-4); flex-wrap: wrap; margin-bottom: var(--sf-space-7); }
+  .label { font: 500 12px/1 var(--sf-font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--sf-muted-foreground); margin: 0 0 var(--sf-space-3); }
+  h1 { font-size: 44px; line-height: 1.1; letter-spacing: -.015em; margin: 0 0 var(--sf-space-3); }
+  .lede { color: var(--sf-muted-foreground); max-width: 60ch; margin: 0; }
+  section { border-top: 1px solid var(--sf-border); padding: var(--sf-space-6) 0; }
+  .row { display: flex; gap: var(--sf-space-5); flex-wrap: wrap; align-items: center; }
+  .panel { padding: var(--sf-space-5); border-radius: var(--sf-radius-md); border: 1px solid var(--sf-border); }
+  .panel.light { background: #F6F3EC; } .panel.dark { background: #151412; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--sf-space-3); }
+  .sw { border: 1px solid var(--sf-border); border-radius: var(--sf-radius-sm); overflow: hidden; background: var(--sf-card); font: 12px/1.4 var(--sf-font-mono); }
+  .sw div { height: 56px; } .sw p { margin: 0; padding: 6px 8px; } .sw span { color: var(--sf-muted-foreground); }
+  .btn { font: 600 14px/1 var(--sf-font-sans); padding: 12px 18px; min-height: 44px; border-radius: var(--sf-radius-sm); border: 1px solid transparent; cursor: pointer; transition: filter .2s; }
+  .btn:hover { filter: brightness(1.08); }
+  .btn:focus-visible { outline: 2px solid var(--sf-ring); outline-offset: 2px; }
+  .pri { background: var(--sf-primary); color: var(--sf-on-primary); }
+  .acc { background: var(--sf-accent); color: var(--sf-on-accent); }
+  .ghost { background: transparent; color: var(--sf-foreground); border-color: var(--sf-border); }
+  .badge { font: 500 12px/1 var(--sf-font-mono); padding: 5px 9px; border-radius: var(--sf-radius-pill); border: 1px solid currentColor; }
+  .card { background: var(--sf-card); border: 1px solid var(--sf-border); border-radius: var(--sf-radius-md); padding: var(--sf-space-4); max-width: 420px; }
+  .card a { color: var(--sf-link); text-underline-offset: 3px; }
+  .term { background: #1C1B19; color: #EDE8DC; border-radius: var(--sf-radius-md); padding: var(--sf-space-4) var(--sf-space-5); font: 13px/1.7 var(--sf-font-mono); overflow-x: auto; white-space: pre; }
+  .term .p { color: #8E887C; } .term .ok { color: #6BBF8A; } .term .warn { color: #E0B04A; } .term .err { color: #F07A6A; } .term .acc { color: #F08A5D; }
+  .mono { font-family: var(--sf-font-mono); font-size: 13px; color: var(--sf-muted-foreground); }
+  @media (prefers-reduced-motion: reduce) { .btn { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="logo/lockup.svg" alt="Specfold" height="40" id="lockup">
+    <button class="btn ghost" id="theme" type="button">Toggle theme</button>
+  </header>
+
+  <p class="label">Brand kit · Ink &amp; Vermilion</p>
+  <h1>Specs and knowledge, folded into one.</h1>
+  <p class="lede">Warm paper, near-black ink and one signal colour. Every change starts from a brief the user confirmed; specs carry the contract, the knowledge bundle carries the context.</p>
+
+  <section>
+    <p class="label">Logo</p>
+    <div class="row">
+      <div class="panel light"><img src="logo/lockup.svg" alt="Specfold lockup on light" height="48"></div>
+      <div class="panel dark"><img src="logo/lockup-inverse.svg" alt="Specfold lockup on dark" height="48"></div>
+      <img src="logo/app-icon.svg" alt="Specfold app icon" width="72" height="72">
+      <img src="logo/mark.svg" alt="" width="48" height="48">
+      <img src="logo/mark.svg" alt="" width="24" height="24">
+      <img src="logo/mark.svg" alt="" width="16" height="16">
+    </div>
+  </section>
+
+  <section>
+    <p class="label">Colour (current theme)</p>
+    <div class="swatches" id="swatches"></div>
+  </section>
+
+  <section>
+    <p class="label">Type</p>
+    <p style="font-size:32px;font-weight:600;line-height:1.2;margin:0 0 8px">Rather ask than assume</p>
+    <p style="margin:0 0 8px;max-width:60ch">IBM Plex Sans for headings, body and interface. Base 16 px, line height 1.5.</p>
+    <p class="mono">JetBrains Mono for code, paths and labels — knowledge/decisions/self-hosting.md</p>
+  </section>
+
+  <section>
+    <p class="label">Interface</p>
+    <div class="row">
+      <button class="btn pri">Run the gate</button>
+      <button class="btn acc">Propose change</button>
+      <button class="btn ghost">Read docs</button>
+    </div>
+    <div class="row" style="margin-top:16px">
+      <span class="badge" style="color:var(--sf-status-stable)">stable</span>
+      <span class="badge" style="color:var(--sf-status-draft)">draft</span>
+      <span class="badge" style="color:var(--sf-status-stale)">stale</span>
+      <span class="badge" style="color:var(--sf-status-deprecated)">deprecated</span>
+    </div>
+    <div class="card" style="margin-top:16px"><strong>decisions/self-hosting.md</strong><br><span style="color:var(--sf-muted-foreground)">Specfold is built with Specfold.</span> <a href="#">Read concept →</a></div>
+  </section>
+
+  <section>
+    <p class="label">CLI</p>
+<div class="term"><span class="p">$</span> specfold validate
+<span class="ok">✓</span> 84 concepts, 0 errors
+<span class="warn">!</span> 2 stale  <span class="p">references/okf.md, references/openspec.md</span>
+<span class="err">✕</span> 1 broken link <span class="p">/decisions/gate.md → /domain/trust.md</span>
+
+<span class="p">$</span> specfold lookup <span class="acc">trust signals</span>
+<span class="acc">1</span> domain/trust-levels.md   <span class="ok">stable</span>
+<span class="acc">2</span> decisions/human-only.md <span class="warn">draft</span></div>
+  </section>
+</div>
+<script>
+  const names = ["background","foreground","card","muted-foreground","border","primary","accent","secondary","link","status-stable","status-draft","status-stale","status-deprecated"];
+  const render = () => {
+    const cs = getComputedStyle(document.documentElement);
+    document.getElementById("swatches").innerHTML = names.map(n => {
+      const v = cs.getPropertyValue("--sf-" + n).trim();
+      return `<div class="sw"><div style="background:${v}"></div><p>${n}<br><span>${v}</span></p></div>`;
+    }).join("");
+    const dark = document.documentElement.dataset.theme === "dark" ||
+      (!document.documentElement.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
+    document.getElementById("lockup").src = dark ? "logo/lockup-inverse.svg" : "logo/lockup.svg";
+  };
+  document.getElementById("theme").onclick = () => {
+    const el = document.documentElement;
+    const dark = el.dataset.theme ? el.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    el.dataset.theme = dark ? "light" : "dark";
+    render();
+  };
+  render();
+</script>
+</body>
+</html>

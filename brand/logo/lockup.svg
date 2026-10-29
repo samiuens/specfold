@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="232" height="48" viewBox="0 0 232 48" role="img" aria-label="Specfold">
+  <path d="M8 4h22l10 10v30H8z" fill="#1C1B19"/>
+  <path d="M30 4v10h10z" fill="#C2410C"/>
+  <path d="M30 4l10 10" stroke="#F6F3EC" stroke-width="1.5"/>
+  <rect x="14" y="22" width="20" height="3" rx="1.5" fill="#C2410C"/>
+  <rect x="14" y="29" width="14" height="3" rx="1.5" fill="#F6F3EC" fill-opacity=".55"/>
+  <rect x="14" y="36" width="17" height="3" rx="1.5" fill="#F6F3EC" fill-opacity=".55"/>
+  <text x="56" y="35" fill="#1C1B19" font-family="'IBM Plex Sans', system-ui, sans-serif" font-size="32" font-weight="700" letter-spacing="-0.64">specfold</text>
+</svg>

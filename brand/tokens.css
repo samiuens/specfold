@@ -1,0 +1,80 @@
+/* Specfold brand tokens, direction "Ink & Vermilion". Mirrors tokens.json; see brand/README.md. */
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap");
+
+:root {
+  --sf-background: #F6F3EC;
+  --sf-foreground: #1C1B19;
+  --sf-card: #FFFFFF;
+  --sf-muted-foreground: #5E5A52;
+  --sf-border: #DDD7CA;
+  --sf-primary: #1C1B19;
+  --sf-on-primary: #F6F3EC;
+  --sf-accent: #C2410C;
+  --sf-on-accent: #FFFFFF;
+  --sf-secondary: #2F6F6A;
+  --sf-on-secondary: #FFFFFF;
+  --sf-link: #A3360A;
+  --sf-ring: #C2410C;
+  --sf-status-stable: #2F7A4F;
+  --sf-status-draft: #5E5A52;
+  --sf-status-stale: #8A5E00;
+  --sf-status-deprecated: #B42318;
+
+  --sf-font-sans: "IBM Plex Sans", system-ui, sans-serif;
+  --sf-font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --sf-radius-sm: 4px;
+  --sf-radius-md: 6px;
+  --sf-radius-pill: 999px;
+
+  --sf-space-1: 4px;
+  --sf-space-2: 8px;
+  --sf-space-3: 12px;
+  --sf-space-4: 16px;
+  --sf-space-5: 24px;
+  --sf-space-6: 32px;
+  --sf-space-7: 48px;
+  --sf-space-8: 64px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --sf-background: #151412;
+    --sf-foreground: #EDE8DC;
+    --sf-card: #201F1C;
+    --sf-muted-foreground: #A39D90;
+    --sf-border: #3A3833;
+    --sf-primary: #EDE8DC;
+    --sf-on-primary: #151412;
+    --sf-accent: #F08A5D;
+    --sf-on-accent: #1C1B19;
+    --sf-secondary: #6FB3AC;
+    --sf-on-secondary: #151412;
+    --sf-link: #F08A5D;
+    --sf-ring: #F08A5D;
+    --sf-status-stable: #6BBF8A;
+    --sf-status-draft: #A39D90;
+    --sf-status-stale: #E0B04A;
+    --sf-status-deprecated: #F07A6A;
+  }
+}
+
+:root[data-theme="dark"] {
+  --sf-background: #151412;
+  --sf-foreground: #EDE8DC;
+  --sf-card: #201F1C;
+  --sf-muted-foreground: #A39D90;
+  --sf-border: #3A3833;
+  --sf-primary: #EDE8DC;
+  --sf-on-primary: #151412;
+  --sf-accent: #F08A5D;
+  --sf-on-accent: #1C1B19;
+  --sf-secondary: #6FB3AC;
+  --sf-on-secondary: #151412;
+  --sf-link: #F08A5D;
+  --sf-ring: #F08A5D;
+  --sf-status-stable: #6BBF8A;
+  --sf-status-draft: #A39D90;
+  --sf-status-stale: #E0B04A;
+  --sf-status-deprecated: #F07A6A;
+}
