@@ -9,6 +9,7 @@
 * **Retro**: add-gate-require: 0 answers
 * **Change**: 2026-10-29-fix-description-length: created 0, updated 2, deprecated 0
 * **Retro**: fix-description-length: 0 answers
+* **Decision**: record the Ink & Vermilion brand kit in /decisions/brand-ink-and-vermilion.md
 
 ## 2026-10-28
 
