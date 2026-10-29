@@ -2,9 +2,10 @@
 type: Runbook
 title: Sample app agent check
 description: How to check the agent layer and the quality loops end to end on the sample app, in Claude Code and in opencode.
-status: draft
+status: stable
 stale_after: 2027-01-24T16:02:15+01:00
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T16:02:15+01:00 }
+verified: { by: human:samiuens, at: 2026-10-29T11:10:00+01:00 }
 sources:
   - id: steps
     resource: ../../examples/sample-app/README.md
