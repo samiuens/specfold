@@ -9,7 +9,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Generate `docs/commands.md` from the bundled CLI's `--help` output with `node tools/specfold/docs.mjs`
+- [x] 1.1 Generate `docs/commands.md` from the bundled CLI's `--help` output with `node tools/specfold/docs.mjs`
   - Done when: `docs.mjs` writes one section per command with its summary and usage line, `docs.mjs --check` exits 1 on a stale file and names the fix, and `npx vitest run test/docs.test.ts` passes
 - [ ] 1.2 Check the command reference in CI
   - Done when: `cli.yml` runs `node tools/specfold/docs.mjs --check` after the bundle check
