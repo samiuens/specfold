@@ -1,7 +1,7 @@
 {
   "manifest_version": 1,
-  "kit_version": "0.2.0",
-  "ref": "v0.2.0",
+  "kit_version": "0.2.1",
+  "ref": "v0.2.1",
   "files": {
     ".agents/skills/sf-apply/SKILL.md": "sha256:f11234c197a26b22c9163e0b13dcf243dce6c0cfac96e400f4eb166d7dcb515a",
     ".agents/skills/sf-apply/references/packet-and-split.md": "sha256:5c251af88b9d3db92015d6c405b8a9b3d154092c3023f569ad7519fe4469e588",
@@ -35,7 +35,7 @@
     "openspec/schemas/specfold/templates/proposal.md": "sha256:0dd70e35db5c696ba8ac3cc3a53e2d6561865c1e4e7d49db5a1eaa3e4a6ad86e",
     "openspec/schemas/specfold/templates/spec.md": "sha256:1cccfb573f031c6352bed2a879b7035ff710bc909112fc23d10bdcfcdd8d4318",
     "openspec/schemas/specfold/templates/tasks.md": "sha256:2ef32ccb374fd2470cfea280eb0dd247679d46ac569a719d7e1afc3cae9f3529",
-    "scripts/specfold.mjs": "sha256:4ae5206433d0238c357170957723412f8e4efdb6d7d55dc28a4d1b7226d2a6bd"
+    "scripts/specfold.mjs": "sha256:a977f51e5a3c077aaaec9158f5dc26259e00ca2f95546e9b2efbc238c47a9ce6"
   },
   "blocks": {
     "AGENTS.md": "sha256:a6bd30b8c573182e415f78c84cb89847f8c3e3e92cf4c312906174bc74b11339",

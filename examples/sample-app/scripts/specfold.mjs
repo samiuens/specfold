@@ -8323,7 +8323,7 @@ async function main(argv, io) {
       return name === void 0 ? 2 : 0;
     }
     if (name === "--version" || name === "-v") {
-      io.stdout(`${"0.2.0"}
+      io.stdout(`${"0.2.1"}
 `);
       return 0;
     }
@@ -8341,7 +8341,7 @@ async function main(argv, io) {
       throw new UsageError(error.message);
     }
     const values = parsed.values;
-    if (writes(name, parsed.positionals, values)) refuseSkew(io.cwd, "0.2.0");
+    if (writes(name, parsed.positionals, values)) refuseSkew(io.cwd, "0.2.1");
     return await command.run({ io, values, positionals: parsed.positionals });
   } catch (error) {
     if (error instanceof UsageError) {
@@ -9423,6 +9423,12 @@ function isoWithOffset(date) {
   const sign = offset < 0 ? "-" : "+";
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}${sign}${pad(Math.trunc(offset / 60))}:${pad(offset % 60)}`;
 }
+var MAX_DESCRIPTION = 160;
+function checkDescription(description, what = "the description", fix = "put longer text in the concept's body") {
+  const length = [...description].length;
+  if (length > MAX_DESCRIPTION)
+    throw new UsageError(`${what} has ${length} characters (max ${MAX_DESCRIPTION}); ${fix}`);
+}
 function titleFromPath(rel) {
   const name = rel.slice(rel.lastIndexOf("/") + 1, -3).replace(/-/g, " ");
   return name.charAt(0).toUpperCase() + name.slice(1);
@@ -9502,6 +9508,7 @@ register({
     }
     const title = values.title ?? titleFromPath(rel);
     const description = values.description ?? "";
+    checkDescription(description);
     const committedBy = type === "Deferred Commitment" ? humanLogin(config.root) : void 0;
     const content = renderConcept(config.root, {
       type,
@@ -10049,6 +10056,10 @@ register({
         const priority = values.priority ?? "medium";
         if (!PRIORITIES2.includes(priority))
           throw new UsageError(`priority must be one of ${PRIORITIES2.join(", ")}, got '${priority}'`);
+        const description = values.description;
+        if (description === void 0)
+          checkDescription(title, "the title, used as the description,", "pass a shorter --description");
+        else checkDescription(description);
         const abs = join20(bundleRoot, "backlog", `${slug}.md`);
         if (existsSync15(abs)) {
           io.stderr(`specfold: ${shown(abs)} already exists
@@ -10064,8 +10075,7 @@ register({
           renderConcept(config.root, {
             type: "Backlog Item",
             title,
-            // a concept needs a description; the title is a valid start
-            description: values.description ?? title,
+            description: description ?? title,
             by,
             now: /* @__PURE__ */ new Date(),
             ...origin ? { origin } : {}
