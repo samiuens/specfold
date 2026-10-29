@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.3.0](https://github.com/samiuens/specfold/compare/v0.2.1...v0.3.0) (2026-10-29)
+
+
+### Features
+
+* 💄 add the blocks diagram style ([22a6a30](https://github.com/samiuens/specfold/commit/22a6a30e90be54520290de6995093a113789ef03))
+* 💄 add the github social preview ([f7af153](https://github.com/samiuens/specfold/commit/f7af153474bb5ae110e77bb0152e76670e77741b))
+* 💄 add the ink and vermilion brand kit ([f066f5e](https://github.com/samiuens/specfold/commit/f066f5ef08a90cd968a4d0cf4a81c282f1792053))
+* 💄 replace the logo with the two-sheet mark ([68b1a01](https://github.com/samiuens/specfold/commit/68b1a016909c6e39c2203bb88dba843a1813f54d))
+
 ## [0.2.1](https://github.com/samiuens/specfold/compare/v0.2.0...v0.2.1) (2026-10-29)
 
 
