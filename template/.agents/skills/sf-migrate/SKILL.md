@@ -31,7 +31,7 @@ Use this when a repository that already has code or docs should start using Spec
    - Run `node scripts/specfold.mjs stats` for the always-loaded token estimate. A budget it reports as exceeded goes into the report; shorten only what the migration itself wrote.
    - A spec or change that existed before the migration and already fails `openspec validate --strict` would block the gate's G3 on this PR. Never edit it on your own: show the failure and ask the user whether to fix it in this PR (in its own commit) or leave it and report it.
    - Write `.specfold/migration/report.md` from [references/report.md](references/report.md), then run `node scripts/specfold.mjs log add --kind Migration "<summary with counts>"` and `migrate mark report`. Commit.
-9. **PR.** Ask the user before `git push` and before opening the PR. The PR body summarizes the report and links `plan.md` and `report.md`. The gate skips G4 for this PR (adoption PR), and G4 applies to every PR after it.
+9. **PR.** Ask the user before `git push` and before opening the PR. The PR body summarizes the report and links `plan.md` and `report.md`. The gate skips G4 for this PR (adoption PR), and G4 applies to every PR after it. Tell the user that the gate blocks merges only as a required check: once the PR is merged, `node scripts/specfold.mjs gate require` sets that up, with a `gh` login that has admin rights.
 
 ## Rules
 

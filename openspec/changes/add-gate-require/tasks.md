@@ -61,7 +61,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 5.1 Ask about the required gate in BOOTSTRAP.md and the sf-migrate report
+- [x] 5.1 Ask about the required gate in BOOTSTRAP.md and the sf-migrate report
   - Done when: BOOTSTRAP.md asks the user (recommending yes) and passes `--require-gate`, sf-migrate's report step tells the user to run `gate require` after the migration PR merges, the kit's skill copy matches, and the template manifest test passes
 - [ ] 5.2 Write the upgrade notes for the next release
   - Done when: `upgrade/notes/0.2.0.md` tells the agent to ask the user and run `node scripts/specfold.mjs gate require`
