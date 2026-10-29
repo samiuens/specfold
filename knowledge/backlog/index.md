@@ -1,5 +1,6 @@
 # Backlog Item
 
+* [Agent permissions in specfold.yaml](agent-permissions-in-specfold-yaml.md) - Declare what agents may do on their own (push, open PRs, close PRs, delete branches) in Specfold and render it into each tool's permission settings.
 * [Check the Specfold name before publishing](name-and-trademark-check.md) - Check GitHub and trademark registers for Specfold before the kit repo or npm package goes public.
 * [Cost per change in stats](cost-per-change-in-stats.md) - specfold stats reports the tokens a change cost, so each person can tune their subagent limit; needs the agent tool's local transcripts.
 * [Escaped pipes in brief tables](escaped-pipes-in-brief-tables.md) - The brief and knowledge table parser splits cells on an escaped pipe, which GFM allows inside a table cell.
