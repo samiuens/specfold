@@ -2,9 +2,10 @@
 type: Decision
 title: One product version, small integer versions for formats
 description: Specfold has one semver product version; the profile, schema and manifest carry their own integer versions.
-status: draft
+status: stable
 decision: accepted
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T11:38:47+01:00 }
+verified: { by: human:samiuens, at: 2026-10-29T08:53:06+01:00 }
 sources:
   - id: plan
     resource: ../../docs/plan.md

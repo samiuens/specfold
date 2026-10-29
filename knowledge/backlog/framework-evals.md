@@ -2,11 +2,12 @@
 type: Backlog Item
 title: Evals for the framework itself
 description: Decide whether and how to evaluate Specfold's skills and agent roles with repeatable evals.
-status: draft
+status: stable
 state: open
 origin: human
 priority: medium
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T02:10:00+01:00 }
+verified: { by: human:samiuens, at: 2026-10-29T08:53:06+01:00 }
 sources:
   - id: plan
     resource: ../../docs/plan.md

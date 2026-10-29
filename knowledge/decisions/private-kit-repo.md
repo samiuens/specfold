@@ -2,9 +2,10 @@
 type: Decision
 title: Every install and upgrade path works from a private kit repo
 description: Release downloads authenticate through gh or a token, so the kit works while its repo is private.
-status: draft
+status: stable
 decision: accepted
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T02:10:00+01:00 }
+verified: { by: human:samiuens, at: 2026-10-29T08:53:06+01:00 }
 sources:
   - id: plan
     resource: ../../docs/plan.md

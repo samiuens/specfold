@@ -2,9 +2,10 @@
 type: Decision
 title: Specfold is built with Specfold
 description: Every feature, fix and release of the kit runs through the kit's own workflow, switched on piece by piece as it is built.
-status: draft
+status: stable
 decision: accepted
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T02:10:00+01:00 }
+verified: { by: human:samiuens, at: 2026-10-29T08:53:06+01:00 }
 sources:
   - id: plan
     resource: ../../docs/plan.md

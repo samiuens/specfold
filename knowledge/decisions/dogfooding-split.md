@@ -2,9 +2,10 @@
 type: Decision
 title: Kit knowledge at the root, payload in template/
 description: The kit repo keeps its own knowledge, specs and settings at the root; everything shipped to user repos lives in template/.
-status: draft
+status: stable
 decision: accepted
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T02:10:00+01:00 }
+verified: { by: human:samiuens, at: 2026-10-29T08:53:06+01:00 }
 sources:
   - id: plan
     resource: ../../docs/plan.md
