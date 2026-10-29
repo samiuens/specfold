@@ -2,9 +2,10 @@
 type: Vision
 title: Where Specfold is heading
 description: Goals, non-goals and principles for Specfold up to its first stable release; a draft written by an agent for the maintainer to verify.
-status: draft
+status: stable
 horizon: "2027"
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:22:28+01:00 }
+verified: { by: human:samiuens, at: 2026-10-29T08:55:52+01:00 }
 sources:
   - id: plan
     resource: ../../docs/plan.md
