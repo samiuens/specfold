@@ -23,7 +23,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 2.1 Rebuild the bundle, copy it to the template and update the manifest
+- [x] 2.1 Rebuild the bundle, copy it to the template and update the manifest
   - Done when: `npm run build -w specfold` leaves no diff, the template copy matches, and the template manifest test passes
 
 ## 3. Knowledge
