@@ -41,7 +41,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 3.1 Set `release-as` to `0.1.0` and drop `prerelease`
+- [x] 3.1 Set `release-as` to `0.1.0` and drop `prerelease`
   - Done when: `node tools/specfold/release.mjs check` passes and the config has no `prerelease` key
 
 ## 4. Knowledge
