@@ -2,9 +2,10 @@
 type: Decision
 title: First specs are OpenSpec changes, not baseline specs
 description: Specs for not-yet-built commands are written as OpenSpec changes and only reach openspec/specs/ when implemented and archived.
-status: draft
+status: stable
 decision: accepted
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T02:10:00+01:00 }
+verified: { by: human:samiuens, at: 2026-10-29T08:53:06+01:00 }
 sources:
   - id: plan
     resource: ../../docs/plan.md

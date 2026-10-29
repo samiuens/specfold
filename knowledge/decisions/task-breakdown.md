@@ -2,9 +2,10 @@
 type: Decision
 title: Every change is broken down into task groups, and subagents work on groups
 description: tasks.md splits each change into task groups with owned files and small tasks with a done check; one implementer takes one group, never a whole change.
-status: draft
+status: stable
 decision: accepted
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T14:04:05+01:00 }
+verified: { by: human:samiuens, at: 2026-10-29T08:53:06+01:00 }
 sources:
   - id: plan
     resource: ../../docs/plan.md

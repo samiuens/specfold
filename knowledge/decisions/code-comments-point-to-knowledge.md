@@ -2,9 +2,10 @@
 type: Decision
 title: Code comments point to knowledge
 description: Code comments stay short; rationale lives in knowledge and the comment only references it with see knowledge:.
-status: draft
+status: stable
 decision: accepted
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T02:10:00+01:00 }
+verified: { by: human:samiuens, at: 2026-10-29T08:53:06+01:00 }
 sources:
   - id: plan
     resource: ../../docs/plan.md

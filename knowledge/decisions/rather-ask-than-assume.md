@@ -2,9 +2,10 @@
 type: Decision
 title: Rather ask than assume
 description: When a decision is open or something conflicts, agents ask the user through the native question UI instead of guessing.
-status: draft
+status: stable
 decision: accepted
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T02:10:00+01:00 }
+verified: { by: human:samiuens, at: 2026-10-29T08:53:06+01:00 }
 sources:
   - id: plan
     resource: ../../docs/plan.md

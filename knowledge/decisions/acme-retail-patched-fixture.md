@@ -2,9 +2,10 @@
 type: Decision
 title: OKF sample acme_retail is tested as a patched fixture
 description: The upstream acme_retail sample violates OKF, so the tests use a documented patched copy plus the unpatched copy as a negative fixture.
-status: draft
+status: stable
 decision: accepted
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T02:10:00+01:00 }
+verified: { by: human:samiuens, at: 2026-10-29T08:53:06+01:00 }
 sources:
   - id: plan
     resource: ../../docs/plan.md
