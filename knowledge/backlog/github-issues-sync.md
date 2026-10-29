@@ -3,9 +3,10 @@ type: Backlog Item
 title: Two-way sync of backlog items with GitHub Issues
 description: Optionally mirror backlog items to GitHub Issues and back, so teams can triage the backlog where they already work.
 status: draft
-state: open
+state: dropped
 origin: human
 priority: low
+reason: "Not needed: the user ruled it out in the review of the drifted concepts on 2026-10-29."
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T02:10:00+01:00 }
 sources:
   - id: plan
