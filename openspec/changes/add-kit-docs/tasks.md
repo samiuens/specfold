@@ -29,7 +29,7 @@ agent: implementer
   - Done when: its first line says so and points to `README.md` and `docs/`
 - [x] 2.3 Write the getting-started and workflow guides
   - Done when: `docs/getting-started.md` takes a new user from install to a first archived change, and `docs/workflow.md` covers plan, apply, check, archive, sync and parallel work, linking `docs/commands.md` instead of repeating usage lines
-- [ ] 2.4 Write the upgrading and releasing guides
+- [x] 2.4 Write the upgrading and releasing guides
   - Done when: `docs/upgrading.md` covers channels, sources, private repositories, tokens, the weekly workflow, the reminder and conflicts, and `docs/releasing.md` covers release-please, upgrade notes, migrations and release candidates
 
 ## 3. Release config
