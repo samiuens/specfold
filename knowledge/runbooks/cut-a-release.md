@@ -14,12 +14,13 @@ When a change that should ship has been merged to `main`, and for each M9 releas
 # Steps
 
 1. **Pick the version.** For a planned release, the change sets `release-as` in `release-please-config.json`. After `0.1.0`, release-please derives the version from the commits; while at `0.x`, breaking changes bump the minor ([versioning](/decisions/versioning.md)).
-2. **Pre-releases:** `"prerelease": true` stays out of the config. release-please would mark every `0.x` release as a GitHub pre-release with it, and `BOOTSTRAP.md` would then skip `0.1.0`. A version with `-rc` is still published as a pre-release, so the release candidates up to rc.3 kept the key, and `add-kit-docs` removed it for `0.1.0`.
+2. **Pre-releases:** release-please marks a GitHub release as a pre-release only with `"prerelease": true`, and then marks every `0.x` release too, final ones included (its `manifest.ts`). The candidates up to rc.3 had the key. `add-kit-docs` removed it, so `0.1.0` is a full release that `BOOTSTRAP.md` can find. A later candidate needs the key back for its own release PR only.
 3. **Merge the release PR** by rebase once all checks pass, including `upgrade-fixtures`.
 4. **Check the release:** `gh release view vX.Y.Z --repo samiuens/specfold` lists the tarball and its `.sha256`, and the body ends with "Upgrade notes".
 5. **Upgrade the sample app** with the released upgrader, in a follow-up PR ([upgrade the sample app](/runbooks/upgrade-the-sample-app.md)).
 6. **After `0.1.0`, one follow-up PR:**
    - remove `release-as`;
+   - hide the Documentation changelog section again. `add-kit-docs` showed it because every commit since rc.3 was in a hidden section, and release-please skips a release with an empty changelog even when `release-as` is set;
    - add `--exclude-pre-releases` to the release lookup in `BOOTSTRAP.md`, so it installs only stable releases. This waits until `0.1.0` exists, because before that the lookup would find nothing;
    - make `upgrade-fixtures` a required check in the `main` branch protection, next to `commit-convention`, `cli (20)`, `cli (24)` and `specfold-gate`.
 
