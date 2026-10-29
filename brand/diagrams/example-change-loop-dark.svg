@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1192" height="160" viewBox="0 0 1192 160" role="img" aria-labelledby="t">
+  <title id="t">The change loop: plan, apply, check, archive, sync, then the gate</title>
+  <rect width="1192" height="160" fill="#151412"/>
+  <rect x="24" y="32" width="164" height="96" fill="#EDE8DC"/>
+  <text x="40" y="58" fill="#151412" fill-opacity=".75" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="500">01</text>
+  <text x="40" y="86" fill="#151412" font-family="'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="19" font-weight="700">Plan</text>
+  <text x="40" y="108" fill="#151412" fill-opacity=".75" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">brief · specs · tasks</text>
+  <path d="M192 80H209" stroke="#EDE8DC" stroke-width="3"/><path d="M208 75L216 80L208 85z" fill="#EDE8DC"/>
+  <rect x="220" y="32" width="164" height="96" fill="#EDE8DC"/>
+  <text x="236" y="58" fill="#151412" fill-opacity=".75" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="500">02</text>
+  <text x="236" y="86" fill="#151412" font-family="'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="19" font-weight="700">Apply</text>
+  <text x="236" y="108" fill="#151412" fill-opacity=".75" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">worktree per group</text>
+  <path d="M388 80H405" stroke="#EDE8DC" stroke-width="3"/><path d="M404 75L412 80L404 85z" fill="#EDE8DC"/>
+  <rect x="416" y="32" width="164" height="96" fill="#EDE8DC"/>
+  <text x="432" y="58" fill="#151412" fill-opacity=".75" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="500">03</text>
+  <text x="432" y="86" fill="#151412" font-family="'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="19" font-weight="700">Check</text>
+  <text x="432" y="108" fill="#151412" fill-opacity=".75" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">tests · validate</text>
+  <path d="M584 80H601" stroke="#EDE8DC" stroke-width="3"/><path d="M600 75L608 80L600 85z" fill="#EDE8DC"/>
+  <rect x="612" y="32" width="164" height="96" fill="#EDE8DC"/>
+  <text x="628" y="58" fill="#151412" fill-opacity=".75" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="500">04</text>
+  <text x="628" y="86" fill="#151412" font-family="'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="19" font-weight="700">Archive</text>
+  <text x="628" y="108" fill="#151412" fill-opacity=".75" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">deltas → specs</text>
+  <path d="M780 80H797" stroke="#EDE8DC" stroke-width="3"/><path d="M796 75L804 80L796 85z" fill="#EDE8DC"/>
+  <rect x="808" y="32" width="164" height="96" fill="#EDE8DC"/>
+  <text x="824" y="58" fill="#151412" fill-opacity=".75" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="500">05</text>
+  <text x="824" y="86" fill="#151412" font-family="'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="19" font-weight="700">Sync</text>
+  <text x="824" y="108" fill="#151412" fill-opacity=".75" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">update knowledge</text>
+  <path d="M976 80H993" stroke="#EDE8DC" stroke-width="3"/><path d="M992 75L1000 80L992 85z" fill="#EDE8DC"/>
+  <rect x="1004" y="32" width="164" height="96" fill="#F08A5D"/>
+  <text x="1020" y="58" fill="#1C1B19" fill-opacity="1" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" font-weight="500">✓</text>
+  <text x="1020" y="86" fill="#1C1B19" font-family="'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="19" font-weight="700">Gate</text>
+  <text x="1020" y="108" fill="#1C1B19" fill-opacity="1" font-family="'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace" font-size="11">specfold-gate</text>
+</svg>
