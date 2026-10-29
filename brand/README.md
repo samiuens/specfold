@@ -18,7 +18,7 @@ The mark is two sheets, a vermilion one behind an ink one, offset like a stack o
 - Keep clear space of at least the sheets' offset (a sixth of the mark) around the mark.
 - Smallest size: 16 px for the mark, 96 px wide for the lockup.
 - Don't recolour, rotate, outline or add shadows or gradients. The back sheet is the only vermilion element; the front sheet is always ink on light and paper on dark.
-- The lockup SVGs use live text. Outline the text before using them where IBM Plex Sans may be missing.
+- The lockup SVGs carry the wordmark as outlines, so they look right without IBM Plex Sans installed (for example in the GitHub README).
 
 ## Colour
 
