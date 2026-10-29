@@ -5,7 +5,7 @@ description: Which files an upgrade replaces, merges three ways or never touches
 status: draft
 decision: accepted
 change: 2026-10-28-add-specfold-upgrade
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T18:04:37+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-29T08:58:01+01:00 }
 sources:
   - id: design
     resource: ../../openspec/changes/archive/2026-10-28-add-specfold-upgrade/design.md
@@ -17,7 +17,7 @@ sources:
 `specfold upgrade` sorts every path of a repository into one class and treats each class the same way every time.
 
 - **Kit-owned files:**
-  - which files: the CLI bundle, the OpenSpec schema, the skills, the gate workflows and the Claude Code agents;
+  - which files: the CLI bundle, the OpenSpec schema, the skills, the gate workflows, the Claude Code agents and the inactive upgrade workflow in `.specfold/workflows/`. A turned-on copy in `.github/workflows/` counts too, with the release copy as its source;
   - one still equal to its manifest hash is replaced, or removed when the new release dropped it;
   - one changed here is merged three ways with `git merge-file`. A conflict leaves the markers in the file, and the upgrade exits with 1.
 - **Managed blocks:** an unchanged block is replaced inside its markers; an edited one is merged three ways like a file. Text outside the markers is never read.
