@@ -5,6 +5,7 @@
 * **Retro**: add-upgrade-workflow: 0 answers
 * **Change**: 2026-10-29-add-kit-docs: created 1, updated 1, deprecated 0
 * **Retro**: add-kit-docs: 0 answers
+* **Change**: 2026-10-29-add-gate-require: created 0, updated 4, deprecated 0
 
 ## 2026-10-28
 
