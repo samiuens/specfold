@@ -6,7 +6,7 @@ status: draft
 spec: openspec/specs/specfold-gate/spec.md
 resource: ../../openspec/specs/specfold-gate/spec.md
 change: 2026-10-28-add-specfold-stats
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:21:50+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-29T09:12:27+01:00 }
 sources:
   - id: proposal-2026-10-26-add-specfold-gate
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-gate/proposal.md
@@ -60,6 +60,7 @@ The checks that keep knowledge and specs honest exist as separate commands (`val
 - **Code changes name their knowledge.** G16 warns when a branch changes a file that a concept depends on (its resource, sources or `see knowledge:` code) and leaves the concept untouched; it blocks only with `gate.block_on_drift: true` ([specfold drift](/capabilities/specfold-drift.md)).
 - **Promises are stated, and only humans take them back.** G17 warns when a touched change's design marks an open commitment `blocked`, links something that is not an open commitment, or has no `## Commitments` section while commitments are open; a design can keep a promise in letter only, so this stays a warning for the reviewer and, later, the verifier. A commitment set to `withdrawn` blocks unless the branch also adds a human `verified` entry, which G7 then checks against the PR ([specfold commitments](/capabilities/specfold-commitments.md)).
 - **Existing rules, new ids.** Validate, change, tasks and audit findings keep their own rule id at the start of the message (for example `T5 ...`) under the gate rule that runs them.
+- **Making the check required is part of the gate.** `gate require` writes one ruleset named `specfold-gate`, targeting `~DEFAULT_BRANCH`, requiring the check from GitHub Actions only, with no bypass. It goes through `gh`, so it uses the user's login and admin rights and reads no token from the environment. It finds its own ruleset by name and source, compares only the fields it sets, and writes nothing when they match, so it is safe to run again and puts back a ruleset someone changed. Other rulesets are never read beyond their names. When GitHub refuses (no admin rights, or a private repository on a free plan), GitHub's message and fixed manual steps are printed, with exit 2 ([blocking merge gate](/decisions/blocking-merge-gate.md)).
 - **What must be fixed comes first.** Blocking findings come first, then warnings, each sorted by rule number; JSON `counts` gives totals per effect and per rule for the workflow summary.
 
 # Related

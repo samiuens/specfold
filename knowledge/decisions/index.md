@@ -1,6 +1,7 @@
 # Decision
 
 * [A required CI check blocks merges](blocking-merge-gate.md) - The specfold-gate CI check is required and blocks merges; local hooks only give early feedback.
+  * Referenced from code: tools/specfold/src/gate/require.ts:2
 * [Built-in git hooks with adapters instead of lefthook](built-in-git-hooks.md) - Specfold installs its own git hooks via core.hooksPath and adds one entry to an existing hook manager instead of requiring lefthook.
 * [Claude Code skills are symlinks into .agents/skills/](skills-symlinked-for-claude.md) - specfold agents sync links each .agents/skills/<name> into .claude/skills/ instead of copying it.
 * [Code comments point to knowledge](code-comments-point-to-knowledge.md) - Code comments stay short; rationale lives in knowledge and the comment only references it with see knowledge:.

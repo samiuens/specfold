@@ -6,7 +6,7 @@ status: draft
 spec: openspec/specs/specfold-init/spec.md
 resource: ../../openspec/specs/specfold-init/spec.md
 change: 2026-10-28-add-upgrade-workflow
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T08:14:46+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-29T09:12:27+01:00 }
 sources:
   - id: proposal-2026-10-28-add-bootstrap
     resource: ../../openspec/changes/archive/2026-10-28-add-bootstrap/proposal.md
@@ -36,6 +36,7 @@ A repository made with "Use this template" holds every kit file but still has pl
 - **A default subagent limit.** Init sets the personal limit to 3 when none exists, or to `--max-subagents`; a limit someone already set stays ([specfold parallel](/capabilities/specfold-parallel.md)).
 - **`--dry-run` writes nothing** and lists the values and every step it would take.
 - **Upgrade PRs are opt-in.** `--upgrade-workflow` copies the inactive `.specfold/workflows/specfold-upgrade.yml` to `.github/workflows/`, records it in the manifest so upgrades keep it current, and prints the `SPECFOLD_TOKEN` setup. A plain template copy never runs it ([turn on upgrade PRs](/runbooks/turn-on-upgrade-prs.md)).
+- **Required gate is opt-in, and a refusal doesn't fail init.** `--require-gate` runs the step of `gate require` after setup. Without admin rights or rulesets, the repository is still set up; only the GitHub setting is missing. So init reports the step as skipped, prints the manual steps and exits 0. `--dry-run` lists the step without asking GitHub anything.
 
 # Related
 
