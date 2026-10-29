@@ -43,6 +43,8 @@ agent: implementer
 
 - [x] 3.1 Set `release-as` to `0.1.0` and drop `prerelease`
   - Done when: `node tools/specfold/release.mjs check` passes and the config has no `prerelease` key
+- [x] 3.2 Show the Documentation section in the changelog for v0.1.0
+  - Done when: the `docs` changelog section is not hidden, so release-please finds user-facing commits since rc.3 and opens the v0.1.0 PR
 
 ## 4. Knowledge
 
@@ -60,4 +62,4 @@ agent: knowledge-curator
 
 - Archive the change, then run `node scripts/specfold.mjs sync add-kit-docs` and commit its result in the same PR.
 - After merging, merge release-please's `v0.1.0` PR once its checks pass.
-- After v0.1.0 is published, one follow-up PR: remove `release-as`, add `--exclude-pre-releases` to `BOOTSTRAP.md`, make `upgrade-fixtures` a required check. Then upgrade the sample app to 0.1.0 in its own PR.
+- After v0.1.0 is published, one follow-up PR: remove `release-as`, hide the Documentation changelog section again, add `--exclude-pre-releases` to `BOOTSTRAP.md`, make `upgrade-fixtures` a required check. Then upgrade the sample app to 0.1.0 in its own PR.
