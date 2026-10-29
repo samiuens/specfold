@@ -6,7 +6,7 @@ status: draft
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-29T08:20:21+01:00 }
 sources:
   - id: proposal
-    resource: ../../openspec/changes/add-kit-docs/proposal.md
+    resource: ../../openspec/changes/archive/2026-10-29-add-kit-docs/proposal.md
     title: "Proposal of add-kit-docs"
 ---
 
