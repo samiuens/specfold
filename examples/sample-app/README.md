@@ -137,3 +137,10 @@ The sample app gets its kit files only by upgrading from each release, with the 
   `specfold.yaml` changed only on its `kit_version` line, and the `gate --local` follow-up ran with the upgrade branch's start as its base and passed. The two upgrader bugs from the rc.2 run are fixed. `npm test`, `validate`, `index --check`, `openspec validate --all --strict` and `agents sync --check` pass, and `upgrade --check` now reports rc.3 as the newest release.
 - **Expected follow-up failures:** the same as in the rc.2 run: `openspec update` could not run, and `hooks install` exited with 2.
 - **Not covered:** the sample app has no `.gitignore` of its own, so the upgrade did not add `.specfold/local-state.json` to one; the kit's root `.gitignore` already covers that file. The kit's `upgrade-fixtures` job checks a repository whose `.gitignore` block is in the manifest.
+
+### 0.1.0-rc.3 to 0.1.0 (2026-10-29)
+
+- **How:** the sample app's own rc.3 CLI, `upgrade --check`, then the plan, then `upgrade --yes`, as for rc.3.
+- **Result:** no conflicts, no manual steps, exit 0. Only the CLI bundle changed, and its diff is the version string; `kit_version` and the manifest moved to 0.1.0. The gate follow-up passed, and `npm test`, `validate`, `index --check`, `openspec validate --all --strict` and `agents sync --check` pass.
+- **Channel:** the sample app stays on `next`, so it keeps getting each release candidate before its final release.
+- **Expected follow-up failures:** the same as before: `openspec update` could not run, and `hooks install` exited with 2.
