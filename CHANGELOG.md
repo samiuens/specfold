@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.2.0](https://github.com/samiuens/specfold/compare/v0.1.0...v0.2.0) (2026-10-29)
+
+
+### Features
+
+* **cli:** ✨ make the gate a required check with `init --require-gate` ([93443c1](https://github.com/samiuens/specfold/commit/93443c1ab8bdb9bcc01c03db1d177a66ebff2862))
+* **cli:** ✨ warn in doctor when the gate is not a required check ([93a14ce](https://github.com/samiuens/specfold/commit/93a14ceeca9d76627fcc1bf516de4471b3b76cac))
+* **gate:** ✨ add the `gate require` subcommand ([d9e777f](https://github.com/samiuens/specfold/commit/d9e777f2ea659befb883bcce27927ae809a24e2b))
+* **gate:** ✨ keep a ruleset that makes the gate a required check ([e461bc5](https://github.com/samiuens/specfold/commit/e461bc559b88c4bc8c24ef5433f8cd603bdc4c64))
+* **skills:** ✨ ask about the required gate when installing ([6e7a52b](https://github.com/samiuens/specfold/commit/6e7a52b8c5e2d3a4e9a16ff46fc41757b632723c))
+
 ## [0.1.0](https://github.com/samiuens/specfold/compare/v0.1.0-rc.3...v0.1.0) (2026-10-29)
 
 
