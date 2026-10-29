@@ -49,7 +49,7 @@ agent: implementer
 
 - [x] 4.1 Rebuild the bundle and copy it to the template
   - Done when: `npm run build -w specfold` leaves no diff and `template/scripts/specfold.mjs` matches
-- [ ] 4.2 Regenerate the command reference and describe the required check in getting started
+- [x] 4.2 Regenerate the command reference and describe the required check in getting started
   - Done when: `node tools/specfold/docs.mjs --check` passes and `docs/getting-started.md` names `init --require-gate` and `gate require` instead of the manual setting
 
 ## 5. Agents and upgrade notes

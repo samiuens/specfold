@@ -17,7 +17,7 @@ Open your coding agent at the repository root and paste the whole of [`BOOTSTRAP
 
 1. checks git, `gh` and Node.js;
 2. downloads the newest release's `specfold-template-<version>.tar.gz` into a temporary folder and checks it against its `.sha256`;
-3. asks you for the stack, where the code will live, and whether to turn on weekly upgrade PRs (see [Upgrading](upgrading.md));
+3. asks you for the stack, where the code will live, whether to make the gate a required check, and whether to turn on weekly upgrade PRs (see [Upgrading](upgrading.md));
 4. copies the kit in, never overwriting a file without asking, and runs `node scripts/specfold.mjs init`;
 5. shows `git status` and asks before committing.
 
@@ -31,7 +31,7 @@ Paste `BOOTSTRAP.md` as well. When the repository has tracked files, the agent f
 2. `migrate inventory` lists your docs, ADRs, agent files and specs, and the agent proposes where each one goes;
 3. you approve the mapping plan before anything is installed;
 4. `migrate install` copies the kit in. Your text in shared files such as `AGENTS.md` stays, and Specfold's text goes into a marked block;
-5. the agent converts your docs into draft concepts in `knowledge/` and opens one PR.
+5. the agent converts your docs into draft concepts in `knowledge/` and opens one PR. Once it is merged, run `node scripts/specfold.mjs gate require` to make the gate a required check.
 
 The migration PR is exempt from the "source change without a spec" rule, since it is the PR that brings Specfold in.
 
@@ -46,6 +46,7 @@ The migration PR is exempt from the "source change without a spec" rule, since i
 - **Git hooks** (`specfold hooks install`): pre-commit checks staged concepts and changes, pre-push runs the local gate, and post-checkout and post-merge refresh the code graph when graphify is set up. If your repository already uses lefthook, husky or pre-commit, init adds the hooks to it.
 - **Managed blocks:** Specfold's text in `AGENTS.md`, `CLAUDE.md`, `.gitignore` and the other shared files gets `specfold:start` and `specfold:end` markers. Upgrades rewrite only what is between them.
 - **Subagent limit:** sets your personal limit on subagents running at the same time to 3, or to `--max-subagents <n>`. Change it with `specfold parallel set <n>`.
+- **Required gate:** with `--require-gate`, makes `specfold-gate` a required check on the default branch (see below).
 - **Weekly upgrade PRs:** turned on only with `--upgrade-workflow`.
 
 `--dry-run` shows the values and the steps without writing anything. Running init again is safe: it keeps earlier values and reports "everything is up to date".
@@ -64,7 +65,7 @@ The migration PR is exempt from the "source change without a spec" rule, since i
 | `specfold.yaml` | settings: kit version, channel, source, gate rules, budgets |
 | `.specfold/manifest.json` | what came from the kit, so upgrades know what they may rewrite |
 
-Commit it all, then make `specfold-gate` a required status check in the default branch's protection rules. Until it is required, the gate only reports.
+Commit it all. The gate blocks merges only once `specfold-gate` is a required check on the default branch; until then it only reports. `init --require-gate` sets that up, and so does `node scripts/specfold.mjs gate require` at any later time: it adds a ruleset named `specfold-gate` that requires the check, with no bypass. It needs a `gh` login with admin rights on the repository, and GitHub offers rulesets for private repositories only on its paid plans. When it can't be done, it prints the steps to do it by hand. `specfold doctor` warns while the check isn't required.
 
 ## The first change
 

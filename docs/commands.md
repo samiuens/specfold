@@ -62,10 +62,10 @@ specfold drift [<path>...] [--json]
 
 ## gate
 
-Decide whether a branch may merge: run the merge-gate rules on its diff.
+Decide whether a branch may merge: run the merge-gate rules on its diff; require makes it a required check.
 
 ```sh
-specfold gate --base <ref> [--local] [--pr <number>] [--label <name>]... [--pr-body <file>] [--summary <file>] [--json]
+specfold gate --base <ref> [--local] [--pr <number>] [--label <name>]... [--pr-body <file>] [--summary <file>] [--json] | require [--dry-run] [--json]
 ```
 
 ## graphify
@@ -105,7 +105,7 @@ specfold index [--check] [--bundle <dir>] [--json]
 Finish setting up a repository made from the template: settings, OpenSpec skills, links, hooks.
 
 ```sh
-specfold init [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--max-subagents <n>] [--upgrade-workflow] [--dry-run] [--json]
+specfold init [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--max-subagents <n>] [--upgrade-workflow] [--require-gate] [--dry-run] [--json]
 ```
 
 ## log
