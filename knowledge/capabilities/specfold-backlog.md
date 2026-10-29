@@ -5,13 +5,15 @@ description: Why backlog items have their own commands, and how promoting one ha
 status: draft
 spec: openspec/specs/specfold-backlog/spec.md
 resource: ../../openspec/specs/specfold-backlog/spec.md
-change: 2026-10-26-add-specfold-backlog
+change: 2026-10-29-fix-description-length
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-29T10:31:37+01:00 }
 sources:
   - id: proposal-2026-10-26-add-specfold-backlog
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-backlog/proposal.md
   - id: design-2026-10-26-add-specfold-backlog
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-backlog/design.md
+  - id: proposal-2026-10-29-fix-description-length
+    resource: ../../openspec/changes/archive/2026-10-29-fix-description-length/proposal.md
 ---
 
 # Why

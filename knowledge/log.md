@@ -7,6 +7,7 @@
 * **Retro**: add-kit-docs: 0 answers
 * **Change**: 2026-10-29-add-gate-require: created 0, updated 4, deprecated 0
 * **Retro**: add-gate-require: 0 answers
+* **Change**: 2026-10-29-fix-description-length: created 0, updated 2, deprecated 0
 
 ## 2026-10-28
 
