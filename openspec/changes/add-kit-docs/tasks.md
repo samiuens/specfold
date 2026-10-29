@@ -23,7 +23,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 2.1 Rewrite the kit README: what Specfold is, the three install paths, a five-minute quick start and links to the guides
+- [x] 2.1 Rewrite the kit README: what Specfold is, the three install paths, a five-minute quick start and links to the guides
   - Done when: `README.md` no longer says M0, links every guide in `docs/`, and `tools/specfold/README.md` describes the CLI source, not M1
 - [ ] 2.2 Mark `docs/plan.md` as the historical build brief
   - Done when: its first line says so and points to `README.md` and `docs/`
