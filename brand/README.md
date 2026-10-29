@@ -4,7 +4,7 @@ Direction **Ink & Vermilion**: warm paper, near-black ink and one signal colour.
 
 ## Logo
 
-The mark is a sheet with its corner folded over: the spec (sheet) and the knowledge (fold) as one object.
+The mark is two sheets, a vermilion one behind an ink one, offset like a stack of documents: specs and knowledge, two sources in one bundle.
 
 | File | Use |
 | --- | --- |
@@ -15,9 +15,9 @@ The mark is a sheet with its corner folded over: the spec (sheet) and the knowle
 | `logo/app-icon.svg` | square icon, avatars, favicons |
 
 - The wordmark is always lowercase `specfold`, IBM Plex Sans Bold, tracking -2%.
-- Keep clear space of at least the fold's width (a quarter of the mark) around the mark.
+- Keep clear space of at least the sheets' offset (a sixth of the mark) around the mark.
 - Smallest size: 16 px for the mark, 96 px wide for the lockup.
-- Don't recolour, rotate, outline or add shadows or gradients. The fold is the only vermilion element.
+- Don't recolour, rotate, outline or add shadows or gradients. The back sheet is the only vermilion element; the front sheet is always ink on light and paper on dark.
 - The lockup SVGs use live text. Outline the text before using them where IBM Plex Sans may be missing.
 
 ## Colour
