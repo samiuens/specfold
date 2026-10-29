@@ -20,7 +20,7 @@ The workflow needs the `RELEASE_PLEASE_TOKEN` secret: a fine-grained token for t
 
 - Versions follow semver. While the major version is 0, a breaking change (`feat!:`) bumps the minor version.
 - **A chosen version** goes into `release-as` in `release-please-config.json`, in the change that needs it. Remove it once that release is out, or every later release PR proposes the same version again.
-- **Release candidates** (`0.1.0-rc.1`) are marked as pre-releases on GitHub. Repositories see them only on the `next` channel, and `BOOTSTRAP.md` skips them once a stable release exists.
+- **Release candidates** (`0.1.0-rc.1`) reach repositories only on the `next` channel. GitHub's pre-release mark, which `BOOTSTRAP.md` uses to skip them, comes from `"prerelease": true` in the config. With that key, release-please also marks every `0.x` release, so set it only for a candidate's release PR, and remove it again before the final release.
 
 ## Upgrade notes and migrations
 
