@@ -3,6 +3,7 @@
 ## 2026-10-29
 
 * **Retro**: add-upgrade-workflow: 0 answers
+* **Change**: 2026-10-29-add-kit-docs: created 1, updated 1, deprecated 0
 
 ## 2026-10-28
 
