@@ -38,6 +38,7 @@ describe("doctor: checks", () => {
       "ok",
       "ok",
       "ok",
+      "ok",
     ]);
   });
 
@@ -132,5 +133,41 @@ describe("doctor: checks", () => {
       check(runChecks(env(tempDir("valid"), { ...healthy, "graphify --version": "graphify 0.9.95" })), "D6")
         ?.message,
     ).toBe("graphify 0.9.95");
+  });
+
+  const VIEW = "gh repo view --json nameWithOwner,defaultBranchRef";
+  const RULES = "gh api repos/acme/shop/rules/branches/main";
+  const onGithub = { ...healthy, [VIEW]: '{"nameWithOwner":"acme/shop","defaultBranchRef":{"name":"main"}}' };
+  const gateRule = {
+    type: "required_status_checks",
+    parameters: { required_status_checks: [{ context: "specfold-gate", integration_id: 15368 }] },
+  };
+
+  // spec: specfold-doctor#not-required
+  it("D7 warns when no rule on the default branch requires specfold-gate", () => {
+    const rules = JSON.stringify([{ type: "deletion" }]);
+    expect(check(runChecks(env(tempDir("valid"), { ...onGithub, [RULES]: rules })), "D7")).toEqual({
+      id: "D7",
+      status: "warn",
+      message: "specfold-gate is not a required check on main",
+      fix: "node scripts/specfold.mjs gate require",
+    });
+    const required = JSON.stringify([gateRule]);
+    expect(check(runChecks(env(tempDir("valid"), { ...onGithub, [RULES]: required })), "D7")).toMatchObject({
+      status: "ok",
+      message: "specfold-gate is a required check on main",
+    });
+  });
+
+  // spec: specfold-doctor#offline
+  it("D7 is ok and skipped without gh or readable rules", () => {
+    expect(check(runChecks(env(tempDir("valid"), healthy)), "D7")).toMatchObject({
+      status: "ok",
+      message:
+        "required gate not checked: gh is missing or not logged in, or this is not a GitHub repository",
+    });
+    expect(check(runChecks(env(tempDir("valid"), onGithub)), "D7")?.message).toBe(
+      "required gate not checked: the rules of main could not be read",
+    );
   });
 });

@@ -175,5 +175,53 @@ export function runChecks(env: DoctorEnv): Check[] {
 
   const graphify = firstVersion(env.exec("graphify", ["--version"], env.cwd));
   checks.push(ok("D6", graphify ? `graphify ${graphify}` : "graphify not installed (optional)"));
+  checks.push(requiredGate(env));
   return checks;
+}
+
+interface BranchRule {
+  type?: unknown;
+  parameters?: { required_status_checks?: { context?: unknown }[] };
+}
+
+/** D7: whether an active rule on the default branch requires specfold-gate; read through gh, skipped without it. */
+function requiredGate(env: DoctorEnv): Check {
+  const skipped = (why: string) => ok("D7", `required gate not checked: ${why}`);
+  const view = env.exec("gh", ["repo", "view", "--json", "nameWithOwner,defaultBranchRef"], env.cwd);
+  let repo: unknown;
+  let branch: unknown;
+  try {
+    const data = JSON.parse(view ?? "") as { nameWithOwner?: unknown; defaultBranchRef?: { name?: unknown } };
+    repo = data.nameWithOwner;
+    branch = data.defaultBranchRef?.name;
+  } catch {
+    // handled below
+  }
+  if (typeof repo !== "string" || typeof branch !== "string")
+    return skipped("gh is missing or not logged in, or this is not a GitHub repository");
+  const answer = env.exec(
+    "gh",
+    ["api", `repos/${repo}/rules/branches/${encodeURIComponent(branch)}`],
+    env.cwd,
+  );
+  let rules: unknown;
+  try {
+    rules = JSON.parse(answer ?? "");
+  } catch {
+    // handled below
+  }
+  if (!Array.isArray(rules)) return skipped(`the rules of ${branch} could not be read`);
+  const required = (rules as BranchRule[]).some(
+    (r) =>
+      r.type === "required_status_checks" &&
+      (r.parameters?.required_status_checks ?? []).some((c) => c.context === "specfold-gate"),
+  );
+  return required
+    ? ok("D7", `specfold-gate is a required check on ${branch}`)
+    : {
+        id: "D7",
+        status: "warn",
+        message: `specfold-gate is not a required check on ${branch}`,
+        fix: "node scripts/specfold.mjs gate require",
+      };
 }
