@@ -17,6 +17,7 @@ When the request, the knowledge or the specs leave a decision open, or something
 | `tools/specfold/` | CLI source (TypeScript), tests, fixtures; kit only |
 | `scripts/specfold.mjs` | bundled CLI (build output, committed) |
 | `examples/` | worked example app; kit only |
+| `brand/` | brand kit: logos, colour and type tokens, preview; kit only |
 | `specfold.yaml` | the kit repo's own Specfold settings |
 
 Never copy the kit's own knowledge, specs or settings into `template/`.
