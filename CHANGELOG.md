@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1](https://github.com/samiuens/specfold/compare/v0.2.0...v0.2.1) (2026-10-29)
+
+
+### Bug Fixes
+
+* **cli:** 🐛 check the description that `backlog add` writes ([fc02556](https://github.com/samiuens/specfold/commit/fc02556cccc7d7171fab2c4489e353667ab88bb9))
+* **cli:** 🐛 refuse a concept description over 160 characters ([0b4940d](https://github.com/samiuens/specfold/commit/0b4940d9adda0ae826e5f273b3ce299746b5b168))
+
 ## [0.2.0](https://github.com/samiuens/specfold/compare/v0.1.0...v0.2.0) (2026-10-29)
 
 
