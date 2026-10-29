@@ -1,5 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { chmodSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
 import { desiredRuleset, type Gh, MANUAL_STEPS, RequireError, requireGate } from "../src/gate/require.ts";
+import { run, tempDir } from "./helpers.ts";
 
 interface FakeRuleset {
   id: number;
@@ -109,5 +112,44 @@ describe("gate require", () => {
     const { gh } = fakeGh([], { loggedIn: false });
     expect(() => requireGate(gh)).toThrow("gh is not logged in to github.com");
     expect(MANUAL_STEPS).toContain("requires the status check 'specfold-gate'");
+  });
+});
+
+describe("gate require: command", () => {
+  const path = process.env.PATH;
+  afterEach(() => {
+    process.env.PATH = path;
+  });
+
+  /** Puts a gh on the PATH that fails every call, like one that is not logged in. */
+  function loggedOutGh() {
+    const bin = tempDir();
+    writeFileSync(
+      join(bin, "gh"),
+      "#!/bin/sh\necho 'You are not logged into any GitHub hosts.' >&2\nexit 1\n",
+    );
+    chmodSync(join(bin, "gh"), 0o755);
+    process.env.PATH = `${bin}:${path}`;
+  }
+
+  // spec: specfold-gate#no-admin-rights
+  it("exits with 2 and prints the reason and the manual steps", async () => {
+    loggedOutGh();
+    const result = await run(["gate", "require"], tempDir());
+    expect(result.code).toBe(2);
+    expect(result.stderr).toContain("could not make specfold-gate a required check: gh is not logged in");
+    expect(result.stderr).toContain(MANUAL_STEPS);
+  });
+
+  it("keeps the option sets of the gate and of require apart", async () => {
+    loggedOutGh();
+    const cwd = tempDir();
+    expect((await run(["gate", "require", "--base", "main"], cwd)).stderr).toContain(
+      "--base does not apply to 'gate require'",
+    );
+    const dry = await run(["gate", "--base", "main", "--dry-run"], cwd);
+    expect(dry.code).toBe(2);
+    expect(dry.stderr).toContain("--dry-run applies only to 'gate require'");
+    expect((await run(["gate"], cwd)).stderr).toContain("missing --base <ref>");
   });
 });
