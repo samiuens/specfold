@@ -47,6 +47,25 @@ describe("new: command", () => {
     expect(existsSync(join(repo, "knowledge/operations/restart-workers.md"))).toBe(true);
   });
 
+  // spec: specfold-new#description-too-long
+  it("refuses a description over 160 characters and writes nothing", async () => {
+    const repo = tempDir("valid");
+    const result = await run(["new", "Decision", "decisions/x.md", "--description", "é".repeat(161)], repo);
+    expect(result.code).toBe(2);
+    expect(result.stderr).toContain(
+      "the description has 161 characters (max 160); put longer text in the concept's body",
+    );
+    expect(existsSync(join(repo, "knowledge/decisions/x.md"))).toBe(false);
+  });
+
+  // spec: specfold-new#description-at-the-limit
+  it("accepts a description of exactly 160 characters", async () => {
+    const repo = tempDir("valid");
+    const result = await run(["new", "Decision", "decisions/x.md", "--description", "é".repeat(160)], repo);
+    expect(result.code).toBe(0);
+    expect((await findings(repo)).filter((f: string) => f.startsWith("P2 "))).toEqual([]);
+  });
+
   // spec: specfold-new#existing-file
   it("refuses to overwrite an existing file", async () => {
     const repo = tempDir("valid");

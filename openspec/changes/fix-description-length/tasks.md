@@ -9,7 +9,7 @@ scenarios: [specfold-new#description-too-long, specfold-new#description-at-the-l
 agent: implementer
 ```
 
-- [ ] 1.1 Refuse a description over 160 characters in `specfold new`
+- [x] 1.1 Refuse a description over 160 characters in `specfold new`
   - Done when: a 161-character description exits with 2 and writes nothing, a 160-character one passes validate, and `npx vitest run test/new.test.ts` passes
 - [ ] 1.2 Apply the limit in `backlog add`, title fallback included
   - Done when: a long `--description` or a long title without one exits with 2, the title case suggests `--description`, a long title with a short description works, and `npx vitest run test/backlog.test.ts` passes
