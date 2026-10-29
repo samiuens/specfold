@@ -35,7 +35,7 @@ scenarios: [specfold-doctor#not-required, specfold-doctor#offline, specfold-doct
 agent: implementer
 ```
 
-- [ ] 3.1 Add D7 for the required gate
+- [x] 3.1 Add D7 for the required gate
   - Done when: D7 warns with `gate require` as the fix when no active rule requires `specfold-gate`, is `ok` when one does, is `ok` with "skipped" when gh fails, and the doctor tests pass with seven checks
 
 ## 4. Bundle and docs
