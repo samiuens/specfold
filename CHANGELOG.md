@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.1.0-rc.3](https://github.com/samiuens/specfold/compare/v0.1.0-rc.2...v0.1.0-rc.3) (2026-10-29)
+
+
+### Features
+
+* **cli:** ✨ turn the upgrade workflow on with `--upgrade-workflow` ([b8c713c](https://github.com/samiuens/specfold/commit/b8c713cbe819857464995b9d2f72b61b86e5fae5))
+* **hooks:** ✨ remind of a waiting release at session start ([493a927](https://github.com/samiuens/specfold/commit/493a92797e662ea986d038e2fbb4c75f15645dc5))
+* **template:** ✨ document the upgrade reminder and ignore its cache ([eef5b3d](https://github.com/samiuens/specfold/commit/eef5b3d1e5b6701c3599e16e1e39fe2050dabe5c))
+* **template:** ✨ ship the weekly upgrade workflow, inactive ([ac0508e](https://github.com/samiuens/specfold/commit/ac0508e4cd53a54febb0953346e09bd75172c5ab))
+* **upgrade:** ✨ keep a turned-on upgrade workflow current ([3aa3038](https://github.com/samiuens/specfold/commit/3aa303861d4ffe9b4d709d8c3c64ff60590f277f))
+* **upgrade:** ✨ read the reminder setting and limit source queries ([4e309d4](https://github.com/samiuens/specfold/commit/4e309d441b142458de901b81bcafccfe11485cce))
+
+
+### Bug Fixes
+
+* **cli:** 🐛 keep long lines in local settings and hook manager files ([9624400](https://github.com/samiuens/specfold/commit/9624400d48c293b6eb30404b50c515ba807a0134))
+* **upgrade:** 🐛 give the gate follow-up the upgrade branch's start ([de170dd](https://github.com/samiuens/specfold/commit/de170ddc7d65dabf313cc018c6714be0c8a19138))
+* **upgrade:** 🐛 keep long lines when rewriting openspec configs ([e175abc](https://github.com/samiuens/specfold/commit/e175abc3f12e256af84cc906b1e3d70894c6cf2f))
+
 ## [0.1.0-rc.2](https://github.com/samiuens/specfold/compare/v0.1.0-rc.1...v0.1.0-rc.2) (2026-10-28)
 
 
