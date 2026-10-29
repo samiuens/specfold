@@ -1,12 +1,13 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { register } from "../cli.ts";
-import { UsageError } from "../errors.ts";
+import { EnvError, UsageError } from "../errors.ts";
 import { plural } from "../findings.ts";
 import { openspecBinary } from "../openspec.ts";
 import { type Config, requireConfig, resolveBundleRoot } from "../repo.ts";
 import { computeDiff } from "./diff.ts";
 import { fetchPullRequest, githubEnv } from "./github.ts";
+import { describeResult, MANUAL_STEPS, RequireError, realGh, requireGate } from "./require.ts";
 import { type GateContext, type GateFinding, runGate } from "./rules.ts";
 import { renderSummary } from "./summary.ts";
 
@@ -61,11 +62,31 @@ function verdict(findings: GateFinding[]): string {
     : `blocked by ${blocking.join(", ")} (${plural(counts.block, "blocking finding")}, ${warnings})`;
 }
 
+const GATE_ONLY = ["base", "local", "pr", "label", "pr-body", "summary"];
+
+/** `specfold gate require`: exit 0 when the check is required afterwards, 2 when GitHub refuses. */
+function runRequire(values: Record<string, unknown>, out: (text: string) => void): number {
+  const extra = GATE_ONLY.find((o) => values[o] !== undefined);
+  if (extra) throw new UsageError(`--${extra} does not apply to 'gate require'`);
+  try {
+    const result = requireGate(realGh, { dryRun: values["dry-run"] === true });
+    out(
+      values.json ? `${JSON.stringify({ ok: true, ...result }, null, 2)}\n` : `${describeResult(result)}\n`,
+    );
+    return 0;
+  } catch (error) {
+    if (error instanceof RequireError)
+      throw new EnvError(`could not make specfold-gate a required check: ${error.message}\n${MANUAL_STEPS}`);
+    throw error;
+  }
+}
+
 register({
   name: "gate",
-  summary: "decide whether a branch may merge: run the merge-gate rules on its diff",
+  summary:
+    "decide whether a branch may merge: run the merge-gate rules on its diff; require makes it a required check",
   usage:
-    "specfold gate --base <ref> [--local] [--pr <number>] [--label <name>]... [--pr-body <file>] [--summary <file>] [--json]",
+    "specfold gate --base <ref> [--local] [--pr <number>] [--label <name>]... [--pr-body <file>] [--summary <file>] [--json] | require [--dry-run] [--json]",
   options: {
     base: { type: "string" },
     local: { type: "boolean" },
@@ -73,10 +94,13 @@ register({
     label: { type: "string", multiple: true },
     "pr-body": { type: "string" },
     summary: { type: "string" },
+    "dry-run": { type: "boolean" },
     json: { type: "boolean" },
   },
   run: async ({ io, values, positionals }) => {
+    if (positionals[0] === "require" && positionals.length === 1) return runRequire(values, io.stdout);
     if (positionals.length > 0) throw new UsageError(`unexpected argument '${positionals[0]}'`);
+    if (values["dry-run"]) throw new UsageError("--dry-run applies only to 'gate require'");
     const base = values.base as string | undefined;
     if (!base) throw new UsageError("missing --base <ref>");
     const bodyFile = values["pr-body"] as string | undefined;

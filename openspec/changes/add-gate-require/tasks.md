@@ -11,7 +11,7 @@ agent: implementer
 
 - [x] 1.1 Find, compare and write the `specfold-gate` ruleset through a gh runner
   - Done when: `requireGate` creates, updates or leaves the ruleset as the scenarios say, refusals carry GitHub's message and the manual steps, and `npx vitest run test/gate-require.test.ts` passes
-- [ ] 1.2 Route `specfold gate require [--dry-run] [--json]` inside the gate command
+- [x] 1.2 Route `specfold gate require [--dry-run] [--json]` inside the gate command
   - Done when: `gate require` exits 0 or 2 as specified, `--base` is still required for the plain gate, and mixing the two option sets is a usage error
 
 ## 2. Init flag
