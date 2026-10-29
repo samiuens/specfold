@@ -3,22 +3,33 @@ import { join } from "node:path";
 import { register } from "../cli.ts";
 import { UsageError } from "../errors.ts";
 import { plural } from "../findings.ts";
+import {
+  describeResult,
+  MANUAL_STEPS,
+  RequireError,
+  RULESET_NAME,
+  realGh,
+  requireGate,
+} from "../gate/require.ts";
 import { MANIFEST_PATH, parseTools } from "../migrate/install.ts";
 import { gitRoot } from "../migrate/repo.ts";
 import { LOCAL_SETTINGS } from "../parallel/limit.ts";
 import { planInit, runInit } from "./init.ts";
 
+const GATE_STEP = `ruleset ${RULESET_NAME}`;
+
 register({
   name: "init",
   summary: "finish setting up a repository made from the template: settings, OpenSpec skills, links, hooks",
   usage:
-    "specfold init [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--max-subagents <n>] [--upgrade-workflow] [--dry-run] [--json]",
+    "specfold init [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--max-subagents <n>] [--upgrade-workflow] [--require-gate] [--dry-run] [--json]",
   options: {
     stack: { type: "string" },
     "source-glob": { type: "string", multiple: true },
     tools: { type: "string" },
     "max-subagents": { type: "string" },
     "upgrade-workflow": { type: "boolean" },
+    "require-gate": { type: "boolean" },
     "dry-run": { type: "boolean" },
     json: { type: "boolean" },
   },
@@ -38,6 +49,7 @@ register({
     };
     const plan = planInit(options);
     const dryRun = values["dry-run"] === true;
+    const requireFlag = values["require-gate"] === true;
     const { stack, sourceGlobs } = plan.values;
     const valueLines = [
       `stack: ${stack.value ?? "unknown"} (${stack.source})`,
@@ -62,6 +74,7 @@ register({
           ? [{ path: LOCAL_SETTINGS, action: `set subagent limit to ${plan.limit}` }]
           : []),
         ...(manifestChanges ? [{ path: MANIFEST_PATH, action: "write" }] : []),
+        ...(requireFlag ? [{ path: GATE_STEP, action: "run gate require" }] : []),
       ];
       if (values.json)
         io.stdout(
@@ -80,6 +93,18 @@ register({
     }
 
     const result = runInit(options, plan);
+    if (requireFlag) {
+      // a refusal is a skipped step: the repository is set up, only the GitHub setting is missing
+      try {
+        const gate = requireGate(realGh);
+        if (gate.action !== "unchanged") result.actions.push({ path: GATE_STEP, action: gate.action });
+        else result.notes.push(describeResult(gate));
+      } catch (error) {
+        if (!(error instanceof RequireError)) throw error;
+        result.skipped.push({ path: GATE_STEP, reason: error.message });
+        result.notes.push(MANUAL_STEPS);
+      }
+    }
     if (values.json) {
       io.stdout(`${JSON.stringify({ ok: true, dry_run: false, values: filled, ...result }, null, 2)}\n`);
       return 0;
