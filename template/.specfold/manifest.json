@@ -10,7 +10,7 @@
     ".agents/skills/sf-interview/SKILL.md": "sha256:9b97e6c84217f352df57f3a066993ea06b614793d6ad77939f3b257ede72208a",
     ".agents/skills/sf-interview/references/design-tree.md": "sha256:de4f396a9721a65dceefe9cdc1da40a411f3b7f28a650d30396db6a49fd566ad",
     ".agents/skills/sf-lookup/SKILL.md": "sha256:2b18bffa47394c60f8d7d9893837cd10ea0a2739fd24b291b028cadedbc5b44f",
-    ".agents/skills/sf-migrate/SKILL.md": "sha256:f06072169d45a44d24d5993eaa6ab445920d6ab74e72edf14a849144dc6c82b5",
+    ".agents/skills/sf-migrate/SKILL.md": "sha256:c6d4c31da8b100e86e7fe2210623ccc36adca3d47dc6a31651acefa23983ce12",
     ".agents/skills/sf-migrate/references/conversion.md": "sha256:023a42cbf25ff4b07e91a87d6fb95bd2862a2dc44b9efdf7828b2f343bbae42e",
     ".agents/skills/sf-migrate/references/plan.md": "sha256:bda937783a44e6d34553a22c764f27b800e50267e5c7b26ca8dc1d6898090a29",
     ".agents/skills/sf-migrate/references/report.md": "sha256:2295d3eb25eb09349751fc9a5605a3b21f6df367caf458f1d2634819eaba898f",
@@ -34,7 +34,7 @@
     "openspec/schemas/specfold/templates/proposal.md": "sha256:0dd70e35db5c696ba8ac3cc3a53e2d6561865c1e4e7d49db5a1eaa3e4a6ad86e",
     "openspec/schemas/specfold/templates/spec.md": "sha256:1cccfb573f031c6352bed2a879b7035ff710bc909112fc23d10bdcfcdd8d4318",
     "openspec/schemas/specfold/templates/tasks.md": "sha256:2ef32ccb374fd2470cfea280eb0dd247679d46ac569a719d7e1afc3cae9f3529",
-    "scripts/specfold.mjs": "sha256:cf65441b844d91d1682b92c74c076db78b308f0fd8cdeecf3f56efbeb5535a52"
+    "scripts/specfold.mjs": "sha256:f552aa88f93f0c078f97ada1ead3ad1dbf3f3147165f1c0a1c8fbce04b6d8349"
   },
   "blocks": {
     ".gitattributes": "sha256:1bf32920694d48900b707f228d8b154e37439df8994b68e4a4badc87d98e1d58",
