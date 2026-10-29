@@ -23,7 +23,7 @@ scenarios: [specfold-init#gate-made-required, specfold-init#cannot-set-it]
 agent: implementer
 ```
 
-- [ ] 2.1 Add `--require-gate` to init
+- [x] 2.1 Add `--require-gate` to init
   - Done when: init runs the require step after setup, reports a refusal as skipped with the manual steps and exits 0, lists the step in `--dry-run`, and touches no GitHub setting without the flag
 
 ## 3. Doctor check

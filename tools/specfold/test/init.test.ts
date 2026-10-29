@@ -1,4 +1,4 @@
-import { cpSync, existsSync, readFileSync } from "node:fs";
+import { chmodSync, cpSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -28,6 +28,27 @@ function templateRepo(files: Record<string, string> = {}): string {
   git(root, "add", "-A");
   git(root, "commit", "-q", "-m", "from the template");
   return root;
+}
+
+/** Puts a gh on the PATH: logged in, it answers for acme/shop and keeps a posted ruleset; else it fails. */
+function fakeGh(loggedIn: boolean): string {
+  const bin = tempDir();
+  const script = loggedIn
+    ? `#!/bin/sh
+echo "$*" >> "${bin}/calls.log"
+case "$*" in
+  "auth status --hostname github.com") exit 0 ;;
+  "repo view --json nameWithOwner") echo '{"nameWithOwner":"acme/shop"}' ;;
+  "api repos/acme/shop/rulesets") echo '[]' ;;
+  "api --method POST repos/acme/shop/rulesets --input -") cat > "${bin}/posted.json"; echo '{}' ;;
+  *) echo "unexpected gh $*" >&2; exit 1 ;;
+esac
+`
+    : "#!/bin/sh\nexit 1\n";
+  writeFileSync(join(bin, "gh"), script);
+  chmodSync(join(bin, "gh"), 0o755);
+  vi.stubEnv("PATH", `${bin}:${process.env.PATH}`);
+  return bin;
 }
 
 const TS_PROJECT = { "package.json": "{}\n", "tsconfig.json": "{}\n", "src/index.ts": "export {};\n" };
@@ -65,6 +86,34 @@ describe("specfold init", () => {
     expect(JSON.parse(read(root, ".specfold/manifest.json")).files).not.toHaveProperty([
       ".github/workflows/specfold-upgrade.yml",
     ]);
+  });
+
+  // spec: specfold-init#gate-made-required
+  it("makes the gate a required check with --require-gate", async () => {
+    const root = templateRepo(TS_PROJECT);
+    const posted = join(fakeGh(true), "posted.json");
+    const result = await run(["init", "--require-gate"], root);
+    expect(result.code).toBe(0);
+    expect(result.stdout).toContain("ruleset specfold-gate: created\n");
+    expect(JSON.parse(readFileSync(posted, "utf8"))).toMatchObject({ name: "specfold-gate" });
+  });
+
+  // spec: specfold-init#cannot-set-it
+  it("reports a refused required check as skipped and still exits with 0", async () => {
+    const root = templateRepo(TS_PROJECT);
+    fakeGh(false);
+    const result = await run(["init", "--require-gate"], root);
+    expect(result.code).toBe(0);
+    expect(result.stdout).toContain("ruleset specfold-gate: skipped: gh is not logged in to github.com\n");
+    expect(result.stdout).toContain("then: To do it by hand:");
+  });
+
+  it("lists the required check in a dry run and asks GitHub nothing", async () => {
+    const root = templateRepo(TS_PROJECT);
+    const bin = fakeGh(true);
+    const result = await run(["init", "--require-gate", "--dry-run"], root);
+    expect(result.stdout).toContain("ruleset specfold-gate: would run gate require\n");
+    expect(existsSync(join(bin, "calls.log"))).toBe(false);
   });
 
   // spec: specfold-init#typescript-project
