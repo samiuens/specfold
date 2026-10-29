@@ -31,6 +31,20 @@ export function isoWithOffset(date: Date): string {
 }
 
 /** `decisions/guest-orders.md` → `Guest orders`. */
+/** The longest `description` validate accepts (profile rule P2), in code points. */
+export const MAX_DESCRIPTION = 160;
+
+/** Refuses a description validate would reject; `what` names it in the error, `fix` ends it. */
+export function checkDescription(
+  description: string,
+  what = "the description",
+  fix = "put longer text in the concept's body",
+): void {
+  const length = [...description].length;
+  if (length > MAX_DESCRIPTION)
+    throw new UsageError(`${what} has ${length} characters (max ${MAX_DESCRIPTION}); ${fix}`);
+}
+
 export function titleFromPath(rel: string): string {
   const name = rel.slice(rel.lastIndexOf("/") + 1, -3).replace(/-/g, " ");
   return name.charAt(0).toUpperCase() + name.slice(1);
@@ -143,6 +157,7 @@ register({
 
     const title = (values.title as string | undefined) ?? titleFromPath(rel);
     const description = (values.description as string | undefined) ?? "";
+    checkDescription(description);
     const committedBy = type === "Deferred Commitment" ? humanLogin(config.root) : undefined;
     const content = renderConcept(config.root, {
       type,
