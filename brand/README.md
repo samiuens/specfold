@@ -56,6 +56,27 @@ No purple, violet or blue-to-purple gradients anywhere.
 
 `tokens.json` is the source of truth; `tokens.css` mirrors it as `--sf-*` custom properties with light, dark (`prefers-color-scheme`) and `data-theme` overrides. Change both together.
 
+## Diagrams
+
+House style **Blocks**: solid blocks, heavy arrows, one vermilion block. Reference: `diagrams/example-change-loop-light.svg` and `-dark.svg`.
+
+- **Blocks:** square corners, no outlines. Fill ink with paper text on light, paper with ink text on dark.
+- **One emphasis:** exactly one block in vermilion, the outcome the diagram leads to (for example the gate). Text on it is `on-accent` at full opacity.
+- **Labels:** a small JetBrains Mono line on top (step number or kind, 12 px, 75% opacity), the name in IBM Plex Sans Bold 19 px, and an optional JetBrains Mono detail line (11 px, 75% opacity). At most three words per detail line.
+- **Arrows:** 3 px ink (paper on dark) with a solid triangular head. Straight lines only, left to right or top to bottom; no curves, no diagonals.
+- **Grid:** 8 px. Blocks 164 × 96, gaps 32, outer padding 24 horizontally and 32 vertically. Wider blocks are fine when a name needs it; keep one width per row.
+- **Background:** the page colour, `#F6F3EC` light and `#151412` dark. No shadows, gradients, icons or emoji.
+- **Files:** every diagram ships as `<name>-light.svg` and `<name>-dark.svg` with a `<title>`, and keeps its text as live text. Where IBM Plex is missing, the viewer's system sans and mono take over.
+
+Embed both in Markdown so GitHub follows the reader's theme:
+
+```html
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="brand/diagrams/change-loop-dark.svg">
+  <img alt="The change loop: plan, apply, check, archive, sync, then the gate" src="brand/diagrams/change-loop-light.svg">
+</picture>
+```
+
 ## CLI
 
 In the terminal, use the terminal's own green, yellow and red for ok/warn/error, so themes keep working. Use vermilion (`#F08A5D` on dark) only for highlights such as matched lookup terms.

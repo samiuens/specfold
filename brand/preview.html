@@ -88,6 +88,14 @@
   </section>
 
   <section>
+    <p class="label">Diagrams · Blocks</p>
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="diagrams/example-change-loop-dark.svg">
+      <img id="diagram" src="diagrams/example-change-loop-light.svg" alt="The change loop: plan, apply, check, archive, sync, then the gate" style="max-width:100%;height:auto;display:block">
+    </picture>
+  </section>
+
+  <section>
     <p class="label">CLI</p>
 <div class="term"><span class="p">$</span> specfold validate
 <span class="ok">✓</span> 84 concepts, 0 errors
@@ -110,6 +118,9 @@
     const dark = document.documentElement.dataset.theme === "dark" ||
       (!document.documentElement.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
     document.getElementById("lockup").src = dark ? "logo/lockup-inverse.svg" : "logo/lockup.svg";
+    const pic = document.getElementById("diagram").parentElement;
+    pic.querySelector("source").media = document.documentElement.dataset.theme
+      ? (dark ? "all" : "not all") : "(prefers-color-scheme: dark)";
   };
   document.getElementById("theme").onclick = () => {
     const el = document.documentElement;
