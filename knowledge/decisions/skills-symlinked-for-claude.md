@@ -2,9 +2,10 @@
 type: Decision
 title: Claude Code skills are symlinks into .agents/skills/
 description: specfold agents sync links each .agents/skills/<name> into .claude/skills/ instead of copying it.
-status: draft
+status: stable
 decision: accepted
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T02:10:00+01:00 }
+verified: { by: human:samiuens, at: 2026-10-29T11:10:00+01:00 }
 sources:
   - id: plan
     resource: ../../docs/plan.md
