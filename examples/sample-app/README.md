@@ -125,3 +125,15 @@ The sample app gets its kit files only by upgrading from each release, with the 
   - merging `openspec/config.yaml` rewrapped its long list items at 80 characters. The content is equal, but the formatting changed.
 
   Both get fixed in the kit before rc.3. This commit is left exactly as the rc.2 upgrader made it.
+
+### 0.1.0-rc.2 to 0.1.0-rc.3 (2026-10-29)
+
+- **How:** the sample app's own rc.2 CLI, `node scripts/specfold.mjs upgrade --check`, then the plan, then `upgrade --yes`. This was the first run of the full path: the rc.2 CLI downloaded rc.3, checked its checksum and handed over to the rc.3 CLI, which planned and applied the upgrade.
+- **Result:** no conflicts, no manual steps, exit 0. The upgrade:
+  - added `.specfold/workflows/specfold-upgrade.yml`, the weekly upgrade workflow, inactive; the sample app does not turn it on, because it lives inside the kit's repository;
+  - replaced the CLI bundle and the `sf-migrate` skill, which now asks about the workflow;
+  - moved `kit_version` and the manifest to rc.3.
+
+  `specfold.yaml` changed only on its `kit_version` line, and the `gate --local` follow-up ran with the upgrade branch's start as its base and passed. The two upgrader bugs from the rc.2 run are fixed. `npm test`, `validate`, `index --check`, `openspec validate --all --strict` and `agents sync --check` pass, and `upgrade --check` now reports rc.3 as the newest release.
+- **Expected follow-up failures:** the same as in the rc.2 run: `openspec update` could not run, and `hooks install` exited with 2.
+- **Not covered:** the sample app has no `.gitignore` of its own, so the upgrade did not add `.specfold/local-state.json` to one; the kit's root `.gitignore` already covers that file. The kit's `upgrade-fixtures` job checks a repository whose `.gitignore` block is in the manifest.
