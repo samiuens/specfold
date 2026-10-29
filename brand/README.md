@@ -77,6 +77,10 @@ Embed both in Markdown so GitHub follows the reader's theme:
 </picture>
 ```
 
+## Social preview
+
+`social/github-social-preview-1280x640.png` is the repository's GitHub social preview (Settings → General → Social preview). Its source is the SVG next to it. To rebuild the PNG with IBM Plex Sans and JetBrains Mono installed: `rsvg-convert social/github-social-preview-1280x640.svg -o social/github-social-preview-1280x640.png`. GitHub accepts files under 1 MB.
+
 ## CLI
 
 In the terminal, use the terminal's own green, yellow and red for ok/warn/error, so themes keep working. Use vermilion (`#F08A5D` on dark) only for highlights such as matched lookup terms.
