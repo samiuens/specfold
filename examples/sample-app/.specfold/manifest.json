@@ -1,7 +1,7 @@
 {
   "manifest_version": 1,
-  "kit_version": "0.1.0-rc.2",
-  "ref": "v0.1.0-rc.2",
+  "kit_version": "0.1.0-rc.3",
+  "ref": "v0.1.0-rc.3",
   "files": {
     ".agents/skills/sf-apply/SKILL.md": "sha256:f11234c197a26b22c9163e0b13dcf243dce6c0cfac96e400f4eb166d7dcb515a",
     ".agents/skills/sf-apply/references/packet-and-split.md": "sha256:5c251af88b9d3db92015d6c405b8a9b3d154092c3023f569ad7519fe4469e588",
@@ -11,7 +11,7 @@
     ".agents/skills/sf-interview/SKILL.md": "sha256:9b97e6c84217f352df57f3a066993ea06b614793d6ad77939f3b257ede72208a",
     ".agents/skills/sf-interview/references/design-tree.md": "sha256:de4f396a9721a65dceefe9cdc1da40a411f3b7f28a650d30396db6a49fd566ad",
     ".agents/skills/sf-lookup/SKILL.md": "sha256:2b18bffa47394c60f8d7d9893837cd10ea0a2739fd24b291b028cadedbc5b44f",
-    ".agents/skills/sf-migrate/SKILL.md": "sha256:9c4b359b222bc7abb87f69266795ddfdf3e5790c7133fa3967c702a1c834d61f",
+    ".agents/skills/sf-migrate/SKILL.md": "sha256:f06072169d45a44d24d5993eaa6ab445920d6ab74e72edf14a849144dc6c82b5",
     ".agents/skills/sf-migrate/references/conversion.md": "sha256:023a42cbf25ff4b07e91a87d6fb95bd2862a2dc44b9efdf7828b2f343bbae42e",
     ".agents/skills/sf-migrate/references/plan.md": "sha256:bda937783a44e6d34553a22c764f27b800e50267e5c7b26ca8dc1d6898090a29",
     ".agents/skills/sf-migrate/references/report.md": "sha256:2295d3eb25eb09349751fc9a5605a3b21f6df367caf458f1d2634819eaba898f",
@@ -27,6 +27,7 @@
     ".claude/agents/verifier.md": "sha256:5cbcef592fbe6a56cbce430d622f426b2b7175c5c66dfbfa6866e5e73290703e",
     ".github/workflows/specfold-gate-comment.yml": "sha256:a409026835daf5afdf752a18a7cbd9565198c347c1f6b119719b348f16eecc5b",
     ".github/workflows/specfold-gate.yml": "sha256:edb62a79c29bbb629d7d14a70436f62b2a996122da8399b234ce199047fb7669",
+    ".specfold/workflows/specfold-upgrade.yml": "sha256:f42b96127b5611af6db14395e395dee9d4eb4d653503229a39960149729120d6",
     "openspec/schemas/specfold/schema.yaml": "sha256:1e125cb0ebebadf1e1447e3b35a38cc2e587bd410fd873853c268969d0dc269b",
     "openspec/schemas/specfold/templates/brief.md": "sha256:49c6b6e984a81d4237f981e0661c62936cea140f5bf3ee0149ed611c3cc95d9b",
     "openspec/schemas/specfold/templates/design.md": "sha256:48aaa6670d991574e1600fd757c44b0c47be2993b32ca8ffecac48ad8413c828",
@@ -34,7 +35,7 @@
     "openspec/schemas/specfold/templates/proposal.md": "sha256:0dd70e35db5c696ba8ac3cc3a53e2d6561865c1e4e7d49db5a1eaa3e4a6ad86e",
     "openspec/schemas/specfold/templates/spec.md": "sha256:1cccfb573f031c6352bed2a879b7035ff710bc909112fc23d10bdcfcdd8d4318",
     "openspec/schemas/specfold/templates/tasks.md": "sha256:2ef32ccb374fd2470cfea280eb0dd247679d46ac569a719d7e1afc3cae9f3529",
-    "scripts/specfold.mjs": "sha256:b95870b04b02c3a017d5dd0c5617d5f77e67e7cf9431e06680d2d9e65f2ee642"
+    "scripts/specfold.mjs": "sha256:e260e504226d7bbcc7ceb2533198a198d7a6b4c4d5aad7146de869279f3372b8"
   },
   "blocks": {
     "AGENTS.md": "sha256:a6bd30b8c573182e415f78c84cb89847f8c3e3e92cf4c312906174bc74b11339",
