@@ -7,7 +7,7 @@ import { findItem, type Item, listItems, setKeys } from "../future/items.ts";
 import { syncIndexes } from "../indexes/command.ts";
 import { generateIndexes } from "../indexes/generate.ts";
 import { locationsByConcept, scanReferences } from "../indexes/refs.ts";
-import { renderConcept } from "../new/command.ts";
+import { checkDescription, renderConcept } from "../new/command.ts";
 import { openspecBinary } from "../openspec.ts";
 import { type Config, requireConfig, resolveBundleRoot } from "../repo.ts";
 
@@ -91,6 +91,11 @@ register({
         const priority = (values.priority as string | undefined) ?? "medium";
         if (!PRIORITIES.includes(priority))
           throw new UsageError(`priority must be one of ${PRIORITIES.join(", ")}, got '${priority}'`);
+        // a concept needs a description; the title is a valid start
+        const description = values.description as string | undefined;
+        if (description === undefined)
+          checkDescription(title, "the title, used as the description,", "pass a shorter --description");
+        else checkDescription(description);
         const abs = join(bundleRoot, "backlog", `${slug}.md`);
         if (existsSync(abs)) {
           io.stderr(`specfold: ${shown(abs)} already exists\n`);
@@ -105,8 +110,7 @@ register({
           renderConcept(config.root, {
             type: "Backlog Item",
             title,
-            // a concept needs a description; the title is a valid start
-            description: (values.description as string | undefined) ?? title,
+            description: description ?? title,
             by,
             now: new Date(),
             ...(origin ? { origin } : {}),

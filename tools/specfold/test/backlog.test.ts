@@ -48,6 +48,36 @@ describe("specfold backlog", () => {
       expect((await run(argv, repo())).code, argv.join(" ")).toBe(2);
   });
 
+  // spec: specfold-backlog#long-description
+  it("refuses a description over 160 characters", async () => {
+    const root = repo();
+    const result = await run(["backlog", "add", "Night theme", "--description", "x".repeat(200)], root);
+    expect(result.code).toBe(2);
+    expect(result.stderr).toContain("the description has 200 characters (max 160)");
+    expect(existsSync(join(root, "knowledge/backlog/night-theme.md"))).toBe(false);
+  });
+
+  // spec: specfold-backlog#long-title-without-a-description
+  it("refuses a long title used as the description and suggests --description", async () => {
+    const root = repo();
+    const title = Array.from({ length: 34 }, (_, i) => `word${i % 10}`).join(" ");
+    const result = await run(["backlog", "add", title], root);
+    expect(result.code).toBe(2);
+    expect(result.stderr).toContain(
+      `the title, used as the description, has ${title.length} characters (max 160); pass a shorter --description`,
+    );
+  });
+
+  // spec: specfold-backlog#long-title-with-a-short-description
+  it("accepts a long title with a short description", async () => {
+    const root = repo();
+    const title = Array.from({ length: 34 }, (_, i) => `word${i % 10}`).join(" ");
+    const result = await run(["backlog", "add", title, "--description", "A short summary."], root);
+    expect(result.code).toBe(0);
+    const created = result.stdout.match(/created (\S+)/)?.[1] ?? "";
+    expect(frontmatter(root, created)).toMatchObject({ title, description: "A short summary." });
+  });
+
   // spec: specfold-backlog#idea-from-an-interview
   it("adds an item and regenerates the indexes", async () => {
     vi.stubEnv("SPECFOLD_MODEL", "opus");
