@@ -3,9 +3,10 @@ type: Backlog Item
 title: Init sets the gate as a required check
 description: init and migrate install offer to make specfold-gate a required check on the default branch through a GitHub ruleset.
 status: draft
-state: open
+state: promoted
 priority: high
 origin: human
+change: add-gate-require
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-29T08:50:23+01:00 }
 ---
 
