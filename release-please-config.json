@@ -11,6 +11,7 @@
     ".": {
       "package-name": "specfold",
       "changelog-path": "CHANGELOG.md",
+      "exclude-paths": ["brand"],
       "changelog-sections": [
         { "type": "feat", "section": "Features" },
         { "type": "fix", "section": "Bug Fixes" },
