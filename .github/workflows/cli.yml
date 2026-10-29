@@ -33,6 +33,8 @@ jobs:
         run: |
           npm run build -w specfold
           git diff --exit-code -- scripts/specfold.mjs || { echo "::error::scripts/specfold.mjs is stale; run 'npm run build -w specfold' and commit it"; exit 1; }
+      - name: Command reference is up to date
+        run: node tools/specfold/docs.mjs --check
       - name: Release versions agree
         run: node tools/specfold/release.mjs check
       - name: Validate the kit's knowledge
