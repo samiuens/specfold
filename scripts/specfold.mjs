@@ -1165,27 +1165,27 @@ var require_stringifyString = __commonJS({
       return true;
     }
     function doubleQuotedString(value, ctx) {
-      const json = JSON.stringify(value);
+      const json2 = JSON.stringify(value);
       if (ctx.options.doubleQuotedAsJSON)
-        return json;
+        return json2;
       const { implicitKey } = ctx;
       const minMultiLineLength = ctx.options.doubleQuotedMinMultiLineLength;
       const indent = ctx.indent || (containsDocumentMarker(value) ? "  " : "");
       let str3 = "";
       let start = 0;
-      for (let i = 0, ch = json[i]; ch; ch = json[++i]) {
-        if (ch === " " && json[i + 1] === "\\" && json[i + 2] === "n") {
-          str3 += json.slice(start, i) + "\\ ";
+      for (let i = 0, ch = json2[i]; ch; ch = json2[++i]) {
+        if (ch === " " && json2[i + 1] === "\\" && json2[i + 2] === "n") {
+          str3 += json2.slice(start, i) + "\\ ";
           i += 1;
           start = i;
           ch = "\\";
         }
         if (ch === "\\")
-          switch (json[i + 1]) {
+          switch (json2[i + 1]) {
             case "u":
               {
-                str3 += json.slice(start, i);
-                const code = json.substr(i + 2, 4);
+                str3 += json2.slice(start, i);
+                const code = json2.substr(i + 2, 4);
                 switch (code) {
                   case "0000":
                     str3 += "\\0";
@@ -1215,23 +1215,23 @@ var require_stringifyString = __commonJS({
                     if (code.substr(0, 2) === "00")
                       str3 += "\\x" + code.substr(2);
                     else
-                      str3 += json.substr(i, 6);
+                      str3 += json2.substr(i, 6);
                 }
                 i += 5;
                 start = i + 1;
               }
               break;
             case "n":
-              if (implicitKey || json[i + 2] === '"' || json.length < minMultiLineLength) {
+              if (implicitKey || json2[i + 2] === '"' || json2.length < minMultiLineLength) {
                 i += 1;
               } else {
-                str3 += json.slice(start, i) + "\n\n";
-                while (json[i + 2] === "\\" && json[i + 3] === "n" && json[i + 4] !== '"') {
+                str3 += json2.slice(start, i) + "\n\n";
+                while (json2[i + 2] === "\\" && json2[i + 3] === "n" && json2[i + 4] !== '"') {
                   str3 += "\n";
                   i += 2;
                 }
                 str3 += indent;
-                if (json[i + 2] === " ")
+                if (json2[i + 2] === " ")
                   str3 += "\\";
                 i += 1;
                 start = i + 1;
@@ -1241,7 +1241,7 @@ var require_stringifyString = __commonJS({
               i += 1;
           }
       }
-      str3 = start ? str3 + json.slice(start) : json;
+      str3 = start ? str3 + json2.slice(start) : json2;
       return implicitKey ? str3 : foldFlowLines.foldFlowLines(str3, indent, foldFlowLines.FOLD_QUOTED, getFoldOptions(ctx, false));
     }
     function singleQuotedString(value, ctx) {
@@ -3663,11 +3663,11 @@ var require_Document = __commonJS({
           throw new Error(`With a null YAML version, the { schema: Schema } option is required`);
       }
       // json & jsonArg are only used from toJSON()
-      toJS({ json, jsonArg, mapAsMap, maxAliasCount, onAnchor, reviver } = {}) {
+      toJS({ json: json2, jsonArg, mapAsMap, maxAliasCount, onAnchor, reviver } = {}) {
         const ctx = {
           anchors: /* @__PURE__ */ new Map(),
           doc: this,
-          keep: !json,
+          keep: !json2,
           mapAsMap: mapAsMap === true,
           mapKeyWarned: false,
           maxAliasCount: typeof maxAliasCount === "number" ? maxAliasCount : 100
@@ -10026,7 +10026,7 @@ register({
     const config = requireConfig(io.cwd);
     const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
     const shown = (abs) => relative9(config.root, abs).split(sep9).join("/");
-    const print = (lines3, json) => io.stdout(values.json ? `${JSON.stringify(json, null, 2)}
+    const print = (lines3, json2) => io.stdout(values.json ? `${JSON.stringify(json2, null, 2)}
 ` : `${lines3.join("\n")}
 `);
     const refuse = (item, message) => {
@@ -11343,7 +11343,7 @@ register({
     const config = requireConfig(io.cwd);
     const bundleRoot = resolveBundleRoot(io.cwd, void 0, config);
     const shown = (abs) => relative10(config.root, abs).split(sep10).join("/");
-    const print = (lines3, json) => io.stdout(values.json ? `${JSON.stringify(json, null, 2)}
+    const print = (lines3, json2) => io.stdout(values.json ? `${JSON.stringify(json2, null, 2)}
 ` : `${lines3.join("\n")}
 `);
     const refuse = (item, message) => {
@@ -11585,7 +11585,42 @@ function runChecks(env) {
   }
   const graphify2 = firstVersion(env.exec("graphify", ["--version"], env.cwd));
   checks.push(ok("D6", graphify2 ? `graphify ${graphify2}` : "graphify not installed (optional)"));
+  checks.push(requiredGate(env));
   return checks;
+}
+function requiredGate(env) {
+  const skipped = (why) => ok("D7", `required gate not checked: ${why}`);
+  const view = env.exec("gh", ["repo", "view", "--json", "nameWithOwner,defaultBranchRef"], env.cwd);
+  let repo;
+  let branch;
+  try {
+    const data = JSON.parse(view ?? "");
+    repo = data.nameWithOwner;
+    branch = data.defaultBranchRef?.name;
+  } catch {
+  }
+  if (typeof repo !== "string" || typeof branch !== "string")
+    return skipped("gh is missing or not logged in, or this is not a GitHub repository");
+  const answer = env.exec(
+    "gh",
+    ["api", `repos/${repo}/rules/branches/${encodeURIComponent(branch)}`],
+    env.cwd
+  );
+  let rules;
+  try {
+    rules = JSON.parse(answer ?? "");
+  } catch {
+  }
+  if (!Array.isArray(rules)) return skipped(`the rules of ${branch} could not be read`);
+  const required = rules.some(
+    (r) => r.type === "required_status_checks" && (r.parameters?.required_status_checks ?? []).some((c) => c.context === "specfold-gate")
+  );
+  return required ? ok("D7", `specfold-gate is a required check on ${branch}`) : {
+    id: "D7",
+    status: "warn",
+    message: `specfold-gate is not a required check on ${branch}`,
+    fix: "node scripts/specfold.mjs gate require"
+  };
 }
 
 // src/doctor/command.ts
@@ -11608,8 +11643,8 @@ function realEnv(cwd) {
   };
 }
 var exitCode = (checks) => checks.some((c) => c.status === "fail") ? 1 : 0;
-function render(checks, json) {
-  if (json) return `${JSON.stringify({ ok: exitCode(checks) === 0, checks }, null, 2)}
+function render(checks, json2) {
+  if (json2) return `${JSON.stringify({ ok: exitCode(checks) === 0, checks }, null, 2)}
 `;
   const lines3 = checks.flatMap((c) => [
     `${c.id} ${c.status} ${c.message}`,
@@ -11889,6 +11924,120 @@ async function fetchPullRequest(env, number) {
   return { number, author: author.toLowerCase(), approvers: approvers(reviews) };
 }
 
+// src/gate/require.ts
+import { execFileSync as execFileSync7 } from "node:child_process";
+var RULESET_NAME = "specfold-gate";
+var CHECK = "specfold-gate";
+var ACTIONS_APP_ID = 15368;
+var MANUAL_STEPS = "To do it by hand: in the repository's Settings > Rules > Rulesets, add a ruleset for the default branch that requires the status check 'specfold-gate'.";
+var realGh = (args, input) => {
+  try {
+    const stdout = execFileSync7("gh", args, {
+      encoding: "utf8",
+      input,
+      stdio: ["pipe", "pipe", "pipe"],
+      timeout: 3e4
+    });
+    return { ok: true, stdout, stderr: "" };
+  } catch (error) {
+    const e = error;
+    const stderr = e.code === "ENOENT" ? "gh is not installed" : (e.stderr || e.message).trim();
+    return { ok: false, stdout: e.stdout ?? "", stderr };
+  }
+};
+var desiredRuleset = () => ({
+  name: RULESET_NAME,
+  target: "branch",
+  enforcement: "active",
+  bypass_actors: [],
+  conditions: { ref_name: { include: ["~DEFAULT_BRANCH"], exclude: [] } },
+  rules: [
+    {
+      type: "required_status_checks",
+      parameters: {
+        strict_required_status_checks_policy: false,
+        do_not_enforce_on_create: false,
+        required_status_checks: [{ context: CHECK, integration_id: ACTIONS_APP_ID }]
+      }
+    }
+  ]
+});
+function reduce(r) {
+  return {
+    name: r.name,
+    target: r.target,
+    enforcement: r.enforcement,
+    bypass_actors: (r.bypass_actors ?? []).map((a) => ({
+      actor_id: a.actor_id,
+      actor_type: a.actor_type,
+      bypass_mode: a.bypass_mode
+    })),
+    conditions: {
+      ref_name: { include: r.conditions?.ref_name?.include, exclude: r.conditions?.ref_name?.exclude }
+    },
+    rules: (r.rules ?? []).map((rule) => {
+      const p = rule.parameters ?? {};
+      const checks = p.required_status_checks ?? [];
+      return rule.type === "required_status_checks" ? {
+        type: rule.type,
+        parameters: {
+          strict_required_status_checks_policy: p.strict_required_status_checks_policy ?? false,
+          do_not_enforce_on_create: p.do_not_enforce_on_create ?? false,
+          required_status_checks: checks.map((c) => ({
+            context: c.context,
+            integration_id: c.integration_id
+          }))
+        }
+      } : { type: rule.type, parameters: p };
+    })
+  };
+}
+var RequireError = class extends Error {
+};
+function json(gh, args) {
+  const r = gh(args);
+  if (!r.ok) throw new RequireError(r.stderr || `gh ${args.join(" ")} failed`);
+  try {
+    return JSON.parse(r.stdout);
+  } catch {
+    throw new RequireError(`gh ${args.join(" ")} returned no JSON`);
+  }
+}
+function requireGate(gh, o = {}) {
+  const auth = gh(["auth", "status", "--hostname", "github.com"]);
+  if (!auth.ok)
+    throw new RequireError(
+      auth.stderr === "gh is not installed" ? auth.stderr : "gh is not logged in to github.com"
+    );
+  const repo = json(gh, ["repo", "view", "--json", "nameWithOwner"]).nameWithOwner;
+  if (typeof repo !== "string") throw new RequireError("gh could not tell the repository of this checkout");
+  const listed = json(gh, ["api", `repos/${repo}/rulesets`]);
+  if (!Array.isArray(listed)) throw new RequireError(`GitHub returned no ruleset list for ${repo}`);
+  const ours = listed.find((r) => r.name === RULESET_NAME && r.source_type === "Repository");
+  const desired = desiredRuleset();
+  const dryRun = o.dryRun === true;
+  const write = (method, path) => {
+    if (dryRun) return;
+    const r = gh(["api", "--method", method, path, "--input", "-"], JSON.stringify(desired));
+    if (!r.ok) throw new RequireError(r.stderr || `gh api --method ${method} ${path} failed`);
+  };
+  if (!ours) {
+    write("POST", `repos/${repo}/rulesets`);
+    return { repository: repo, action: "created", dryRun };
+  }
+  const full = json(gh, ["api", `repos/${repo}/rulesets/${ours.id}`]);
+  if (JSON.stringify(reduce(full)) === JSON.stringify(desired))
+    return { repository: repo, action: "unchanged", dryRun };
+  write("PUT", `repos/${repo}/rulesets/${ours.id}`);
+  return { repository: repo, action: "updated", dryRun };
+}
+function describeResult(r) {
+  if (r.action === "unchanged")
+    return `${CHECK} is already a required check on ${r.repository}'s default branch`;
+  const verb = r.action === "created" ? "create" : "update";
+  return r.dryRun ? `would ${verb} ruleset ${RULESET_NAME} on ${r.repository}` : `${r.action} ruleset ${RULESET_NAME}: ${CHECK} is now a required check on ${r.repository}'s default branch`;
+}
+
 // src/gate/rules.ts
 import { existsSync as existsSync38, readFileSync as readFileSync32 } from "node:fs";
 import { join as join43, relative as relative18, sep as sep18 } from "node:path";
@@ -11907,14 +12056,14 @@ import { existsSync as existsSync30, mkdirSync as mkdirSync7, readFileSync as re
 import { dirname as dirname8, join as join35 } from "node:path";
 
 // src/upgrade/source.ts
-import { execFileSync as execFileSync7 } from "node:child_process";
+import { execFileSync as execFileSync8 } from "node:child_process";
 import { createHash as createHash2 } from "node:crypto";
 import { copyFileSync, existsSync as existsSync29, mkdirSync as mkdirSync6, readdirSync as readdirSync6, readFileSync as readFileSync24, writeFileSync as writeFileSync10 } from "node:fs";
 import { join as join34, resolve as resolve4 } from "node:path";
 var tarballName = (version) => `specfold-template-v${version}.tar.gz`;
 function ghLoggedIn(timeoutMs) {
   try {
-    execFileSync7("gh", ["auth", "status", "--hostname", "github.com"], {
+    execFileSync8("gh", ["auth", "status", "--hostname", "github.com"], {
       stdio: "ignore",
       ...timeoutMs ? { timeout: timeoutMs } : {}
     });
@@ -12003,7 +12152,7 @@ function githubSource(repo, o) {
     accept,
     ...token ? { authorization: `Bearer ${token}` } : {}
   });
-  const gh = (args) => execFileSync7("gh", [...args, "--repo", repo], {
+  const gh = (args) => execFileSync8("gh", [...args, "--repo", repo], {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
     ...o.timeoutMs ? { timeout: o.timeoutMs } : {}
@@ -12065,7 +12214,7 @@ function verifyChecksum(tarball) {
 function unpack(tarball, dir) {
   mkdirSync6(dir, { recursive: true });
   try {
-    execFileSync7("tar", ["-xzf", tarball, "-C", dir, "--strip-components=1"], { stdio: "pipe" });
+    execFileSync8("tar", ["-xzf", tarball, "-C", dir, "--strip-components=1"], { stdio: "pipe" });
   } catch (error) {
     throw new EnvError(
       `could not unpack ${tarball}: ${String(error.stderr).trim()}`
@@ -13118,10 +13267,29 @@ function verdict(findings) {
   const warnings = plural(counts.warn, "warning");
   return counts.block === 0 ? `passed, ${warnings}` : `blocked by ${blocking.join(", ")} (${plural(counts.block, "blocking finding")}, ${warnings})`;
 }
+var GATE_ONLY = ["base", "local", "pr", "label", "pr-body", "summary"];
+function runRequire(values, out) {
+  const extra = GATE_ONLY.find((o) => values[o] !== void 0);
+  if (extra) throw new UsageError(`--${extra} does not apply to 'gate require'`);
+  try {
+    const result = requireGate(realGh, { dryRun: values["dry-run"] === true });
+    out(
+      values.json ? `${JSON.stringify({ ok: true, ...result }, null, 2)}
+` : `${describeResult(result)}
+`
+    );
+    return 0;
+  } catch (error) {
+    if (error instanceof RequireError)
+      throw new EnvError(`could not make specfold-gate a required check: ${error.message}
+${MANUAL_STEPS}`);
+    throw error;
+  }
+}
 register({
   name: "gate",
-  summary: "decide whether a branch may merge: run the merge-gate rules on its diff",
-  usage: "specfold gate --base <ref> [--local] [--pr <number>] [--label <name>]... [--pr-body <file>] [--summary <file>] [--json]",
+  summary: "decide whether a branch may merge: run the merge-gate rules on its diff; require makes it a required check",
+  usage: "specfold gate --base <ref> [--local] [--pr <number>] [--label <name>]... [--pr-body <file>] [--summary <file>] [--json] | require [--dry-run] [--json]",
   options: {
     base: { type: "string" },
     local: { type: "boolean" },
@@ -13129,10 +13297,13 @@ register({
     label: { type: "string", multiple: true },
     "pr-body": { type: "string" },
     summary: { type: "string" },
+    "dry-run": { type: "boolean" },
     json: { type: "boolean" }
   },
   run: async ({ io, values, positionals }) => {
+    if (positionals[0] === "require" && positionals.length === 1) return runRequire(values, io.stdout);
     if (positionals.length > 0) throw new UsageError(`unexpected argument '${positionals[0]}'`);
+    if (values["dry-run"]) throw new UsageError("--dry-run applies only to 'gate require'");
     const base = values.base;
     if (!base) throw new UsageError("missing --base <ref>");
     const bodyFile = values["pr-body"];
@@ -13409,7 +13580,7 @@ function writeLimit(root, n) {
 
 // src/init/init.ts
 var import_yaml16 = __toESM(require_dist(), 1);
-import { execFileSync as execFileSync8 } from "node:child_process";
+import { execFileSync as execFileSync9 } from "node:child_process";
 import { existsSync as existsSync42, mkdirSync as mkdirSync10, readFileSync as readFileSync35, writeFileSync as writeFileSync15 } from "node:fs";
 import { dirname as dirname12, join as join46 } from "node:path";
 var OPENSPEC_CONFIG2 = "openspec/config.yaml";
@@ -13434,7 +13605,7 @@ function planInit(o) {
   if (openspec) {
     const bin = openspecBinary(o.root);
     try {
-      execFileSync8(bin.command, ["--version"], { stdio: "ignore" });
+      execFileSync9(bin.command, ["--version"], { stdio: "ignore" });
     } catch {
       throw new EnvError(`openspec is not installed (looked for ${bin.command}); init runs openspec init`);
     }
@@ -13550,16 +13721,18 @@ function runInit(o, plan) {
 }
 
 // src/init/command.ts
+var GATE_STEP = `ruleset ${RULESET_NAME}`;
 register({
   name: "init",
   summary: "finish setting up a repository made from the template: settings, OpenSpec skills, links, hooks",
-  usage: "specfold init [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--max-subagents <n>] [--upgrade-workflow] [--dry-run] [--json]",
+  usage: "specfold init [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--max-subagents <n>] [--upgrade-workflow] [--require-gate] [--dry-run] [--json]",
   options: {
     stack: { type: "string" },
     "source-glob": { type: "string", multiple: true },
     tools: { type: "string" },
     "max-subagents": { type: "string" },
     "upgrade-workflow": { type: "boolean" },
+    "require-gate": { type: "boolean" },
     "dry-run": { type: "boolean" },
     json: { type: "boolean" }
   },
@@ -13579,6 +13752,7 @@ register({
     };
     const plan = planInit(options);
     const dryRun = values["dry-run"] === true;
+    const requireFlag = values["require-gate"] === true;
     const { stack, sourceGlobs } = plan.values;
     const valueLines = [
       `stack: ${stack.value ?? "unknown"} (${stack.source})`,
@@ -13595,7 +13769,8 @@ register({
         { path: ".agents/skills", action: "run agents sync" },
         { path: "git hooks", action: "run hooks install" },
         ...plan.limit !== void 0 ? [{ path: LOCAL_SETTINGS, action: `set subagent limit to ${plan.limit}` }] : [],
-        ...manifestChanges ? [{ path: MANIFEST_PATH, action: "write" }] : []
+        ...manifestChanges ? [{ path: MANIFEST_PATH, action: "write" }] : [],
+        ...requireFlag ? [{ path: GATE_STEP, action: "run gate require" }] : []
       ];
       if (values.json)
         io.stdout(
@@ -13615,6 +13790,17 @@ register({
       return 0;
     }
     const result = runInit(options, plan);
+    if (requireFlag) {
+      try {
+        const gate = requireGate(realGh);
+        if (gate.action !== "unchanged") result.actions.push({ path: GATE_STEP, action: gate.action });
+        else result.notes.push(describeResult(gate));
+      } catch (error) {
+        if (!(error instanceof RequireError)) throw error;
+        result.skipped.push({ path: GATE_STEP, reason: error.message });
+        result.notes.push(MANUAL_STEPS);
+      }
+    }
     if (values.json) {
       io.stdout(`${JSON.stringify({ ok: true, dry_run: false, values: filled2, ...result }, null, 2)}
 `);
@@ -13749,7 +13935,7 @@ register({
     if (!["start", "inventory", "install", "mark", "status"].includes(sub))
       throw new UsageError(`unknown migrate subcommand '${sub}'`);
     const root = gitRoot(io.cwd);
-    const print = (lines3, json) => io.stdout(values.json ? `${JSON.stringify(json, null, 2)}
+    const print = (lines3, json2) => io.stdout(values.json ? `${JSON.stringify(json2, null, 2)}
 ` : `${lines3.join("\n")}
 `);
     const refuse = (message) => {
@@ -14041,7 +14227,7 @@ register({
     const [sub, ...args] = positionals;
     if (sub !== "set" && sub !== "show") throw new UsageError("missing or unknown subcommand: set or show");
     const root = requireConfig(io.cwd).root;
-    const print = (line, json) => io.stdout(values.json ? `${JSON.stringify(json, null, 2)}
+    const print = (line, json2) => io.stdout(values.json ? `${JSON.stringify(json2, null, 2)}
 ` : `${line}
 `);
     if (sub === "show") {
@@ -14084,7 +14270,7 @@ register({
   options: { json: { type: "boolean" } },
   run: ({ io, values, positionals }) => {
     const config = requireConfig(io.cwd);
-    const print = (lines3, json) => io.stdout(values.json ? `${JSON.stringify(json, null, 2)}
+    const print = (lines3, json2) => io.stdout(values.json ? `${JSON.stringify(json2, null, 2)}
 ` : `${lines3.join("\n")}
 `);
     if (positionals.length > 0) {
@@ -14624,7 +14810,7 @@ function upgradeOpenspecConfig(local, base, next) {
 }
 
 // src/upgrade/merge.ts
-import { execFileSync as execFileSync9 } from "node:child_process";
+import { execFileSync as execFileSync10 } from "node:child_process";
 import { mkdtempSync, rmSync as rmSync2, writeFileSync as writeFileSync19 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join as join54 } from "node:path";
@@ -14650,7 +14836,7 @@ function mergeThreeWay(local, base, next) {
     ];
     try {
       return {
-        text: execFileSync9("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }),
+        text: execFileSync10("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }),
         conflict: false
       };
     } catch (error) {
@@ -14946,7 +15132,7 @@ async function inner(io, config, f, from, base, ref) {
   const target = f.to ?? (typeof shipped === "string" ? shipped : void 0);
   if (!target) throw new EnvError(`--from ${from} has no kit_version; pass --to <version>`);
   const plan = planUpgrade({ root, from, base, installed: installedVersion(config), target });
-  const print = (text3, json) => io.stdout(f.json ? `${JSON.stringify(json, null, 2)}
+  const print = (text3, json2) => io.stdout(f.json ? `${JSON.stringify(json2, null, 2)}
 ` : text3);
   if (!f.yes) {
     print(reportText(plan), { applied: false, ...planJson(plan) });
@@ -15356,7 +15542,7 @@ register({
       );
     if (values.base !== void 0 && sub !== "clean") throw new UsageError("--base works only with wt clean");
     const root = requireConfig(io.cwd).root;
-    const print = (lines3, json) => io.stdout(values.json ? `${JSON.stringify(json, null, 2)}
+    const print = (lines3, json2) => io.stdout(values.json ? `${JSON.stringify(json2, null, 2)}
 ` : `${lines3.join("\n")}
 `);
     const log = (text3) => {
