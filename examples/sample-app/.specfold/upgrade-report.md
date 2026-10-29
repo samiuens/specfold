@@ -1,4 +1,4 @@
-# Specfold upgrade: 0.1.0-rc.2 to 0.1.0-rc.3
+# Specfold upgrade: 0.1.0-rc.3 to 0.1.0
 
 ## Conflicts (0)
 
@@ -8,8 +8,6 @@ None.
 
 | Path | Action |
 | --- | --- |
-| `.agents/skills/sf-migrate/SKILL.md` | replace |
-| `.specfold/workflows/specfold-upgrade.yml` | add |
 | `scripts/specfold.mjs` | replace |
 
 ## Kept
@@ -29,7 +27,7 @@ None.
 | `specfold hooks install` | 2 | specfold: specfold.yaml is in a subfolder of the git repository /Users/smi/Development/specfold; hooks are installed from the git root, because core.hooksPath applies to the whole repository |
 | `specfold index` | 0 | 11 indexes, 0 written: 0 errors, 0 warnings |
 | `specfold validate` | 0 | 21 files checked: 0 errors, 0 warnings |
-| `specfold gate --base 385aa76412a75ca4a213b51364f21a7a315ddd5a --local` | 0 | gate: passed, 1 warning |
+| `specfold gate --base a2f67b214cf4cc384707a8efa7137f8c332d5fbe --local` | 0 | gate: passed, 1 warning |
 
 ## Upgrade notes
 
