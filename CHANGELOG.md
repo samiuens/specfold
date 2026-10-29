@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.1.0](https://github.com/samiuens/specfold/compare/v0.1.0-rc.3...v0.1.0) (2026-10-29)
+
+
+### Documentation
+
+* **knowledge:** 📝 correct the pre-release step of the release runbook ([34bcc0b](https://github.com/samiuens/specfold/commit/34bcc0b9b0b56eed95d993e56492d770332f16ea))
+* **knowledge:** 📝 link the release runbook to the new guides ([44c5e63](https://github.com/samiuens/specfold/commit/44c5e6371beb22240f78d34516389fde3f611f1d))
+* **knowledge:** 📝 record the retro of add-kit-docs ([743c379](https://github.com/samiuens/specfold/commit/743c3791736a20566271a121c33027294b417e81))
+* **knowledge:** 📝 sync add-kit-docs ([2da603c](https://github.com/samiuens/specfold/commit/2da603cb1012ed3eaecf38d2c71db5a02e35fe0f))
+* **openspec:** 📝 plan add-kit-docs ([f586633](https://github.com/samiuens/specfold/commit/f58663378f862b04560626449e8a46159d4392be))
+* **release:** 📝 add the getting-started and workflow guides ([9f1a46f](https://github.com/samiuens/specfold/commit/9f1a46f44da0d937b23316073b828c7a7f7f70d0))
+* **release:** 📝 add the upgrading and releasing guides ([4bd89a6](https://github.com/samiuens/specfold/commit/4bd89a627a1e71b9b9650e20edb4f92da15bcc09))
+* **release:** 📝 explain where the pre-release mark comes from ([28e537d](https://github.com/samiuens/specfold/commit/28e537d8c266c97b0a373dbbce8d121cad08aebc))
+* **release:** 📝 mark the plan as the historical build brief ([e70f593](https://github.com/samiuens/specfold/commit/e70f5939624d0a3258552d40955915b34ead82d3))
+* **release:** 📝 rewrite the kit readme for v0.1.0 ([a2593fb](https://github.com/samiuens/specfold/commit/a2593fb69ca6ec239bd1f210b057156212c42335))
+* **template:** 📝 record the sample app's upgrade to v0.1.0-rc.3 ([3617c60](https://github.com/samiuens/specfold/commit/3617c6034cd9e4e68c56a80d3bbc91b369620561))
+
 ## [0.1.0-rc.3](https://github.com/samiuens/specfold/compare/v0.1.0-rc.2...v0.1.0-rc.3) (2026-10-29)
 
 
