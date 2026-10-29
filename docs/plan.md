@@ -1,3 +1,5 @@
+> **Historical:** this is the build brief Specfold was built from (milestones M0 to M9), kept as written. For using the kit, read the [README](../README.md) and the guides in [`docs/`](.).
+
 # Implementation Plan: Specfold
 
 Oct 26, 2026 · @Sami Arda Ünsay

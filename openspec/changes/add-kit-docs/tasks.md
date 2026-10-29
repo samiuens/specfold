@@ -25,7 +25,7 @@ agent: implementer
 
 - [x] 2.1 Rewrite the kit README: what Specfold is, the three install paths, a five-minute quick start and links to the guides
   - Done when: `README.md` no longer says M0, links every guide in `docs/`, and `tools/specfold/README.md` describes the CLI source, not M1
-- [ ] 2.2 Mark `docs/plan.md` as the historical build brief
+- [x] 2.2 Mark `docs/plan.md` as the historical build brief
   - Done when: its first line says so and points to `README.md` and `docs/`
 - [ ] 2.3 Write the getting-started and workflow guides
   - Done when: `docs/getting-started.md` takes a new user from install to a first archived change, and `docs/workflow.md` covers plan, apply, check, archive, sync and parallel work, linking `docs/commands.md` instead of repeating usage lines
