@@ -2,7 +2,7 @@
 
 Paste this whole file into your coding agent, started at the root of the repository that should use Specfold. It works in any agent that can run shell commands.
 
-The kit is fetched as the newest release of `samiuens/specfold`: a template tarball checked against its SHA-256.
+The kit is fetched as the newest stable release of `samiuens/specfold`: a template tarball checked against its SHA-256.
 
 ## Instructions for the agent
 
@@ -12,7 +12,7 @@ Rather ask than assume: whenever a step leaves a decision open, ask the user in 
 2. **Fetch the kit** into a new temporary folder, outside the repository. Run nothing from it yet.
 
    ```sh
-   TAG=$(gh release list --repo samiuens/specfold --limit 1 --json tagName --jq '.[0].tagName')
+   TAG=$(gh release list --repo samiuens/specfold --exclude-pre-releases --limit 1 --json tagName --jq '.[0].tagName')
    KIT=$(mktemp -d)
    gh release download "$TAG" --repo samiuens/specfold --pattern 'specfold-template-*' --dir "$KIT"
    node -e 'const [f, s] = process.argv.slice(1), fs = require("node:fs"), h = require("node:crypto").createHash("sha256").update(fs.readFileSync(f)).digest("hex"); if (h !== fs.readFileSync(s, "utf8").split(" ")[0]) { console.error("checksum mismatch"); process.exit(1); }' "$KIT/specfold-template-$TAG.tar.gz" "$KIT/specfold-template-$TAG.tar.gz.sha256"
