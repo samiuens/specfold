@@ -144,3 +144,10 @@ The sample app gets its kit files only by upgrading from each release, with the 
 - **Result:** no conflicts, no manual steps, exit 0. Only the CLI bundle changed, and its diff is the version string; `kit_version` and the manifest moved to 0.1.0. The gate follow-up passed, and `npm test`, `validate`, `index --check`, `openspec validate --all --strict` and `agents sync --check` pass.
 - **Channel:** the sample app stays on `next`, so it keeps getting each release candidate before its final release.
 - **Expected follow-up failures:** the same as before: `openspec update` could not run, and `hooks install` exited with 2.
+
+### 0.1.0 to 0.2.0 (2026-10-29)
+
+- **How:** the sample app's own 0.1.0 CLI: `upgrade --check`, then the plan, then `upgrade --yes`.
+- **Result:** no conflicts, exit 0. The upgrade replaced the CLI bundle (now with `gate require` and doctor's D7) and the `sf-migrate` skill, which now points to `gate require` after a migration. `kit_version` and the manifest moved to 0.2.0. The gate follow-up passed, and `npm test`, `validate`, `index --check`, `openspec validate --all --strict` and `agents sync --check` pass.
+- **Manual step left out on purpose:** the upgrade notes ask to run `gate require`. The sample app has no GitHub repository of its own; `gh` resolves the kit's, whose `main` already requires `specfold-gate`. For the same reason, `doctor` reports "D7 ok specfold-gate is a required check on main" here, from the kit's ruleset.
+- **Expected follow-up failures:** the same as before: `openspec update` could not run, and `hooks install` exited with 2.
