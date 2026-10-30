@@ -113,4 +113,39 @@ describe("hook: Claude Code", () => {
     });
     expect(await run(["hook", "claude-stop"], root, stdin)).toEqual({ code: 0, stdout: "", stderr: "" });
   });
+
+  /** A branch carrying the `demo` change without the test for its scenario, moved to `dir`. */
+  const untestedChange = (dir: string) => {
+    const root = gateRepo();
+    write(root, "node_modules/.bin/openspec", "#!/bin/sh\necho '{\"itemFindings\": []}'\n");
+    chmodSync(join(root, "node_modules/.bin/openspec"), 0o755);
+    git(root, "update-ref", "refs/remotes/origin/main", "main");
+    const { "test/checkout.test.ts": _, ...files } = demoChange();
+    for (const [rel, content] of Object.entries(files))
+      write(root, rel.replace("openspec/changes/demo/", `${dir}/`), content);
+    writeIndexes(root);
+    return root;
+  };
+  const stopEvent = JSON.stringify({ hook_event_name: "Stop", stop_hook_active: false });
+
+  // spec: specfold-hooks#scenario-without-a-test-in-an-active-change
+  it("lets Claude stop while an active change still lacks a test, and says so", async () => {
+    const root = untestedChange("openspec/changes/demo");
+    const result = await run(["hook", "claude-stop"], root, stopEvent);
+    expect(result.code).toBe(0);
+    expect(result.stderr).toContain("G15 openspec/changes/demo/specs/guest-checkout/spec.md");
+    expect(result.stderr).toContain("not blocking: the change is still in progress");
+    expect(result.stderr).not.toContain("gate: blocked");
+  });
+
+  // spec: specfold-hooks#scenario-without-a-test-in-an-archived-change
+  it("blocks stopping while a change archived on the branch lacks a test", async () => {
+    const root = untestedChange("openspec/changes/archive/2026-01-01-demo");
+    const result = await run(["hook", "claude-stop"], root, stopEvent);
+    expect(result.code).toBe(2);
+    expect(result.stderr).toContain(
+      "block G15 openspec/changes/archive/2026-01-01-demo/specs/guest-checkout/spec.md",
+    );
+    expect(result.stderr).not.toContain("not blocking");
+  });
 });
