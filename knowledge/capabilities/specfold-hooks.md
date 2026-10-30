@@ -5,7 +5,7 @@ description: Why Specfold ships its own git and Claude Code hook entry points, a
 status: draft
 spec: openspec/specs/specfold-hooks/spec.md
 resource: ../../openspec/specs/specfold-hooks/spec.md
-change: 2026-10-28-add-upgrade-workflow
+change: 2026-10-30-stop-hook-skips-pending-test-references
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-30T13:56:51+01:00 }
 sources:
   - id: proposal-2026-10-26-add-specfold-hooks
@@ -26,6 +26,8 @@ sources:
     resource: ../../openspec/changes/archive/2026-10-28-add-upgrade-workflow/proposal.md
   - id: design-2026-10-28-add-upgrade-workflow
     resource: ../../openspec/changes/archive/2026-10-28-add-upgrade-workflow/design.md
+  - id: proposal-2026-10-30-stop-hook-skips-pending-test-references
+    resource: ../../openspec/changes/archive/2026-10-30-stop-hook-skips-pending-test-references/proposal.md
 ---
 
 # Why

@@ -1,5 +1,10 @@
 # Log
 
+## 2026-10-30
+
+* **Change**: 2026-10-30-stop-hook-skips-pending-test-references: created 0, updated 1, deprecated 0
+* **Retro**: stop-hook-skips-pending-test-references: 0 answers
+
 ## 2026-10-29
 
 * **Retro**: add-upgrade-workflow: 0 answers
