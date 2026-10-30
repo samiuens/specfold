@@ -3,7 +3,7 @@
 ## 1. Stop hook
 
 ```yaml
-files: [tools/specfold/src/hooks/claude.ts, tools/specfold/test/hooks-claude.test.ts, scripts/specfold.mjs, template/scripts/specfold.mjs, examples/sample-app/scripts/specfold.mjs]
+files: [tools/specfold/src/hooks/claude.ts, tools/specfold/test/hooks-claude.test.ts, scripts/specfold.mjs, template/scripts/specfold.mjs, template/.specfold/manifest.json]
 depends: []
 scenarios: [specfold-hooks#scenario-without-a-test-in-an-active-change, specfold-hooks#scenario-without-a-test-in-an-archived-change]
 agent: implementer
@@ -11,7 +11,7 @@ agent: implementer
 
 - [x] 1.1 `stop` splits G15 findings whose path lies in an active change (`openspec/changes/<name>/`, not `archive/`) off the blocking set and prints them with "not blocking: the change is still in progress"; tests for both new scenarios and the existing G13 one
   - Done when: `npx vitest run tools/specfold/test/hooks-claude.test.ts` passes with tests tagged `spec: specfold-hooks#scenario-without-a-test-in-an-active-change` and `#scenario-without-a-test-in-an-archived-change`
-- [ ] 1.2 Rebuild the bundle and its copies in `template/` and `examples/sample-app/`
+- [x] 1.2 Rebuild the bundle, copy it to `template/scripts/specfold.mjs` and regenerate `template/.specfold/manifest.json`
   - Done when: the repo's build script runs clean and the full test suite passes
 
 ## 2. Knowledge
