@@ -12422,12 +12422,22 @@ async function postToolUse({ config, io }) {
 `);
   return 2;
 }
+var pendingTest = (f) => f.rule === "G15" && /^openspec\/changes\/(?!archive\/)[^/]+\//.test(f.path ?? "");
 function stop({ config, io }) {
   const base = localBase(config.root);
   if (!base) return 0;
   const findings = localGate(config, config.root, base).filter((f) => f.effect === "block");
-  if (findings.length === 0) return 0;
-  io.stderr(renderGate(findings));
+  const pending = findings.filter(pendingTest);
+  const blocking = findings.filter((f) => !pendingTest(f));
+  if (pending.length > 0)
+    io.stderr(
+      pending.map(
+        (f) => `${f.rule} ${f.path}${f.line === null ? "" : `:${f.line}`} ${f.message} (not blocking: the change is still in progress)
+`
+      ).join("")
+    );
+  if (blocking.length === 0) return 0;
+  io.stderr(renderGate(blocking));
   return 2;
 }
 var PUSH_REASON = "pushing and pull requests are the orchestrator's job; return your branch name instead";

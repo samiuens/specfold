@@ -34,7 +34,7 @@
     "openspec/schemas/specfold/templates/proposal.md": "sha256:0dd70e35db5c696ba8ac3cc3a53e2d6561865c1e4e7d49db5a1eaa3e4a6ad86e",
     "openspec/schemas/specfold/templates/spec.md": "sha256:1cccfb573f031c6352bed2a879b7035ff710bc909112fc23d10bdcfcdd8d4318",
     "openspec/schemas/specfold/templates/tasks.md": "sha256:2ef32ccb374fd2470cfea280eb0dd247679d46ac569a719d7e1afc3cae9f3529",
-    "scripts/specfold.mjs": "sha256:a977f51e5a3c077aaaec9158f5dc26259e00ca2f95546e9b2efbc238c47a9ce6"
+    "scripts/specfold.mjs": "sha256:3d7081b30e5d0e6bbb87b47c83597d08a9a60271c245d455a8970ac376f53941"
   },
   "blocks": {
     ".gitattributes": "sha256:1bf32920694d48900b707f228d8b154e37439df8994b68e4a4badc87d98e1d58",
