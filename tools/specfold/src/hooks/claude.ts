@@ -4,6 +4,7 @@ import { checkPlannedChange } from "../change/command.ts";
 import { findingLine } from "../findings.ts";
 import { dueDate, listItems } from "../future/items.ts";
 import { localGate, renderGate } from "../gate/command.ts";
+import type { GateFinding } from "../gate/rules.ts";
 import { resolveBundleRoot } from "../repo.ts";
 import { taskFindingLine } from "../tasks/command.ts";
 import { upgradeReminder } from "../upgrade/reminder.ts";
@@ -107,13 +108,31 @@ export async function postToolUse({ config, io }: HookContext): Promise<number> 
   return 2;
 }
 
-/** The local gate before Claude stops: blocking findings go to stderr with exit 2. */
+/** Whether a G15 finding names a scenario of a change not yet archived. */
+const pendingTest = (f: GateFinding) =>
+  f.rule === "G15" && /^openspec\/changes\/(?!archive\/)[^/]+\//.test(f.path ?? "");
+
+/**
+ * The local gate before Claude stops: blocking findings go to stderr with exit 2; G15 findings
+ * of changes still in progress go to stderr too but do not block.
+ */
 export function stop({ config, io }: HookContext): number {
   const base = localBase(config.root);
   if (!base) return 0;
   const findings = localGate(config, config.root, base).filter((f) => f.effect === "block");
-  if (findings.length === 0) return 0;
-  io.stderr(renderGate(findings));
+  const pending = findings.filter(pendingTest);
+  const blocking = findings.filter((f) => !pendingTest(f));
+  if (pending.length > 0)
+    io.stderr(
+      pending
+        .map(
+          (f) =>
+            `${f.rule} ${f.path}${f.line === null ? "" : `:${f.line}`} ${f.message} (not blocking: the change is still in progress)\n`,
+        )
+        .join(""),
+    );
+  if (blocking.length === 0) return 0;
+  io.stderr(renderGate(blocking));
   return 2;
 }
 

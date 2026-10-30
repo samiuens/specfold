@@ -9,7 +9,7 @@ scenarios: [specfold-hooks#scenario-without-a-test-in-an-active-change, specfold
 agent: implementer
 ```
 
-- [ ] 1.1 `stop` splits G15 findings whose path lies in an active change (`openspec/changes/<name>/`, not `archive/`) off the blocking set and prints them with "not blocking: the change is still in progress"; tests for both new scenarios and the existing G13 one
+- [x] 1.1 `stop` splits G15 findings whose path lies in an active change (`openspec/changes/<name>/`, not `archive/`) off the blocking set and prints them with "not blocking: the change is still in progress"; tests for both new scenarios and the existing G13 one
   - Done when: `npx vitest run tools/specfold/test/hooks-claude.test.ts` passes with tests tagged `spec: specfold-hooks#scenario-without-a-test-in-an-active-change` and `#scenario-without-a-test-in-an-archived-change`
 - [ ] 1.2 Rebuild the bundle and its copies in `template/` and `examples/sample-app/`
   - Done when: the repo's build script runs clean and the full test suite passes
