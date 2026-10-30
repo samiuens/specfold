@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/samiuens/specfold/compare/v0.2.1...v0.3.0) (2026-10-30)
+
+
+### Features
+
+* **hooks:** 🚩 let claude stop while an active change lacks a test ([ed230c2](https://github.com/samiuens/specfold/commit/ed230c2d4e4400ceccc60f8924858fd03d38a270))
+
 ## [0.2.1](https://github.com/samiuens/specfold/compare/v0.2.0...v0.2.1) (2026-10-29)
 
 
