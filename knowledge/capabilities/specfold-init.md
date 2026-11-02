@@ -5,7 +5,7 @@ description: Why a repository made from the template needs init, and how it fill
 status: draft
 spec: openspec/specs/specfold-init/spec.md
 resource: ../../openspec/specs/specfold-init/spec.md
-change: 2026-10-29-add-gate-require
+change: 2026-11-02-fix-migration-findings
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-29T09:12:27+01:00 }
 sources:
   - id: proposal-2026-10-28-add-bootstrap
@@ -24,6 +24,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-10-29-add-gate-require/proposal.md
   - id: design-2026-10-29-add-gate-require
     resource: ../../openspec/changes/archive/2026-10-29-add-gate-require/design.md
+  - id: proposal-2026-11-02-fix-migration-findings
+    resource: ../../openspec/changes/archive/2026-11-02-fix-migration-findings/proposal.md
+  - id: design-2026-11-02-fix-migration-findings
+    resource: ../../openspec/changes/archive/2026-11-02-fix-migration-findings/design.md
 ---
 
 # Why

@@ -3,7 +3,7 @@ type: Capability
 title: specfold doctor
 description: Why setup problems are checked in one command, and where the contract for specfold doctor lives.
 status: draft
-change: 2026-10-29-add-gate-require
+change: 2026-11-02-fix-migration-findings
 resource: ../../openspec/specs/specfold-doctor/spec.md
 spec: openspec/specs/specfold-doctor/spec.md
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-29T09:12:27+01:00 }
@@ -16,6 +16,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-10-29-add-gate-require/proposal.md
   - id: design-2026-10-29-add-gate-require
     resource: ../../openspec/changes/archive/2026-10-29-add-gate-require/design.md
+  - id: proposal-2026-11-02-fix-migration-findings
+    resource: ../../openspec/changes/archive/2026-11-02-fix-migration-findings/proposal.md
+  - id: design-2026-11-02-fix-migration-findings
+    resource: ../../openspec/changes/archive/2026-11-02-fix-migration-findings/design.md
 ---
 
 # Why

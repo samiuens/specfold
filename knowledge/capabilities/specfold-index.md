@@ -3,7 +3,7 @@ type: Capability
 title: specfold index
 description: Why bundle indexes are generated instead of written, and where the contract for specfold index lives.
 status: draft
-change: 2026-10-26-add-specfold-index
+change: 2026-11-02-fix-migration-findings
 resource: ../../openspec/specs/specfold-index/spec.md
 spec: openspec/specs/specfold-index/spec.md
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T10:28:56+01:00 }
@@ -12,6 +12,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-index/proposal.md
   - id: design
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-index/design.md
+  - id: proposal-2026-11-02-fix-migration-findings
+    resource: ../../openspec/changes/archive/2026-11-02-fix-migration-findings/proposal.md
+  - id: design-2026-11-02-fix-migration-findings
+    resource: ../../openspec/changes/archive/2026-11-02-fix-migration-findings/design.md
 ---
 
 # Why
