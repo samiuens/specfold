@@ -23,7 +23,7 @@ scenarios: [specfold-hooks#lefthook-formatting-kept, specfold-hooks#long-lefthoo
 agent: implementer
 ```
 
-- [ ] 2.1 `hooks install` inserts lefthook entries as text at parsed node offsets, re-parses the result and writes nothing if the entries aren't found (B9, design.md)
+- [x] 2.1 `hooks install` inserts lefthook entries as text at parsed node offsets, re-parses the result and writes nothing if the entries aren't found (B9, design.md)
   - Done when: `npx vitest run tools/specfold/test/hooks-install.test.ts` passes with tests tagged `spec: specfold-hooks#lefthook-formatting-kept` (flow list, folded scalar, comments, `jobs`) and `#long-lefthook-command-kept`
 - [ ] 2.2 The same splice for `.pre-commit-config.yaml`; only `default_install_hook_types` may be rewritten
   - Done when: the hooks-install tests pass with a pre-commit fixture whose other lines are unchanged byte for byte

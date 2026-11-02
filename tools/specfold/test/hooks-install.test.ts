@@ -69,6 +69,18 @@ describe("hooks install: built-in", () => {
   });
 });
 
+/** Whether every line of `before` is in `after`, in the same order, with only new lines between them. */
+const keptInOrder = (before: string, after: string) => {
+  const rest = after.split("\n");
+  let at = 0;
+  for (const line of before.split("\n")) {
+    const found = rest.indexOf(line, at);
+    if (found === -1) return false;
+    at = found + 1;
+  }
+  return true;
+};
+
 describe("hooks install: hook managers", () => {
   // spec: specfold-hooks#lefthook-in-use
   it("adds one specfold command per hook to lefthook.yml, once", async () => {
@@ -100,6 +112,33 @@ describe("hooks install: hook managers", () => {
     write(root, "lefthook.yml", `pre-commit:\n  commands:\n    lint:\n      run: ${command}\n`);
     await run(["hooks", "install"], root);
     expect(readFileSync(join(root, "lefthook.yml"), "utf8")).toContain(`      run: ${command}\n`);
+  });
+
+  // spec: specfold-hooks#lefthook-formatting-kept
+  it("keeps flow lists, folded scalars, comments and blank lines of lefthook.yml", async () => {
+    const root = repo();
+    const before = readFileSync(new URL("./fixtures/hooks/lefthook-formatted.yml", import.meta.url), "utf8");
+    write(root, "lefthook.yml", before);
+    expect((await run(["hooks", "install"], root)).code).toBe(0);
+    const after = readFileSync(join(root, "lefthook.yml"), "utf8");
+    expect(keptInOrder(before, after)).toBe(true);
+    expect(after).toContain('      glob: ["*.ts", "*.tsx"]\n      run: >-\n        npx eslint\n');
+    expect(after).toContain("    - name: specfold\n      run: node scripts/specfold.mjs hook pre-push {0}\n");
+    expect(after).toContain(
+      "    deps:\n      run: npm ci\n    specfold:\n      run: node scripts/specfold.mjs hook post-checkout {0}\n",
+    );
+    expect(after.match(/hook pre-commit \{0\}/g)).toHaveLength(1);
+    await run(["hooks", "install"], root);
+    expect(readFileSync(join(root, "lefthook.yml"), "utf8")).toBe(after);
+  });
+
+  it("writes nothing when a hook is in a form it does not edit", async () => {
+    const root = repo();
+    const before = "pre-commit: {commands: {lint: {run: x}}}\n";
+    write(root, "lefthook.yml", before);
+    const result = await run(["hooks", "install"], root);
+    expect(result.code).toBe(2);
+    expect(readFileSync(join(root, "lefthook.yml"), "utf8")).toBe(before);
   });
 
   // spec: specfold-hooks#husky-in-use
