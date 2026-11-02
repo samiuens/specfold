@@ -57,13 +57,13 @@ Claude Code supports all of the right-hand column today. The skills are written 
 
 ## Install
 
-You need Node.js 20 or later, git, and `gh` logged in; the bootstrap downloads the release through it. OpenSpec 1.15 or later goes on the PATH or in `node_modules/.bin`.
+You need Node.js 20 or later, git and curl. A `gh` login is optional: with one, init can make the gate a required check and the migration can open its PR for you. OpenSpec 1.15 or later goes on the PATH or in `node_modules/.bin`.
 
 Open your coding agent at the root of your repository and give it this prompt:
 
 ```text
 Set up Specfold in this repository. Fetch the instructions with
-gh api repos/samiuens/specfold/contents/BOOTSTRAP.md -H "Accept: application/vnd.github.raw"
+curl -fsSL https://raw.githubusercontent.com/samiuens/specfold/main/BOOTSTRAP.md
 and follow them. Ask me before every decision.
 ```
 
