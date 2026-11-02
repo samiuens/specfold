@@ -83,6 +83,17 @@ describe("doctor: checks", () => {
     expect(d3).toMatchObject({ status: "ok", message: "openspec 1.15.0 from node_modules/.bin (>=1.15 <2)" });
   });
 
+  // spec: specfold-doctor#local-openspec-before-install
+  it("D3 finds ./node_modules/.bin/openspec without a specfold.yaml", () => {
+    const dir = tempDir("valid");
+    rmSync(join(dir, "specfold.yaml"), { force: true });
+    const bin = join(dir, "node_modules", ".bin");
+    mkdirSync(bin, { recursive: true });
+    writeFileSync(join(bin, "openspec"), "");
+    const d3 = check(runChecks(env(dir, { [`${join(bin, "openspec")} --version`]: "1.15.0\n" })), "D3");
+    expect(d3).toMatchObject({ status: "ok", message: expect.stringContaining("node_modules/.bin") });
+  });
+
   // spec: specfold-doctor#version-out-of-range
   it("D3 fails when the version is outside requires.openspec", () => {
     const repo = tempDir("valid");

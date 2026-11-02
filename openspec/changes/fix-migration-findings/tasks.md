@@ -11,7 +11,7 @@ agent: implementer
 
 - [x] 1.1 D4 accepts `specfold.mjs hook` as well as `specfold hook` in a hook manager's config (B1)
   - Done when: `npx vitest run tools/specfold/test/doctor-checks.test.ts` passes with tests tagged `spec: specfold-doctor#lefthook-entries-from-install` and `#hooks-not-installed`
-- [ ] 1.2 Without a `specfold.yaml`, D3 looks for `node_modules/.bin/openspec` in the current directory (B5)
+- [x] 1.2 Without a `specfold.yaml`, D3 looks for `node_modules/.bin/openspec` in the current directory (B5)
   - Done when: the doctor tests pass with a test tagged `spec: specfold-doctor#local-openspec-before-install`, and `#repository-local-openspec` still passes
 
 ## 2. Hooks
