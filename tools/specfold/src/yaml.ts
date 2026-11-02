@@ -52,7 +52,10 @@ export type Ranged = { range?: [number, number, number] | null };
 /** Offset where the node starts in the source, 0 when unknown. */
 export const startOf = (node: unknown): number => (node as Ranged).range?.[0] ?? 0;
 
-/** Text edits against one YAML file; the file is written only when the edited text parses and holds what was added. */
+/**
+ * Text edits against one YAML file; the file is written only when the edited text parses and holds what
+ * was added. see knowledge: /decisions/splice-hook-manager-yaml.md
+ */
 export class Splice {
   private edits: Edit[] = [];
   private appended: string[] = [];
