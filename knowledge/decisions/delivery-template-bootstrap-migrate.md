@@ -2,9 +2,10 @@
 type: Decision
 title: Delivered as template repo, bootstrap prompt and migration skill
 description: One kit repo ships a template for new projects, a paste-able bootstrap prompt and a migration skill for existing ones.
-status: draft
+status: stable
 decision: accepted
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T13:33:31+01:00 }
+verified: { by: human:samiuens, at: 2026-11-02T13:57:04+01:00 }
 sources:
   - id: plan
     resource: ../../docs/plan.md
