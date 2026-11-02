@@ -127,6 +127,17 @@ describe("specfold init", () => {
     expect(parse(read(root, "specfold.yaml")).source_globs).toEqual(["src/**"]);
   });
 
+  // spec: specfold-init#pnpm-workspaces
+  it("reads source globs from pnpm-workspace.yaml", async () => {
+    const root = templateRepo({
+      ...TS_PROJECT,
+      "pnpm-workspace.yaml": "packages:\n  - apps/*\n  - packages/*\n  - '!**/test/**'\n",
+    });
+    const result = await run(["init"], root);
+    expect(result).toMatchObject({ code: 0, stderr: "" });
+    expect(parse(read(root, "specfold.yaml")).source_globs).toEqual(["apps/*/src/**", "packages/*/src/**"]);
+  });
+
   // spec: specfold-init#flag-wins
   it("lets flags override detection", async () => {
     const root = templateRepo(TS_PROJECT);

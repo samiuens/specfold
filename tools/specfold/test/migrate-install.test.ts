@@ -111,6 +111,16 @@ describe("migrate install: files", () => {
     expect(existsSync(join(root, "knowledge/conventions/code-comments.md"))).toBe(true);
   });
 
+  // spec: specfold-migrate#workspace-globs
+  it("takes the source globs from package.json workspaces", () => {
+    const root = fixtureRepo("adr-docs");
+    write(root, "package.json", JSON.stringify({ workspaces: ["apps/*", "packages/*", "!packages/legacy"] }));
+    git(root, "add", "-A");
+    git(root, "commit", "-q", "-m", "workspaces");
+    install(root);
+    expect(parse(read(root, "specfold.yaml")).source_globs).toEqual(["apps/*/src/**", "packages/*/src/**"]);
+  });
+
   // spec: specfold-migrate#agents-only
   it("writes nothing under .claude/ with --tools agents", () => {
     const root = fixtureRepo("adr-docs");

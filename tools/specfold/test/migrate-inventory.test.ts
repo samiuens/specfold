@@ -98,7 +98,7 @@ describe("migration inventory", () => {
     expect(detect(root)).toMatchObject({
       layout: "monorepo",
       ci: ["GitHub Actions"],
-      sourceGlobs: ["lib/**", "packages/*/src/**"],
+      sourceGlobs: ["packages/*/src/**"],
     });
     expect(detect(tempDir())).toMatchObject({ stack: [], sourceGlobs: ["src/**"], globsFallback: true });
   });
