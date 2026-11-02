@@ -19,6 +19,14 @@ afterEach(() => {
 });
 
 describe("migrate start", () => {
+  // spec: specfold-migrate#state-not-committed
+  it("keeps state.json out of git with its own .gitignore", async () => {
+    const root = fixtureRepo("adr-docs");
+    await run(["migrate", "start"], root);
+    git(root, "add", ".specfold/migration");
+    expect(git(root, "diff", "--cached", "--name-only").trim()).toBe(".specfold/migration/.gitignore");
+  });
+
   // spec: specfold-migrate#no-git-repository
   it("needs a git repository", async () => {
     const result = await run(["migrate", "start"], tempDir());

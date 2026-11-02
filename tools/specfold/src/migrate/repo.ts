@@ -3,6 +3,7 @@ import { git, gitSucceeds } from "../git.ts";
 
 export const MIGRATION_BRANCH = "specfold/migration";
 export const STATE_PATH = ".specfold/migration/state.json";
+export const STATE_IGNORE_PATH = ".specfold/migration/.gitignore";
 
 /** The root of the git working tree holding `cwd`; migrate runs before specfold.yaml exists. */
 export function gitRoot(cwd: string): string {
@@ -43,11 +44,11 @@ export function defaultBranch(root: string, flag: string | undefined): string {
   );
 }
 
-/** Changed or untracked paths, without the migration state file. */
+/** Changed or untracked paths, without the migration state file and its .gitignore. */
 export function dirtyPaths(root: string): string[] {
   return git(root, ["status", "--porcelain", "--untracked-files=all"])
     .split("\n")
     .filter((l) => l !== "")
     .map((l) => l.slice(3))
-    .filter((p) => p !== STATE_PATH);
+    .filter((p) => p !== STATE_PATH && p !== STATE_IGNORE_PATH);
 }
