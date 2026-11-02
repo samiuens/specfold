@@ -8576,7 +8576,7 @@ async function main(argv, io) {
       return name === void 0 ? 2 : 0;
     }
     if (name === "--version" || name === "-v") {
-      io.stdout(`${"0.3.0"}
+      io.stdout(`${"0.3.1"}
 `);
       return 0;
     }
@@ -8594,7 +8594,7 @@ async function main(argv, io) {
       throw new UsageError(error.message);
     }
     const values = parsed.values;
-    if (writes(name, parsed.positionals, values)) refuseSkew(io.cwd, "0.3.0");
+    if (writes(name, parsed.positionals, values)) refuseSkew(io.cwd, "0.3.1");
     return await command.run({ io, values, positionals: parsed.positionals });
   } catch (error) {
     if (error instanceof UsageError) {
