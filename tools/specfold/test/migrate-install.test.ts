@@ -111,6 +111,29 @@ describe("migrate install: files", () => {
     expect(existsSync(join(root, "knowledge/conventions/code-comments.md"))).toBe(true);
   });
 
+  // spec: specfold-migrate#workspace-globs
+  it("takes the source globs from package.json workspaces", () => {
+    const root = fixtureRepo("adr-docs");
+    write(root, "package.json", JSON.stringify({ workspaces: ["apps/*", "packages/*", "!packages/legacy"] }));
+    git(root, "add", "-A");
+    git(root, "commit", "-q", "-m", "workspaces");
+    install(root);
+    expect(parse(read(root, "specfold.yaml")).source_globs).toEqual(["apps/*/src/**", "packages/*/src/**"]);
+  });
+
+  // spec: specfold-migrate#claude-md-already-imports-agents-md
+  it("keeps one @AGENTS.md import when CLAUDE.md already has it", () => {
+    const root = fixtureRepo("adr-docs");
+    const team = "@AGENTS.md\n\n# Team notes\n\n- Be kind.\n";
+    write(root, "CLAUDE.md", team);
+    install(root);
+    install(root);
+    const text = read(root, "CLAUDE.md");
+    expect(text.match(/^@AGENTS\.md$/gm)).toHaveLength(1);
+    expect(text.endsWith(`<!-- specfold:end -->\n\n${team}`)).toBe(true);
+    expect(text.split("<!-- specfold:end -->")[0]).not.toContain("@AGENTS.md");
+  });
+
   // spec: specfold-migrate#agents-only
   it("writes nothing under .claude/ with --tools agents", () => {
     const root = fixtureRepo("adr-docs");
