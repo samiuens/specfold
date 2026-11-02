@@ -31,7 +31,7 @@ D2 SHALL fail when no `specfold.yaml` is found from the current directory upward
 - **THEN** D2 fails with the parse error in its message
 
 ### Requirement: D3 OpenSpec
-D3 SHALL run `<repository root>/node_modules/.bin/openspec --version` when that file exists, else `openspec --version` from the PATH, and fail when neither is available or the version does not satisfy `requires.openspec` in `specfold.yaml` (space-separated comparators such as `>=1.15 <2`, defaulting to `>=1.15 <2`). The message SHALL say which binary was used.
+D3 SHALL run `<repository root>/node_modules/.bin/openspec --version` when that file exists, else `openspec --version` from the PATH, and fail when neither is available or the version does not satisfy `requires.openspec` in `specfold.yaml` (space-separated comparators such as `>=1.15 <2`, defaulting to `>=1.15 <2`). Without a `specfold.yaml`, the current directory SHALL stand in for the repository root. The message SHALL say which binary was used.
 
 #### Scenario: OpenSpec missing
 - **WHEN** there is no `node_modules/.bin/openspec` and `openspec` is not on the PATH
@@ -45,12 +45,20 @@ D3 SHALL run `<repository root>/node_modules/.bin/openspec --version` when that 
 - **WHEN** `openspec` is not on the PATH but `node_modules/.bin/openspec --version` prints `1.15.0`
 - **THEN** D3 is `ok` and its message names the local binary
 
+#### Scenario: Local OpenSpec before install
+- **WHEN** doctor runs in a directory without `specfold.yaml`, `openspec` is not on the PATH, and `./node_modules/.bin/openspec --version` prints `1.15.0`
+- **THEN** D3 is `ok` and its message names the local binary
+
 ### Requirement: D4 git hooks
-D4 SHALL be `ok` when `git config core.hooksPath` is `.specfold/hooks`, or when an existing hook manager's config (`lefthook.yml`, `.husky/`, `.pre-commit-config.yaml`) contains `specfold hook`; otherwise, and outside a git repository, it SHALL be `warn`.
+D4 SHALL be `ok` when `git config core.hooksPath` is `.specfold/hooks`, or when an existing hook manager's config (`lefthook.yml`, `.husky/`, `.pre-commit-config.yaml`) contains `specfold hook` or `specfold.mjs hook`; otherwise, and outside a git repository, it SHALL be `warn`.
 
 #### Scenario: Hooks not installed
-- **WHEN** `core.hooksPath` is unset and no hook manager config mentions `specfold hook`
+- **WHEN** `core.hooksPath` is unset and no hook manager config mentions `specfold hook` or `specfold.mjs hook`
 - **THEN** D4 is `warn` with the fix `specfold hooks install`
+
+#### Scenario: Lefthook entries from install
+- **WHEN** `core.hooksPath` is unset and `lefthook.yml` runs `node scripts/specfold.mjs hook pre-commit {0}`
+- **THEN** D4 is `ok`
 
 ### Requirement: D5 knowledge bundle
 D5 SHALL fail when `knowledge/` does not exist under the repository root, or when its root `index.md` is missing.

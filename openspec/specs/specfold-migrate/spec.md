@@ -42,11 +42,15 @@ The default branch SHALL be `--default-branch` when given, else the target of `o
 - **THEN** `specfold migrate start` exits with 2 and names `--default-branch`
 
 ### Requirement: Migration state
-The migrate commands SHALL record finished steps in `.specfold/migration/state.json` with the default branch and the base commit: `start`, `inventory` and `install` by themselves, and `plan`, `convert`, `seed` and `report` through `migrate mark <step>`. `migrate status` SHALL print each step as done or open and the next open step.
+The migrate commands SHALL record finished steps in `.specfold/migration/state.json` with the default branch and the base commit: `start`, `inventory` and `install` by themselves, and `plan`, `convert`, `seed` and `report` through `migrate mark <step>`. `migrate start` SHALL also write `.specfold/migration/.gitignore` ignoring `state.json`, so the state is never committed. `migrate status` SHALL print each step as done or open and the next open step.
 
 #### Scenario: Resumed migration
 - **WHEN** `start`, `inventory` and `mark plan` ran and `specfold migrate status` runs
 - **THEN** it lists `start`, `inventory` and `plan` as done and names `install` as the next step
+
+#### Scenario: State not committed
+- **WHEN** `migrate start` ran and the user runs `git add .specfold/migration`
+- **THEN** `.specfold/migration/.gitignore` is staged and `state.json` is not
 
 ### Requirement: Inventory
 `migrate inventory` SHALL list every tracked file that is a knowledge source, with its kind (`readme`, `docs`, `adr`, `contributing`, `wiki`, `agent-rules`, `spec-tool`) and a token estimate (characters / 4, rounded up), plus the detected stack, package layout and CI system, and store the result in the state.
@@ -74,11 +78,15 @@ The migrate commands SHALL record finished steps in `.specfold/migration/state.j
 - **THEN** the file is unchanged, the output names it as a conflict, and the command exits with 1
 
 ### Requirement: Managed blocks
-`migrate install` SHALL put Specfold's content for `AGENTS.md`, `CLAUDE.md`, `.github/pull_request_template.md`, `.gitignore`, `.github/CODEOWNERS`, `.gitattributes` and `.worktreeinclude` between `specfold:start` and `specfold:end` markers, creating a missing file, keeping all text outside the markers, and replacing only the block on a rerun.
+`migrate install` SHALL put Specfold's content for `AGENTS.md`, `CLAUDE.md`, `.github/pull_request_template.md`, `.gitignore`, `.github/CODEOWNERS`, `.gitattributes` and `.worktreeinclude` between `specfold:start` and `specfold:end` markers, creating a missing file, keeping all text outside the markers, and replacing only the block on a rerun. When the text of `CLAUDE.md` outside the markers already has a line `@AGENTS.md`, the block SHALL leave out its own `@AGENTS.md` line.
 
 #### Scenario: Existing AGENTS.md
 - **WHEN** `AGENTS.md` holds the team's own rules and install runs twice
 - **THEN** `AGENTS.md` starts with one Specfold block and still holds the team's rules unchanged after it
+
+#### Scenario: CLAUDE.md already imports AGENTS.md
+- **WHEN** `CLAUDE.md` holds the line `@AGENTS.md` and the team's notes, and install runs
+- **THEN** `CLAUDE.md` contains `@AGENTS.md` exactly once, outside the block, and the team's text is unchanged
 
 ### Requirement: Claude settings merge
 With the `claude` tool, `migrate install` SHALL add each Specfold hook from the template's `.claude/settings.json` whose command is not yet present, each `permissions.deny` rule of the template that is not yet present, each `env` entry whose name is not yet set and each other top-level key the repository's settings lack, keeping every other key, rule and value, and SHALL report a file that is not valid JSON without changing it.
@@ -103,11 +111,15 @@ When `openspec/config.yaml` exists, `migrate install` SHALL add the `specfold` s
 - **THEN** after install `config.yaml` names `schema: specfold`, its old `context` is kept, and `add-login/.openspec.yaml` is unchanged
 
 ### Requirement: Project files
-`migrate install` SHALL create `specfold.yaml` from the template with `--source-glob` values (or the detected globs) and the knowledge skeleton only where they are missing, put `--stack` (or the detected stack) into the config context, and then run `specfold agents sync` and `specfold hooks install`.
+`migrate install` SHALL create `specfold.yaml` from the template with `--source-glob` values (or the globs detected as `specfold init` detects them) and the knowledge skeleton only where they are missing, put `--stack` (or the detected stack) into the config context, and then run `specfold agents sync` and `specfold hooks install`.
 
 #### Scenario: Source globs
 - **WHEN** install runs with `--source-glob 'lib/**'` in a repository without `specfold.yaml`
 - **THEN** `specfold.yaml` has `source_globs: ["lib/**"]` and `knowledge/index.md` exists
+
+#### Scenario: Workspace globs
+- **WHEN** install runs without `--source-glob` in a repository whose `package.json` has `workspaces: ["apps/*", "packages/*"]`
+- **THEN** `specfold.yaml` has `source_globs: ["apps/*/src/**", "packages/*/src/**"]`
 
 ### Requirement: Agent tools
 `migrate install` SHALL set up the tools named by `--tools` (default `agents,claude`); with `--tools agents` it SHALL write nothing under `.claude/` and leave `CLAUDE.md` alone.

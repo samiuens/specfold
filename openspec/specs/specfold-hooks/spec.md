@@ -102,6 +102,13 @@ After its own checks, `specfold hook <name> [args...]` SHALL run each command in
 - **WHEN** Claude tries to stop while a change archived on the branch has a scenario no test names
 - **THEN** the G15 finding goes to stderr and the command exits with 2
 
+### Requirement: Claude stop summary
+When `specfold hook claude-stop` blocks with more than 20 blocking findings, it SHALL print the count per rule and the first 10 findings, followed by a line naming how many findings it did not show, instead of every finding.
+
+#### Scenario: Many blocking findings
+- **WHEN** Claude tries to stop while the local gate reports 214 blocking findings, 200 of them G1 and 14 of them G2
+- **THEN** stderr shows `G1: 200` and `G2: 14`, the first 10 findings, and a line naming the 204 findings not shown, and the command exits with 2
+
 ### Requirement: Claude no-push guard
 `specfold hook claude-no-push` SHALL read a Claude Code PreToolUse event from stdin and, when its Bash command runs `git push` or `gh pr` in any part of the command, print why to stderr and exit with 2; every other event SHALL exit with 0 and print nothing.
 
@@ -114,11 +121,27 @@ After its own checks, `specfold hook <name> [args...]` SHALL run each command in
 - **THEN** the hook exits with 0 and prints nothing
 
 ### Requirement: Hook manager files keep long lines
-When `specfold hooks install` adds its entries to `lefthook.yml` or `.pre-commit-config.yaml`, it SHALL keep the file's other values on the lines they had, without folding long lines.
+When `specfold hooks install` adds its entries to `lefthook.yml` or `.pre-commit-config.yaml`, it SHALL keep the text of every line it does not need to change as it was, including long lines, flow sequences, block scalars and line endings. It MAY rewrite only `default_install_hook_types` when a hook type is missing from it, and a hook section, its `commands` or `jobs`, or pre-commit `repos` that is in flow style, empty or null; then only that node's text changes.
 
 #### Scenario: Long lefthook command kept
 - **WHEN** `lefthook.yml` has a 100-character `run` command and `hooks install` adds Specfold's entries
 - **THEN** that command is still on one line
+
+#### Scenario: Lefthook formatting kept
+- **WHEN** `lefthook.yml` has a flow sequence `glob: ["*.ts", "*.tsx"]` and a folded `run: >-` scalar, and `hooks install` adds Specfold's entries
+- **THEN** every line that was in the file before is unchanged
+
+#### Scenario: Flow-style hook section filled in place
+- **WHEN** `lefthook.yml` has `pre-commit: { commands: { lint: { run: eslint } } }` and a comment line, and `hooks install` runs
+- **THEN** only the `pre-commit` node's text changes, it holds the `specfold` command and `lint`, and every other line is unchanged
+
+#### Scenario: Empty pre-commit sections filled in place
+- **WHEN** `.pre-commit-config.yaml` has `repos: []`, a bare `default_install_hook_types:` key and a comment line, and `hooks install` runs
+- **THEN** only those two nodes' text changes, they hold Specfold's local repo and hook types, no line ends in whitespace, and every other line is unchanged
+
+#### Scenario: CRLF line endings kept
+- **WHEN** `lefthook.yml` uses CRLF line endings and `hooks install` adds Specfold's entries
+- **THEN** every line of the result, the inserted ones included, ends in CRLF
 
 ### Requirement: Upgrade reminder
 `specfold hook claude-session-start` SHALL print one line naming the newer version and `specfold upgrade` when a newer release is on the repository's channel. It SHALL query the source at most once a day with a 2-second limit, cache the result in `.specfold/local-state.json`, print nothing when the check fails, and skip the check when `upgrade.reminder` is `false`.
