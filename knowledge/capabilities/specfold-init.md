@@ -41,6 +41,7 @@ A repository made with "Use this template" holds every kit file but still has pl
 - **`--dry-run` writes nothing** and lists the values and every step it would take.
 - **Upgrade PRs are opt-in.** `--upgrade-workflow` copies the inactive `.specfold/workflows/specfold-upgrade.yml` to `.github/workflows/`, records it in the manifest so upgrades keep it current, and prints the `SPECFOLD_TOKEN` setup. A plain template copy never runs it ([turn on upgrade PRs](/runbooks/turn-on-upgrade-prs.md)).
 - **Required gate is opt-in, and a refusal doesn't fail init.** `--require-gate` runs the step of `gate require` after setup. Without admin rights or rulesets, the repository is still set up; only the GitHub setting is missing. So init reports the step as skipped, prints the manual steps and exits 0. `--dry-run` lists the step without asking GitHub anything.
+- **Workspace-aware globs.** Source globs come from `package.json` `workspaces` and `pnpm-workspace.yaml` (`<pattern>/src/**`, negations skipped) before the fixed folder list, which now includes `apps`.
 
 # Related
 

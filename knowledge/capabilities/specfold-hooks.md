@@ -45,6 +45,7 @@ The gate in CI is the enforcement, but its feedback comes late. Hooks run the sa
 - **Manager files keep their shape.** Entries in `lefthook.yml` and `.pre-commit-config.yaml` are added to the parsed document, which is written back without folding: the `yaml` library would fold long lines at 80 characters by default, so every YAML rewrite in the CLI writes without folding (found in the sample app's upgrade to rc.2).
 - **A waiting release shows at session start.** Once a day at most, within 2 seconds and silently when offline, the session-start hook checks the repository's channel and names a newer release ([upgrade flow](/architecture/upgrade-flow.md)). The check is cached in the gitignored `.specfold/local-state.json`, and `upgrade.reminder: false` turns it off.
 - **The graph is refreshed, never built.** post-checkout and post-merge run `graphify update .` only when graphify is installed and `graphify-out/graph.json` exists ([graphify](/references/graphify.md)).
+- **Manager files keep their text.** `hooks install` inserts its entries as text at parsed offsets, so flow lists, folded scalars and long lines elsewhere stay unchanged ([splice hook manager YAML](/decisions/splice-hook-manager-yaml.md)). The Claude stop hook still blocks; above 20 blocking findings it prints counts per rule and the first 10 findings instead of repeating all of them.
 
 # Related
 

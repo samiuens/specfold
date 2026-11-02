@@ -33,6 +33,7 @@ Agents writing frontmatter by hand get small things wrong: a missing `status`, a
 - Template files in `.agents/skills/sf-capture/templates/` override the built-in bodies, so repos adapt templates without a CLI change.
 
 This card was itself created with `specfold new`.
+- Every type gets `sources: []`; Runbook and Interface also get `stale_after`. The defaults per type are listed in the `sf-capture` types reference.
 
 # Related
 

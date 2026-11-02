@@ -22,6 +22,7 @@ sources:
 
 - The kind is free (any capitalized word, `Update` by default), so new kinds such as `Migration` need no config change.
 - `log` is a command group with `add` as its first subcommand, which leaves room for `log list` later.
+- When `log add` creates `log.md`, it also refreshes the root index, so the Log entry is listed and G2 stays quiet after the first entry.
 
 # Related
 
