@@ -43,7 +43,7 @@ agent: implementer
   - Done when: `npx vitest run tools/specfold/test/index-refs.test.ts` passes with a test tagged `spec: specfold-index#several-paths-in-one-pointer`, and `#reference-listed` still passes
 - [x] 3.2 The shipped code-comment convention allows a comma-separated list of paths in one pointer
   - Done when: `template/knowledge/conventions/code-comments.md` shows the list form and `node scripts/specfold.mjs validate --bundle template/knowledge` reports no errors
-- [ ] 3.3 When `log add` creates `log.md`, it rewrites the root `index.md` and names both files in its output (B2, CLI part)
+- [x] 3.3 When `log add` creates `log.md`, it rewrites the root `index.md` and names both files in its output (B2, CLI part)
   - Done when: `npx vitest run tools/specfold/test/log.test.ts` passes with a test tagged `spec: specfold-log#root-index-lists-the-new-log`, and `#first-entry` still passes
 
 ## 4. New

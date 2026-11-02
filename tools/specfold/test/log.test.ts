@@ -114,6 +114,19 @@ describe("log add: command", () => {
     expect(log(repo)).toBe("# Log\n\n## 2026-10-26\n\n* **Creation**: Bundle created\n");
   });
 
+  // spec: specfold-log#root-index-lists-the-new-log
+  it("adds the new log to the root index", async () => {
+    const repo = tempDir("valid");
+    rmSync(join(repo, "knowledge/log.md"));
+    await run(["index"], repo);
+    const result = await run(["log", "add", "--date", "2026-10-26", "Bundle created"], repo);
+    expect(result.stdout).toContain("knowledge/log.md");
+    expect(result.stdout).toContain("knowledge/index.md");
+    const index = readFileSync(join(repo, "knowledge/index.md"), "utf8");
+    expect(index).toContain("# Log");
+    expect((await run(["index", "--check"], repo)).code).toBe(0);
+  });
+
   // spec: specfold-log#still-conformant
   it("keeps log.md conformant after entries in random date order", async () => {
     const repo = tempDir("valid");

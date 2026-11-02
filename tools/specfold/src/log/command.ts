@@ -1,8 +1,11 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, relative, sep } from "node:path";
 import { register } from "../cli.ts";
 import { UsageError } from "../errors.ts";
-import { resolveBundleRoot } from "../repo.ts";
+import { generateIndexes } from "../indexes/generate.ts";
+import { syncIndexes } from "../indexes/command.ts";
+import { locationsByConcept, scanReferences } from "../indexes/refs.ts";
+import { findRepoRoot, loadConfig, resolveBundleRoot } from "../repo.ts";
 import { insertEntry } from "./insert.ts";
 
 const KIND = /^[A-Z][A-Za-z]*$/;
@@ -39,8 +42,20 @@ register({
     const bundleRoot = resolveBundleRoot(io.cwd, values.bundle as string | undefined, undefined);
     const path = join(bundleRoot, "log.md");
     const entry = `* **${kind}**: ${message}`;
-    writeFileSync(path, insertEntry(existsSync(path) ? readFileSync(path, "utf8") : undefined, date, entry));
+    const created = !existsSync(path);
+    writeFileSync(path, insertEntry(created ? undefined : readFileSync(path, "utf8"), date, entry));
     io.stdout(`${entry}\n`);
+    // a new log.md joins the root index
+    const repoRoot = findRepoRoot(io.cwd);
+    if (created && repoRoot) {
+      const config = loadConfig(repoRoot);
+      const refs = scanReferences(config.root, config.sourceGlobs);
+      const { indexes } = generateIndexes(bundleRoot, config, locationsByConcept(refs));
+      const root = new Map([...indexes].filter(([rel]) => rel === "index.md"));
+      const written = syncIndexes(config.root, bundleRoot, root, false);
+      io.stdout(`created ${relative(repoRoot, path).split(sep).join("/")}\n`);
+      for (const p of written) io.stdout(`wrote ${p}\n`);
+    }
     return 0;
   },
 });
