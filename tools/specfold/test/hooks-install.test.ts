@@ -134,11 +134,77 @@ describe("hooks install: hook managers", () => {
 
   it("writes nothing when a hook is in a form it does not edit", async () => {
     const root = repo();
-    const before = "pre-commit: {commands: {lint: {run: x}}}\n";
+    const before = "pre-commit: lint\n";
     write(root, "lefthook.yml", before);
     const result = await run(["hooks", "install"], root);
     expect(result.code).toBe(2);
     expect(readFileSync(join(root, "lefthook.yml"), "utf8")).toBe(before);
+  });
+
+  // spec: specfold-hooks#lefthook-formatting-kept
+  it.each([
+    ["a flow-style hook section", "pre-commit: { commands: { lint: { run: x } } }\n", "pre-commit"],
+    ["an empty flow commands map", "pre-commit:\n  commands: {}\n", "pre-commit"],
+    ["an empty flow jobs list", "pre-commit:\n  jobs: []\n", "pre-commit"],
+    ["a bare hook key", "pre-commit:\n", "pre-commit"],
+    ["a bare commands key", "pre-commit:\n  commands:\n", "pre-commit"],
+  ])("fills %s and keeps the other lines", async (_name, head, _hook) => {
+    const root = repo();
+    const before = `${head}# keep me\npre-push:\n  commands:\n    lint:\n      run: npm run lint\n`;
+    write(root, "lefthook.yml", before);
+    expect((await run(["hooks", "install"], root)).code).toBe(0);
+    const after = readFileSync(join(root, "lefthook.yml"), "utf8");
+    expect(after).toContain("# keep me\npre-push:\n  commands:\n    lint:\n      run: npm run lint\n");
+    expect(after.match(/hook pre-commit \{0\}/g)).toHaveLength(1);
+    expect(after).toContain("post-merge:\n  commands:\n    specfold:");
+    await run(["hooks", "install"], root);
+    expect(readFileSync(join(root, "lefthook.yml"), "utf8")).toBe(after);
+  });
+
+  // spec: specfold-hooks#lefthook-in-use
+  it("keeps the lines around an empty hook section with a comment", async () => {
+    const root = repo();
+    write(root, "lefthook.yml", "# top\npre-commit: # later\npre-push:\n  jobs: []\n");
+    expect((await run(["hooks", "install"], root)).code).toBe(0);
+    const after = readFileSync(join(root, "lefthook.yml"), "utf8");
+    expect(after.startsWith("# top\npre-commit: # later\n  commands:\n    specfold:")).toBe(true);
+    expect(after).toContain("name: specfold");
+  });
+
+  // spec: specfold-hooks#lefthook-formatting-kept
+  it("fills a flow-style repos list in .pre-commit-config.yaml and keeps the other lines", async () => {
+    const root = repo();
+    const before =
+      "# top\nfail_fast: true\nrepos: [ { repo: https://example.com/x, rev: v1, hooks: [ { id: a } ] } ]\nexclude: ^docs/\n";
+    write(root, ".pre-commit-config.yaml", before);
+    expect((await run(["hooks", "install"], root)).code).toBe(0);
+    const after = readFileSync(join(root, ".pre-commit-config.yaml"), "utf8");
+    expect(after.startsWith("# top\nfail_fast: true\nrepos: [")).toBe(true);
+    expect(after).toContain("id: specfold-pre-commit");
+    expect(after).toContain("\nexclude: ^docs/\n");
+    await run(["hooks", "install"], root);
+    expect(readFileSync(join(root, ".pre-commit-config.yaml"), "utf8")).toBe(after);
+  });
+
+  // spec: specfold-hooks#lefthook-formatting-kept
+  it("fills a bare repos key and a flow-style specfold hooks list", async () => {
+    const bare = repo();
+    write(bare, ".pre-commit-config.yaml", "repos:\nexclude: x\n");
+    expect((await run(["hooks", "install"], bare)).code).toBe(0);
+    const text = readFileSync(join(bare, ".pre-commit-config.yaml"), "utf8");
+    expect(text.startsWith("repos:\n  - repo: local\n")).toBe(true);
+    expect(text).toContain("exclude: x\n");
+
+    const flow = repo();
+    write(
+      flow,
+      ".pre-commit-config.yaml",
+      "default_install_hook_types: [pre-commit]\nrepos:\n  - repo: local\n    hooks: [ { id: specfold-pre-commit } ]\n",
+    );
+    expect((await run(["hooks", "install"], flow)).code).toBe(0);
+    const out = readFileSync(join(flow, ".pre-commit-config.yaml"), "utf8");
+    expect(out).toContain("id: specfold-post-merge");
+    expect(out.match(/specfold-pre-commit/g)).toHaveLength(1);
   });
 
   // spec: specfold-hooks#husky-in-use
