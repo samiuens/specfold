@@ -42,3 +42,12 @@ FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN
 AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+---
+
+Third-party skills
+
+The kit-only skills banner-design, brand, design and ui-ux-pro-max under
+.agents/skills/ come from https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+and keep their own MIT License, copyright (c) 2024 Next Level Builder, in the
+LICENSE file of each skill.
