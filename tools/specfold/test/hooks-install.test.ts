@@ -157,6 +157,32 @@ describe("hooks install: hook managers", () => {
     expect(hooksPath(root)).toBe(".husky/_");
   });
 
+  it("leaves every other line of .pre-commit-config.yaml as it was", async () => {
+    const root = repo();
+    const fixture = new URL("./fixtures/hooks/pre-commit-formatted.yaml", import.meta.url);
+    const before = readFileSync(fixture, "utf8");
+    write(root, ".pre-commit-config.yaml", before);
+    expect((await run(["hooks", "install"], root)).code).toBe(0);
+    const after = readFileSync(join(root, ".pre-commit-config.yaml"), "utf8");
+    const rewritten = "default_install_hook_types: [pre-commit, pre-push]";
+    expect(
+      keptInOrder(
+        before
+          .split("\n")
+          .filter((l) => !l.startsWith(rewritten))
+          .join("\n"),
+        after,
+      ),
+    ).toBe(true);
+    expect(after).toContain(
+      "default_install_hook_types: [ pre-commit, pre-push, post-checkout, post-merge ]   # keep\n",
+    );
+    expect(after.match(/repo: local/g)).toHaveLength(2);
+    expect(after).toContain("      - id: specfold-post-merge\n");
+    await run(["hooks", "install"], root);
+    expect(readFileSync(join(root, ".pre-commit-config.yaml"), "utf8")).toBe(after);
+  });
+
   it("adds a local repo to the pre-commit configuration, once", async () => {
     const root = repo("types: []\nhooks:\n  extra:\n    commit-msg: [check]\n");
     write(

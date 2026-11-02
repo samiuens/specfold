@@ -4,7 +4,7 @@ import { Document, isMap, isScalar, isSeq, parseDocument, type YAMLSeq } from "y
 import { EnvError } from "../errors.ts";
 import { git } from "../git.ts";
 import type { Config } from "../repo.ts";
-import { indentAt, Splice, startOf, yamlBlock, yamlText } from "../yaml.ts";
+import { indentAt, Splice, startOf, yamlBlock } from "../yaml.ts";
 
 export const HOOKS_PATH = ".specfold/hooks";
 /** Hooks with Specfold's own checks; `hooks.extra` adds more. */
@@ -99,11 +99,6 @@ function readSource(path: string): { source: string; doc: Document } {
   return { source, doc };
 }
 
-const readDocument = (path: string): Document => {
-  const { doc } = readSource(path);
-  return isMap(doc.contents) ? doc : new Document({});
-};
-
 const byHand = (file: string, what: string) =>
   new EnvError(
     `${file}: ${what} is written in a form hooks install does not edit; add the Specfold entries by hand`,
@@ -182,54 +177,94 @@ function huskyEntries(config: Config): InstallAction[] {
 
 const idOf = (hook: unknown) => (isMap(hook) ? String(hook.get("id")) : "");
 
-/** A local repo with one `specfold-<hook>` hook per hook, and every hook type in default_install_hook_types. */
+const preCommitHook = (hook: string) => ({
+  id: `specfold-${hook}`,
+  name: `specfold ${hook}`,
+  entry: hookCommand(hook),
+  language: "system",
+  always_run: true,
+  pass_filenames: hook === "commit-msg",
+  stages: [hook],
+});
+
+/** A flow sequence the way the yaml library writes it, e.g. `[ a, b ]`. */
+function flowList(items: string[]): string {
+  const doc = new Document();
+  doc.contents = doc.createNode(items, { flow: true });
+  return doc.toString({ lineWidth: 0 }).trimEnd();
+}
+
+/**
+ * A local repo with one `specfold-<hook>` hook per hook, and every hook type in default_install_hook_types.
+ * Only that key's value may be rewritten; everything else is inserted as text.
+ */
 function preCommitEntries(config: Config): InstallAction[] {
   const path = join(config.root, PRE_COMMIT_FILE);
-  const doc = readDocument(path);
-  if (!isSeq(doc.get("repos"))) doc.set("repos", doc.createNode([]));
-  const repos = doc.get("repos") as YAMLSeq;
-  const hookSeqs = repos.items.flatMap((repo) => {
-    const hooks = isMap(repo) ? repo.get("hooks") : undefined;
-    return isSeq(hooks) ? [{ repo, hooks }] : [];
-  });
+  const { source, doc } = readSource(path);
+  const splice = new Splice(PRE_COMMIT_FILE, path, source);
+  const repos = doc.get("repos", true);
+  const hookSeqs = isSeq(repos)
+    ? repos.items.flatMap((repo) => {
+        const hooks = isMap(repo) ? repo.get("hooks", true) : undefined;
+        return isSeq(hooks) ? [{ repo, hooks }] : [];
+      })
+    : [];
   const ids = new Set(hookSeqs.flatMap(({ hooks }) => hooks.items.map(idOf)));
   const actions: InstallAction[] = [];
   const missing = hookNames(config).filter((hook) => !ids.has(`specfold-${hook}`));
   if (missing.length > 0) {
-    let target = hookSeqs.find(
+    const entries = missing.map(preCommitHook);
+    const target = hookSeqs.find(
       ({ repo, hooks }) =>
         isMap(repo) &&
         repo.get("repo") === "local" &&
         hooks.items.some((h) => idOf(h).startsWith("specfold-")),
     )?.hooks;
-    if (!target) {
-      target = doc.createNode([]) as YAMLSeq;
-      repos.add(doc.createNode({ repo: "local", hooks: target }));
+    const local = [{ repo: "local", hooks: entries }];
+    if (target) {
+      if (target.flow || target.items.length === 0) throw byHand(PRE_COMMIT_FILE, "'hooks'");
+      splice.after(target, yamlBlock(entries, columnOf(source, target.items[0])));
+    } else if (!doc.has("repos")) {
+      splice.append(yamlBlock({ repos: local }, 0));
+    } else if (isSeq(repos) && repos.items.length === 0) {
+      splice.replace(repos, `\n${yamlBlock(local, columnOf(source, repos) + 2)}`);
+    } else if (isSeq(repos) && !repos.flow) {
+      splice.after(repos, yamlBlock(local, columnOf(source, repos.items[0])));
+    } else {
+      throw byHand(PRE_COMMIT_FILE, "'repos'");
     }
-    for (const hook of missing) {
-      target.add(
-        doc.createNode({
-          id: `specfold-${hook}`,
-          name: `specfold ${hook}`,
-          entry: hookCommand(hook),
-          language: "system",
-          always_run: true,
-          pass_filenames: hook === "commit-msg",
-          stages: [hook],
-        }),
-      );
-      actions.push({ path: PRE_COMMIT_FILE, action: `add specfold-${hook}` });
-    }
+    for (const hook of missing) actions.push({ path: PRE_COMMIT_FILE, action: `add specfold-${hook}` });
   }
   // pre-commit installs only the hook types listed here, [pre-commit] when the key is missing
-  const listed = doc.get("default_install_hook_types");
+  const listed = doc.get("default_install_hook_types", true);
+  if (doc.has("default_install_hook_types") && !isSeq(listed))
+    throw byHand(PRE_COMMIT_FILE, "'default_install_hook_types'");
   const types = isSeq(listed) ? listed.items.map((t) => String(isScalar(t) ? t.value : t)) : ["pre-commit"];
   const added = hookNames(config).filter((h) => !types.includes(h));
   if (added.length > 0) {
-    doc.set("default_install_hook_types", doc.createNode([...types, ...added], { flow: true }));
+    if (!isSeq(listed)) splice.append(`default_install_hook_types: ${flowList([...types, ...added])}`);
+    else if (listed.flow || listed.items.length === 0) splice.replace(listed, flowList([...types, ...added]));
+    else splice.after(listed, yamlBlock(added, columnOf(source, listed.items[0])));
     actions.push({ path: PRE_COMMIT_FILE, action: `install hook types ${added.join(", ")}` });
   }
-  if (actions.length > 0) writeFileSync(path, yamlText(doc));
+  if (actions.length === 0) return actions;
+  splice.commit((check) => {
+    const found = check.get("repos");
+    const present = new Set(
+      isSeq(found)
+        ? found.items.flatMap((r) =>
+            isMap(r) && isSeq(r.get("hooks")) ? (r.get("hooks") as YAMLSeq).items.map(idOf) : [],
+          )
+        : [],
+    );
+    const kinds = check.get("default_install_hook_types");
+    return (
+      hookNames(config).every((h) => present.has(`specfold-${h}`)) &&
+      hookNames(config).every(
+        (h) => isSeq(kinds) && kinds.items.some((t) => String(isScalar(t) ? t.value : t) === h),
+      )
+    );
+  });
   return actions;
 }
 
