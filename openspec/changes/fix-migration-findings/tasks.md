@@ -27,7 +27,7 @@ agent: implementer
   - Done when: `npx vitest run tools/specfold/test/hooks-install.test.ts` passes with tests tagged `spec: specfold-hooks#lefthook-formatting-kept` (flow list, folded scalar, comments, `jobs`) and `#long-lefthook-command-kept`
 - [x] 2.2 The same splice for `.pre-commit-config.yaml`; only `default_install_hook_types` may be rewritten
   - Done when: the hooks-install tests pass with a pre-commit fixture whose other lines are unchanged byte for byte
-- [ ] 2.3 `claude-stop` prints counts per rule, the first 10 findings and a "not shown" line when there are more than 20 blocking findings, and still exits 2 (B10)
+- [x] 2.3 `claude-stop` prints counts per rule, the first 10 findings and a "not shown" line when there are more than 20 blocking findings, and still exits 2 (B10)
   - Done when: `npx vitest run tools/specfold/test/hooks-claude.test.ts` passes with a test tagged `spec: specfold-hooks#many-blocking-findings`, and `#unfinished-work` still passes
 
 ## 3. Index and log
