@@ -14,3 +14,7 @@ graphify-out/
 
 # the session start's daily check for a newer release (specfold upgrade)
 .specfold/local-state.json
+
+# Python bytecode from skill scripts
+__pycache__/
+*.pyc
