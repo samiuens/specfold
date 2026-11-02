@@ -23,7 +23,7 @@ Each entry is rendered as text in the file's detected indentation (taken from th
 
 Rejected: other `yaml` `toString` options. The library has no mode that keeps flow sequences and folded scalars as written. Also rejected: a text-only append with no parse, which cannot tell whether a hook already holds an entry or uses `jobs`.
 
-When the target collection is written in flow style (`pre-commit: { commands: {...} }`), install falls back to replacing only that node's text, re-serialised. This is rare, and every other line still stays as it was.
+When the target collection is written in flow style (`pre-commit: { commands: {...} }`, a flow-style pre-commit `repos`) or is empty or null (`commands: {}`, `jobs: []`, a bare `pre-commit:` key), install falls back to replacing only that node's text, re-serialised, instead of refusing. This is rare, and every other line still stays as it was.
 
 ### B3: one pattern, a list of paths
 
@@ -42,3 +42,7 @@ When `log add` creates `log.md`, it calls the same generator `specfold index` us
 - [Spliced YAML is wrong for an unusual layout] → re-parse after the edit, fail without writing, and test fixtures with flow lists, folded scalars, comments and `jobs`.
 - [Workspace patterns such as `!**/test/**` or `apps/**`] → skip negations; a pattern that ends in `**` becomes `<pattern>` itself rather than `<pattern>/src/**`.
 - [`log add` now writes a second file] → only when it creates the log, and the output names both files.
+
+## Commitments
+
+- [Migrate a repository that already has an OKF bundle](/commitments/migrate-an-existing-okf-bundle.md): kept
