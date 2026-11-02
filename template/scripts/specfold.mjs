@@ -7511,7 +7511,8 @@ function contentLineEnd(source, node) {
   let i = node.range?.[1] ?? source.length;
   while (i > 0 && /\s/.test(source[i - 1] ?? "")) i--;
   const newline = source.indexOf("\n", i);
-  return newline === -1 ? source.length : newline;
+  if (newline === -1) return source.length;
+  return source[newline - 1] === "\r" ? newline - 1 : newline;
 }
 function indentAt(source, offset) {
   const start = source.lastIndexOf("\n", offset - 1) + 1;
@@ -7528,22 +7529,42 @@ var Splice = class {
     this.name = name;
     this.path = path;
     this.source = source;
+    this.eol = source.includes("\r\n") ? "\r\n" : "\n";
   }
   name;
   path;
   source;
   edits = [];
   appended = [];
+  /** The file's line ending; inserted text uses it. */
+  eol;
+  lines(text3) {
+    return this.eol === "\n" ? text3 : text3.replace(/\n/g, this.eol);
+  }
   /** A new line after the line on which `node` ends. */
   after(node, block) {
     const at = contentLineEnd(this.source, node);
-    this.edits.push({ start: at, end: at, text: `
-${block}` });
+    this.edits.push({ start: at, end: at, text: this.lines(`
+${block}`) });
   }
   /** The node's own text becomes `text`. */
   replace(node, text3) {
     const range = node.range;
-    if (range) this.edits.push({ start: range[0], end: range[1], text: text3 });
+    if (range)
+      this.edits.push({
+        start: range[0],
+        end: range[1],
+        text: this.lines(text3)
+      });
+  }
+  /** The node's own text becomes a block on the next lines; the space before the node goes with it. */
+  fill(node, block) {
+    const range = node.range;
+    if (!range) return;
+    let start = range[0];
+    while (start > 0 && /[ \t]/.test(this.source[start - 1] ?? "")) start--;
+    this.edits.push({ start, end: range[1], text: this.lines(`
+${block}`) });
   }
   /** A top-level block at the end of the file. */
   append(block) {
@@ -7553,10 +7574,14 @@ ${block}` });
   commit(holds) {
     const edits = [...this.edits];
     if (this.appended.length > 0) {
-      const lead = this.source === "" || this.source.endsWith("\n") ? "" : "\n";
+      const lead = this.source === "" || this.source.endsWith("\n") ? "" : this.eol;
       const end = this.source.length;
-      edits.push({ start: end, end, text: `${lead}${this.appended.join("\n")}
-` });
+      edits.push({
+        start: end,
+        end,
+        text: lead + this.lines(`${this.appended.join("\n")}
+`)
+      });
     }
     const text3 = applyEdits(this.source, edits);
     const check2 = (0, import_yaml.parseDocument)(text3);
@@ -7793,8 +7818,7 @@ function preCommitEntries(config) {
     } else if (!doc.has("repos")) {
       splice.append(yamlBlock({ repos: local }, 0));
     } else if ((0, import_yaml2.isSeq)(repos) && repos.items.length === 0) {
-      splice.replace(repos, `
-${yamlBlock(local, columnOf(source, repos) + 2)}`);
+      splice.fill(repos, yamlBlock(local, columnOf(source, repos) + 2));
     } else if ((0, import_yaml2.isSeq)(repos) && !repos.flow) {
       splice.after(repos, yamlBlock(local, columnOf(source, repos.items[0])));
     } else if (grow(
@@ -7809,15 +7833,22 @@ ${yamlBlock(local, columnOf(source, repos) + 2)}`);
     for (const hook of missing) actions.push({ path: PRE_COMMIT_FILE, action: `add specfold-${hook}` });
   }
   const listed = doc.get("default_install_hook_types", true);
-  if (doc.has("default_install_hook_types") && !(0, import_yaml2.isSeq)(listed))
+  const emptyTypes = (0, import_yaml2.isScalar)(listed) && listed.value === null;
+  if (doc.has("default_install_hook_types") && !(0, import_yaml2.isSeq)(listed) && !emptyTypes)
     throw byHand(PRE_COMMIT_FILE, "'default_install_hook_types'");
   const types = (0, import_yaml2.isSeq)(listed) ? listed.items.map((t) => String((0, import_yaml2.isScalar)(t) ? t.value : t)) : ["pre-commit"];
   const added = hookNames(config).filter((h) => !types.includes(h));
   if (added.length > 0) {
-    if (!(0, import_yaml2.isSeq)(listed)) splice.append(`default_install_hook_types: ${flowText([...types, ...added])}`);
+    if (emptyTypes) {
+      const all = [...types, ...added];
+      grow({ doc, splice, source }, doc.contents, "default_install_hook_types", all, () => void 0);
+    } else if (!(0, import_yaml2.isSeq)(listed)) splice.append(`default_install_hook_types: ${flowText([...types, ...added])}`);
     else if (listed.flow || listed.items.length === 0) splice.replace(listed, flowText([...types, ...added]));
     else splice.after(listed, yamlBlock(added, columnOf(source, listed.items[0])));
-    actions.push({ path: PRE_COMMIT_FILE, action: `install hook types ${added.join(", ")}` });
+    actions.push({
+      path: PRE_COMMIT_FILE,
+      action: `install hook types ${added.join(", ")}`
+    });
   }
   if (actions.length === 0) return actions;
   splice.commit((check2) => {
@@ -7840,7 +7871,11 @@ function installHooks(config) {
   if (!manager) return installBuiltIn(config);
   if (manager.name === "lefthook") {
     const actions2 = lefthookEntries(config, manager.path);
-    return { manager: "lefthook", actions: actions2, next: actions2.length > 0 ? "run lefthook install" : null };
+    return {
+      manager: "lefthook",
+      actions: actions2,
+      next: actions2.length > 0 ? "run lefthook install" : null
+    };
   }
   if (manager.name === "husky") return { manager: "husky", actions: huskyEntries(config), next: null };
   const actions = preCommitEntries(config);
@@ -8923,7 +8958,7 @@ function walkFiles(root) {
 
 // src/indexes/refs.ts
 var MAX_BYTES = 1024 * 1024;
-var PATH = String.raw`\/[^\s"'\`),]+\.md`;
+var PATH = String.raw`\/[^\s"'\`),]+\.md(?![\w-])`;
 var REFERENCE = new RegExp(String.raw`see knowledge:\s+(${PATH}(?:\s*,\s*${PATH})*)`, "g");
 function scanReferences(repoRoot, sourceGlobs) {
   if (sourceGlobs.length === 0) return [];
