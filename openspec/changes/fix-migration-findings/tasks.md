@@ -69,7 +69,7 @@ scenarios: [specfold-init#pnpm-workspaces, specfold-init#typescript-project, spe
 agent: implementer
 ```
 
-- [ ] 5.1 Detection reads globs from package.json `workspaces` and `pnpm-workspace.yaml` (`<pattern>/src/**`, negations skipped), else the folder list with `apps` added (B4)
+- [x] 5.1 Detection reads globs from package.json `workspaces` and `pnpm-workspace.yaml` (`<pattern>/src/**`, negations skipped), else the folder list with `apps` added (B4)
   - Done when: `npx vitest run tools/specfold/test/init.test.ts tools/specfold/test/migrate-install.test.ts` passes with tests tagged `spec: specfold-init#pnpm-workspaces` and `spec: specfold-migrate#workspace-globs`, and `#typescript-project` and `#source-globs` still pass
 - [ ] 5.2 `migrate start` writes `.specfold/migration/.gitignore` with `state.json` (B6)
   - Done when: the migrate tests pass with a test tagged `spec: specfold-migrate#state-not-committed`, and `#resumed-migration` still passes
