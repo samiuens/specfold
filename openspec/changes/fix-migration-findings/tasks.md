@@ -19,7 +19,7 @@ agent: implementer
 ```yaml
 files: [tools/specfold/src/hooks/install.ts, tools/specfold/src/hooks/claude.ts, tools/specfold/src/yaml.ts, tools/specfold/test/hooks-install.test.ts, tools/specfold/test/hooks-claude.test.ts, tools/specfold/test/fixtures/hooks/**]
 depends: []
-scenarios: [specfold-hooks#lefthook-formatting-kept, specfold-hooks#long-lefthook-command-kept, specfold-hooks#many-blocking-findings, specfold-hooks#unfinished-work]
+scenarios: [specfold-hooks#lefthook-formatting-kept, specfold-hooks#lefthook-in-use, specfold-hooks#long-lefthook-command-kept, specfold-hooks#many-blocking-findings, specfold-hooks#unfinished-work]
 agent: implementer
 ```
 
@@ -29,6 +29,10 @@ agent: implementer
   - Done when: the hooks-install tests pass with a pre-commit fixture whose other lines are unchanged byte for byte
 - [x] 2.3 `claude-stop` prints counts per rule, the first 10 findings and a "not shown" line when there are more than 20 blocking findings, and still exits 2 (B10)
   - Done when: `npx vitest run tools/specfold/test/hooks-claude.test.ts` passes with a test tagged `spec: specfold-hooks#many-blocking-findings`, and `#unfinished-work` still passes
+- [ ] 2.4 For flow-style and empty or null hook sections, `hooks install` replaces only that node's text (re-serialised) instead of refusing, in `lefthook.yml` and `.pre-commit-config.yaml`, and keeps every other line unchanged (verify F1)
+  - Done when: from `tools/specfold`, `npx vitest run test/hooks-install.test.ts` passes with tests for `pre-commit: { commands: {...} }`, `commands: {}`, `jobs: []`, a bare `pre-commit:` key and a flow-style pre-commit `repos`, each tagged `spec: specfold-hooks#lefthook-in-use` or `#lefthook-formatting-kept` as fits
+- [ ] 2.5 Point the code comments in `src/hooks/install.ts` and `src/yaml.ts` to `/decisions/splice-hook-manager-yaml.md` (verify F2)
+  - Done when: `node scripts/specfold.mjs gate --base main --local` shows no G16 warning for `tools/specfold/src/hooks/install.ts`
 
 ## 3. Index and log
 
@@ -90,6 +94,8 @@ agent: implementer
 ```
 
 - [x] 6.1 Rebuild the bundle, copy it to `template/scripts/specfold.mjs` and regenerate `template/.specfold/manifest.json`
+  - Done when: from `tools/specfold`, `npm run build` runs clean, `npx vitest run -u test/template-manifest.test.ts` regenerates `template/.specfold/manifest.json`, and `npm run check` and `npx vitest run` pass
+- [ ] 6.2 Rebuild the bundle after 2.4, copy it to `template/scripts/specfold.mjs` and regenerate `template/.specfold/manifest.json`
   - Done when: from `tools/specfold`, `npm run build` runs clean, `npx vitest run -u test/template-manifest.test.ts` regenerates `template/.specfold/manifest.json`, and `npm run check` and `npx vitest run` pass
 
 ## 7. Knowledge
