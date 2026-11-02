@@ -70,7 +70,7 @@ function hookManagerMentions(root: string): boolean {
     for (const f of readdirSync(husky)) files.push(join(husky, f));
   }
   return files.some(
-    (f) => existsSync(f) && statSync(f).isFile() && readFileSync(f, "utf8").includes("specfold hook"),
+    (f) => existsSync(f) && statSync(f).isFile() && /specfold(\.mjs)? hook/.test(readFileSync(f, "utf8")),
   );
 }
 
@@ -112,7 +112,7 @@ export function runChecks(env: DoctorEnv): Check[] {
   }
 
   const range = config?.requires.openspec ?? DEFAULT_OPENSPEC_RANGE;
-  const binary = openspecBinary(root);
+  const binary = openspecBinary(root ?? env.cwd);
   const useLocal = binary.source === "node_modules/.bin";
   const source = binary.source;
   const openspec = firstVersion(env.exec(binary.command, ["--version"], env.cwd));
