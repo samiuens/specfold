@@ -3,6 +3,7 @@
 ## 2026-11-02
 
 * **Change**: 2026-11-02-fix-migration-findings: created 1, updated 8, deprecated 0
+* **Retro**: fix-migration-findings: nothing asked too late, nothing guessed
 
 ## 2026-10-30
 
