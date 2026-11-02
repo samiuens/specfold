@@ -55,7 +55,7 @@ agent: implementer
   - Done when: `npx vitest run tools/specfold/test/log.test.ts` passes with a test tagged `spec: specfold-log#root-index-lists-the-new-log`, and `#first-entry` still passes
 - [x] 3.4 Fix the two biome errors in group 3's files: sort the imports in `src/log/command.ts` (`../indexes/command.ts` before `../indexes/generate.ts`) and use ` {2}` instead of two adjacent spaces in the regex on line 40 of `test/index-refs.test.ts`
   - Done when: from `tools/specfold`, `npx biome check src/log/command.ts test/index-refs.test.ts` reports no errors and `npx vitest run test/index-refs.test.ts test/log.test.ts` passes
-- [ ] 3.5 Restore the end-of-path boundary in `src/indexes/refs.ts`: each path in a pointer ends at a lookahead such as `(?![\w-])`, so `/docs/x.mdx` is not read as `/docs/x.md` (verify V4)
+- [x] 3.5 Restore the end-of-path boundary in `src/indexes/refs.ts`: each path in a pointer ends at a lookahead such as `(?![\w-])`, so `/docs/x.mdx` is not read as `/docs/x.md` (verify V4)
   - Done when: from `tools/specfold`, `npx vitest run test/index-refs.test.ts` passes with a test that `// see knowledge: /docs/x.mdx` is not a reference
 
 ## 4. New
