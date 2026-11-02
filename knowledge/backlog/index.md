@@ -3,6 +3,7 @@
 * [Agent permissions in specfold.yaml](agent-permissions-in-specfold-yaml.md) - Declare what agents may do on their own (push, open PRs, close PRs, delete branches) in Specfold and render it into each tool's permission settings.
 * [Check the Specfold name before publishing](name-and-trademark-check.md) - Check GitHub and trademark registers for Specfold before the kit repo or npm package goes public.
 * [Cost per change in stats](cost-per-change-in-stats.md) - specfold stats reports the tokens a change cost, so each person can tune their subagent limit; needs the agent tool's local transcripts.
+* [Council mode for review](council-mode-for-review.md) - At verify or plan approval, several reviewers on different models check a change independently; their findings are merged and deduplicated.
 * [Escaped pipes in brief tables](escaped-pipes-in-brief-tables.md) - The brief and knowledge table parser splits cells on an escaped pipe, which GFM allows inside a table cell.
 * [Evals for the framework itself](framework-evals.md) - Decide whether and how to evaluate Specfold's skills and agent roles with repeatable evals.
 * [Fix the parallel run findings](fix-the-parallel-run-findings.md) - Eight kit gaps found by the pattern-2 run: packets, branch names, the gate in a nested root, the verifier's base and sf-apply wording.
