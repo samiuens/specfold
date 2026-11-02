@@ -181,6 +181,17 @@ export function manifestText(kitVersion: string, ref: string | undefined, m: Man
   )}\n`;
 }
 
+/** Whether a line `@AGENTS.md` stands outside Specfold's managed block. */
+function importsAgentsOutside(text: string): boolean {
+  let inside = false;
+  for (const l of text.split("\n").map((x) => x.trim())) {
+    if (l === "<!-- specfold:start -->") inside = true;
+    else if (l === "<!-- specfold:end -->") inside = false;
+    else if (!inside && l === "@AGENTS.md") return true;
+  }
+  return false;
+}
+
 /** Installs the kit into `o.root` without overwriting anything the repository already has. */
 export function installKit(o: InstallOptions): InstallResult {
   preflight(o);
@@ -249,7 +260,13 @@ export function installKit(o: InstallOptions): InstallResult {
   for (const p of BLOCK_FILES) {
     if (p === "CLAUDE.md" && !claude) continue;
     const content = template(p);
-    if (merged(p, applyBlock(read(p), content, blockStyle(p)), "block")) manifest.blocks[p] = sha256(content);
+    const existing = read(p);
+    // a bare import outside the block already does the block's job; text outside the markers stays untouched
+    const body =
+      p === "CLAUDE.md" && existing !== undefined && importsAgentsOutside(existing)
+        ? content.replace(/^@AGENTS\.md\n+/m, "")
+        : content;
+    if (merged(p, applyBlock(existing, body, blockStyle(p)), "block")) manifest.blocks[p] = sha256(content);
     else if (previous.blocks[p]) manifest.blocks[p] = previous.blocks[p];
   }
   if (claude) {
