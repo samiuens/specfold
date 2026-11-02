@@ -19,7 +19,7 @@ agent: implementer
 ```yaml
 files: [tools/specfold/src/hooks/install.ts, tools/specfold/src/hooks/claude.ts, tools/specfold/src/yaml.ts, tools/specfold/test/hooks-install.test.ts, tools/specfold/test/hooks-claude.test.ts, tools/specfold/test/fixtures/hooks/**]
 depends: []
-scenarios: [specfold-hooks#lefthook-formatting-kept, specfold-hooks#lefthook-in-use, specfold-hooks#long-lefthook-command-kept, specfold-hooks#many-blocking-findings, specfold-hooks#unfinished-work]
+scenarios: [specfold-hooks#lefthook-formatting-kept, specfold-hooks#lefthook-in-use, specfold-hooks#long-lefthook-command-kept, specfold-hooks#flow-style-hook-section-filled-in-place, specfold-hooks#empty-pre-commit-sections-filled-in-place, specfold-hooks#crlf-line-endings-kept, specfold-hooks#many-blocking-findings, specfold-hooks#unfinished-work]
 agent: implementer
 ```
 
@@ -33,6 +33,10 @@ agent: implementer
   - Done when: from `tools/specfold`, `npx vitest run test/hooks-install.test.ts` passes with tests for `pre-commit: { commands: {...} }`, `commands: {}`, `jobs: []`, a bare `pre-commit:` key and a flow-style pre-commit `repos`, each tagged `spec: specfold-hooks#lefthook-in-use` or `#lefthook-formatting-kept` as fits
 - [x] 2.5 Point the code comments in `src/hooks/install.ts` and `src/yaml.ts` to `/decisions/splice-hook-manager-yaml.md` (verify F2)
   - Done when: `node scripts/specfold.mjs gate --base main --local` shows no G16 warning for `tools/specfold/src/hooks/install.ts`
+- [ ] 2.6 Retag the tests that fill a flow-style or empty node: lefthook ones cite `spec: specfold-hooks#flow-style-hook-section-filled-in-place`, pre-commit ones cite `#empty-pre-commit-sections-filled-in-place` instead of a lefthook scenario (verify V2)
+  - Done when: from `tools/specfold`, `npx vitest run test/hooks-install.test.ts` passes, a test is tagged with each of the two new scenarios, and no flow-style or empty-node test and no pre-commit test cites `#lefthook-formatting-kept` or `#lefthook-in-use`
+- [ ] 2.7 In `src/hooks/install.ts`, `repos: []` leaves no trailing whitespace, a null `default_install_hook_types:` is filled instead of refused, and inserted text uses the file's line ending (verify V3)
+  - Done when: from `tools/specfold`, `npx vitest run test/hooks-install.test.ts` passes with a test for each of the three cases, the first two tagged `spec: specfold-hooks#empty-pre-commit-sections-filled-in-place` and the CRLF one tagged `#crlf-line-endings-kept`
 
 ## 3. Index and log
 
@@ -51,6 +55,8 @@ agent: implementer
   - Done when: `npx vitest run tools/specfold/test/log.test.ts` passes with a test tagged `spec: specfold-log#root-index-lists-the-new-log`, and `#first-entry` still passes
 - [x] 3.4 Fix the two biome errors in group 3's files: sort the imports in `src/log/command.ts` (`../indexes/command.ts` before `../indexes/generate.ts`) and use ` {2}` instead of two adjacent spaces in the regex on line 40 of `test/index-refs.test.ts`
   - Done when: from `tools/specfold`, `npx biome check src/log/command.ts test/index-refs.test.ts` reports no errors and `npx vitest run test/index-refs.test.ts test/log.test.ts` passes
+- [ ] 3.5 Restore the end-of-path boundary in `src/indexes/refs.ts`: each path in a pointer ends at a lookahead such as `(?![\w-])`, so `/docs/x.mdx` is not read as `/docs/x.md` (verify V4)
+  - Done when: from `tools/specfold`, `npx vitest run test/index-refs.test.ts` passes with a test that `// see knowledge: /docs/x.mdx` is not a reference
 
 ## 4. New
 
@@ -97,6 +103,8 @@ agent: implementer
   - Done when: from `tools/specfold`, `npm run build` runs clean, `npx vitest run -u test/template-manifest.test.ts` regenerates `template/.specfold/manifest.json`, and `npm run check` and `npx vitest run` pass
 - [x] 6.2 Rebuild the bundle after 2.4, copy it to `template/scripts/specfold.mjs` and regenerate `template/.specfold/manifest.json`
   - Done when: from `tools/specfold`, `npm run build` runs clean, `npx vitest run -u test/template-manifest.test.ts` regenerates `template/.specfold/manifest.json`, and `npm run check` and `npx vitest run` pass
+- [ ] 6.3 Rebuild the bundle after 2.6-3.5, copy it to `template/scripts/specfold.mjs` and regenerate `template/.specfold/manifest.json`
+  - Done when: from `tools/specfold`, `npm run build` runs clean, `npx vitest run -u test/template-manifest.test.ts` regenerates `template/.specfold/manifest.json`, and `npm run check` and `npx vitest run` pass
 
 ## 7. Knowledge
 
@@ -109,6 +117,8 @@ agent: knowledge-curator
 
 - [x] 7.1 Write the concepts listed in knowledge.md
   - Done when: `node scripts/specfold.mjs validate` exits 0
+- [ ] 7.2 `knowledge/conventions/code-comments.md` mentions the comma-separated list form of a pointer, like the template convention it sources (verify V5)
+  - Done when: `node scripts/specfold.mjs gate --base main --local` shows no G16 warning for `template/knowledge/conventions/code-comments.md`, and `node scripts/specfold.mjs validate` exits 0
 
 ## Workflow follow-up
 

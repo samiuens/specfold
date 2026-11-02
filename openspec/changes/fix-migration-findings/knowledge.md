@@ -30,6 +30,10 @@ ops:
     path: capabilities/specfold-init.md
     type: Capability
     summary: Source globs are detected from package.json and pnpm workspaces before the fixed folder list.
+  - op: update
+    path: conventions/code-comments.md
+    type: Convention
+    summary: A see knowledge pointer may list several comma-separated paths, as the shipped convention allows.
   - op: create
     path: decisions/splice-hook-manager-yaml.md
     type: Decision
