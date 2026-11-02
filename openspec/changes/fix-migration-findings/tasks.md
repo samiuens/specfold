@@ -45,7 +45,7 @@ agent: implementer
   - Done when: `template/knowledge/conventions/code-comments.md` shows the list form and `node scripts/specfold.mjs validate --bundle template/knowledge` reports no errors
 - [x] 3.3 When `log add` creates `log.md`, it rewrites the root `index.md` and names both files in its output (B2, CLI part)
   - Done when: `npx vitest run tools/specfold/test/log.test.ts` passes with a test tagged `spec: specfold-log#root-index-lists-the-new-log`, and `#first-entry` still passes
-- [ ] 3.4 Fix the two biome errors in group 3's files: sort the imports in `src/log/command.ts` (`../indexes/command.ts` before `../indexes/generate.ts`) and use ` {2}` instead of two adjacent spaces in the regex on line 40 of `test/index-refs.test.ts`
+- [x] 3.4 Fix the two biome errors in group 3's files: sort the imports in `src/log/command.ts` (`../indexes/command.ts` before `../indexes/generate.ts`) and use ` {2}` instead of two adjacent spaces in the regex on line 40 of `test/index-refs.test.ts`
   - Done when: from `tools/specfold`, `npx biome check src/log/command.ts test/index-refs.test.ts` reports no errors and `npx vitest run test/index-refs.test.ts test/log.test.ts` passes
 
 ## 4. New

@@ -33,10 +33,13 @@ describe("index: code references", () => {
   it("lists a concept for every path in one pointer", async () => {
     const repo = tempDir("index/repo");
     mkdirSync(join(repo, "src/pay"), { recursive: true });
-    writeFileSync(join(repo, "src/pay/multi.ts"), "// see knowledge: /decisions/a-first.md, /decisions/b-second.md - both\n");
+    writeFileSync(
+      join(repo, "src/pay/multi.ts"),
+      "// see knowledge: /decisions/a-first.md, /decisions/b-second.md - both\n",
+    );
     await run(["index"], repo);
     const index = readFileSync(join(repo, "knowledge/decisions/index.md"), "utf8");
     expect(index).toContain("  * Referenced from code: src/pay/multi.ts:1\n");
-    expect(index).toMatch(/\(b-second\.md\)[^\n]*\n  \* Referenced from code: src\/pay\/multi\.ts:1/);
+    expect(index).toMatch(/\(b-second\.md\)[^\n]*\n {2}\* Referenced from code: src\/pay\/multi\.ts:1/);
   });
 });
