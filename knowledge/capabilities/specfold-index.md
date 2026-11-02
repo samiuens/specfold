@@ -25,6 +25,7 @@ Indexes also connect code and knowledge: `see knowledge:` comments in files matc
 - Folder titles and descriptions live in `specfold.yaml` under `folders`, because folder indexes may not carry frontmatter in OKF.
 - Deprecated concepts stay listed and marked, so agents see them but know not to rely on them.
 - A reference to a missing concept only warns here; blocking is gate rule G14.
+- A `see knowledge:` pointer may list several comma-separated paths, and every path is indexed under its concept.
 
 # Related
 

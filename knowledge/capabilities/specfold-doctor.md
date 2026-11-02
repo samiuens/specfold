@@ -28,6 +28,7 @@ An old Node, a missing or incompatible OpenSpec, git hooks that were never insta
 - D3 prefers a repository-local `node_modules/.bin/openspec` over the PATH (change `update-doctor-local-openspec`), so Node repos that pin OpenSpec as a dev dependency, like the kit itself, are checked against the version they really use.
 - D7 reads the rules GitHub applies to the default branch (`gh api repos/<repo>/rules/branches/<branch>`), which covers every ruleset, Specfold's or the team's. It warns while none requires `specfold-gate`, and names `gate require` as the fix. Without gh, a login or a GitHub remote it is `ok` with "not checked", so doctor stays usable offline. Classic branch protection isn't read, so a repository that requires the check only that way sees a warning (change `add-gate-require`).
 - Checks run against an injected environment, so every case is testable without installing tools in particular versions.
+- D3 also finds `node_modules/.bin/openspec` in the current directory when there is no `specfold.yaml` yet, and D4 counts `specfold.mjs hook` entries in a hook manager's config as installed hooks (change `fix-migration-findings`).
 
 # Related
 

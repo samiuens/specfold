@@ -59,6 +59,7 @@ Bringing an existing repository into the kit touches many files at once ([migrat
 - **YAML rewrites keep long lines.** The OpenSpec config merge re-serializes the file only after a real edit, and then without folding: the `yaml` library would fold long lines at 80 characters by default, so every YAML rewrite in the CLI writes without folding (found in the sample app's upgrade to rc.2).
 - **Upgrade PRs are opt-in here too.** `install --upgrade-workflow` turns on the weekly workflow like init does, and `sf-migrate` asks about it before install. A later install without the flag keeps a workflow that was turned on ([turn on upgrade PRs](/runbooks/turn-on-upgrade-prs.md)).
 - **The skill drives it.** `sf-migrate` calls the subcommands in order and does the judgment between them; the recorded runs in `examples/migrations/` show both on the two fixtures.
+- **State stays out of git.** `migrate start` writes `.specfold/migration/.gitignore` listing `state.json`. The CLAUDE.md managed block leaves out its `@AGENTS.md` import when the text outside the markers already has one.
 
 # Related
 
