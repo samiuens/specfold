@@ -138,3 +138,11 @@ Specfold is built with Specfold: the kit's own knowledge and specs live at the r
 | `examples/sample-app/` | a worked example, upgraded from each release |
 | `brand/` | logo, colour and type tokens, diagram style and sources, social preview |
 | `docs/` | the guides; `docs/plan.md` is the historical build brief |
+
+## Contributing
+
+Issues and pull requests are welcome; read [Contributing](CONTRIBUTING.md) first. Report vulnerabilities privately, as [Security](SECURITY.md) describes.
+
+## License
+
+[MIT](LICENSE). The files under `template/`, which are copied into your repository, are MIT-0: you can use them without keeping any notice.
