@@ -1,6 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { scanReferences } from "../src/indexes/refs.ts";
 import { run, tempDir } from "./helpers.ts";
 
 describe("index: code references", () => {
@@ -41,5 +42,13 @@ describe("index: code references", () => {
     const index = readFileSync(join(repo, "knowledge/decisions/index.md"), "utf8");
     expect(index).toContain("  * Referenced from code: src/pay/multi.ts:1\n");
     expect(index).toMatch(/\(b-second\.md\)[^\n]*\n {2}\* Referenced from code: src\/pay\/multi\.ts:1/);
+  });
+
+  it("does not read /docs/x.mdx as a reference to /docs/x.md", () => {
+    const repo = tempDir("index/repo");
+    mkdirSync(join(repo, "src/pay"), { recursive: true });
+    writeFileSync(join(repo, "src/pay/mdx.ts"), "// see knowledge: /docs/x.mdx\n");
+    const refs = scanReferences(repo, ["src/**"]);
+    expect(refs.filter((r) => r.file === "src/pay/mdx.ts")).toEqual([]);
   });
 });

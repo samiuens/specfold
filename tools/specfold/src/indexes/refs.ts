@@ -4,7 +4,7 @@ import { globToRegExp, walkFiles } from "../glob.ts";
 
 const MAX_BYTES = 1024 * 1024;
 // comma-separated bundle-absolute .md paths; the label after " - " ends the list
-const PATH = String.raw`\/[^\s"'\`),]+\.md`;
+const PATH = String.raw`\/[^\s"'\`),]+\.md(?![\w-])`;
 const REFERENCE = new RegExp(String.raw`see knowledge:\s+(${PATH}(?:\s*,\s*${PATH})*)`, "g");
 
 export interface CodeReference {
