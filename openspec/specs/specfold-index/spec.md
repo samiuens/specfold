@@ -85,7 +85,7 @@ An index of a folder without concepts or subfolders SHALL contain only a `# <fol
 - **THEN** its index reads `# Runbooks`, an empty line and `No concepts yet.`
 
 ### Requirement: Code references
-The command SHALL scan files matching `source_globs` in `specfold.yaml` for `see knowledge: <path>` (bundle-absolute path to a `.md` file, optionally followed by ` - <label>`) and list each reference under the referenced concept's entry as `  * Referenced from code: <repo-relative path>:<line>`, sorted by path and line.
+The command SHALL scan files matching `source_globs` in `specfold.yaml` for `see knowledge: <path>` (bundle-absolute path to a `.md` file, optionally followed by ` - <label>`), where further paths may follow the first, each after a comma, and list each referenced path under its concept's entry as `  * Referenced from code: <repo-relative path>:<line>`, sorted by path and line.
 
 #### Scenario: Reference listed
 - **WHEN** `src/checkout.ts` line 12 contains `// see knowledge: /decisions/guest-orders.md`
@@ -94,6 +94,10 @@ The command SHALL scan files matching `source_globs` in `specfold.yaml` for `see
 #### Scenario: Reference to a missing concept
 - **WHEN** a source file references `/decisions/missing.md`
 - **THEN** the command reports a warning with the source location and the exit code is unaffected
+
+#### Scenario: Several paths in one pointer
+- **WHEN** `src/checkout.ts` line 12 contains `// see knowledge: /decisions/guest-orders.md, /domain/guest.md - guests`
+- **THEN** the entries for both `guest-orders.md` and `guest.md` have a nested line `  * Referenced from code: src/checkout.ts:12`
 
 ### Requirement: Deterministic output
 Generated indexes SHALL be UTF-8 with LF line endings, exactly one trailing newline, one blank line between blocks, and no timestamps or other run-dependent content, so the same input always produces byte-identical files.

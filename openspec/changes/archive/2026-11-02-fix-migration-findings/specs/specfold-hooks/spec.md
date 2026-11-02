@@ -1,7 +1,16 @@
+## ADDED Requirements
+
+### Requirement: Claude stop summary
+When `specfold hook claude-stop` blocks with more than 20 blocking findings, it SHALL print the count per rule and the first 10 findings, followed by a line naming how many findings it did not show, instead of every finding.
+
+#### Scenario: Many blocking findings
+- **WHEN** Claude tries to stop while the local gate reports 214 blocking findings, 200 of them G1 and 14 of them G2
+- **THEN** stderr shows `G1: 200` and `G2: 14`, the first 10 findings, and a line naming the 204 findings not shown, and the command exits with 2
+
 ## MODIFIED Requirements
 
 ### Requirement: Claude stop
-`specfold hook claude-stop` SHALL run the local gate against the same base as the pre-push hook and, when a blocking rule fails, print the blocking findings to stderr and exit with 2, also when the event says a Stop hook is already active; otherwise, or when no base resolves, exit with 0. G15 findings for scenarios of changes not yet archived SHALL NOT block: they go to stderr marked as not blocking. With more than 20 blocking findings, it SHALL print the count per rule and the first 10 findings instead of every finding.
+`specfold hook claude-stop` SHALL run the local gate against the same base as the pre-push hook and, when a blocking rule fails, print the blocking findings to stderr and exit with 2, also when the event says a Stop hook is already active; otherwise, or when no base resolves, exit with 0. G15 findings for scenarios of changes not yet archived SHALL NOT block: they go to stderr marked as not blocking.
 
 #### Scenario: Unfinished work
 - **WHEN** Claude tries to stop while a touched change has an unconfirmed brief
@@ -14,10 +23,6 @@
 #### Scenario: Scenario without a test in an archived change
 - **WHEN** Claude tries to stop while a change archived on the branch has a scenario no test names
 - **THEN** the G15 finding goes to stderr and the command exits with 2
-
-#### Scenario: Many blocking findings
-- **WHEN** Claude tries to stop while the local gate reports 214 blocking findings, 200 of them G1 and 14 of them G2
-- **THEN** stderr shows `G1: 200` and `G2: 14`, the first 10 findings, and a line naming the 204 findings not shown, and the command exits with 2
 
 ### Requirement: Hook manager files keep long lines
 When `specfold hooks install` adds its entries to `lefthook.yml` or `.pre-commit-config.yaml`, it SHALL keep the text of every line it does not need to change as it was, including long lines, flow sequences, block scalars and line endings. It MAY rewrite only `default_install_hook_types` when a hook type is missing from it, and a hook section, its `commands` or `jobs`, or pre-commit `repos` that is in flow style, empty or null; then only that node's text changes.
