@@ -3,8 +3,9 @@ import { join } from "node:path";
 import { globToRegExp, walkFiles } from "../glob.ts";
 
 const MAX_BYTES = 1024 * 1024;
-// bundle-absolute path to a .md file; the label after " - " is ignored
-const REFERENCE = /see knowledge:\s+(\/[^\s"'`)]+\.md)\b/g;
+// comma-separated bundle-absolute .md paths; the label after " - " ends the list
+const PATH = String.raw`\/[^\s"'\`),]+\.md`;
+const REFERENCE = new RegExp(String.raw`see knowledge:\s+(${PATH}(?:\s*,\s*${PATH})*)`, "g");
 
 export interface CodeReference {
   /** Bundle-relative concept path, without the leading slash. */
@@ -27,7 +28,9 @@ export function scanReferences(repoRoot: string, sourceGlobs: string[]): CodeRef
     if (text.includes("\0")) continue;
     text.split("\n").forEach((content, i) => {
       for (const match of content.matchAll(REFERENCE)) {
-        refs.push({ concept: (match[1] ?? "").slice(1), file, line: i + 1 });
+        for (const path of (match[1] ?? "").split(",")) {
+          refs.push({ concept: path.trim().slice(1), file, line: i + 1 });
+        }
       }
     });
   }
