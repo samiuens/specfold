@@ -117,7 +117,7 @@ agent: knowledge-curator
 
 - [x] 7.1 Write the concepts listed in knowledge.md
   - Done when: `node scripts/specfold.mjs validate` exits 0
-- [ ] 7.2 `knowledge/conventions/code-comments.md` mentions the comma-separated list form of a pointer, like the template convention it sources (verify V5)
+- [x] 7.2 `knowledge/conventions/code-comments.md` mentions the comma-separated list form of a pointer, like the template convention it sources (verify V5)
   - Done when: `node scripts/specfold.mjs gate --base main --local` shows no G16 warning for `template/knowledge/conventions/code-comments.md`, and `node scripts/specfold.mjs validate` exits 0
 
 ## Workflow follow-up

@@ -12,7 +12,7 @@ sources:
 
 # Convention
 
-The kit's TypeScript and scripts follow the same rule the template ships to user repos: comments stay short, and rationale, history and rejected alternatives live in `knowledge/`, referenced with `// see knowledge: /<path>.md`. The convention's full text lives once, in `template/knowledge/conventions/code-comments.md` (linked as the source), so it is not repeated here.
+The kit's TypeScript and scripts follow the same rule the template ships to user repos: comments stay short, and rationale, history and rejected alternatives live in `knowledge/`, referenced with `// see knowledge: /<path>.md`; one comment covering several concepts lists the paths separated by commas. The convention's full text lives once, in `template/knowledge/conventions/code-comments.md` (linked as the source), so it is not repeated here.
 
 The kit's `source_globs` cover the CLI source, the build script, `scripts/` and the template's top-level and `openspec/` files. Template knowledge is left out, so the convention's example reference is not read as kit code.
 
