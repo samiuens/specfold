@@ -32,7 +32,7 @@
   * Referenced from code: tools/specfold/src/hooks/install.ts:123
   * Referenced from code: tools/specfold/src/hooks/install.ts:156
   * Referenced from code: tools/specfold/src/hooks/install.ts:267
-  * Referenced from code: tools/specfold/src/yaml.ts:57
+  * Referenced from code: tools/specfold/src/yaml.ts:58
 * [The brand is Ink & Vermilion](brand-ink-and-vermilion.md) - Specfold's visual identity: warm paper, near-black ink, one vermilion accent, a two-sheet mark, IBM Plex Sans and JetBrains Mono; kit only.
 * [The framework is called Specfold](naming-specfold.md) - Specfold replaces the working names (kb, okf-openspec-kit); the CLI is specfold with alias sf, skills use the sf- prefix.
 * [Tool-neutral first, Claude Code extras on top](tool-neutral-first.md) - The workflow runs on AGENTS.md, .agents/skills/, the CLI and CI; Claude Code hooks, subagents and skills are additions.
