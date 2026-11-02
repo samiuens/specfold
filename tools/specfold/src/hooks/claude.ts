@@ -15,6 +15,9 @@ import type { HookContext } from "./run.ts";
 
 const MAX_LINES = 40;
 const DUE_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+/** Above this many blocking findings the Stop hook prints counts and the first few only. */
+const MANY_FINDINGS = 20;
+const SHOWN_FINDINGS = 10;
 const EDIT_TOOLS = new Set(["Edit", "Write"]);
 
 const activeChanges = (root: string): string[] => {
@@ -132,8 +135,23 @@ export function stop({ config, io }: HookContext): number {
         .join(""),
     );
   if (blocking.length === 0) return 0;
-  io.stderr(renderGate(blocking));
+  io.stderr(blockingReport(blocking));
   return 2;
+}
+
+/** The blocking findings as the Stop hook prints them; above 20, counts per rule, the first 10 and how many are left out. */
+export function blockingReport(blocking: GateFinding[]): string {
+  if (blocking.length <= MANY_FINDINGS) return renderGate(blocking);
+  const counts = new Map<string, number>();
+  for (const f of blocking) counts.set(f.rule, (counts.get(f.rule) ?? 0) + 1);
+  const shown = renderGate(blocking.slice(0, SHOWN_FINDINGS)).trimEnd().split("\n").slice(0, -1);
+  const rest = blocking.length - SHOWN_FINDINGS;
+  return `${[
+    `gate: blocked, ${blocking.length} blocking findings`,
+    ...[...counts].map(([rule, n]) => `${rule}: ${n}`),
+    ...shown,
+    `${rest} more blocking findings not shown; run the local gate for the full list`,
+  ].join("\n")}\n`;
 }
 
 const PUSH_REASON = "pushing and pull requests are the orchestrator's job; return your branch name instead";

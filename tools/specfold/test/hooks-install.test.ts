@@ -69,6 +69,18 @@ describe("hooks install: built-in", () => {
   });
 });
 
+/** Whether every line of `before` is in `after`, in the same order, with only new lines between them. */
+const keptInOrder = (before: string, after: string) => {
+  const rest = after.split("\n");
+  let at = 0;
+  for (const line of before.split("\n")) {
+    const found = rest.indexOf(line, at);
+    if (found === -1) return false;
+    at = found + 1;
+  }
+  return true;
+};
+
 describe("hooks install: hook managers", () => {
   // spec: specfold-hooks#lefthook-in-use
   it("adds one specfold command per hook to lefthook.yml, once", async () => {
@@ -102,6 +114,33 @@ describe("hooks install: hook managers", () => {
     expect(readFileSync(join(root, "lefthook.yml"), "utf8")).toContain(`      run: ${command}\n`);
   });
 
+  // spec: specfold-hooks#lefthook-formatting-kept
+  it("keeps flow lists, folded scalars, comments and blank lines of lefthook.yml", async () => {
+    const root = repo();
+    const before = readFileSync(new URL("./fixtures/hooks/lefthook-formatted.yml", import.meta.url), "utf8");
+    write(root, "lefthook.yml", before);
+    expect((await run(["hooks", "install"], root)).code).toBe(0);
+    const after = readFileSync(join(root, "lefthook.yml"), "utf8");
+    expect(keptInOrder(before, after)).toBe(true);
+    expect(after).toContain('      glob: ["*.ts", "*.tsx"]\n      run: >-\n        npx eslint\n');
+    expect(after).toContain("    - name: specfold\n      run: node scripts/specfold.mjs hook pre-push {0}\n");
+    expect(after).toContain(
+      "    deps:\n      run: npm ci\n    specfold:\n      run: node scripts/specfold.mjs hook post-checkout {0}\n",
+    );
+    expect(after.match(/hook pre-commit \{0\}/g)).toHaveLength(1);
+    await run(["hooks", "install"], root);
+    expect(readFileSync(join(root, "lefthook.yml"), "utf8")).toBe(after);
+  });
+
+  it("writes nothing when a hook is in a form it does not edit", async () => {
+    const root = repo();
+    const before = "pre-commit: {commands: {lint: {run: x}}}\n";
+    write(root, "lefthook.yml", before);
+    const result = await run(["hooks", "install"], root);
+    expect(result.code).toBe(2);
+    expect(readFileSync(join(root, "lefthook.yml"), "utf8")).toBe(before);
+  });
+
   // spec: specfold-hooks#husky-in-use
   it("appends a line to each husky hook", async () => {
     const root = repo();
@@ -116,6 +155,32 @@ describe("hooks install: hook managers", () => {
       'node scripts/specfold.mjs hook post-merge "$@"\n',
     );
     expect(hooksPath(root)).toBe(".husky/_");
+  });
+
+  it("leaves every other line of .pre-commit-config.yaml as it was", async () => {
+    const root = repo();
+    const fixture = new URL("./fixtures/hooks/pre-commit-formatted.yaml", import.meta.url);
+    const before = readFileSync(fixture, "utf8");
+    write(root, ".pre-commit-config.yaml", before);
+    expect((await run(["hooks", "install"], root)).code).toBe(0);
+    const after = readFileSync(join(root, ".pre-commit-config.yaml"), "utf8");
+    const rewritten = "default_install_hook_types: [pre-commit, pre-push]";
+    expect(
+      keptInOrder(
+        before
+          .split("\n")
+          .filter((l) => !l.startsWith(rewritten))
+          .join("\n"),
+        after,
+      ),
+    ).toBe(true);
+    expect(after).toContain(
+      "default_install_hook_types: [ pre-commit, pre-push, post-checkout, post-merge ]   # keep\n",
+    );
+    expect(after.match(/repo: local/g)).toHaveLength(2);
+    expect(after).toContain("      - id: specfold-post-merge\n");
+    await run(["hooks", "install"], root);
+    expect(readFileSync(join(root, ".pre-commit-config.yaml"), "utf8")).toBe(after);
   });
 
   it("adds a local repo to the pre-commit configuration, once", async () => {

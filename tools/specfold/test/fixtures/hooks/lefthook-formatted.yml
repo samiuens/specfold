@@ -1,0 +1,27 @@
+# team hooks
+pre-commit:
+  parallel: true   # run side by side
+  commands:
+    lint:
+      glob: ["*.ts", "*.tsx"]
+      run: >-
+        npx eslint
+        --max-warnings 0
+        {staged_files}
+    fmt:
+      run: npx prettier --check .
+
+# slow checks
+pre-push:
+  jobs:
+    - name: test
+      glob: ["*.ts"]
+      run: npm test
+
+    - name: types
+      run: npx tsc --noEmit  # strict
+
+post-checkout:
+  commands:
+    deps:
+      run: npm ci

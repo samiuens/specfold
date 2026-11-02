@@ -1,8 +1,20 @@
 import { chmodSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import type { GateFinding } from "../src/gate/rules.ts";
+import { blockingReport } from "../src/hooks/claude.ts";
 import { commit, concept, demoChange, gateRepo, git, write, writeIndexes } from "./gate-helpers.ts";
 import { run } from "./helpers.ts";
+
+const blocking = (rule: string, n: number): GateFinding[] =>
+  Array.from({ length: n }, (_, i) => ({
+    rule,
+    effect: "block",
+    path: `knowledge/c${i}.md`,
+    line: 1,
+    message: `${rule} problem ${i}`,
+    fix: "fix it",
+  }));
 
 const event = (root: string, tool: string, file: string) =>
   JSON.stringify({
@@ -112,6 +124,32 @@ describe("hook: Claude Code", () => {
       ),
     });
     expect(await run(["hook", "claude-stop"], root, stdin)).toEqual({ code: 0, stdout: "", stderr: "" });
+  });
+
+  // spec: specfold-hooks#many-blocking-findings
+  it("reports 214 blocking findings as counts per rule and the first 10", () => {
+    const report = blockingReport([...blocking("G1", 200), ...blocking("G2", 14)]);
+    expect(report).toContain("G1: 200\n");
+    expect(report).toContain("G2: 14\n");
+    expect(report.match(/^block G1 /gm)).toHaveLength(10);
+    expect(report).toContain("G1 problem 9\n");
+    expect(report).not.toContain("G1 problem 10\n");
+    expect(report).toContain("204 more blocking findings not shown");
+    expect(blockingReport(blocking("G1", 20))).toContain("gate: blocked by G1 (20 blocking findings");
+  });
+
+  // spec: specfold-hooks#many-blocking-findings
+  it("exits with 2 and prints the summary when many concepts are broken", async () => {
+    const root = gateRepo();
+    write(root, "node_modules/.bin/openspec", "#!/bin/sh\necho '{\"itemFindings\": []}'\n");
+    chmodSync(join(root, "node_modules/.bin/openspec"), 0o755);
+    git(root, "update-ref", "refs/remotes/origin/main", "main");
+    for (let i = 0; i < 30; i++) write(root, `knowledge/domain/broken-${i}.md`, "---\ntitle: broken\n---\n");
+    const result = await run(["hook", "claude-stop"], root, JSON.stringify({ hook_event_name: "Stop" }));
+    expect(result.code).toBe(2);
+    expect(result.stderr).toMatch(/^G1: \d+$/m);
+    expect(result.stderr).toMatch(/\d+ more blocking findings not shown/);
+    expect(result.stderr.match(/^block /gm)?.length).toBe(10);
   });
 
   /** A branch carrying the `demo` change without the test for its scenario, moved to `dir`. */
