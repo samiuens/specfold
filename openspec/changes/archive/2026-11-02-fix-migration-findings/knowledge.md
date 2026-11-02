@@ -43,4 +43,4 @@ empty_reason: ""
 
 ## Notes
 
-All fixes come from the Atrium migration feedback (v0.2.1). The existing-bundle migration path is recorded as the deferred commitment `/commitments/migrate-an-existing-okf-bundle.md`, and the remaining ideas as backlog items.
+All fixes come from the feedback on the first real migration (v0.2.1). The existing-bundle migration path is recorded as the deferred commitment `/commitments/migrate-an-existing-okf-bundle.md`, and the remaining ideas as backlog items.

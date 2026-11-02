@@ -6,12 +6,12 @@ status: draft
 state: open
 priority: medium
 origin: interview
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T09:55:31+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T13:41:33+01:00 }
 ---
 
 # Idea
 
-`specfold validate --summary` prints finding counts per rule and per folder instead of every finding. On Atrium's old bundle `validate` printed 214 findings in about 400 lines, and each conversion subagent had to grep the full output for its own files.
+`specfold validate --summary` prints finding counts per rule and per folder instead of every finding. On the first real migration's old bundle `validate` printed some 200 findings in hundreds of lines, and each conversion subagent had to grep the full output for its own files.
 
 # Why it waits
 
