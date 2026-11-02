@@ -35,7 +35,7 @@ agent: implementer
   - Done when: `node scripts/specfold.mjs gate --base main --local` shows no G16 warning for `tools/specfold/src/hooks/install.ts`
 - [x] 2.6 Retag the tests that fill a flow-style or empty node: lefthook ones cite `spec: specfold-hooks#flow-style-hook-section-filled-in-place`, pre-commit ones cite `#empty-pre-commit-sections-filled-in-place` instead of a lefthook scenario (verify V2)
   - Done when: from `tools/specfold`, `npx vitest run test/hooks-install.test.ts` passes, a test is tagged with each of the two new scenarios, and no flow-style or empty-node test and no pre-commit test cites `#lefthook-formatting-kept` or `#lefthook-in-use`
-- [ ] 2.7 In `src/hooks/install.ts`, `repos: []` leaves no trailing whitespace, a null `default_install_hook_types:` is filled instead of refused, and inserted text uses the file's line ending (verify V3)
+- [x] 2.7 In `src/hooks/install.ts`, `repos: []` leaves no trailing whitespace, a null `default_install_hook_types:` is filled instead of refused, and inserted text uses the file's line ending (verify V3)
   - Done when: from `tools/specfold`, `npx vitest run test/hooks-install.test.ts` passes with a test for each of the three cases, the first two tagged `spec: specfold-hooks#empty-pre-commit-sections-filled-in-place` and the CRLF one tagged `#crlf-line-endings-kept`
 
 ## 3. Index and log

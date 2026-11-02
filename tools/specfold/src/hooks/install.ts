@@ -296,7 +296,7 @@ function preCommitEntries(config: Config): InstallAction[] {
     } else if (!doc.has("repos")) {
       splice.append(yamlBlock({ repos: local }, 0));
     } else if (isSeq(repos) && repos.items.length === 0) {
-      splice.replace(repos, `\n${yamlBlock(local, columnOf(source, repos) + 2)}`);
+      splice.fill(repos, yamlBlock(local, columnOf(source, repos) + 2));
     } else if (isSeq(repos) && !repos.flow) {
       splice.after(repos, yamlBlock(local, columnOf(source, repos.items[0])));
     } else if (
@@ -310,15 +310,22 @@ function preCommitEntries(config: Config): InstallAction[] {
   }
   // pre-commit installs only the hook types listed here, [pre-commit] when the key is missing
   const listed = doc.get("default_install_hook_types", true);
-  if (doc.has("default_install_hook_types") && !isSeq(listed))
+  const emptyTypes = isScalar(listed) && listed.value === null;
+  if (doc.has("default_install_hook_types") && !isSeq(listed) && !emptyTypes)
     throw byHand(PRE_COMMIT_FILE, "'default_install_hook_types'");
   const types = isSeq(listed) ? listed.items.map((t) => String(isScalar(t) ? t.value : t)) : ["pre-commit"];
   const added = hookNames(config).filter((h) => !types.includes(h));
   if (added.length > 0) {
-    if (!isSeq(listed)) splice.append(`default_install_hook_types: ${flowText([...types, ...added])}`);
+    if (emptyTypes) {
+      const all = [...types, ...added];
+      grow({ doc, splice, source }, doc.contents, "default_install_hook_types", all, () => undefined);
+    } else if (!isSeq(listed)) splice.append(`default_install_hook_types: ${flowText([...types, ...added])}`);
     else if (listed.flow || listed.items.length === 0) splice.replace(listed, flowText([...types, ...added]));
     else splice.after(listed, yamlBlock(added, columnOf(source, listed.items[0])));
-    actions.push({ path: PRE_COMMIT_FILE, action: `install hook types ${added.join(", ")}` });
+    actions.push({
+      path: PRE_COMMIT_FILE,
+      action: `install hook types ${added.join(", ")}`,
+    });
   }
   if (actions.length === 0) return actions;
   splice.commit((check) => {
@@ -348,7 +355,11 @@ export function installHooks(config: Config): InstallResult {
   if (!manager) return installBuiltIn(config);
   if (manager.name === "lefthook") {
     const actions = lefthookEntries(config, manager.path);
-    return { manager: "lefthook", actions, next: actions.length > 0 ? "run lefthook install" : null };
+    return {
+      manager: "lefthook",
+      actions,
+      next: actions.length > 0 ? "run lefthook install" : null,
+    };
   }
   if (manager.name === "husky") return { manager: "husky", actions: huskyEntries(config), next: null };
   const actions = preCommitEntries(config);
