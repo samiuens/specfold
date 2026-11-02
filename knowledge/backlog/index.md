@@ -15,7 +15,10 @@
 * [Native CLI instead of Node](native-cli-instead-of-node.md) - Compare a compiled CLI (Go, Rust or a Bun-compiled binary) with the bundled scripts/specfold.mjs: install, size, platforms and the upgrade hand-off.
 * [Pitfall knowledge type](pitfall-knowledge-type.md) - A Pitfall concept type for recurring agent mistakes in a repo, always returned by sf-lookup for matching areas.
 * [Plan-critic subagent role](plan-critic-subagent-role.md) - A read-only subagent on a different model that reviews a brief, specs and task breakdown before the user approves the plan.
+* [Polish from the first migration](polish-from-the-first-migration.md) - Generated header on the bundled CLI, install note on the upgrade workflow, D7 migration hint, stats skill split, merge=union doc line.
 * [Read barriers for other agents](read-barriers-for-other-agents.md) - Ignore or permission files for agents other than Claude Code (Codex, Cursor and others), matching the template's Claude Code deny list.
+* [Rewrite old decision references in code](rewrite-old-decision-references-in-code.md) - A specfold refs rewrite --map command that rewrites references like ADR NNNN in code, dry run first, comments only by default.
 * [Secrets guard](secrets-guard.md) - Decide whether to ship a secrets check (for example gitleaks) through the git hooks and CI.
 * [Skills CLI for skill updates](skills-cli-for-skill-updates.md) - Decide in M9 whether specfold upgrade uses the skills CLI (npx skills update) to keep shipped and third-party skills current.
+* [Summary mode for validate](summary-mode-for-validate.md) - A validate --summary flag that prints finding counts per rule and per folder instead of every finding.
 * [Two-way sync of backlog items with GitHub Issues](github-issues-sync.md) - Optionally mirror backlog items to GitHub Issues and back, so teams can triage the backlog where they already work.
