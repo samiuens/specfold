@@ -73,7 +73,7 @@ agent: implementer
   - Done when: `npx vitest run tools/specfold/test/init.test.ts tools/specfold/test/migrate-install.test.ts` passes with tests tagged `spec: specfold-init#pnpm-workspaces` and `spec: specfold-migrate#workspace-globs`, and `#typescript-project` and `#source-globs` still pass
 - [x] 5.2 `migrate start` writes `.specfold/migration/.gitignore` with `state.json` (B6)
   - Done when: the migrate tests pass with a test tagged `spec: specfold-migrate#state-not-committed`, and `#resumed-migration` still passes
-- [ ] 5.3 The CLAUDE.md managed block omits `@AGENTS.md` when the text outside the markers already has that line (B7)
+- [x] 5.3 The CLAUDE.md managed block omits `@AGENTS.md` when the text outside the markers already has that line (B7)
   - Done when: the migrate tests pass with a test tagged `spec: specfold-migrate#claude-md-already-imports-agents-md`, and `#existing-agents-md` still passes
 - [ ] 5.4 sf-migrate step 8 runs `log add` before `index`, `validate` and the report (B2, skill part), in the template and the kit copy
   - Done when: both copies of `sf-migrate/SKILL.md` are identical and step 8 names `log add` before `index`
