@@ -75,7 +75,7 @@ agent: implementer
   - Done when: the migrate tests pass with a test tagged `spec: specfold-migrate#state-not-committed`, and `#resumed-migration` still passes
 - [x] 5.3 The CLAUDE.md managed block omits `@AGENTS.md` when the text outside the markers already has that line (B7)
   - Done when: the migrate tests pass with a test tagged `spec: specfold-migrate#claude-md-already-imports-agents-md`, and `#existing-agents-md` still passes
-- [ ] 5.4 sf-migrate step 8 runs `log add` before `index`, `validate` and the report (B2, skill part), in the template and the kit copy
+- [x] 5.4 sf-migrate step 8 runs `log add` before `index`, `validate` and the report (B2, skill part), in the template and the kit copy
   - Done when: both copies of `sf-migrate/SKILL.md` are identical and step 8 names `log add` before `index`
 
 ## 6. Bundle
