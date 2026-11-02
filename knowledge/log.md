@@ -1,5 +1,9 @@
 # Log
 
+## 2026-11-02
+
+* **Change**: 2026-11-02-fix-migration-findings: created 1, updated 8, deprecated 0
+
 ## 2026-10-30
 
 * **Change**: 2026-10-30-stop-hook-skips-pending-test-references: created 0, updated 1, deprecated 0

@@ -4,10 +4,11 @@ title: Splice entries into hook manager YAML
 description: hooks install inserts its entries as text at parsed offsets, so unrelated lines of lefthook.yml and pre-commit config stay as they were.
 status: draft
 decision: accepted
+change: 2026-11-02-fix-migration-findings
 generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-02T10:21:00+01:00 }
 sources:
   - id: design
-    resource: ../../openspec/changes/fix-migration-findings/design.md
+    resource: ../../openspec/changes/archive/2026-11-02-fix-migration-findings/design.md
     title: "Design, B9: splice text instead of re-serialising the document"
 ---
 

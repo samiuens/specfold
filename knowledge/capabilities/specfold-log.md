@@ -3,7 +3,7 @@ type: Capability
 title: specfold log
 description: Why log entries are written by a command, and where the contract for specfold log add lives.
 status: draft
-change: 2026-10-26-add-specfold-log
+change: 2026-11-02-fix-migration-findings
 resource: ../../openspec/specs/specfold-log/spec.md
 spec: openspec/specs/specfold-log/spec.md
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T11:36:00+01:00 }
@@ -12,6 +12,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-log/proposal.md
   - id: design
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-log/design.md
+  - id: proposal-2026-11-02-fix-migration-findings
+    resource: ../../openspec/changes/archive/2026-11-02-fix-migration-findings/proposal.md
+  - id: design-2026-11-02-fix-migration-findings
+    resource: ../../openspec/changes/archive/2026-11-02-fix-migration-findings/design.md
 ---
 
 # Why
