@@ -70,7 +70,7 @@ function hookManagerMentions(root: string): boolean {
     for (const f of readdirSync(husky)) files.push(join(husky, f));
   }
   return files.some(
-    (f) => existsSync(f) && statSync(f).isFile() && readFileSync(f, "utf8").includes("specfold hook"),
+    (f) => existsSync(f) && statSync(f).isFile() && /specfold(\.mjs)? hook/.test(readFileSync(f, "utf8")),
   );
 }
 

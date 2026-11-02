@@ -107,6 +107,17 @@ describe("doctor: checks", () => {
     expect(check(runChecks(env(repo, noHooks)), "D4")?.status).toBe("ok");
   });
 
+  // spec: specfold-doctor#lefthook-entries-from-install
+  it("D4 accepts the node scripts/specfold.mjs hook entry that install writes", () => {
+    const repo = tempDir("valid");
+    const { "git config --get core.hooksPath": _, ...noHooks } = healthy;
+    writeFileSync(
+      join(repo, "lefthook.yml"),
+      "pre-commit:\n  commands:\n    specfold:\n      run: node scripts/specfold.mjs hook pre-commit {0}\n",
+    );
+    expect(check(runChecks(env(repo, noHooks)), "D4")?.status).toBe("ok");
+  });
+
   it("D4 warns outside a git repository", () => {
     expect(check(runChecks(env(tempDir("valid"), { "openspec --version": "1.15.0" })), "D4")?.message).toBe(
       "not inside a git repository",
