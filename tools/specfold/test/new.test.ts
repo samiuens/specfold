@@ -134,6 +134,19 @@ describe("new: command", () => {
     expect(await findings(repo)).toEqual([]);
   });
 
+  // spec: specfold-new#sources-stub-for-every-type
+  it("writes sources: [] for a Component and no decision or stale_after", async () => {
+    const repo = tempDir("valid");
+    const cfg = readFileSync(join(repo, "specfold.yaml"), "utf8");
+    writeFileSync(join(repo, "specfold.yaml"), cfg.replace("types: [", "types: [Component, "));
+    const result = await run(["new", "Component", "architecture/api.md", "--description", "The API."], repo);
+    expect(result.code).toBe(0);
+    const fm = frontmatter(repo, "knowledge/architecture/api.md");
+    expect(fm.sources).toEqual([]);
+    expect(fm).not.toHaveProperty("decision");
+    expect(fm).not.toHaveProperty("stale_after");
+  });
+
   // spec: specfold-new#created-path-in-json
   it("prints the created path as JSON", async () => {
     const repo = tempDir("valid");

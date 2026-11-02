@@ -85,7 +85,7 @@ export function renderConcept(repoRoot: string, fields: ConceptFields): string {
         ? ["state: open", 'trigger: ""', ...(committedBy ? [`committed_by: human:${committedBy}`] : [])]
         : []),
       `generated: { by: ${scalar(by)}, at: ${placeholders.now} }`,
-      ...(type === "Decision" ? ["sources: []"] : []),
+      "sources: []",
       "---",
       "",
       builtInBody(type),
