@@ -27,7 +27,8 @@ export function contentLineEnd(source: string, node: { range?: [number, number, 
   let i = node.range?.[1] ?? source.length;
   while (i > 0 && /\s/.test(source[i - 1] ?? "")) i--;
   const newline = source.indexOf("\n", i);
-  return newline === -1 ? source.length : newline;
+  if (newline === -1) return source.length;
+  return source[newline - 1] === "\r" ? newline - 1 : newline;
 }
 
 /** Number of leading spaces of the line that holds `offset`. */
@@ -59,22 +60,44 @@ export const startOf = (node: unknown): number => (node as Ranged).range?.[0] ??
 export class Splice {
   private edits: Edit[] = [];
   private appended: string[] = [];
+  /** The file's line ending; inserted text uses it. */
+  private readonly eol: string;
   constructor(
     private readonly name: string,
     private readonly path: string,
     private readonly source: string,
-  ) {}
+  ) {
+    this.eol = source.includes("\r\n") ? "\r\n" : "\n";
+  }
+
+  private lines(text: string): string {
+    return this.eol === "\n" ? text : text.replace(/\n/g, this.eol);
+  }
 
   /** A new line after the line on which `node` ends. */
   after(node: unknown, block: string): void {
     const at = contentLineEnd(this.source, node as Ranged);
-    this.edits.push({ start: at, end: at, text: `\n${block}` });
+    this.edits.push({ start: at, end: at, text: this.lines(`\n${block}`) });
   }
 
   /** The node's own text becomes `text`. */
   replace(node: unknown, text: string): void {
     const range = (node as Ranged).range;
-    if (range) this.edits.push({ start: range[0], end: range[1], text });
+    if (range)
+      this.edits.push({
+        start: range[0],
+        end: range[1],
+        text: this.lines(text),
+      });
+  }
+
+  /** The node's own text becomes a block on the next lines; the space before the node goes with it. */
+  fill(node: unknown, block: string): void {
+    const range = (node as Ranged).range;
+    if (!range) return;
+    let start = range[0];
+    while (start > 0 && /[ \t]/.test(this.source[start - 1] ?? "")) start--;
+    this.edits.push({ start, end: range[1], text: this.lines(`\n${block}`) });
   }
 
   /** A top-level block at the end of the file. */
@@ -86,9 +109,13 @@ export class Splice {
   commit(holds: (doc: Document) => boolean): void {
     const edits = [...this.edits];
     if (this.appended.length > 0) {
-      const lead = this.source === "" || this.source.endsWith("\n") ? "" : "\n";
+      const lead = this.source === "" || this.source.endsWith("\n") ? "" : this.eol;
       const end = this.source.length;
-      edits.push({ start: end, end, text: `${lead}${this.appended.join("\n")}\n` });
+      edits.push({
+        start: end,
+        end,
+        text: lead + this.lines(`${this.appended.join("\n")}\n`),
+      });
     }
     const text = applyEdits(this.source, edits);
     const check = parseDocument(text);

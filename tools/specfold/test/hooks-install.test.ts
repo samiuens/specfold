@@ -15,7 +15,10 @@ function repo(settings = "types: []\n"): string {
 
 const hooksPath = (root: string) => {
   try {
-    return execFileSync("git", ["config", "--get", "core.hooksPath"], { cwd: root, encoding: "utf8" }).trim();
+    return execFileSync("git", ["config", "--get", "core.hooksPath"], {
+      cwd: root,
+      encoding: "utf8",
+    }).trim();
   } catch {
     return undefined;
   }
@@ -63,7 +66,10 @@ describe("hooks install: built-in", () => {
   it("prints JSON and rejects unknown subcommands", async () => {
     const out = JSON.parse((await run(["hooks", "install", "--json"], repo())).stdout);
     expect(out).toMatchObject({ ok: true, manager: null, next: null });
-    expect(out.actions).toContainEqual({ path: "core.hooksPath", action: "set to .specfold/hooks" });
+    expect(out.actions).toContainEqual({
+      path: "core.hooksPath",
+      action: "set to .specfold/hooks",
+    });
     for (const argv of [["hooks"], ["hooks", "add"], ["hooks", "install", "x"]])
       expect((await run(argv, repo())).code, argv.join(" ")).toBe(2);
   });
@@ -141,7 +147,7 @@ describe("hooks install: hook managers", () => {
     expect(readFileSync(join(root, "lefthook.yml"), "utf8")).toBe(before);
   });
 
-  // spec: specfold-hooks#lefthook-formatting-kept
+  // spec: specfold-hooks#flow-style-hook-section-filled-in-place
   it.each([
     ["a flow-style hook section", "pre-commit: { commands: { lint: { run: x } } }\n", "pre-commit"],
     ["an empty flow commands map", "pre-commit:\n  commands: {}\n", "pre-commit"],
@@ -161,7 +167,7 @@ describe("hooks install: hook managers", () => {
     expect(readFileSync(join(root, "lefthook.yml"), "utf8")).toBe(after);
   });
 
-  // spec: specfold-hooks#lefthook-in-use
+  // spec: specfold-hooks#flow-style-hook-section-filled-in-place
   it("keeps the lines around an empty hook section with a comment", async () => {
     const root = repo();
     write(root, "lefthook.yml", "# top\npre-commit: # later\npre-push:\n  jobs: []\n");
@@ -171,7 +177,7 @@ describe("hooks install: hook managers", () => {
     expect(after).toContain("name: specfold");
   });
 
-  // spec: specfold-hooks#lefthook-formatting-kept
+  // spec: specfold-hooks#empty-pre-commit-sections-filled-in-place
   it("fills a flow-style repos list in .pre-commit-config.yaml and keeps the other lines", async () => {
     const root = repo();
     const before =
@@ -186,7 +192,7 @@ describe("hooks install: hook managers", () => {
     expect(readFileSync(join(root, ".pre-commit-config.yaml"), "utf8")).toBe(after);
   });
 
-  // spec: specfold-hooks#lefthook-formatting-kept
+  // spec: specfold-hooks#empty-pre-commit-sections-filled-in-place
   it("fills a bare repos key and a flow-style specfold hooks list", async () => {
     const bare = repo();
     write(bare, ".pre-commit-config.yaml", "repos:\nexclude: x\n");
@@ -268,5 +274,45 @@ describe("hooks install: hook managers", () => {
     expect(text).toContain(
       "default_install_hook_types: [ pre-commit, pre-push, post-checkout, post-merge, commit-msg ]",
     );
+  });
+
+  // spec: specfold-hooks#empty-pre-commit-sections-filled-in-place
+  it("fills `repos: []` without trailing whitespace", async () => {
+    const root = repo();
+    write(root, ".pre-commit-config.yaml", "# top\nrepos: []\nexclude: ^docs/\n");
+    expect((await run(["hooks", "install"], root)).code).toBe(0);
+    const after = readFileSync(join(root, ".pre-commit-config.yaml"), "utf8");
+    expect(after.startsWith("# top\nrepos:\n  - repo: local\n")).toBe(true);
+    expect(after).toContain("\nexclude: ^docs/\n");
+    expect(after).not.toMatch(/[ \t]$/m);
+    await run(["hooks", "install"], root);
+    expect(readFileSync(join(root, ".pre-commit-config.yaml"), "utf8")).toBe(after);
+  });
+
+  // spec: specfold-hooks#empty-pre-commit-sections-filled-in-place
+  it("fills a bare default_install_hook_types key", async () => {
+    const root = repo();
+    write(root, ".pre-commit-config.yaml", "default_install_hook_types:\n# keep\nrepos: []\n");
+    expect((await run(["hooks", "install"], root)).code).toBe(0);
+    const after = readFileSync(join(root, ".pre-commit-config.yaml"), "utf8");
+    expect(after.startsWith("default_install_hook_types:\n  - pre-commit\n  - pre-push\n")).toBe(true);
+    expect(after).toContain("  - post-merge\n# keep\nrepos:\n  - repo: local\n");
+    expect(after).not.toMatch(/[ \t]$/m);
+    await run(["hooks", "install"], root);
+    expect(readFileSync(join(root, ".pre-commit-config.yaml"), "utf8")).toBe(after);
+  });
+
+  // spec: specfold-hooks#crlf-line-endings-kept
+  it("uses the file's CRLF line ending for inserted lines", async () => {
+    const root = repo();
+    const before = "# top\r\npre-commit:\r\n  commands:\r\n    lint:\r\n      run: npm run lint\r\n";
+    write(root, "lefthook.yml", before);
+    expect((await run(["hooks", "install"], root)).code).toBe(0);
+    const after = readFileSync(join(root, "lefthook.yml"), "utf8");
+    expect(after).toContain("hook pre-push {0}");
+    expect(after.replace(/\r\n/g, "")).not.toMatch(/[\r\n]/);
+    expect(after.startsWith(before.slice(0, before.indexOf("      run")))).toBe(true);
+    await run(["hooks", "install"], root);
+    expect(readFileSync(join(root, "lefthook.yml"), "utf8")).toBe(after);
   });
 });
