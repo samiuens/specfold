@@ -55,7 +55,7 @@ var require_identity = __commonJS({
     var isPair = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === PAIR;
     var isScalar2 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SCALAR;
     var isSeq3 = (node) => !!node && typeof node === "object" && node[NODE_TYPE] === SEQ;
-    function isCollection(node) {
+    function isCollection2(node) {
       if (node && typeof node === "object")
         switch (node[NODE_TYPE]) {
           case MAP:
@@ -75,7 +75,7 @@ var require_identity = __commonJS({
         }
       return false;
     }
-    var hasAnchor = (node) => (isScalar2(node) || isCollection(node)) && !!node.anchor;
+    var hasAnchor = (node) => (isScalar2(node) || isCollection2(node)) && !!node.anchor;
     exports.ALIAS = ALIAS;
     exports.DOC = DOC;
     exports.MAP = MAP;
@@ -85,7 +85,7 @@ var require_identity = __commonJS({
     exports.SEQ = SEQ;
     exports.hasAnchor = hasAnchor;
     exports.isAlias = isAlias;
-    exports.isCollection = isCollection;
+    exports.isCollection = isCollection2;
     exports.isDocument = isDocument;
     exports.isMap = isMap6;
     exports.isNode = isNode;
@@ -5634,7 +5634,7 @@ var require_cst = __commonJS({
     var DOCUMENT = "";
     var FLOW_END = "";
     var SCALAR = "";
-    var isCollection = (token) => !!token && "items" in token;
+    var isCollection2 = (token) => !!token && "items" in token;
     var isScalar2 = (token) => !!token && (token.type === "scalar" || token.type === "single-quoted-scalar" || token.type === "double-quoted-scalar" || token.type === "block-scalar");
     function prettyToken(token) {
       switch (token) {
@@ -5718,7 +5718,7 @@ var require_cst = __commonJS({
     exports.DOCUMENT = DOCUMENT;
     exports.FLOW_END = FLOW_END;
     exports.SCALAR = SCALAR;
-    exports.isCollection = isCollection;
+    exports.isCollection = isCollection2;
     exports.isScalar = isScalar2;
     exports.prettyToken = prettyToken;
     exports.tokenType = tokenType;
@@ -7642,39 +7642,97 @@ var byHand = (file, what) => new EnvError(
 );
 var isSpecfoldJob = (job) => (0, import_yaml2.isMap)(job) && job.get("name") === "specfold";
 var columnOf = (source, node) => indentAt(source, startOf(node));
+function flowText(value) {
+  const doc = new import_yaml2.Document();
+  doc.contents = doc.createNode(value, { flow: true });
+  return doc.toString({ lineWidth: 0 }).trimEnd();
+}
+function grow(ctx, map, key, add, merge) {
+  const pair = (0, import_yaml2.isMap)(map) ? map.items.find((p) => (0, import_yaml2.isScalar)(p.key) && p.key.value === key) : void 0;
+  if (!pair) return "no";
+  const value = pair.value;
+  if ((0, import_yaml2.isCollection)(value) && value.flow) {
+    const next = merge(value.toJS(ctx.doc));
+    if (next === void 0) return "skip";
+    ctx.splice.replace(value, flowText(next));
+    return "done";
+  }
+  if (!(0, import_yaml2.isScalar)(value) || value.value !== null) return "no";
+  const range = value.range;
+  if (range && ctx.source.slice(range[0], range[1]).trim() !== "") ctx.splice.replace(value, flowText(add));
+  else ctx.splice.after(pair.key, yamlBlock(add, columnOf(ctx.source, pair.key) + 2));
+  return "done";
+}
+var jobsWithSpecfold = (jobs) => Array.isArray(jobs) && jobs.some((j) => j?.name === "specfold");
+var isObject = (v) => typeof v === "object" && v !== null;
 function lefthookEntries(config, file) {
   const path = join2(config.root, file);
   const { source, doc } = readSource(path);
   const splice = new Splice(file, path, source);
+  const ctx = { doc, splice, source };
   const actions = [];
   const asJob = /* @__PURE__ */ new Set();
   for (const hook of hookNames(config)) {
     const run = `${hookCommand(hook)} {0}`;
+    const job = { name: "specfold", run };
     const section2 = doc.get(hook, true);
+    let result = "done";
     if (!doc.has(hook)) {
       splice.append(yamlBlock({ [hook]: { commands: { specfold: { run } } } }, 0));
-    } else if (!(0, import_yaml2.isMap)(section2) || section2.flow || section2.items.length === 0) {
-      throw byHand(file, `'${hook}'`);
-    } else if (section2.has("jobs")) {
+    } else if ((0, import_yaml2.isMap)(section2) && !section2.flow && section2.has("jobs")) {
       const jobs = section2.get("jobs", true);
-      if (!(0, import_yaml2.isSeq)(jobs) || jobs.flow || jobs.items.length === 0) throw byHand(file, `'${hook}.jobs'`);
-      if (jobs.items.some(isSpecfoldJob)) continue;
-      splice.after(jobs, yamlBlock([{ name: "specfold", run }], columnOf(source, jobs.items[0])));
+      if ((0, import_yaml2.isSeq)(jobs) && !jobs.flow) {
+        if (jobs.items.length === 0) throw byHand(file, `'${hook}.jobs'`);
+        if (jobs.items.some(isSpecfoldJob)) continue;
+        splice.after(jobs, yamlBlock([job], columnOf(source, jobs.items[0])));
+      } else {
+        result = grow(
+          ctx,
+          section2,
+          "jobs",
+          [job],
+          (list) => Array.isArray(list) && !jobsWithSpecfold(list) ? [...list, job] : void 0
+        );
+        if (result === "no") throw byHand(file, `'${hook}.jobs'`);
+      }
       asJob.add(hook);
-    } else if (section2.has("commands")) {
+    } else if ((0, import_yaml2.isMap)(section2) && !section2.flow && section2.has("commands")) {
       const commands2 = section2.get("commands", true);
-      if (!(0, import_yaml2.isMap)(commands2) || commands2.flow || commands2.items.length === 0)
-        throw byHand(file, `'${hook}.commands'`);
-      if (commands2.has("specfold")) continue;
-      const pad = columnOf(source, commands2.items[0]?.key);
-      const outer2 = columnOf(source, section2.items[0]?.key);
-      splice.after(commands2, yamlBlock({ specfold: { run } }, pad, pad > outer2 ? pad - outer2 : 2));
-    } else {
+      if ((0, import_yaml2.isMap)(commands2) && !commands2.flow) {
+        if (commands2.has("specfold")) continue;
+        const pad = columnOf(source, commands2.items[0]?.key);
+        const outer2 = columnOf(source, section2.items[0]?.key);
+        splice.after(commands2, yamlBlock({ specfold: { run } }, pad, pad > outer2 ? pad - outer2 : 2));
+      } else {
+        result = grow(
+          ctx,
+          section2,
+          "commands",
+          { specfold: { run } },
+          (map) => isObject(map) && !Array.isArray(map) && !("specfold" in map) ? { ...map, specfold: { run } } : void 0
+        );
+        if (result === "no") throw byHand(file, `'${hook}.commands'`);
+      }
+    } else if ((0, import_yaml2.isMap)(section2) && !section2.flow) {
       splice.after(
         section2,
         yamlBlock({ commands: { specfold: { run } } }, columnOf(source, section2.items[0]?.key))
       );
+    } else {
+      let useJob = false;
+      result = grow(ctx, doc.contents, hook, { commands: { specfold: { run } } }, (current) => {
+        if (!isObject(current) || Array.isArray(current)) return void 0;
+        if (Array.isArray(current.jobs)) {
+          useJob = true;
+          return jobsWithSpecfold(current.jobs) ? void 0 : { ...current, jobs: [...current.jobs, job] };
+        }
+        const commands2 = isObject(current.commands) ? current.commands : {};
+        return "specfold" in commands2 ? void 0 : { ...current, commands: { ...commands2, specfold: { run } } };
+      });
+      if (result === "no") throw byHand(file, `'${hook}'`);
+      if (useJob) asJob.add(hook);
     }
+    if (result === "skip") continue;
     actions.push({ path: file, action: `add specfold to ${hook}` });
   }
   if (actions.length === 0) return actions;
@@ -7710,11 +7768,6 @@ var preCommitHook = (hook) => ({
   pass_filenames: hook === "commit-msg",
   stages: [hook]
 });
-function flowList(items) {
-  const doc = new import_yaml2.Document();
-  doc.contents = doc.createNode(items, { flow: true });
-  return doc.toString({ lineWidth: 0 }).trimEnd();
-}
 function preCommitEntries(config) {
   const path = join2(config.root, PRE_COMMIT_FILE);
   const { source, doc } = readSource(path);
@@ -7734,8 +7787,9 @@ function preCommitEntries(config) {
     )?.hooks;
     const local = [{ repo: "local", hooks: entries }];
     if (target) {
-      if (target.flow || target.items.length === 0) throw byHand(PRE_COMMIT_FILE, "'hooks'");
-      splice.after(target, yamlBlock(entries, columnOf(source, target.items[0])));
+      if (target.items.length === 0) throw byHand(PRE_COMMIT_FILE, "'hooks'");
+      if (target.flow) splice.replace(target, flowText([...target.toJS(doc), ...entries]));
+      else splice.after(target, yamlBlock(entries, columnOf(source, target.items[0])));
     } else if (!doc.has("repos")) {
       splice.append(yamlBlock({ repos: local }, 0));
     } else if ((0, import_yaml2.isSeq)(repos) && repos.items.length === 0) {
@@ -7743,7 +7797,13 @@ function preCommitEntries(config) {
 ${yamlBlock(local, columnOf(source, repos) + 2)}`);
     } else if ((0, import_yaml2.isSeq)(repos) && !repos.flow) {
       splice.after(repos, yamlBlock(local, columnOf(source, repos.items[0])));
-    } else {
+    } else if (grow(
+      { doc, splice, source },
+      doc.contents,
+      "repos",
+      local,
+      (list) => Array.isArray(list) ? [...list, ...local] : void 0
+    ) !== "done") {
       throw byHand(PRE_COMMIT_FILE, "'repos'");
     }
     for (const hook of missing) actions.push({ path: PRE_COMMIT_FILE, action: `add specfold-${hook}` });
@@ -7754,8 +7814,8 @@ ${yamlBlock(local, columnOf(source, repos) + 2)}`);
   const types = (0, import_yaml2.isSeq)(listed) ? listed.items.map((t) => String((0, import_yaml2.isScalar)(t) ? t.value : t)) : ["pre-commit"];
   const added = hookNames(config).filter((h) => !types.includes(h));
   if (added.length > 0) {
-    if (!(0, import_yaml2.isSeq)(listed)) splice.append(`default_install_hook_types: ${flowList([...types, ...added])}`);
-    else if (listed.flow || listed.items.length === 0) splice.replace(listed, flowList([...types, ...added]));
+    if (!(0, import_yaml2.isSeq)(listed)) splice.append(`default_install_hook_types: ${flowText([...types, ...added])}`);
+    else if (listed.flow || listed.items.length === 0) splice.replace(listed, flowText([...types, ...added]));
     else splice.after(listed, yamlBlock(added, columnOf(source, listed.items[0])));
     actions.push({ path: PRE_COMMIT_FILE, action: `install hook types ${added.join(", ")}` });
   }
