@@ -103,7 +103,7 @@ agent: implementer
   - Done when: from `tools/specfold`, `npm run build` runs clean, `npx vitest run -u test/template-manifest.test.ts` regenerates `template/.specfold/manifest.json`, and `npm run check` and `npx vitest run` pass
 - [x] 6.2 Rebuild the bundle after 2.4, copy it to `template/scripts/specfold.mjs` and regenerate `template/.specfold/manifest.json`
   - Done when: from `tools/specfold`, `npm run build` runs clean, `npx vitest run -u test/template-manifest.test.ts` regenerates `template/.specfold/manifest.json`, and `npm run check` and `npx vitest run` pass
-- [ ] 6.3 Rebuild the bundle after 2.6-3.5, copy it to `template/scripts/specfold.mjs` and regenerate `template/.specfold/manifest.json`
+- [x] 6.3 Rebuild the bundle after 2.6-3.5, copy it to `template/scripts/specfold.mjs` and regenerate `template/.specfold/manifest.json`
   - Done when: from `tools/specfold`, `npm run build` runs clean, `npx vitest run -u test/template-manifest.test.ts` regenerates `template/.specfold/manifest.json`, and `npm run check` and `npx vitest run` pass
 
 ## 7. Knowledge
