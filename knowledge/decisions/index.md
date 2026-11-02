@@ -3,7 +3,6 @@
 * [A required CI check blocks merges](blocking-merge-gate.md) - The specfold-gate CI check is required and blocks merges; local hooks only give early feedback.
   * Referenced from code: tools/specfold/src/gate/require.ts:2
 * [Built-in git hooks with adapters instead of lefthook](built-in-git-hooks.md) - Specfold installs its own git hooks via core.hooksPath and adds one entry to an existing hook manager instead of requiring lefthook.
-  * Referenced from code: tools/specfold/src/hooks/install.ts:114
 * [Claude Code skills are symlinks into .agents/skills/](skills-symlinked-for-claude.md) - specfold agents sync links each .agents/skills/<name> into .claude/skills/ instead of copying it.
 * [Code comments point to knowledge](code-comments-point-to-knowledge.md) - Code comments stay short; rationale lives in knowledge and the comment only references it with see knowledge:.
 * [Commit convention for the kit repo](commit-convention.md) - Kit-repo commits use Conventional Commits with a type-matched gitmoji, subject only, the human as author and the agent as co-author; not shipped.
@@ -30,6 +29,10 @@
 * [Specfold is built with Specfold](self-hosting.md) - Every feature, fix and release of the kit runs through the kit's own workflow, switched on piece by piece as it is built.
 * [Specs are the contract, knowledge is context](specs-vs-knowledge.md) - Specs hold normative behavior, knowledge holds descriptive context, and nothing is written twice.
 * [Splice entries into hook manager YAML](splice-hook-manager-yaml.md) - hooks install inserts its entries as text at parsed offsets, so unrelated lines of lefthook.yml and pre-commit config stay as they were.
+  * Referenced from code: tools/specfold/src/hooks/install.ts:123
+  * Referenced from code: tools/specfold/src/hooks/install.ts:156
+  * Referenced from code: tools/specfold/src/hooks/install.ts:267
+  * Referenced from code: tools/specfold/src/yaml.ts:57
 * [The brand is Ink & Vermilion](brand-ink-and-vermilion.md) - Specfold's visual identity: warm paper, near-black ink, one vermilion accent, a two-sheet mark, IBM Plex Sans and JetBrains Mono; kit only.
 * [The framework is called Specfold](naming-specfold.md) - Specfold replaces the working names (kb, okf-openspec-kit); the CLI is specfold with alias sf, skills use the sf- prefix.
 * [Tool-neutral first, Claude Code extras on top](tool-neutral-first.md) - The workflow runs on AGENTS.md, .agents/skills/, the CLI and CI; Claude Code hooks, subagents and skills are additions.
