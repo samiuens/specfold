@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { EnvError } from "../errors.ts";
-import { STATE_PATH } from "./repo.ts";
+import { STATE_IGNORE_PATH, STATE_PATH } from "./repo.ts";
 
 /** Migration steps in order; the CLI records the first, second and fourth, `migrate mark` the others. */
 export const STEPS = ["start", "inventory", "plan", "install", "convert", "seed", "report"] as const;
@@ -31,6 +31,7 @@ export function readState(root: string): MigrationState {
 export function writeState(root: string, state: MigrationState): void {
   const path = join(root, STATE_PATH);
   mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(join(root, STATE_IGNORE_PATH), "state.json\n");
   writeFileSync(path, `${JSON.stringify(state, null, 2)}\n`);
 }
 

@@ -71,7 +71,7 @@ agent: implementer
 
 - [x] 5.1 Detection reads globs from package.json `workspaces` and `pnpm-workspace.yaml` (`<pattern>/src/**`, negations skipped), else the folder list with `apps` added (B4)
   - Done when: `npx vitest run tools/specfold/test/init.test.ts tools/specfold/test/migrate-install.test.ts` passes with tests tagged `spec: specfold-init#pnpm-workspaces` and `spec: specfold-migrate#workspace-globs`, and `#typescript-project` and `#source-globs` still pass
-- [ ] 5.2 `migrate start` writes `.specfold/migration/.gitignore` with `state.json` (B6)
+- [x] 5.2 `migrate start` writes `.specfold/migration/.gitignore` with `state.json` (B6)
   - Done when: the migrate tests pass with a test tagged `spec: specfold-migrate#state-not-committed`, and `#resumed-migration` still passes
 - [ ] 5.3 The CLAUDE.md managed block omits `@AGENTS.md` when the text outside the markers already has that line (B7)
   - Done when: the migrate tests pass with a test tagged `spec: specfold-migrate#claude-md-already-imports-agents-md`, and `#existing-agents-md` still passes
