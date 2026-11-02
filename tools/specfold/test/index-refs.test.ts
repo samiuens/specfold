@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { run, tempDir } from "./helpers.ts";
@@ -27,5 +27,16 @@ describe("index: code references", () => {
     expect(JSON.parse(result.stdout).findings).toEqual([
       expect.objectContaining({ rule: "I2", severity: "warning", path: "src/checkout/token.ts", line: 4 }),
     ]);
+  });
+
+  // spec: specfold-index#several-paths-in-one-pointer
+  it("lists a concept for every path in one pointer", async () => {
+    const repo = tempDir("index/repo");
+    mkdirSync(join(repo, "src/pay"), { recursive: true });
+    writeFileSync(join(repo, "src/pay/multi.ts"), "// see knowledge: /decisions/a-first.md, /decisions/b-second.md - both\n");
+    await run(["index"], repo);
+    const index = readFileSync(join(repo, "knowledge/decisions/index.md"), "utf8");
+    expect(index).toContain("  * Referenced from code: src/pay/multi.ts:1\n");
+    expect(index).toMatch(/\(b-second\.md\)[^\n]*\n  \* Referenced from code: src\/pay\/multi\.ts:1/);
   });
 });
