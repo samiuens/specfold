@@ -4,7 +4,7 @@ title: Turn on upgrade PRs
 description: How a team turns on the weekly upgrade workflow, which token it needs, and what the workflow does with older upgrade PRs.
 status: draft
 stale_after: 2027-01-26T19:00:37+01:00
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T19:00:37+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T12:44:09+01:00 }
 ---
 
 # When to use
@@ -14,7 +14,7 @@ When a team wants Specfold upgrades to arrive as pull requests, like Dependabot 
 # Steps
 
 1. **Turn it on:** `node scripts/specfold.mjs init --upgrade-workflow` in a repository made from the template, or `migrate install --upgrade-workflow` during a migration. `BOOTSTRAP.md` and `sf-migrate` ask about it. Commit `.github/workflows/specfold-upgrade.yml` and `.specfold/manifest.json`.
-2. **Create the token.** It must read the kit's releases (the kit repository is private) and, in this repository, write contents, pull requests and workflows. An upgrade may change `.github/workflows/specfold-gate.yml`, and pushing that needs the workflows permission. A fine-grained token covers both repositories only when they have the same owner. Otherwise use a classic token with `repo` and `workflow`.
+2. **Create the token.** It must, in this repository, write contents, pull requests and workflows; the public kit's releases need no extra access. An upgrade may change `.github/workflows/specfold-gate.yml`, and pushing that needs the workflows permission. A private source must also be readable: a fine-grained token covers both repositories only when they have the same owner, otherwise use a classic token with `repo` and `workflow`.
 3. **Store it** as the repository secret `SPECFOLD_TOKEN` (Settings > Secrets and variables > Actions).
 4. **Try it:** run the workflow by hand (Actions > specfold-upgrade > Run workflow) and read its log.
 
