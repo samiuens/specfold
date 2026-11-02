@@ -1,10 +1,10 @@
 import { chmodSync, existsSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { Document, isMap, isScalar, isSeq, parseDocument, type YAMLSeq } from "yaml";
+import { Document, isCollection, isMap, isScalar, isSeq, parseDocument, type YAMLSeq } from "yaml";
 import { EnvError } from "../errors.ts";
 import { git } from "../git.ts";
 import type { Config } from "../repo.ts";
-import { indentAt, Splice, startOf, yamlBlock } from "../yaml.ts";
+import { indentAt, type Ranged, Splice, startOf, yamlBlock } from "../yaml.ts";
 
 export const HOOKS_PATH = ".specfold/hooks";
 /** Hooks with Specfold's own checks; `hooks.extra` adds more. */
@@ -109,43 +109,117 @@ const isSpecfoldJob = (job: unknown) => isMap(job) && job.get("name") === "specf
 /** Column of the first key of a block mapping, or of the first dash of a block sequence. */
 const columnOf = (source: string, node: unknown) => indentAt(source, startOf(node));
 
+/** A value as flow-style YAML text on one line, e.g. `{ a: 1, b: [ x ] }`. */
+function flowText(value: unknown): string {
+  const doc = new Document();
+  doc.contents = doc.createNode(value, { flow: true });
+  return doc.toString({ lineWidth: 0 }).trimEnd();
+}
+
+/**
+ * Grows the value under `key` of `map` when it is empty (`key:` or `~`) or flow style: an empty value gets
+ * `add` as an indented block, a flow value is replaced by `merge(its value)`. Returns "skip" when `merge`
+ * finds the entry already there and "no" for any other form.
+ * see knowledge: /decisions/splice-hook-manager-yaml.md
+ */
+function grow(
+  ctx: { doc: Document; splice: Splice; source: string },
+  map: unknown,
+  key: string,
+  add: unknown,
+  merge: (current: unknown) => unknown,
+): "done" | "skip" | "no" {
+  const pair = isMap(map) ? map.items.find((p) => isScalar(p.key) && p.key.value === key) : undefined;
+  if (!pair) return "no";
+  const value = pair.value;
+  if (isCollection(value) && value.flow) {
+    const next = merge(value.toJS(ctx.doc));
+    if (next === undefined) return "skip";
+    ctx.splice.replace(value, flowText(next));
+    return "done";
+  }
+  if (!isScalar(value) || value.value !== null) return "no";
+  const range = (value as Ranged).range;
+  if (range && ctx.source.slice(range[0], range[1]).trim() !== "") ctx.splice.replace(value, flowText(add));
+  else ctx.splice.after(pair.key, yamlBlock(add, columnOf(ctx.source, pair.key) + 2));
+  return "done";
+}
+
+/** A job list holds a job named `specfold`. */
+const jobsWithSpecfold = (jobs: unknown) =>
+  Array.isArray(jobs) && jobs.some((j) => (j as { name?: unknown } | null)?.name === "specfold");
+const isObject = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null;
+
 /**
  * One `specfold` command per hook; a hook that already uses `jobs` gets a job instead. The entries are
- * inserted as text, so every other line stays as it was; see knowledge: /decisions/built-in-git-hooks.md.
+ * inserted as text, so every other line stays as it was; only an empty or flow-style node is replaced.
+ * see knowledge: /decisions/splice-hook-manager-yaml.md
  */
 function lefthookEntries(config: Config, file: string): InstallAction[] {
   const path = join(config.root, file);
   const { source, doc } = readSource(path);
   const splice = new Splice(file, path, source);
+  const ctx = { doc, splice, source };
   const actions: InstallAction[] = [];
   const asJob = new Set<string>();
   for (const hook of hookNames(config)) {
     const run = `${hookCommand(hook)} {0}`;
+    const job = { name: "specfold", run };
     const section = doc.get(hook, true);
+    let result: "done" | "skip" | "no" = "done";
     if (!doc.has(hook)) {
       splice.append(yamlBlock({ [hook]: { commands: { specfold: { run } } } }, 0));
-    } else if (!isMap(section) || section.flow || section.items.length === 0) {
-      throw byHand(file, `'${hook}'`);
-    } else if (section.has("jobs")) {
+    } else if (isMap(section) && !section.flow && section.has("jobs")) {
       const jobs = section.get("jobs", true);
-      if (!isSeq(jobs) || jobs.flow || jobs.items.length === 0) throw byHand(file, `'${hook}.jobs'`);
-      if (jobs.items.some(isSpecfoldJob)) continue;
-      splice.after(jobs, yamlBlock([{ name: "specfold", run }], columnOf(source, jobs.items[0])));
+      if (isSeq(jobs) && !jobs.flow) {
+        if (jobs.items.length === 0) throw byHand(file, `'${hook}.jobs'`);
+        if (jobs.items.some(isSpecfoldJob)) continue;
+        splice.after(jobs, yamlBlock([job], columnOf(source, jobs.items[0])));
+      } else {
+        result = grow(ctx, section, "jobs", [job], (list) =>
+          Array.isArray(list) && !jobsWithSpecfold(list) ? [...list, job] : undefined,
+        );
+        if (result === "no") throw byHand(file, `'${hook}.jobs'`);
+      }
       asJob.add(hook);
-    } else if (section.has("commands")) {
+    } else if (isMap(section) && !section.flow && section.has("commands")) {
       const commands = section.get("commands", true);
-      if (!isMap(commands) || commands.flow || commands.items.length === 0)
-        throw byHand(file, `'${hook}.commands'`);
-      if (commands.has("specfold")) continue;
-      const pad = columnOf(source, commands.items[0]?.key);
-      const outer = columnOf(source, section.items[0]?.key);
-      splice.after(commands, yamlBlock({ specfold: { run } }, pad, pad > outer ? pad - outer : 2));
-    } else {
+      if (isMap(commands) && !commands.flow) {
+        if (commands.has("specfold")) continue;
+        const pad = columnOf(source, commands.items[0]?.key);
+        const outer = columnOf(source, section.items[0]?.key);
+        splice.after(commands, yamlBlock({ specfold: { run } }, pad, pad > outer ? pad - outer : 2));
+      } else {
+        result = grow(ctx, section, "commands", { specfold: { run } }, (map) =>
+          isObject(map) && !Array.isArray(map) && !("specfold" in map)
+            ? { ...map, specfold: { run } }
+            : undefined,
+        );
+        if (result === "no") throw byHand(file, `'${hook}.commands'`);
+      }
+    } else if (isMap(section) && !section.flow) {
       splice.after(
         section,
         yamlBlock({ commands: { specfold: { run } } }, columnOf(source, section.items[0]?.key)),
       );
+    } else {
+      // an empty or flow-style hook section: that node is rewritten
+      let useJob = false;
+      result = grow(ctx, doc.contents, hook, { commands: { specfold: { run } } }, (current) => {
+        if (!isObject(current) || Array.isArray(current)) return undefined;
+        if (Array.isArray(current.jobs)) {
+          useJob = true;
+          return jobsWithSpecfold(current.jobs) ? undefined : { ...current, jobs: [...current.jobs, job] };
+        }
+        const commands = isObject(current.commands) ? current.commands : {};
+        return "specfold" in commands
+          ? undefined
+          : { ...current, commands: { ...commands, specfold: { run } } };
+      });
+      if (result === "no") throw byHand(file, `'${hook}'`);
+      if (useJob) asJob.add(hook);
     }
+    if (result === "skip") continue;
     actions.push({ path: file, action: `add specfold to ${hook}` });
   }
   if (actions.length === 0) return actions;
@@ -187,16 +261,10 @@ const preCommitHook = (hook: string) => ({
   stages: [hook],
 });
 
-/** A flow sequence the way the yaml library writes it, e.g. `[ a, b ]`. */
-function flowList(items: string[]): string {
-  const doc = new Document();
-  doc.contents = doc.createNode(items, { flow: true });
-  return doc.toString({ lineWidth: 0 }).trimEnd();
-}
-
 /**
  * A local repo with one `specfold-<hook>` hook per hook, and every hook type in default_install_hook_types.
- * Only that key's value may be rewritten; everything else is inserted as text.
+ * Only default_install_hook_types and an empty or flow-style node may be rewritten; the rest is inserted
+ * as text. see knowledge: /decisions/splice-hook-manager-yaml.md
  */
 function preCommitEntries(config: Config): InstallAction[] {
   const path = join(config.root, PRE_COMMIT_FILE);
@@ -222,15 +290,20 @@ function preCommitEntries(config: Config): InstallAction[] {
     )?.hooks;
     const local = [{ repo: "local", hooks: entries }];
     if (target) {
-      if (target.flow || target.items.length === 0) throw byHand(PRE_COMMIT_FILE, "'hooks'");
-      splice.after(target, yamlBlock(entries, columnOf(source, target.items[0])));
+      if (target.items.length === 0) throw byHand(PRE_COMMIT_FILE, "'hooks'");
+      if (target.flow) splice.replace(target, flowText([...(target.toJS(doc) as unknown[]), ...entries]));
+      else splice.after(target, yamlBlock(entries, columnOf(source, target.items[0])));
     } else if (!doc.has("repos")) {
       splice.append(yamlBlock({ repos: local }, 0));
     } else if (isSeq(repos) && repos.items.length === 0) {
       splice.replace(repos, `\n${yamlBlock(local, columnOf(source, repos) + 2)}`);
     } else if (isSeq(repos) && !repos.flow) {
       splice.after(repos, yamlBlock(local, columnOf(source, repos.items[0])));
-    } else {
+    } else if (
+      grow({ doc, splice, source }, doc.contents, "repos", local, (list) =>
+        Array.isArray(list) ? [...list, ...local] : undefined,
+      ) !== "done"
+    ) {
       throw byHand(PRE_COMMIT_FILE, "'repos'");
     }
     for (const hook of missing) actions.push({ path: PRE_COMMIT_FILE, action: `add specfold-${hook}` });
@@ -242,8 +315,8 @@ function preCommitEntries(config: Config): InstallAction[] {
   const types = isSeq(listed) ? listed.items.map((t) => String(isScalar(t) ? t.value : t)) : ["pre-commit"];
   const added = hookNames(config).filter((h) => !types.includes(h));
   if (added.length > 0) {
-    if (!isSeq(listed)) splice.append(`default_install_hook_types: ${flowList([...types, ...added])}`);
-    else if (listed.flow || listed.items.length === 0) splice.replace(listed, flowList([...types, ...added]));
+    if (!isSeq(listed)) splice.append(`default_install_hook_types: ${flowText([...types, ...added])}`);
+    else if (listed.flow || listed.items.length === 0) splice.replace(listed, flowText([...types, ...added]));
     else splice.after(listed, yamlBlock(added, columnOf(source, listed.items[0])));
     actions.push({ path: PRE_COMMIT_FILE, action: `install hook types ${added.join(", ")}` });
   }
