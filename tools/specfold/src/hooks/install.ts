@@ -4,7 +4,7 @@ import { Document, isMap, isScalar, isSeq, parseDocument, type YAMLSeq } from "y
 import { EnvError } from "../errors.ts";
 import { git } from "../git.ts";
 import type { Config } from "../repo.ts";
-import { yamlText } from "../yaml.ts";
+import { indentAt, Splice, startOf, yamlBlock, yamlText } from "../yaml.ts";
 
 export const HOOKS_PATH = ".specfold/hooks";
 /** Hooks with Specfold's own checks; `hooks.extra` adds more. */
@@ -89,31 +89,79 @@ export function detectManager(root: string): { name: string; path: string } | un
   return undefined;
 }
 
-/** The YAML file as an editable document that keeps comments; a missing or empty file becomes an empty mapping. */
-function readDocument(path: string): Document {
-  const doc = parseDocument(existsSync(path) ? readFileSync(path, "utf8") : "");
+/** The text of a YAML file and its parse; a missing or empty file is an empty mapping. */
+function readSource(path: string): { source: string; doc: Document } {
+  const source = existsSync(path) ? readFileSync(path, "utf8") : "";
+  const doc = parseDocument(source);
   if (doc.errors[0]) throw new EnvError(`${path}: ${doc.errors[0].message.split("\n")[0]}`);
-  return isMap(doc.contents) ? doc : new Document({});
+  if (doc.contents !== null && !isMap(doc.contents))
+    throw new EnvError(`${path}: expected a mapping at the top level; add the Specfold entries by hand`);
+  return { source, doc };
 }
 
-/** One `specfold` command per hook; a hook that already uses `jobs` gets a job instead. */
+const readDocument = (path: string): Document => {
+  const { doc } = readSource(path);
+  return isMap(doc.contents) ? doc : new Document({});
+};
+
+const byHand = (file: string, what: string) =>
+  new EnvError(
+    `${file}: ${what} is written in a form hooks install does not edit; add the Specfold entries by hand`,
+  );
+
+const isSpecfoldJob = (job: unknown) => isMap(job) && job.get("name") === "specfold";
+
+/** Column of the first key of a block mapping, or of the first dash of a block sequence. */
+const columnOf = (source: string, node: unknown) => indentAt(source, startOf(node));
+
+/**
+ * One `specfold` command per hook; a hook that already uses `jobs` gets a job instead. The entries are
+ * inserted as text, so every other line stays as it was; see knowledge: /decisions/built-in-git-hooks.md.
+ */
 function lefthookEntries(config: Config, file: string): InstallAction[] {
   const path = join(config.root, file);
-  const doc = readDocument(path);
+  const { source, doc } = readSource(path);
+  const splice = new Splice(file, path, source);
   const actions: InstallAction[] = [];
+  const asJob = new Set<string>();
   for (const hook of hookNames(config)) {
     const run = `${hookCommand(hook)} {0}`;
-    const jobs = doc.getIn([hook, "jobs"]);
-    if (isSeq(jobs)) {
-      if (jobs.items.some((j) => isMap(j) && j.get("name") === "specfold")) continue;
-      jobs.add(doc.createNode({ name: "specfold", run }));
+    const section = doc.get(hook, true);
+    if (!doc.has(hook)) {
+      splice.append(yamlBlock({ [hook]: { commands: { specfold: { run } } } }, 0));
+    } else if (!isMap(section) || section.flow || section.items.length === 0) {
+      throw byHand(file, `'${hook}'`);
+    } else if (section.has("jobs")) {
+      const jobs = section.get("jobs", true);
+      if (!isSeq(jobs) || jobs.flow || jobs.items.length === 0) throw byHand(file, `'${hook}.jobs'`);
+      if (jobs.items.some(isSpecfoldJob)) continue;
+      splice.after(jobs, yamlBlock([{ name: "specfold", run }], columnOf(source, jobs.items[0])));
+      asJob.add(hook);
+    } else if (section.has("commands")) {
+      const commands = section.get("commands", true);
+      if (!isMap(commands) || commands.flow || commands.items.length === 0)
+        throw byHand(file, `'${hook}.commands'`);
+      if (commands.has("specfold")) continue;
+      const pad = columnOf(source, commands.items[0]?.key);
+      const outer = columnOf(source, section.items[0]?.key);
+      splice.after(commands, yamlBlock({ specfold: { run } }, pad, pad > outer ? pad - outer : 2));
     } else {
-      if (doc.hasIn([hook, "commands", "specfold"])) continue;
-      doc.setIn([hook, "commands", "specfold"], doc.createNode({ run }));
+      splice.after(
+        section,
+        yamlBlock({ commands: { specfold: { run } } }, columnOf(source, section.items[0]?.key)),
+      );
     }
     actions.push({ path: file, action: `add specfold to ${hook}` });
   }
-  if (actions.length > 0) writeFileSync(path, yamlText(doc));
+  if (actions.length === 0) return actions;
+  const hooks = actions.map((a) => a.action.slice("add specfold to ".length));
+  splice.commit((check) =>
+    hooks.every((hook) =>
+      asJob.has(hook)
+        ? ((list) => isSeq(list) && list.items.some(isSpecfoldJob))(check.getIn([hook, "jobs"]))
+        : check.hasIn([hook, "commands", "specfold"]),
+    ),
+  );
   return actions;
 }
 
