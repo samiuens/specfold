@@ -2,7 +2,7 @@
 
 ## Why
 
-The first real migration (Atrium, a pnpm monorepo, on v0.2.1) found ten bugs in doctor, hooks, index, log, new and migrate. None of them is fixed in v0.3.0. Each one cost the migration a workaround: a doctor warning that can't be satisfied, a gate that blocks after the skill's own last step, dropped code references, missed apps, a committed state file, a duplicate import, uneven `specfold new` output, a reformatted `lefthook.yml`, and a Stop hook that repeated 30 KB of findings every turn.
+The first real migration (on v0.2.1) found ten bugs in doctor, hooks, index, log, new and migrate. None of them is fixed in v0.3.0. Each one cost the migration a workaround: a doctor warning that can't be satisfied, a gate that blocks after the skill's own last step, dropped code references, missed apps, a committed state file, a duplicate import, uneven `specfold new` output, a reformatted `lefthook.yml`, and a Stop hook that repeated 30 KB of findings every turn.
 
 ## What Changes
 

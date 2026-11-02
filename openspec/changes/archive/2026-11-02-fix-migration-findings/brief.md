@@ -1,6 +1,6 @@
 ## Wish
 
-"Let's start with the plain bugs from 1": fix the ten bugs (B1-B10) that the first real migration (Atrium, v0.2.1) found in doctor, hooks, index, log, new and migrate, as listed in `specfold-review.md` and `specfold-post-migration-feedback.md` and verified against v0.3.0.
+"Let's start with the plain bugs from 1": fix the ten bugs (B1-B10) that the first real migration (on v0.2.1) found in doctor, hooks, index, log, new and migrate, as listed in `specfold-review.md` and `specfold-post-migration-feedback.md` and verified against v0.3.0.
 
 ## Decisions
 

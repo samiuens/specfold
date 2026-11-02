@@ -5,7 +5,7 @@ description: hooks install inserts its entries as text at parsed offsets, so unr
 status: draft
 decision: accepted
 change: 2026-11-02-fix-migration-findings
-generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-02T10:21:00+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T13:41:33+01:00 }
 sources:
   - id: design
     resource: ../../openspec/changes/archive/2026-11-02-fix-migration-findings/design.md
@@ -18,7 +18,7 @@ sources:
 
 # Why
 
-Writing the re-serialised document rewrote lines that had nothing to do with Specfold (flow lists, folded scalars, long lines), which showed up as noise in the Atrium migration diff. Inserting text leaves every other line byte for byte as it was.
+Writing the re-serialised document rewrote lines that had nothing to do with Specfold (flow lists, folded scalars, long lines), which showed up as noise in the first real migration's diff. Inserting text leaves every other line byte for byte as it was.
 
 # Rejected alternatives
 
