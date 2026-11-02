@@ -58,19 +58,19 @@ source:
 
 Every tarball is checked against its `.sha256` before it is unpacked.
 
-## Private kit repositories and tokens
+## Private sources and tokens
 
-The kit repository is private, so whoever upgrades needs read access to its releases:
+The kit repository `samiuens/specfold` is public, so reading its releases needs no token; one only raises GitHub's API rate limit. A private fork or mirror needs read access to its releases:
 
 - **On your machine,** your `gh` login is enough.
-- **In CI or without gh,** set `SPECFOLD_TOKEN` to a token that can read the kit repository's releases.
+- **In CI or without gh,** set `SPECFOLD_TOKEN` to a token that can read the source's releases.
 
 ## Weekly upgrade PRs
 
 Like Dependabot, a workflow can open the upgrade PR for you. Every repository ships it switched off, at `.specfold/workflows/specfold-upgrade.yml`.
 
 1. **Turn it on:** `node scripts/specfold.mjs init --upgrade-workflow` (or `migrate install --upgrade-workflow` during a migration). This copies it to `.github/workflows/` and records it in the manifest, so upgrades keep it current. Commit both files.
-2. **Create a token.** It must read the kit's releases and, in your repository, write contents, pull requests and workflows. An upgrade may change the gate workflow, and pushing that needs the workflows permission. A fine-grained token covers both repositories only when they have the same owner; otherwise use a classic token with the `repo` and `workflow` scopes.
+2. **Create a token.** It must read the kit's releases and, in your repository, write contents, pull requests and workflows. An upgrade may change the gate workflow, and pushing that needs the workflows permission. With the public kit, a fine-grained token for your repository is enough. A private source on another owner's account needs a classic token with the `repo` and `workflow` scopes, because a fine-grained token covers both repositories only when they have the same owner.
 3. **Store it** as the repository secret `SPECFOLD_TOKEN` (Settings > Secrets and variables > Actions).
 4. **Try it** with Actions > specfold-upgrade > Run workflow.
 

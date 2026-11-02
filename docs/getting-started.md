@@ -5,7 +5,7 @@ This guide takes a repository from nothing to its first archived change. The who
 ## What you need
 
 - Node.js 20 or later and git.
-- `gh`, logged in with read access to `samiuens/specfold`. The kit repository is private, so releases are downloaded through your login.
+- `gh`, logged in. The bootstrap downloads the release from `samiuens/specfold` through your login.
 - OpenSpec 1.15 or later (`@fission-ai/openspec`), on the PATH or in the repository's `node_modules/.bin`. `specfold init` stops before writing anything when it is missing.
 - A coding agent. Claude Code gets the most: subagents, plan mode, hooks and parallel worktrees. Any agent that reads `AGENTS.md` and `.agents/skills/` works, opencode and Codex for example.
 

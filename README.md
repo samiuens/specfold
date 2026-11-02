@@ -57,7 +57,7 @@ Claude Code supports all of the right-hand column today. The skills are written 
 
 ## Install
 
-You need Node.js 20 or later, git, and `gh` logged in with access to `samiuens/specfold` (the kit repository is private). OpenSpec 1.15 or later goes on the PATH or in `node_modules/.bin`.
+You need Node.js 20 or later, git, and `gh` logged in; the bootstrap downloads the release through it. OpenSpec 1.15 or later goes on the PATH or in `node_modules/.bin`.
 
 Open your coding agent at the root of your repository and give it this prompt:
 
@@ -121,7 +121,7 @@ Make `specfold-gate` a required check, and nothing merges that fails it. Blockin
 - [Getting started](docs/getting-started.md): install, init, the first change.
 - [Workflow](docs/workflow.md): plan, apply, check, archive and sync; parallel work; the gate.
 - [Command reference](docs/commands.md): every CLI command, generated from its help.
-- [Upgrading](docs/upgrading.md): channels, sources, private repositories, tokens, weekly upgrade PRs, conflicts.
+- [Upgrading](docs/upgrading.md): channels, sources, private mirrors, tokens, weekly upgrade PRs, conflicts.
 - [Releasing](docs/releasing.md): how the kit itself is released (maintainers).
 
 ## This repository
