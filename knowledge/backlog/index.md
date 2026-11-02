@@ -22,3 +22,4 @@
 * [Skills CLI for skill updates](skills-cli-for-skill-updates.md) - Decide in M9 whether specfold upgrade uses the skills CLI (npx skills update) to keep shipped and third-party skills current.
 * [Summary mode for validate](summary-mode-for-validate.md) - A validate --summary flag that prints finding counts per rule and per folder instead of every finding.
 * [Two-way sync of backlog items with GitHub Issues](github-issues-sync.md) - Optionally mirror backlog items to GitHub Issues and back, so teams can triage the backlog where they already work.
+* [Upgrade keeps a trimmed CLAUDE.md block quiet](upgrade-keeps-a-trimmed-claude-md-block-quiet.md) - upgrade applies the @AGENTS.md import rule itself, so a trimmed CLAUDE.md block is no merge or conflict when nothing changed.
