@@ -18,6 +18,12 @@
 
 `specfold.yaml` lists the types a repository allows; `specfold new` refuses others.
 
+## Keys `specfold new` writes
+
+- `sources: []` for every type, to be filled with the files or documents the concept rests on.
+- `decision: accepted` for a Decision only; change it to `rejected` for a rejected proposal.
+- `stale_after` (90 days after `generated.at`) for a Runbook and an Interface only; a Reference gets it when you add it.
+
 ## Choosing
 
 - Would the behavior be testable? Then it belongs in a spec, and knowledge only explains why.

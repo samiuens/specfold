@@ -55,9 +55,9 @@ scenarios: [specfold-new#sources-stub-for-every-type, specfold-new#runbook-revie
 agent: implementer
 ```
 
-- [ ] 4.1 `specfold new` writes `sources: []` for every type (B8)
+- [x] 4.1 `specfold new` writes `sources: []` for every type (B8)
   - Done when: `npx vitest run tools/specfold/test/new.test.ts` passes with a test tagged `spec: specfold-new#sources-stub-for-every-type`, and `#runbook-review-date` still passes
-- [ ] 4.2 sf-capture's `types.md` lists the keys `specfold new` writes for each type (in both the template and the kit copy)
+- [x] 4.2 sf-capture's `types.md` lists the keys `specfold new` writes for each type (in both the template and the kit copy)
   - Done when: both copies of `types.md` are identical and name `sources`, `decision` and `stale_after` with the types they apply to
 
 ## 5. Migrate and init
