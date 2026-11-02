@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.3.1](https://github.com/samiuens/specfold/compare/v0.3.0...v0.3.1) (2026-11-02)
+
+
+### Bug Fixes
+
+* **cli:** 🐛 accept specfold.mjs hook entries in the hooks check ([f575f0a](https://github.com/samiuens/specfold/commit/f575f0a7c47f120ee45eb7b04a0627de40db1933))
+* **cli:** 🐛 add a new log.md to the root index ([b0e502f](https://github.com/samiuens/specfold/commit/b0e502f20d7eabd0cb575e5a19098b3d16658b91))
+* **cli:** 🐛 find a local openspec in doctor without specfold.yaml ([02a1735](https://github.com/samiuens/specfold/commit/02a17351dbf64afd21d35b39a6b51bedfa283d92))
+* **cli:** 🐛 write sources stub for every type ([9443f38](https://github.com/samiuens/specfold/commit/9443f3850f575dab097fbad252cf45d05f3dd5e4))
+* **hooks:** 🐛 fill empty pre-commit nodes cleanly and keep `CRLF` ([0e08a99](https://github.com/samiuens/specfold/commit/0e08a9922dab6d9fdb62d66f83e0fb3a889bdbb1))
+* **hooks:** 🐛 fill flow-style and empty hook sections in place ([77e11d4](https://github.com/samiuens/specfold/commit/77e11d48f01672ec5ca2ce45a7ff96ed6eb998ec))
+* **hooks:** 🐛 keep lefthook.yml formatting when installing hooks ([bcaea56](https://github.com/samiuens/specfold/commit/bcaea564f8f1791ea0ac72efa4e29e9e1dd686bf))
+* **hooks:** 🐛 keep pre-commit config formatting when installing hooks ([6f1648a](https://github.com/samiuens/specfold/commit/6f1648a88d39a3016e92c90a5f67620640117808))
+* **hooks:** 🐛 shorten the stop hook report above 20 blocking findings ([b90b257](https://github.com/samiuens/specfold/commit/b90b257ba871d468ae6f8f5cf23bfda9e5c04644))
+* **index:** 🐛 end each pointer path at a boundary ([9387f81](https://github.com/samiuens/specfold/commit/9387f819c303a6960b919325cbfb74190b9a1875))
+* **index:** 🐛 index every path in a multi-path pointer ([72bd3b1](https://github.com/samiuens/specfold/commit/72bd3b1144be5a3f8cbf4736d7fd5c8111bbedc7))
+* **index:** 🚨 satisfy biome in the pointer and log code ([43590a9](https://github.com/samiuens/specfold/commit/43590a933f58604fdc569be93c19fdc903125ccb))
+* **migrate:** 🐛 detect source globs from workspace files ([740a34e](https://github.com/samiuens/specfold/commit/740a34e2be48b9326447e5b0ad27572a56096a87))
+* **migrate:** 🐛 keep state.json out of git ([a658248](https://github.com/samiuens/specfold/commit/a65824815e3530bc46b5051d0bdaf4b4154abab1))
+* **migrate:** 🐛 run log add before index in sf-migrate ([1fef5fe](https://github.com/samiuens/specfold/commit/1fef5fe515ac12fdb47c517cc3e26fa0937e60cb))
+* **migrate:** 🐛 skip a second `@AGENTS.md` import in `CLAUDE.md` ([f99cecd](https://github.com/samiuens/specfold/commit/f99cecd9e7ed9299504b553e0b209226bddf9b69))
+
 ## [0.3.0](https://github.com/samiuens/specfold/compare/v0.2.1...v0.3.0) (2026-10-30)
 
 
