@@ -2,19 +2,21 @@
 
 Paste this whole file into your coding agent, started at the root of the repository that should use Specfold. It works in any agent that can run shell commands.
 
-The kit is fetched as the newest stable release of `samiuens/specfold`: a template tarball checked against its SHA-256.
+The kit is fetched as the newest stable release of `samiuens/specfold` over plain HTTPS, with no login: a template tarball checked against its SHA-256.
 
 ## Instructions for the agent
 
 Rather ask than assume: whenever a step leaves a decision open, ask the user in your native question UI, one decision per question, recommended option first. A missing or timed-out answer is never consent.
 
-1. **Check.** You are at the root of a git repository (`git rev-parse --show-toplevel`), `gh auth status` succeeds and `node --version` is 20 or later. If one fails, tell the user what is missing and stop.
+1. **Check.** You are at the root of a git repository (`git rev-parse --show-toplevel`), `curl --version` works and `node --version` is 20 or later. If one fails, tell the user what is missing and stop. Then run `gh auth status`: the install works without it, but if it fails, tell the user that making the gate a required check and opening the migration PR will be manual steps.
 2. **Fetch the kit** into a new temporary folder, outside the repository. Run nothing from it yet.
 
    ```sh
-   TAG=$(gh release list --repo samiuens/specfold --exclude-pre-releases --limit 1 --json tagName --jq '.[0].tagName')
+   TAG=$(curl -fsSL https://api.github.com/repos/samiuens/specfold/releases/latest | node -e 'let s = ""; process.stdin.on("data", (d) => (s += d)).on("end", () => console.log(JSON.parse(s).tag_name))')
    KIT=$(mktemp -d)
-   gh release download "$TAG" --repo samiuens/specfold --pattern 'specfold-template-*' --dir "$KIT"
+   for f in "specfold-template-$TAG.tar.gz" "specfold-template-$TAG.tar.gz.sha256"; do
+     curl -fsSL -o "$KIT/$f" "https://github.com/samiuens/specfold/releases/download/$TAG/$f"
+   done
    node -e 'const [f, s] = process.argv.slice(1), fs = require("node:fs"), h = require("node:crypto").createHash("sha256").update(fs.readFileSync(f)).digest("hex"); if (h !== fs.readFileSync(s, "utf8").split(" ")[0]) { console.error("checksum mismatch"); process.exit(1); }' "$KIT/specfold-template-$TAG.tar.gz" "$KIT/specfold-template-$TAG.tar.gz.sha256"
    tar -xzf "$KIT/specfold-template-$TAG.tar.gz" -C "$KIT" --strip-components=1
    ```
