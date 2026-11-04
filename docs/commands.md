@@ -148,6 +148,14 @@ Set or show your personal limit on subagents running at the same time.
 specfold parallel set <n> | show [--json]
 ```
 
+## permissions
+
+Render the permissions in specfold.yaml into agent tool settings.
+
+```sh
+specfold permissions sync [--check] [--json]
+```
+
 ## resume
 
 Print the next open task with its group context.

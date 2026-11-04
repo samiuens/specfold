@@ -44,6 +44,7 @@ The migration PR is exempt from the "source change without a spec" rule, since i
 - **Agent tools:** `--tools` chooses them. Without Claude Code, its files are left out.
 - **OpenSpec skills** and the `/opsx:*` commands, through `openspec init`, which runs only when they are missing.
 - **Skill links** from `.agents/skills/` into `.claude/skills/` (`specfold agents sync`).
+- **Agent permissions** (`specfold permissions sync`): the levels under `permissions` in `specfold.yaml` become Claude Code rules in `.claude/settings.json` (see below).
 - **Git hooks** (`specfold hooks install`): pre-commit checks staged concepts and changes, pre-push runs the local gate, and post-checkout and post-merge refresh the code graph when graphify is set up. If your repository already uses lefthook, husky or pre-commit, init adds the hooks to it.
 - **Managed blocks:** Specfold's text in `AGENTS.md`, `CLAUDE.md`, `.gitignore` and the other shared files gets `specfold:start` and `specfold:end` markers. Upgrades rewrite only what is between them.
 - **Subagent limit:** sets your personal limit on subagents running at the same time to 3, or to `--max-subagents <n>`. Change it with `specfold parallel set <n>`.
@@ -67,6 +68,12 @@ The migration PR is exempt from the "source change without a spec" rule, since i
 | `.specfold/manifest.json` | what came from the kit, so upgrades know what they may rewrite |
 
 Commit it all. The gate blocks merges only once `specfold-gate` is a required check on the default branch; until then it only reports. `init --require-gate` sets that up, and so does `node scripts/specfold.mjs gate require` at any later time: it adds a ruleset named `specfold-gate` that requires the check, with no bypass. It needs a `gh` login with admin rights on the repository, and GitHub offers rulesets for private repositories only on its paid plans. When it can't be done, it prints the steps to do it by hand. `specfold doctor` warns while the check isn't required.
+
+## Agent permissions
+
+`permissions` in `specfold.yaml` says which outward-facing actions an agent may take on its own: `push`, `force-push`, `delete-remote-branch`, `push-tags`, `open-pr`, `merge-pr` and `close-pr`. Each is `allow`, `ask` or `deny`; the template sets `ask` for all, and a missing action counts as `ask`. `force-push`, `delete-remote-branch` and `push-tags` must be at least as strict as `push`, because the `push` rule matches them too.
+
+After a change, run `node scripts/specfold.mjs permissions sync` and commit `.claude/settings.json`. The sync owns only the rules it generates and keeps your own rules, hooks and keys; `--check` reports drift, and so does `specfold doctor` (D8). `AGENTS.md` carries the same rule for every other tool. The rules match the usual `git push` and `gh pr` commands, not every way to write them (`git -C . push` slips through), so treat them as a guard rail, not a security boundary.
 
 ## The first change
 
