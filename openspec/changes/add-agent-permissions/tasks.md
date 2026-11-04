@@ -41,7 +41,7 @@ scenarios: [specfold-doctor#rules-out-of-date, specfold-doctor#invalid-setting, 
 agent: implementer
 ```
 
-- [ ] 3.1 Add D8 for agent permissions, reusing the render functions
+- [x] 3.1 Add D8 for agent permissions, reusing the render functions
   - Done when: D8 is `warn`, `fail` and `ok` (with a note) as the scenarios say, and the doctor tests pass with eight checks
 
 ## 4. Init and migrate
