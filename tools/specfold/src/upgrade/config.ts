@@ -1,6 +1,7 @@
 // see knowledge: /decisions/upgrade-file-classes.md
 import { isDeepStrictEqual } from "node:util";
 import { isMap, parse, parseDocument, Scalar } from "yaml";
+import { OWNED } from "../permissions/actions.ts";
 import { yamlText } from "../yaml.ts";
 
 /** A config file after an upgrade: its text and whether it changed, or why it was left alone. */
@@ -42,9 +43,10 @@ export function upgradeSettings(local: string, base: string | undefined, next: s
   const out: Record<string, unknown> = { ...data };
   const record = (v: unknown) => (isRecord(v) ? v : {});
 
+  // the permissions sync owns its patterns in every list; the merge neither adds nor removes them
   const denyOf = (v: unknown) => {
     const deny = record(v).deny;
-    return Array.isArray(deny) ? deny : [];
+    return Array.isArray(deny) ? deny.filter((r) => !OWNED.has(r)) : [];
   };
   if (data.permissions !== undefined && !isRecord(data.permissions))
     return { conflict: "has a 'permissions' value that is not an object" };
@@ -53,7 +55,8 @@ export function upgradeSettings(local: string, base: string | undefined, next: s
     return { conflict: "has a 'permissions.deny' value that is not a list" };
   const wanted = denyOf(want.permissions);
   const dropped = new Set(denyOf(was.permissions).filter((r) => !wanted.includes(r)));
-  const kept = denyOf(permissions).filter((r) => !dropped.has(r));
+  const localDeny = Array.isArray(permissions.deny) ? permissions.deny : [];
+  const kept = localDeny.filter((r) => !dropped.has(r));
   const deny = [...kept, ...wanted.filter((r) => !kept.includes(r))];
   if (deny.length > 0 || permissions.deny !== undefined) out.permissions = { ...permissions, deny };
 

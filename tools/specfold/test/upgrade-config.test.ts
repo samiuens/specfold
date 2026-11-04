@@ -11,6 +11,20 @@ const textOf = (m: ConfigMerge) => {
 };
 
 describe("upgrade settings", () => {
+  it("neither adds nor removes the patterns the permissions sync owns", () => {
+    const local = JSON.stringify({
+      permissions: { allow: ["Bash(git push *)"], deny: ["Read(a)", "Bash(gh pr merge *)"] },
+    });
+    const base = JSON.stringify({ permissions: { deny: ["Read(a)", "Bash(gh pr merge *)"] } });
+    const next = JSON.stringify({
+      permissions: { deny: ["Read(b)", "Bash(git push *)"], ask: ["Bash(gh pr create *)"] },
+    });
+    expect(JSON.parse(textOf(upgradeSettings(local, base, next))).permissions).toEqual({
+      allow: ["Bash(git push *)"],
+      deny: ["Bash(gh pr merge *)", "Read(b)"],
+    });
+  });
+
   const base = json({
     env: { DEPTH: "1", OLD: "x" },
     permissions: { deny: ["Read(a)", "Read(b)"] },

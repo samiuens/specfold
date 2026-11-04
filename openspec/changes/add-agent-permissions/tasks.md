@@ -67,7 +67,7 @@ scenarios: [specfold-upgrade#team-level-kept]
 agent: implementer
 ```
 
-- [ ] 5.1 Keep owned patterns out of `upgradeSettings`
+- [x] 5.1 Keep owned patterns out of `upgradeSettings`
   - Done when: an upgrade-config test shows that owned patterns in any list are neither added nor removed by the merge
 - [ ] 5.2 Add `permissions sync` to the upgrade's follow-up commands, after `agents sync`
   - Done when: `npx vitest run test/upgrade-apply.test.ts` covers team-level-kept
