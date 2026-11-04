@@ -97,7 +97,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 7.1 Rebuild the bundle and copy it to the template
+- [x] 7.1 Rebuild the bundle and copy it to the template
   - Done when: `npm run build -w specfold` leaves no diff and `template/scripts/specfold.mjs` matches
 - [ ] 7.2 Run `node scripts/specfold.mjs permissions sync` on the kit repo
   - Done when: `permissions sync --check` and `doctor` (D8) are clean in the kit repo, and Claude Code asks before `git push`
