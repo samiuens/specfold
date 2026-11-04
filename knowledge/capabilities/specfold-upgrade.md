@@ -5,7 +5,7 @@ description: Why upgrades run in two stages with the target release's own CLI, m
 status: draft
 spec: openspec/specs/specfold-upgrade/spec.md
 resource: ../../openspec/specs/specfold-upgrade/spec.md
-change: 2026-10-28-add-upgrade-workflow
+change: 2026-11-04-add-agent-permissions
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:45:11+01:00 }
 sources:
   - id: proposal-2026-10-28-add-specfold-upgrade
@@ -18,6 +18,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-10-28-add-upgrade-workflow/proposal.md
   - id: design-2026-10-28-add-upgrade-workflow
     resource: ../../openspec/changes/archive/2026-10-28-add-upgrade-workflow/design.md
+  - id: proposal-2026-11-04-add-agent-permissions
+    resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/proposal.md
+  - id: design-2026-11-04-add-agent-permissions
+    resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/design.md
 ---
 
 # Why

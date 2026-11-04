@@ -1,5 +1,9 @@
 # Log
 
+## 2026-11-04
+
+* **Change**: 2026-11-04-add-agent-permissions: created 3, updated 8, deprecated 0
+
 ## 2026-11-02
 
 * **Change**: 2026-11-02-fix-migration-findings: created 1, updated 8, deprecated 0
