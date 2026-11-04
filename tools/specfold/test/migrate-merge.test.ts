@@ -47,6 +47,13 @@ describe("managed blocks", () => {
 });
 
 describe("settings merge", () => {
+  it("leaves the patterns the permissions sync owns to it", () => {
+    const template = JSON.stringify({ permissions: { deny: ["Read(x)", "Bash(git push *)"] } });
+    const merged = mergeSettings('{ "permissions": { "allow": ["Bash(git push *)"] } }', template);
+    if ("conflict" in merged) throw new Error(merged.conflict);
+    expect(JSON.parse(merged.text).permissions).toEqual({ allow: ["Bash(git push *)"], deny: ["Read(x)"] });
+  });
+
   const template = readFileSync(join(TEMPLATE, ".claude/settings.json"), "utf8");
 
   it("adds Specfold's hooks and keeps other keys and hooks", () => {
