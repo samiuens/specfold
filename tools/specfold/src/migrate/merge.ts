@@ -1,4 +1,5 @@
 import { isMap, parse, parseDocument, Scalar } from "yaml";
+import { OWNED } from "../permissions/actions.ts";
 import { yamlText } from "../yaml.ts";
 import type { Merged } from "./blocks.ts";
 
@@ -41,7 +42,7 @@ export function mergeSettings(existing: string | undefined, template: string): M
     [key: string]: unknown;
   };
   const wanted = parsed.hooks ?? {};
-  const wantedDeny = parsed.permissions?.deny ?? [];
+  const wantedDeny = (parsed.permissions?.deny ?? []).filter((rule) => !OWNED.has(rule));
   if (data.permissions !== undefined && !isRecord(data.permissions))
     return { conflict: "has a 'permissions' value that is not an object" };
   const permissions: Record<string, unknown> = isRecord(data.permissions) ? data.permissions : {};

@@ -90,13 +90,29 @@ describe("migrate install: files", () => {
   });
 
   // spec: specfold-migrate#existing-permissions
-  it("merges Specfold's hooks into existing Claude Code settings", () => {
+  // spec: specfold-migrate#default-permissions-installed
+  it("merges Specfold's hooks into existing Claude Code settings and renders the rules", () => {
     const root = fixtureRepo("cursor-openspec");
-    install(root);
+    const result = install(root);
     const data = JSON.parse(read(root, ".claude/settings.json"));
     const templateDeny = JSON.parse(read(TEMPLATE, ".claude/settings.json")).permissions.deny;
-    expect(data.permissions).toEqual({ deny: ["Read(./.env)", ...templateDeny] });
+    expect(data.permissions.deny).toEqual(["Read(./.env)", ...templateDeny]);
+    expect(data.permissions.ask).toEqual(
+      expect.arrayContaining(["Bash(git push *)", "Bash(gh pr create *)"]),
+    );
     expect(Object.keys(data.hooks)).toEqual(["SessionStart", "PostToolUse", "Stop"]);
+    expect(result.conflicts).toEqual([]);
+  });
+
+  it("reports an invalid permissions setting as a conflict and installs the rest", () => {
+    const root = fixtureRepo("cursor-openspec");
+    write(root, "specfold.yaml", "types: [Decision]\npermissions:\n  push: deny\n  push-tags: ask\n");
+    const result = install(root);
+    expect(result.conflicts).toEqual([
+      { path: ".claude/settings.json", reason: expect.stringContaining("push-tags") },
+    ]);
+    expect(JSON.parse(read(root, ".claude/settings.json")).permissions.ask).toBeUndefined();
+    expect(existsSync(join(root, ".agents/skills/sf-lookup/SKILL.md"))).toBe(true);
   });
 
   // spec: specfold-migrate#source-globs
@@ -135,6 +151,7 @@ describe("migrate install: files", () => {
   });
 
   // spec: specfold-migrate#agents-only
+  // spec: specfold-migrate#agents-only-skips-the-rules
   it("writes nothing under .claude/ with --tools agents", () => {
     const root = fixtureRepo("adr-docs");
     install(root, { tools: ["agents"] });

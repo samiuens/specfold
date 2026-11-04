@@ -15,6 +15,8 @@ import { applyLinks, listSkills, planLinks } from "../agents/sync.ts";
 import { EnvError, UsageError } from "../errors.ts";
 import { installHooks, writeIfChanged } from "../hooks/install.ts";
 import { openspecBinary } from "../openspec.ts";
+import { SETTINGS_FILE } from "../permissions/render.ts";
+import { planLines, syncPermissions } from "../permissions/sync.ts";
 import { CONFIG_FILE, loadConfig } from "../repo.ts";
 import { applyBlock, blockStyle, type Merged } from "./blocks.ts";
 import { detect } from "./detect.ts";
@@ -303,6 +305,14 @@ export function installKit(o: InstallOptions): InstallResult {
     const links = planLinks(o.root, skills, settings.agentTargets).filter((l) => l.action !== "kept");
     applyLinks(o.root, links);
     for (const l of links) act(l.path, l.action);
+  }
+  // the sync settles the rules it owns after the merge; an invalid setting leaves the file as merged
+  if (claude) {
+    const permissions = syncPermissions(settings, false);
+    if (permissions.conflict) conflict(SETTINGS_FILE, `permissions sync: ${permissions.conflict}`);
+    else if (permissions.problems.length > 0)
+      conflict(SETTINGS_FILE, `permissions sync: ${planLines(permissions).join("; ")}`);
+    else if (permissions.text !== undefined) act(SETTINGS_FILE, "run permissions sync");
   }
   try {
     const hooks = installHooks(settings);
