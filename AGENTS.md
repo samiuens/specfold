@@ -37,7 +37,7 @@ Specs are the normative behavior contract, knowledge is descriptive context, not
 
 Every milestone from M1 on is an OpenSpec change: explore, propose, apply, verify, archive, then update knowledge. Claude Code: `/opsx:explore`, `/opsx:propose`, `/opsx:apply`, `/opsx:archive`. Other tools: the `openspec-*` skills in `.agents/skills/`. Changes with no behavior change use `skip_specs: true`.
 
-Work on a branch, never on the default branch. Each milestone or feature ends with a PR for review.
+Work on a branch, never on the default branch. Each milestone or feature ends with a PR for review; pushing and opening it follow `permissions` in `specfold.yaml` (by default: ask the user first). Before an action set to `ask` under `permissions` in `specfold.yaml` (push, force-push, delete a remote branch, push tags, open, merge or close a PR), ask the user; never take one set to `deny`.
 
 ## 6. Knowledge rules
 
