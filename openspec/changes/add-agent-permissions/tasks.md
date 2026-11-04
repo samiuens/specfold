@@ -11,7 +11,7 @@ agent: knowledge-curator
 
 - [x] 1.1 Check Claude Code's permission rule docs: rule syntax, prefix and wildcard matching, and the order of deny, ask and allow. Update the reference.
   - Done when: `knowledge/references/claude-code.md` has a dated `# Permissions` section with sources, and `node scripts/specfold.mjs validate` exits 0
-- [ ] 1.2 Fix the pattern table in design.md to match what the docs allow
+- [x] 1.2 Fix the pattern table in design.md to match what the docs allow
   - Done when: every pattern in design.md decision 4 uses a documented form, and any form that stays uncovered is listed under Risks
 
 ## 2. Permissions core

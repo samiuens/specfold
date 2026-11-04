@@ -37,19 +37,19 @@ See proposal.md (Why). Today the kit writes three things into `.claude/settings.
 
 3. **Precedence explains the sub-action rule.** Claude Code checks `deny` first, then `ask`, then `allow`. Every sub-action pattern also starts with `git push`, so the `push` prefix rule matches every force push, delete and tag push. If a sub-action were looser than `push`, the `push` rule would still win, and the setting would claim something that never takes effect. That is why such a setting is invalid instead of a warning (brief Q11).
 
-4. **Draft pattern table.** Task 1.1 confirms it against Claude Code's permission docs: whether `:*` or a space-separated `*` is the current prefix form, and whether `*` may appear in the middle of a rule. The spec only names one example pattern per action, so changing the table does not change the spec.
+4. **Pattern table.** Checked against Claude Code's permission docs on 2026-11-04 (`/references/claude-code.md`, Permissions). The space form is current: `*` matches any text and may stand anywhere, and a trailing ` *` also matches the bare command. The `:*` suffix is only an end-of-rule wildcard, so the kit writes the space form throughout. Every `*` comes after the subcommand, so no allow rule triggers the startup warning. The spec only names one example pattern per action, so changing the table does not change the spec.
 
-   | Action | Patterns (draft) |
+   | Action | Patterns |
    | --- | --- |
-   | `push` | `Bash(git push:*)` |
-   | `force-push` | `Bash(git push --force:*)`, `Bash(git push -f:*)`, `Bash(git push --force-with-lease:*)`, `Bash(git push * --force*)`, `Bash(git push * -f*)`, `Bash(git push * +*)` |
-   | `delete-remote-branch` | `Bash(git push --delete:*)`, `Bash(git push -d:*)`, `Bash(git push * --delete*)`, `Bash(git push * -d *)`, `Bash(git push * :*)` |
-   | `push-tags` | `Bash(git push --tags:*)`, `Bash(git push --follow-tags:*)`, `Bash(git push * --tags*)`, `Bash(git push * --follow-tags*)` |
-   | `open-pr` | `Bash(gh pr create:*)` |
-   | `merge-pr` | `Bash(gh pr merge:*)`, `Bash(gh api * pulls/*/merge*)` |
-   | `close-pr` | `Bash(gh pr close:*)`, `Bash(gh api * pulls/* * state=closed*)` |
+   | `push` | `Bash(git push *)` |
+   | `force-push` | `Bash(git push *--force*)`, `Bash(git push -f*)`, `Bash(git push * -f*)`, `Bash(git push * +*)` |
+   | `delete-remote-branch` | `Bash(git push *--delete*)`, `Bash(git push -d *)`, `Bash(git push * -d *)` |
+   | `push-tags` | `Bash(git push *--tags*)`, `Bash(git push *--follow-tags*)` |
+   | `open-pr` | `Bash(gh pr create *)` |
+   | `merge-pr` | `Bash(gh pr merge *)`, `Bash(gh api *pulls/*/merge*)` |
+   | `close-pr` | `Bash(gh pr close *)`, `Bash(gh api *pulls/*state=closed*)` |
 
-   If Claude Code cannot match in the middle of a rule, keep only the prefix forms. Then record in the knowledge concept which forms stay uncovered.
+   `*--force*` covers `--force`, `--force-with-lease` and `--force-if-includes`; `--follow-tags` has a single dash before `tags`, so it needs its own pattern. The forms left uncovered are listed under Risks.
 
 5. **Ordering inside a list.** Patterns are appended in the order of the action table, so the rendered output does not depend on the order of keys in `specfold.yaml`.
 
@@ -71,7 +71,8 @@ See proposal.md (Why). Today the kit writes three things into `.claude/settings.
 ## Risks / Trade-offs
 
 - **[Risk] Prefix rules can be bypassed.** Examples are `git -C . push`, aliases, scripts and `gh api` forms the table doesn't list. → The `AGENTS.md` sentence is the contract. The decision concept records that the rules are best effort (brief Q15).
-- **[Risk] A pattern written too broadly could match commands the user didn't mean**, such as `git push * :*` matching a refspec with a colon used for a normal push. → Task 1.1 checks the matching rules. Tests cover one command that should match and one that should not for each sub-action pattern, using a small matcher that follows the documented semantics.
+- **[Risk] Forms the table can't cover.** Deleting with an empty-source refspec (`git push origin :branch`) needs a rule ending in a literal `:` plus anything, which Claude Code reads as the `:*` wildcard; it stays uncovered, and so does pushing a tag by name (`git push origin v1.0`). Both still hit the `push` rule. → The `AGENTS.md` sentence is the contract; the decision concept lists these forms.
+- **[Risk] A pattern written too broadly could match commands the user didn't mean**, such as `gh api *pulls/*/merge*` matching the read-only GET that checks whether a PR is merged, or `*--force*` matching a branch name that contains `--force`. → Task 1.1 checks the matching rules. Tests cover one command that should match and one that should not for each sub-action pattern, using a small matcher that follows the documented semantics.
 - **[Trade-off] A team that writes one of the owned patterns by hand into another list** gets it moved by the next sync. → The capability card names the owned patterns, and the change output shows every move.
 - **[Risk] Upgrades.** A future release that changes a pattern must add the old one to `retired`. Otherwise the old rule is left behind. → A comment in `actions.ts` points to the capability card. A test checks that `retired` and the current patterns don't overlap.
 
