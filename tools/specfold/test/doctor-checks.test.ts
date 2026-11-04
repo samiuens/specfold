@@ -2,6 +2,8 @@ import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { type DoctorEnv, runChecks, satisfies } from "../src/doctor/checks.ts";
+import { syncPermissions } from "../src/permissions/sync.ts";
+import { loadConfig } from "../src/repo.ts";
 import { tempDir } from "./helpers.ts";
 
 /** A fake environment: programs answer from the table, everything else is missing. */
@@ -31,7 +33,10 @@ describe("doctor: checks", () => {
   });
 
   it("is all ok in a healthy repository", () => {
-    expect(runChecks(env(tempDir("valid"), healthy)).map((c) => c.status)).toEqual([
+    const repo = tempDir("valid");
+    syncPermissions(loadConfig(repo), false);
+    expect(runChecks(env(repo, healthy)).map((c) => c.status)).toEqual([
+      "ok",
       "ok",
       "ok",
       "ok",
@@ -191,5 +196,48 @@ describe("doctor: checks", () => {
     expect(check(runChecks(env(tempDir("valid"), onGithub)), "D7")?.message).toBe(
       "required gate not checked: the rules of main could not be read",
     );
+  });
+
+  describe("D8 agent permissions", () => {
+    const repo = (permissions: string, targets?: string) => {
+      const root = tempDir("valid");
+      writeFileSync(
+        join(root, "specfold.yaml"),
+        `types: [Decision]\n${targets ? `agents:\n  targets: ${targets}\n` : ""}${permissions}`,
+      );
+      return root;
+    };
+
+    // spec: specfold-doctor#rules-out-of-date
+    it("warns when the rendered rules are out of date", () => {
+      const root = repo("");
+      syncPermissions(loadConfig(root), false);
+      writeFileSync(join(root, "specfold.yaml"), "types: [Decision]\npermissions:\n  open-pr: allow\n");
+      const d8 = check(runChecks(env(root, healthy)), "D8");
+      expect(d8).toMatchObject({ status: "warn", fix: "node scripts/specfold.mjs permissions sync" });
+    });
+
+    // spec: specfold-doctor#invalid-setting
+    it("fails when the setting is invalid", () => {
+      const d8 = check(
+        runChecks(env(repo("permissions:\n  push: deny\n  force-push: ask\n"), healthy)),
+        "D8",
+      );
+      expect(d8?.status).toBe("fail");
+      expect(d8?.message).toContain("force-push");
+    });
+
+    // spec: specfold-doctor#not-a-claude-code-repository
+    it("is ok with a note when Claude Code is not a target", () => {
+      const d8 = check(runChecks(env(repo("", '[".opencode/skills"]'), healthy)), "D8");
+      expect(d8).toMatchObject({ status: "ok", message: "agent permissions: no tool needs rendered rules" });
+    });
+
+    it("warns when the settings file is broken", () => {
+      const root = repo("");
+      mkdirSync(join(root, ".claude"));
+      writeFileSync(join(root, ".claude/settings.json"), "{");
+      expect(check(runChecks(env(root, healthy)), "D8")?.status).toBe("warn");
+    });
   });
 });

@@ -1,6 +1,8 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { openspecBinary } from "../openspec.ts";
+import { planPermissions, SETTINGS_FILE } from "../permissions/render.ts";
+import { readPermissionsSetting } from "../permissions/sync.ts";
 import { type Config, findRepoRoot, loadConfig } from "../repo.ts";
 
 export type Status = "ok" | "warn" | "fail";
@@ -176,6 +178,7 @@ export function runChecks(env: DoctorEnv): Check[] {
   const graphify = firstVersion(env.exec("graphify", ["--version"], env.cwd));
   checks.push(ok("D6", graphify ? `graphify ${graphify}` : "graphify not installed (optional)"));
   checks.push(requiredGate(env));
+  checks.push(agentPermissions(config));
   return checks;
 }
 
@@ -224,4 +227,36 @@ function requiredGate(env: DoctorEnv): Check {
         message: `specfold-gate is not a required check on ${branch}`,
         fix: "node scripts/specfold.mjs gate require",
       };
+}
+
+/** D8: whether the rules in .claude/settings.json follow `permissions` in specfold.yaml, as `permissions sync --check`. */
+function agentPermissions(config: Config | undefined): Check {
+  if (!config) return ok("D8", "agent permissions not checked: no readable specfold.yaml");
+  const file = join(config.root, SETTINGS_FILE);
+  const current = existsSync(file) ? readFileSync(file, "utf8") : undefined;
+  const plan = planPermissions(readPermissionsSetting(config.root), config.agentTargets, current);
+  const sync = "node scripts/specfold.mjs permissions sync";
+  if (plan.problems.length > 0)
+    return {
+      id: "D8",
+      status: "fail",
+      message: `invalid 'permissions' in specfold.yaml: ${plan.problems.map((p) => p.message).join("; ")}`,
+      fix: "fix 'permissions' in specfold.yaml, then run permissions sync",
+    };
+  if (plan.target === null) return ok("D8", "agent permissions: no tool needs rendered rules");
+  if (plan.conflict)
+    return {
+      id: "D8",
+      status: "warn",
+      message: `agent permissions not checked: ${SETTINGS_FILE} ${plan.conflict}`,
+      fix: `fix ${SETTINGS_FILE} so it parses, then run ${sync}`,
+    };
+  if (plan.changes.length > 0)
+    return {
+      id: "D8",
+      status: "warn",
+      message: `${plan.changes.length} agent permission rule${plan.changes.length === 1 ? "" : "s"} in ${SETTINGS_FILE} out of date`,
+      fix: sync,
+    };
+  return ok("D8", `agent permissions in ${SETTINGS_FILE} follow specfold.yaml`);
 }
