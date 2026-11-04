@@ -35,6 +35,14 @@ ops:
     type: Reference
     summary: Permission rule syntax, prefix and wildcard matching, and the deny-ask-allow order, checked against the current docs.
   - op: update
+    path: architecture/upgrade-flow.md
+    type: Data Flow
+    summary: The upgrade's follow-up commands include permissions sync.
+  - op: update
+    path: decisions/upgrade-file-classes.md
+    type: Decision
+    summary: The settings merge leaves the patterns permissions sync owns to it.
+  - op: update
     path: backlog/agent-permissions-in-specfold-yaml.md
     type: Backlog Item
     summary: Promoted to add-agent-permissions.
@@ -44,3 +52,10 @@ empty_reason: ""
 ## Notes
 
 The reference update is task group 1, because the pattern table in design.md depends on it. The other concepts are written in the Knowledge group.
+
+Found while implementing:
+
+- `:*` is only an end-of-rule wildcard in Claude Code, so the delete form `git push origin :branch` can't be written as a rule; it stays uncovered (design Risks).
+- `--follow-tags` has one dash before `tags`, so `*--tags*` misses it; push-tags has two patterns.
+- The file I/O of the sync lives in `src/permissions/sync.ts`, apart from `command.ts`: migrate install is imported by the CLI's skew check, so importing the command module there would close an import cycle.
+- The sync rewrites `.claude/settings.json` as two-space JSON on a change, which expands the template's hand-formatted one-line entries.

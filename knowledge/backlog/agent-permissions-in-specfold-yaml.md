@@ -3,10 +3,11 @@ type: Backlog Item
 title: Agent permissions in specfold.yaml
 description: Declare what agents may do on their own (push, open PRs, close PRs, delete branches) in Specfold and render it into each tool's permission settings.
 status: draft
-state: open
+state: promoted
+change: add-agent-permissions
 priority: medium
 origin: human
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-29T17:43:22+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:45:11+01:00 }
 ---
 
 # Idea

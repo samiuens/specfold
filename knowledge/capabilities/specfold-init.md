@@ -6,7 +6,7 @@ status: draft
 spec: openspec/specs/specfold-init/spec.md
 resource: ../../openspec/specs/specfold-init/spec.md
 change: 2026-11-02-fix-migration-findings
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-29T09:12:27+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:45:11+01:00 }
 sources:
   - id: proposal-2026-10-28-add-bootstrap
     resource: ../../openspec/changes/archive/2026-10-28-add-bootstrap/proposal.md
@@ -45,6 +45,7 @@ A repository made with "Use this template" holds every kit file but still has pl
 - **`--dry-run` writes nothing** and lists the values and every step it would take.
 - **Upgrade PRs are opt-in.** `--upgrade-workflow` copies the inactive `.specfold/workflows/specfold-upgrade.yml` to `.github/workflows/`, records it in the manifest so upgrades keep it current, and prints the `SPECFOLD_TOKEN` setup. A plain template copy never runs it ([turn on upgrade PRs](/runbooks/turn-on-upgrade-prs.md)).
 - **Required gate is opt-in, and a refusal doesn't fail init.** `--require-gate` runs the step of `gate require` after setup. Without admin rights or rulesets, the repository is still set up; only the GitHub setting is missing. So init reports the step as skipped, prints the manual steps and exits 0. `--dry-run` lists the step without asking GitHub anything.
+- **Permissions rendered.** Init runs `permissions sync` after `agents sync`, and `--dry-run` lists it. The template already ships the rendered default rules, so a fresh repository usually has nothing to change; an invalid `permissions` setting is reported as skipped ([specfold permissions sync](/capabilities/specfold-permissions.md), change `add-agent-permissions`).
 - **Workspace-aware globs.** Source globs come from `package.json` `workspaces` and `pnpm-workspace.yaml` (`<pattern>/src/**`, negations skipped) before the fixed folder list, which now includes `apps`.
 
 # Related
