@@ -6,7 +6,7 @@ Checks that a repository's environment and Specfold configuration are usable, an
 ## Requirements
 
 ### Requirement: Command line and result
-The CLI SHALL provide `specfold doctor [--json]`, which runs checks D1 to D7 in order. Each check SHALL report a status of `ok`, `warn` or `fail`, a message, and a fix hint unless the status is `ok`. The command SHALL exit with 1 when any check fails and with 0 otherwise.
+The CLI SHALL provide `specfold doctor [--json]`, which runs checks D1 to D8 in order. Each check SHALL report a status of `ok`, `warn` or `fail`, a message, and a fix hint unless the status is `ok`. The command SHALL exit with 1 when any check fails and with 0 otherwise.
 
 #### Scenario: Only warnings
 - **WHEN** every check is `ok` except D4, which is `warn`
@@ -79,7 +79,7 @@ Without `--json`, the command SHALL print one line per check, `<id> <status> <me
 
 #### Scenario: JSON result
 - **WHEN** a user runs `specfold doctor --json` and D4 warns
-- **THEN** stdout parses as JSON with seven checks and `"ok": true`
+- **THEN** stdout parses as JSON with eight checks and `"ok": true`
 
 ### Requirement: D7 required gate
 D7 SHALL read the repository's rules for the default branch through `gh` and be `warn` when no active rule requires the status check `specfold-gate`, with `node scripts/specfold.mjs gate require` as the fix. It SHALL be `ok` when such a rule exists, and `ok` with a note that the check was skipped when gh is missing, not logged in, the repository is not on github.com, or the rules cannot be read.
@@ -91,3 +91,18 @@ D7 SHALL read the repository's rules for the default branch through `gh` and be 
 #### Scenario: Offline
 - **WHEN** `gh` is not on the PATH
 - **THEN** D7 is `ok` with a note that the check was skipped
+
+### Requirement: D8 agent permissions
+D8 SHALL compare the `permissions` setting with the rules in `.claude/settings.json` as `specfold permissions sync --check` does. It SHALL be `fail` when the setting is invalid, naming the problem; `warn` when a rule would change, with `node scripts/specfold.mjs permissions sync` as the fix; `ok` otherwise, and `ok` with a note when no tool needs rendered rules.
+
+#### Scenario: Rules out of date
+- **WHEN** `specfold.yaml` sets `open-pr: allow` and the `open-pr` rules are in `permissions.ask`
+- **THEN** D8 is `warn` and its fix names `permissions sync`
+
+#### Scenario: Invalid setting
+- **WHEN** `specfold.yaml` sets `push: deny` and `force-push: ask`
+- **THEN** D8 is `fail` and its message names `force-push`
+
+#### Scenario: Not a Claude Code repository
+- **WHEN** `agents.targets` does not include `.claude/skills`
+- **THEN** D8 is `ok` with a note that no tool needs rendered rules
