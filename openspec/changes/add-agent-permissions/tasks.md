@@ -29,7 +29,7 @@ agent: implementer
   - Done when: `npx vitest run test/permissions-render.test.ts` covers no-permissions-key, unknown-action, unknown-level, looser-force-push and stricter-force-push
 - [x] 2.3 Apply the desired lists to a settings object while keeping foreign rules in their order
   - Done when: the render tests cover level-changed, merge-through-the-api and team-rule-kept, and a second apply reports no changes
-- [ ] 2.4 Route `specfold permissions sync [--check] [--json]` with exit codes 0, 1 and 2
+- [x] 2.4 Route `specfold permissions sync [--check] [--json]` with exit codes 0, 1 and 2
   - Done when: `npx vitest run test/permissions-command.test.ts` covers rules-written, agents-only, broken-settings-file, out-of-date, in-sync and json-changes
 
 ## 3. Doctor check
