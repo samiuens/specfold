@@ -101,7 +101,7 @@ agent: implementer
   - Done when: `npm run build -w specfold` leaves no diff and `template/scripts/specfold.mjs` matches
 - [ ] 7.2 Run `node scripts/specfold.mjs permissions sync` on the kit repo
   - Done when: `permissions sync --check` and `doctor` (D8) are clean in the kit repo, and Claude Code asks before `git push`
-- [ ] 7.3 Regenerate the command reference, describe permissions in getting started, and write the upgrade notes for the next release
+- [x] 7.3 Regenerate the command reference, describe permissions in getting started, and write the upgrade notes for the next release
   - Done when: `node tools/specfold/docs.mjs --check` passes, and `upgrade/notes/0.4.0.md` tells the agent to explain the default `ask` rules and the `permissions` key to the user
 
 ## 8. Knowledge
