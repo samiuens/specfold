@@ -83,7 +83,7 @@ agent: implementer
 
 - [x] 6.1 Add a `permissions` block with `ask` for all seven actions to the template's and the kit's `specfold.yaml`
   - Done when: both files parse, and `permissions sync --check`, run with the source CLI on a copy of the template, reports only the additions
-- [ ] 6.2 Render the default rules into `template/.claude/settings.json` and add a test that keeps it in step with `template/specfold.yaml`
+- [x] 6.2 Render the default rules into `template/.claude/settings.json` and add a test that keeps it in step with `template/specfold.yaml`
   - Done when: `npx vitest run test/permissions-template.test.ts` passes
 - [ ] 6.3 Add the fixed permissions sentence and the reworded PR sentence to the template's `AGENTS.md` block and the kit's `AGENTS.md`
   - Done when: `npx vitest run test/template-manifest.test.ts` passes after updating the manifest hash, and `node scripts/specfold.mjs stats` keeps `AGENTS.md` under its budget
