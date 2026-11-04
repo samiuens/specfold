@@ -69,6 +69,18 @@ actors:
 agents:
   targets: [".claude/skills"]
 
+# What an agent may do on its own: allow, ask (the agent asks first) or deny, per action. A missing
+# action counts as ask. `specfold permissions sync` renders this into .claude/settings.json; AGENTS.md
+# tells every other tool. force-push, delete-remote-branch and push-tags must be at least as strict as push.
+permissions:
+  push: ask
+  force-push: ask
+  delete-remote-branch: ask
+  push-tags: ask
+  open-pr: ask
+  merge-pr: ask
+  close-pr: ask
+
 # Concepts without `verified` older than this many days are reported by `specfold audit` (A2).
 audit:
   unverified_after_days: 30
