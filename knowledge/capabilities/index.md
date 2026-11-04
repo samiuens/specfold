@@ -17,6 +17,8 @@
 * [specfold migrate](specfold-migrate.md) - Why the mechanical steps of a migration are CLI code, and how install brings in the kit without overwriting a repository's own files.
 * [specfold new](specfold-new.md) - Why concepts are created from templates, and where the contract for specfold new lives.
 * [specfold parallel](specfold-parallel.md) - Why the subagent limit is a personal setting in files git ignores, and how init and agents set it.
+* [specfold permissions sync](specfold-permissions.md) - Why permissions sync exists, its owned patterns per action, the push sub-action rule and where its contract lives.
+  * Referenced from code: tools/specfold/src/permissions/actions.ts:1
 * [specfold release](specfold-release.md) - Why the kit packs its own template tarball with a checksum, checks its version fields and ships agent-readable upgrade notes.
 * [specfold schema](specfold-schema.md) - Why changes use the specfold OpenSpec schema with brief and knowledge artifacts, and where its contract lives.
 * [specfold stats](specfold-stats.md) - Why the always-loaded set is measured, what counts in it, and why OpenSpec's own skills count only toward the total.

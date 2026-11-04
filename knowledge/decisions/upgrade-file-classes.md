@@ -5,7 +5,7 @@ description: Which files an upgrade replaces, merges three ways or never touches
 status: draft
 decision: accepted
 change: 2026-10-28-add-specfold-upgrade
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-29T08:58:01+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:46:34+01:00 }
 sources:
   - id: design
     resource: ../../openspec/changes/archive/2026-10-28-add-specfold-upgrade/design.md
@@ -21,7 +21,7 @@ sources:
   - one still equal to its manifest hash is replaced, or removed when the new release dropped it;
   - one changed here is merged three ways with `git merge-file`. A conflict leaves the markers in the file, and the upgrade exits with 1.
 - **Managed blocks:** an unchanged block is replaced inside its markers; an edited one is merged three ways like a file. Text outside the markers is never read.
-- **`.claude/settings.json` and `openspec/config.yaml`:** key by key. A value still equal to the installed release's copy takes the new one, new keys are added, and Specfold's hook groups are swapped. The team's keys, rules and context edits stay.
+- **`.claude/settings.json` and `openspec/config.yaml`:** key by key. A value still equal to the installed release's copy takes the new one, new keys are added, and Specfold's hook groups are swapped. The team's keys, rules and context edits stay. The permission patterns `permissions sync` owns are left to the sync in every list ([specfold permissions sync](/capabilities/specfold-permissions.md)).
 - **Project content is never touched:**
   - `knowledge/`, `openspec/specs/`, `openspec/changes/`;
   - `.specfold/local.yaml`;

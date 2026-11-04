@@ -2,6 +2,8 @@
 
 * [A required CI check blocks merges](blocking-merge-gate.md) - The specfold-gate CI check is required and blocks merges; local hooks only give early feedback.
   * Referenced from code: tools/specfold/src/gate/require.ts:2
+* [Agent permissions declared in specfold.yaml](agent-permissions.md) - Outward-facing agent actions are declared once in specfold.yaml and rendered into Claude Code rules; prefix rules are best effort, AGENTS.md is the contract.
+  * Referenced from code: tools/specfold/src/permissions/render.ts:4
 * [Built-in git hooks with adapters instead of lefthook](built-in-git-hooks.md) - Specfold installs its own git hooks via core.hooksPath and adds one entry to an existing hook manager instead of requiring lefthook.
 * [Claude Code skills are symlinks into .agents/skills/](skills-symlinked-for-claude.md) - specfold agents sync links each .agents/skills/<name> into .claude/skills/ instead of copying it.
 * [Code comments point to knowledge](code-comments-point-to-knowledge.md) - Code comments stay short; rationale lives in knowledge and the comment only references it with see knowledge:.
@@ -25,6 +27,7 @@
 * [OKF sample acme_retail is tested as a patched fixture](acme-retail-patched-fixture.md) - The upstream acme_retail sample violates OKF, so the tests use a documented patched copy plus the unpatched copy as a negative fixture.
 * [One product version, small integer versions for formats](versioning.md) - Specfold has one semver product version; the profile, schema and manifest carry their own integer versions.
 * [Only humans verify knowledge](humans-verify-only.md) - Agents write concepts as draft; only a human adds verified entries, and the gate checks that the named human really approved.
+* [Permission rules tracked in the manifest](permission-rules-tracked-in-manifest.md) - Rejected: tracking the rendered permission rules in the install manifest; the sync owns its fixed patterns instead.
 * [Rather ask than assume](rather-ask-than-assume.md) - When a decision is open or something conflicts, agents ask the user through the native question UI instead of guessing.
 * [Specfold is built with Specfold](self-hosting.md) - Every feature, fix and release of the kit runs through the kit's own workflow, switched on piece by piece as it is built.
 * [Specs are the contract, knowledge is context](specs-vs-knowledge.md) - Specs hold normative behavior, knowledge holds descriptive context, and nothing is written twice.

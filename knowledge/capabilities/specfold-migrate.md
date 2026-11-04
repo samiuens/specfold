@@ -6,7 +6,7 @@ status: draft
 spec: openspec/specs/specfold-migrate/spec.md
 resource: ../../openspec/specs/specfold-migrate/spec.md
 change: 2026-11-02-fix-migration-findings
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-27T12:25:39+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:45:11+01:00 }
 sources:
   - id: proposal-2026-10-27-add-specfold-migrate
     resource: ../../openspec/changes/archive/2026-10-27-add-specfold-migrate/proposal.md
@@ -54,6 +54,7 @@ Bringing an existing repository into the kit touches many files at once ([migrat
 - **Never overwrite.** Kit-owned files that are missing get written, identical ones skipped, differing ones reported as conflicts (exit 1) while the rest installs. Files the repository owns get a [managed block](/decisions/managed-blocks.md), Claude Code settings get Specfold's hooks merged into their JSON, and an existing `openspec/` keeps its context, rules, specs and active changes while `specfold` becomes the default schema for new changes.
 - **Settings grow without overwriting.** The merge also adds each template settings key a repository lacks (such as `worktree.baseRef`) and each `env` variable not yet set; a value already there wins. `.gitattributes` and `.worktreeinclude` are managed blocks like `.gitignore`.
 - **Read barriers arrive with the settings.** The settings merge also appends each of the template's `permissions.deny` rules that a repository's `.claude/settings.json` lacks, after its own; the list holds only generated files (lockfiles, `node_modules`, coverage, snapshots, minified and map files, the graph), because a Read deny rule also blocks editing the path.
+- **Permissions after the merge.** With the `claude` tool, install runs `permissions sync` once `specfold.yaml` exists, so the default `ask` rules land in `permissions.ask` next to the repository's own lists. An invalid `permissions` setting is a conflict: `.claude/settings.json` stays as merged and install exits 1 after installing the rest. The merge itself never adds an owned pattern ([specfold permissions sync](/capabilities/specfold-permissions.md), change `add-agent-permissions`).
 - **A rerun is silent.** Every write compares first, and the YAML merge only reserializes after a real edit, because the `yaml` library reformats a file it rewrites (found while building).
 - **The upgrader gets a base.** `.specfold/manifest.json` records a SHA-256 per kit-owned file and per managed block, the template's `kit_version` and the snapshot ref, with no timestamps, for M9's three-way upgrade.
 - **The migration PR passes G4.** The gate treats a branch whose merge base has no `specfold.yaml` as an adoption PR ([specfold gate](/capabilities/specfold-gate.md)).

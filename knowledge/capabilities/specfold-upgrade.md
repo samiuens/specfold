@@ -6,7 +6,7 @@ status: draft
 spec: openspec/specs/specfold-upgrade/spec.md
 resource: ../../openspec/specs/specfold-upgrade/spec.md
 change: 2026-10-28-add-upgrade-workflow
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T18:04:36+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:45:11+01:00 }
 sources:
   - id: proposal-2026-10-28-add-specfold-upgrade
     resource: ../../openspec/changes/archive/2026-10-28-add-specfold-upgrade/proposal.md
@@ -36,6 +36,7 @@ A repository installed with `specfold init` or sf-migrate keeps the kit of that 
 - **Always a commit, never a push:** `--yes` commits on `specfold/upgrade-<version>`, conflicts included with their markers, and `--pr` is explicit. A dirty tree is refused, so the commit holds only the upgrade.
 - **Version skew guard:** a CLI older than the manifest refuses write commands, so a teammate on an old bundle can't rewrite files in the old format.
 - **Follow-ups check the upgrade itself.** The gate runs against the commit the upgrade branch started from, and config merges keep long lines, so the commit's diff shows only real changes. Both were fixed after the sample app's upgrade to rc.2.
+- **Permission levels stay the team's.** The settings merge neither adds nor removes a pattern that `permissions sync` owns, in any list; the sync runs as a follow-up after `agents sync` and settles them from `specfold.yaml` ([specfold permissions sync](/capabilities/specfold-permissions.md), change `add-agent-permissions`).
 - **Upgrades find the team.** The session-start reminder and the opt-in weekly workflow bring a new release to people who never run `--check` ([turn on upgrade PRs](/runbooks/turn-on-upgrade-prs.md)). A turned-on workflow is a kit file like any other.
 - **Skill `sf-upgrade`** walks an agent through the check, the plan, the conflicts and the release's manual steps, and leaves the push to the user.
 
