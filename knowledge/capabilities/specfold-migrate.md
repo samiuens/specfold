@@ -5,7 +5,7 @@ description: Why the mechanical steps of a migration are CLI code, and how insta
 status: draft
 spec: openspec/specs/specfold-migrate/spec.md
 resource: ../../openspec/specs/specfold-migrate/spec.md
-change: 2026-11-02-fix-migration-findings
+change: 2026-11-04-add-agent-permissions
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:45:11+01:00 }
 sources:
   - id: proposal-2026-10-27-add-specfold-migrate
@@ -38,6 +38,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-11-02-fix-migration-findings/proposal.md
   - id: design-2026-11-02-fix-migration-findings
     resource: ../../openspec/changes/archive/2026-11-02-fix-migration-findings/design.md
+  - id: proposal-2026-11-04-add-agent-permissions
+    resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/proposal.md
+  - id: design-2026-11-04-add-agent-permissions
+    resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/design.md
 ---
 
 # Why

@@ -3,12 +3,17 @@ type: Capability
 title: specfold permissions sync
 description: Why permissions sync exists, its owned patterns per action, the push sub-action rule and where its contract lives.
 status: draft
+spec: openspec/specs/specfold-permissions/spec.md
+resource: ../../openspec/specs/specfold-permissions/spec.md
+change: 2026-11-04-add-agent-permissions
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:44:28+01:00 }
 sources:
-  - id: proposal-add-agent-permissions
-    resource: ../../openspec/changes/add-agent-permissions/proposal.md
   - id: brief-add-agent-permissions
-    resource: ../../openspec/changes/add-agent-permissions/brief.md
+    resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/brief.md
+  - id: proposal-2026-11-04-add-agent-permissions
+    resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/proposal.md
+  - id: design-2026-11-04-add-agent-permissions
+    resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/design.md
 ---
 
 # Why

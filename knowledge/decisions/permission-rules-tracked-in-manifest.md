@@ -4,12 +4,13 @@ title: Permission rules tracked in the manifest
 description: "Rejected: tracking the rendered permission rules in the install manifest; the sync owns its fixed patterns instead."
 status: draft
 decision: rejected
+change: 2026-11-04-add-agent-permissions
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:45:11+01:00 }
 sources:
   - id: proposal-add-agent-permissions
-    resource: ../../openspec/changes/add-agent-permissions/proposal.md
+    resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/proposal.md
   - id: brief-add-agent-permissions
-    resource: ../../openspec/changes/add-agent-permissions/brief.md
+    resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/brief.md
 ---
 
 # Decision

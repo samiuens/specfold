@@ -4,12 +4,13 @@ title: Agent permissions declared in specfold.yaml
 description: Outward-facing agent actions are declared once in specfold.yaml and rendered into Claude Code rules; prefix rules are best effort, AGENTS.md is the contract.
 status: draft
 decision: accepted
+change: 2026-11-04-add-agent-permissions
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:44:27+01:00 }
 sources:
   - id: proposal-add-agent-permissions
-    resource: ../../openspec/changes/add-agent-permissions/proposal.md
+    resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/proposal.md
   - id: brief-add-agent-permissions
-    resource: ../../openspec/changes/add-agent-permissions/brief.md
+    resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/brief.md
 ---
 
 # Decision
