@@ -27,7 +27,7 @@ agent: implementer
   - Done when: a test checks that each sub-action pattern matches one sample command and misses one, using the documented matching rules, and that `retired` and the current patterns don't overlap
 - [x] 2.2 Validate the setting and render it into the desired allow, ask and deny lists
   - Done when: `npx vitest run test/permissions-render.test.ts` covers no-permissions-key, unknown-action, unknown-level, looser-force-push and stricter-force-push
-- [ ] 2.3 Apply the desired lists to a settings object while keeping foreign rules in their order
+- [x] 2.3 Apply the desired lists to a settings object while keeping foreign rules in their order
   - Done when: the render tests cover level-changed, merge-through-the-api and team-rule-kept, and a second apply reports no changes
 - [ ] 2.4 Route `specfold permissions sync [--check] [--json]` with exit codes 0, 1 and 2
   - Done when: `npx vitest run test/permissions-command.test.ts` covers rules-written, agents-only, broken-settings-file, out-of-date, in-sync and json-changes
