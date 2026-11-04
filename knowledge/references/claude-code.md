@@ -1,9 +1,9 @@
 ---
 type: Reference
 title: Claude Code features Specfold relies on
-description: Skill locations, hooks, question tool, subagent frontmatter, plan mode and worktree settings in Claude Code, as documented on 2026-10-26.
+description: Skills, hooks, question tool, subagents, plan mode, worktrees and permission rules in Claude Code, as documented on 2026-10-26 and 2026-11-04.
 status: draft
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:33:11+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:34:50+01:00 }
 stale_after: 2026-11-25T00:00:00+01:00
 sources:
   - id: skills
@@ -22,6 +22,8 @@ sources:
     resource: https://code.claude.com/docs/en/worktrees.md
   - id: env
     resource: https://code.claude.com/docs/en/env-vars.md
+  - id: permissions
+    resource: https://code.claude.com/docs/en/permissions.md
 ---
 
 # Skills and instructions
@@ -54,4 +56,17 @@ sources:
 
 - `claude --worktree <name>` creates `.claude/worktrees/<name>/` on branch `worktree-<name>`. `worktree.baseRef` is `fresh` (default, remote default branch) or `head`. `.worktreeinclude` (gitignore syntax) copies ignored files into new worktrees. Subagent worktrees without changes are removed automatically.[^worktrees]
 - `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` (default 20) and `CLAUDE_CODE_MAX_SUBAGENT_SPAWN_DEPTH` (default 3) exist.[^env]
-- Permission deny rules use `Read(./path/**)`; they cover file tools and recognized Bash file commands, not `grep -r`.
+
+# Permissions
+
+Checked against the permissions page on 2026-11-04.[^permissions]
+
+- Rules are evaluated deny, then ask, then allow; the first match in that order decides, and specificity does not change it. An allow rule can't carve an exception out of a matching ask or deny rule. Deny and ask rules from any settings scope beat allow rules from any other scope.
+- Project `permissions.allow` rules apply only after the user accepts the workspace trust dialog; `ask` and `deny` rules apply right away.
+- Bash rules match the whole command text. `*` matches any text, spaces included, and can stand at the start, in the middle or at the end. Everything before the first `*` is matched as written. A trailing ` *` (space, then the rule's only `*`) also matches the bare command, so `Bash(git push *)` matches `git push`; the space is part of the rule, so `Bash(ls *)` misses `lsof`.
+- `:*` is an equivalent trailing wildcard (`Bash(ls:*)` = `Bash(ls *)`), recognized only at the end of a rule. The permission dialog writes the space form. A rule that has to end in a literal `:` followed by anything can't be written.
+- Claude Code warns at startup about an allow rule with a `*` before the subcommand, such as `Bash(git * main)`.
+- Compound commands are split at `&&`, `||`, `;`, `|`, `|&`, `&` and newlines. Deny and ask rules apply when any subcommand matches, also inside subshells, command substitutions and loops, in every mode. Deny and ask rules also match past any leading variable assignment.
+- Bash rules match only the form Claude writes: `Bash(git push *)` misses `git -C . push`, `git -c x=y push` and `git 'push'`. The docs call argument-constraining patterns fragile and point at sandboxing or PreToolUse hooks for hard boundaries.
+- `Bash(command:...)` parameter rules are ignored with a startup warning; use `Bash(<command> *)`.
+- `Read(./path/**)` deny rules cover file tools and recognized Bash file commands, not `grep -r`.
