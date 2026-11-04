@@ -25,7 +25,7 @@ agent: implementer
 
 - [x] 2.1 Write the action table: actions, the push parent, the patterns and a `retired` list
   - Done when: a test checks that each sub-action pattern matches one sample command and misses one, using the documented matching rules, and that `retired` and the current patterns don't overlap
-- [ ] 2.2 Validate the setting and render it into the desired allow, ask and deny lists
+- [x] 2.2 Validate the setting and render it into the desired allow, ask and deny lists
   - Done when: `npx vitest run test/permissions-render.test.ts` covers no-permissions-key, unknown-action, unknown-level, looser-force-push and stricter-force-push
 - [ ] 2.3 Apply the desired lists to a settings object while keeping foreign rules in their order
   - Done when: the render tests cover level-changed, merge-through-the-api and team-rule-kept, and a second apply reports no changes
