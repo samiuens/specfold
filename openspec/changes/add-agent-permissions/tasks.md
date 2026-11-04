@@ -23,7 +23,7 @@ scenarios: [specfold-permissions#rules-written, specfold-permissions#no-permissi
 agent: implementer
 ```
 
-- [ ] 2.1 Write the action table: actions, the push parent, the patterns and a `retired` list
+- [x] 2.1 Write the action table: actions, the push parent, the patterns and a `retired` list
   - Done when: a test checks that each sub-action pattern matches one sample command and misses one, using the documented matching rules, and that `retired` and the current patterns don't overlap
 - [ ] 2.2 Validate the setting and render it into the desired allow, ask and deny lists
   - Done when: `npx vitest run test/permissions-render.test.ts` covers no-permissions-key, unknown-action, unknown-level, looser-force-push and stricter-force-push
