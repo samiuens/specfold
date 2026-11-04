@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.4.0](https://github.com/samiuens/specfold/compare/v0.3.1...v0.4.0) (2026-11-04)
+
+
+### Features
+
+* **cli:** ✨ add the `permissions sync` command ([e1cf5ac](https://github.com/samiuens/specfold/commit/e1cf5ac766897e7a8b94f5121211c0929115120d))
+* **cli:** ✨ add the table of agent actions and their rule patterns ([63ff410](https://github.com/samiuens/specfold/commit/63ff410bfbbfdfa25da8e65677047e184cbcd740))
+* **cli:** ✨ check agent permissions in doctor as `D8` ([1284d15](https://github.com/samiuens/specfold/commit/1284d154f881b2eafb96158b1d076cb202604b40))
+* **cli:** ✨ move owned permission rules while keeping foreign ones ([620771b](https://github.com/samiuens/specfold/commit/620771b742afc65a88bfbf11a685df89288a2e5a))
+* **cli:** ✨ run the permissions sync in `init` ([f45660b](https://github.com/samiuens/specfold/commit/f45660b63dae20b8509a348be1042e0b938b69a0))
+* **cli:** ✨ validate the permissions setting and render its rules ([db867e9](https://github.com/samiuens/specfold/commit/db867e973c787c0e4fcefe379c5117683dd16c39))
+* **migrate:** ✨ run the permissions sync after the settings merge ([95b5dd6](https://github.com/samiuens/specfold/commit/95b5dd6ff764091f0e35456ebee165c52378e6dc))
+* **template:** ✨ ask before every outward-facing agent action ([1a2e5c1](https://github.com/samiuens/specfold/commit/1a2e5c1e8aaa90e06bb79e50572a87168a40512a))
+* **template:** ✨ ship the rendered permission rules in claude settings ([bcce73b](https://github.com/samiuens/specfold/commit/bcce73bbf1d4c98fbcd1518e0861c36a3f55048d))
+* **template:** ✨ tell agents to follow the permissions in `AGENTS.md` ([1dc9d8a](https://github.com/samiuens/specfold/commit/1dc9d8a0ad94e0a745950d8e32afeb64ed8c8da8))
+* **upgrade:** ✨ leave owned permission rules out of the settings merge ([b979991](https://github.com/samiuens/specfold/commit/b979991ca42d02bd086d115b02d4375ee7569de6))
+* **upgrade:** ✨ run the permissions sync as a follow-up command ([6fb804f](https://github.com/samiuens/specfold/commit/6fb804fbec7792a9601a352ea279a490b3ce1f69))
+
 ## [0.3.1](https://github.com/samiuens/specfold/compare/v0.3.0...v0.3.1) (2026-11-02)
 
 
