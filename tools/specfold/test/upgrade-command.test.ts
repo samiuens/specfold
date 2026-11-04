@@ -168,6 +168,29 @@ console.log("planned by 0.1.0-rc.2");
     expect(gitOut(root, "status", "--porcelain")).toBe("");
   });
 
+  // spec: specfold-upgrade#team-level-kept
+  it("keeps the team's permission levels and runs the permissions sync", async () => {
+    const settings = (extra: object) =>
+      `${JSON.stringify({ permissions: { deny: ["Read(**/*.map)"], ...extra } }, null, 2)}\n`;
+    const base = release("0.1.0-rc.1", { ".claude/settings.json": settings({}) });
+    const root = installed(base, "0.1.0-rc.1");
+    write(
+      root,
+      "specfold.yaml",
+      `${readFileSync(join(root, "specfold.yaml"), "utf8")}permissions:\n  push: allow\n`,
+    );
+    write(root, ".claude/settings.json", settings({ allow: ["Bash(git push *)"] }));
+    commitAll(root);
+    const next = release("0.1.0-rc.2", { ".claude/settings.json": settings({ ask: ["Bash(git push *)"] }) });
+    expect((await run(["upgrade", "--from", next, "--base-dir", base, "--yes"], root)).code).toBe(0);
+    const permissions = JSON.parse(readFileSync(join(root, ".claude/settings.json"), "utf8")).permissions;
+    expect(permissions.allow).toEqual(["Bash(git push *)"]);
+    expect(permissions.ask).toBeUndefined();
+    expect(readFileSync(join(root, ".specfold/upgrade-report.md"), "utf8")).toContain(
+      "| `specfold permissions sync` | 0 |",
+    );
+  });
+
   // spec: specfold-upgrade#gate-with-the-branch-s-start
   it("runs the gate follow-up against the commit the upgrade branch started from", async () => {
     const { root, base } = repo("");

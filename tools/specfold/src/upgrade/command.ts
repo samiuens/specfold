@@ -70,6 +70,7 @@ function followUps(root: string, start: string): FollowUp[] {
     results.push(followUp(root, "openspec update", openspecBinary(root).command, ["update"]));
   for (const args of [
     ["agents", "sync"],
+    ["permissions", "sync"],
     ["hooks", "install"],
     ["index"],
     ["validate"],
