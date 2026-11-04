@@ -69,6 +69,7 @@ register({
           ? [{ path: "openspec/", action: `run openspec init --tools ${options.tools.join(",")}` }]
           : []),
         { path: ".agents/skills", action: "run agents sync" },
+        { path: ".claude/settings.json", action: "run permissions sync" },
         { path: "git hooks", action: "run hooks install" },
         ...(plan.limit !== undefined
           ? [{ path: LOCAL_SETTINGS, action: `set subagent limit to ${plan.limit}` }]

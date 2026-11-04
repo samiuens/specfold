@@ -208,6 +208,19 @@ describe("specfold init", () => {
     expect(status(root)).toBe("");
   });
 
+  // spec: specfold-init#permissions-rendered
+  it("renders the permission rules", async () => {
+    const root = templateRepo(TS_PROJECT);
+    expect((await run(["init"], root)).code).toBe(0);
+    expect((await run(["permissions", "sync", "--check"], root)).code).toBe(0);
+    expect(JSON.parse(read(root, ".claude/settings.json")).permissions.ask).toContain("Bash(git push *)");
+  });
+
+  it("lists the permissions sync in a dry run", async () => {
+    const result = await run(["init", "--dry-run"], templateRepo(TS_PROJECT));
+    expect(result.stdout).toContain(".claude/settings.json: would run permissions sync\n");
+  });
+
   // spec: specfold-init#rerun
   it("changes nothing on a second run", async () => {
     const root = templateRepo(TS_PROJECT);

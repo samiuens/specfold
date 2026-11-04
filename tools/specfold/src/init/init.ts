@@ -21,6 +21,8 @@ import {
 } from "../migrate/install.ts";
 import { openspecBinary } from "../openspec.ts";
 import { LOCAL_SETTINGS, readLimit, writeLimit } from "../parallel/limit.ts";
+import { SETTINGS_FILE } from "../permissions/render.ts";
+import { planLines, syncPermissions } from "../permissions/sync.ts";
 import { CONFIG_FILE, loadConfig } from "../repo.ts";
 
 export interface InitOptions {
@@ -188,7 +190,7 @@ export function planInit(o: InitOptions): InitPlan {
   return plan;
 }
 
-/** Applies `plan`: settings and markers, the OpenSpec skills, skill links, git hooks and the manifest. */
+/** Applies `plan`: settings and markers, the OpenSpec skills, skill links, permissions, git hooks and the manifest. */
 export function runInit(o: InitOptions, plan: InitPlan): InitResult {
   const result: InitResult = { actions: [], skipped: [...plan.skipped], notes: [] };
   const act = (path: string, action: string) => result.actions.push({ path, action });
@@ -212,6 +214,19 @@ export function runInit(o: InitOptions, plan: InitPlan): InitResult {
     applyLinks(o.root, links);
     for (const l of links) act(l.path, l.action);
   }
+  const permissions = syncPermissions(settings, false);
+  if (permissions.conflict)
+    result.skipped.push({
+      path: SETTINGS_FILE,
+      reason: `permissions sync: ${SETTINGS_FILE} ${permissions.conflict}`,
+    });
+  else if (permissions.problems.length > 0)
+    result.skipped.push({
+      path: SETTINGS_FILE,
+      reason: `permissions sync: ${planLines(permissions).join("; ")}`,
+    });
+  else if (permissions.text !== undefined)
+    act(SETTINGS_FILE, `run permissions sync (${permissions.changes.length} rule changes)`);
   try {
     const hooks = installHooks(settings);
     for (const a of hooks.actions) act(a.path, a.action);
