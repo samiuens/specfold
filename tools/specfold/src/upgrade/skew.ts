@@ -21,6 +21,7 @@ const WRITES: Record<string, (positionals: string[], values: Values) => boolean>
   migrate: (p) => p[0] !== undefined && p[0] !== "status",
   new: () => true,
   parallel: (p) => p[0] === "set",
+  permissions: (p, v) => p[0] === "sync" && v.check !== true,
   sync: (_p, v) => v["dry-run"] !== true,
   verify: () => true,
   wt: (p) => p[0] !== undefined && p[0] !== "plan",
