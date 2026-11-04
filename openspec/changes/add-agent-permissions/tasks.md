@@ -53,7 +53,7 @@ scenarios: [specfold-init#permissions-rendered, specfold-init#fresh-template-rep
 agent: implementer
 ```
 
-- [ ] 4.1 Run the permissions sync in init's setup steps and list it in `--dry-run`
+- [x] 4.1 Run the permissions sync in init's setup steps and list it in `--dry-run`
   - Done when: `npx vitest run test/init.test.ts` covers permissions-rendered, and a rerun of init still changes no file
 - [ ] 4.2 Run the permissions sync after migrate install's settings merge, and report problems as conflicts
   - Done when: `npx vitest run test/migrate-install.test.ts test/migrate-merge.test.ts` covers default-permissions-installed and agents-only-skips-the-rules
