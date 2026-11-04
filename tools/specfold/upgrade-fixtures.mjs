@@ -108,14 +108,17 @@ try {
   const next = join(work, "build", "kit");
   unpack(join(work, "build", `specfold-template-v${target}.tar.gz`), next);
 
-  const tags = JSON.parse(
-    execFileSync("gh", ["release", "list", "--repo", REPO, "--limit", "20", "--json", "tagName,isDraft"], {
-      encoding: "utf8",
-    }),
-  )
-    .filter((r) => !r.isDraft)
-    .map((r) => r.tagName)
-    .slice(0, releases);
+  // a release counts once its tarball is uploaded: the push that merges a release PR runs this while
+  // release-please is still publishing, and the new release has no assets for a few seconds
+  const published = JSON.parse(
+    execFileSync("gh", ["api", `repos/${REPO}/releases?per_page=20`], { encoding: "utf8" }),
+  ).filter((r) => !r.draft);
+  const ready = published.filter((r) =>
+    r.assets.some((a) => a.name === `specfold-template-${r.tag_name}.tar.gz`),
+  );
+  for (const r of published)
+    if (!ready.includes(r)) console.log(`skipped ${r.tag_name}: its template tarball is not uploaded yet`);
+  const tags = ready.map((r) => r.tag_name).slice(0, releases);
   if (tags.length === 0) throw new Error(`${REPO} has no releases to build fixtures from`);
   for (const tag of tags) {
     const version = tag.replace(/^v/, "");
