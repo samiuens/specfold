@@ -35,11 +35,11 @@ A Markdown file under `knowledge/` whose frontmatter has a non-empty `type` SHAL
 - **THEN** the inventory lists both as `okf-index`
 
 ### Requirement: Existing bundle at install
-When `migrate install` creates `specfold.yaml` and `knowledge/` holds concepts with a `type`, `types` SHALL hold the template's types followed by every other type those concepts use, in order of first appearance by path, and `folders` SHALL hold the template's folders followed by every other top-level folder under `knowledge/` that holds a concept, with the `description` of that folder's `index.md` when it has one.
+When `migrate install` creates `specfold.yaml` and `knowledge/` holds concepts with a `type`, `types` SHALL hold the template's types followed by every other type those concepts use, in order of first appearance by path, and `folders` SHALL hold the template's folders followed by every other top-level folder under `knowledge/` that holds a concept, without a `description`.
 
 #### Scenario: Bundle types and folders
-- **WHEN** install runs in a repository without `specfold.yaml` whose `knowledge/apps/argocd.md` has `type: App` and `knowledge/apps/index.md` has `description: Deployed applications`
-- **THEN** `specfold.yaml` lists `App` after the template's types and `apps` with description `Deployed applications` after the template's folders, and `specfold validate` reports no `P1` finding
+- **WHEN** install runs in a repository without `specfold.yaml` whose `knowledge/apps/argocd.md` has `type: App`
+- **THEN** `specfold.yaml` lists `App` after the template's types and `apps` without a description after the template's folders, and `specfold validate` reports no `P1` finding
 
 #### Scenario: No bundle
 - **WHEN** install runs in a repository without `knowledge/`
