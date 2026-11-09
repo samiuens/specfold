@@ -6,7 +6,7 @@ status: draft
 spec: openspec/specs/specfold-init/spec.md
 resource: ../../openspec/specs/specfold-init/spec.md
 change: 2026-11-04-add-agent-permissions
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:45:11+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:00:29+01:00 }
 sources:
   - id: proposal-2026-10-28-add-bootstrap
     resource: ../../openspec/changes/archive/2026-10-28-add-bootstrap/proposal.md
@@ -32,6 +32,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/proposal.md
   - id: design-2026-11-04-add-agent-permissions
     resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/design.md
+  - id: proposal-add-knowledge-profile
+    resource: ../../openspec/changes/add-knowledge-profile/proposal.md
+  - id: design-add-knowledge-profile
+    resource: ../../openspec/changes/add-knowledge-profile/design.md
 ---
 
 # Why
@@ -51,6 +55,7 @@ A repository made with "Use this template" holds every kit file but still has pl
 - **Required gate is opt-in, and a refusal doesn't fail init.** `--require-gate` runs the step of `gate require` after setup. Without admin rights or rulesets, the repository is still set up; only the GitHub setting is missing. So init reports the step as skipped, prints the manual steps and exits 0. `--dry-run` lists the step without asking GitHub anything.
 - **Permissions rendered.** Init runs `permissions sync` after `agents sync`, and `--dry-run` lists it. The template already ships the rendered default rules, so a fresh repository usually has nothing to change; an invalid `permissions` setting is reported as skipped ([specfold permissions sync](/capabilities/specfold-permissions.md), change `add-agent-permissions`).
 - **Workspace-aware globs.** Source globs come from `package.json` `workspaces` and `pnpm-workspace.yaml` (`<pattern>/src/**`, negations skipped) before the fixed folder list, which now includes `apps`.
+- **A profile at init.** `--profile knowledge` skips `openspec init` and the `config.yaml` requirement, and removes the template's OpenSpec files that are still unchanged, comparing manifest hashes (and `leftovers.json` for files without one, such as `openspec/config.yaml`); edited ones are kept and reported. A repository counts as already set up once the OpenSpec skills from `openspec init` exist, because the template's own manifest records `profile: full` and cannot tell a fresh template from a finished full init. Switching a full repository to `knowledge` is refused ([a knowledge-only profile](/decisions/knowledge-profile.md)).
 
 # Related
 
@@ -58,3 +63,4 @@ A repository made with "Use this template" holds every kit file but still has pl
 - [specfold hooks](/capabilities/specfold-hooks.md)
 - [specfold agents sync](/capabilities/specfold-agents-sync.md)
 - [Cut a release](/runbooks/cut-a-release.md)
+- [specfold profile](/capabilities/specfold-profile.md)

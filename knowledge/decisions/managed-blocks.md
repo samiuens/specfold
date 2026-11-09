@@ -5,11 +5,15 @@ description: Specfold writes its part of AGENTS.md, CLAUDE.md and similar files 
 status: draft
 decision: accepted
 change: 2026-10-27-add-specfold-migrate
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-27T12:25:39+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:00:29+01:00 }
 sources:
   - id: brief
     resource: ../../openspec/changes/archive/2026-10-27-add-specfold-migrate/brief.md
     title: "Brief of add-specfold-migrate, decision Q4"
+  - id: proposal-add-knowledge-profile
+    resource: ../../openspec/changes/add-knowledge-profile/proposal.md
+  - id: design-add-knowledge-profile
+    resource: ../../openspec/changes/add-knowledge-profile/design.md
 ---
 
 # Decision
@@ -29,7 +33,12 @@ A team's own instructions must survive the migration word for word, and M9's upg
 - Shipping the markers inside the template files: migrate would have to strip them before inserting its own block (rejected while planning `add-bootstrap`).
 - Replacing the file with Specfold's and moving the old text into a section below: the team's text would move, and an upgrade could not tell kit text from team text.
 
+# Knowledge profile variant
+
+The blocks of `AGENTS.md`, `CLAUDE.md` and the PR template have a knowledge variant kept under `.specfold/profiles/knowledge/`, chosen by the profile; a missing variant falls back to the full text. Separate files were chosen over extra markers in one file, which would leak into user repositories ([a knowledge-only profile](/decisions/knowledge-profile.md)).
+
 # Related
 
 - [specfold migrate](/capabilities/specfold-migrate.md)
 - [Versioning](/decisions/versioning.md)
+- [specfold profile](/capabilities/specfold-profile.md)

@@ -5,11 +5,15 @@ description: Which files an upgrade replaces, merges three ways or never touches
 status: draft
 decision: accepted
 change: 2026-10-28-add-specfold-upgrade
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:46:34+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:00:29+01:00 }
 sources:
   - id: design
     resource: ../../openspec/changes/archive/2026-10-28-add-specfold-upgrade/design.md
     title: "Design of add-specfold-upgrade, decisions 1, 5 and 12"
+  - id: proposal-add-knowledge-profile
+    resource: ../../openspec/changes/add-knowledge-profile/proposal.md
+  - id: design-add-knowledge-profile
+    resource: ../../openspec/changes/add-knowledge-profile/design.md
 ---
 
 # Decision
@@ -40,8 +44,13 @@ A team changes kit files on purpose: a stricter verifier, an extra rule in a ski
 - **Base from the git history of the repository:** a repository made from the template or by migrate has no commit that holds the pristine kit copy, and squashed histories lose it anyway.
 - **Upgrading knowledge content with migrations:** releases may report what a team should change in its concepts, but rewriting them would turn an upgrade into a content change.
 
+# Knowledge profile
+
+The set of kit-owned files depends on the profile: the knowledge profile leaves out the OpenSpec schema, `sf-plan`, `sf-apply`, `sf-sync` and every subagent except `scout`. `.specfold/profiles/` is kit-owned in both profiles. The manifest records which profile was installed, so an upgrade compares it with `specfold.yaml` before planning ([a knowledge-only profile](/decisions/knowledge-profile.md)).
+
 # Related
 
 - [Managed blocks](/decisions/managed-blocks.md)
 - [Upgrade flow](/architecture/upgrade-flow.md)
 - [specfold upgrade](/capabilities/specfold-upgrade.md)
+- [specfold profile](/capabilities/specfold-profile.md)

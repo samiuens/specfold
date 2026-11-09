@@ -20,6 +20,7 @@ sources:
 - Agents ask before they assume: every change starts from a brief the user confirmed.
 - Everything that must be correct is checked by deterministic code and a required CI gate, the same for every agent and every human.
 - The workflow works with any agent that reads `AGENTS.md` and `.agents/skills/`; Claude Code gets extra automation on top.
+- The knowledge profile is a supported entry point for repositories with no behavior to spec; the specs carry the contract once a repository moves to the full profile ([a knowledge-only profile](/decisions/knowledge-profile.md)).
 - Upgrades are one command or one PR and never touch project content.
 - Specfold is built and maintained with Specfold.
 
@@ -43,3 +44,4 @@ sources:
 - [The framework is called Specfold](/decisions/naming-specfold.md)
 - [English only](/decisions/english-only.md)
 - [One product version](/decisions/versioning.md)
+- [A knowledge-only profile](/decisions/knowledge-profile.md)

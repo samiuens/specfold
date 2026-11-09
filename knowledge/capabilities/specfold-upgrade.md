@@ -6,7 +6,7 @@ status: draft
 spec: openspec/specs/specfold-upgrade/spec.md
 resource: ../../openspec/specs/specfold-upgrade/spec.md
 change: 2026-11-04-add-agent-permissions
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:45:11+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:00:29+01:00 }
 sources:
   - id: proposal-2026-10-28-add-specfold-upgrade
     resource: ../../openspec/changes/archive/2026-10-28-add-specfold-upgrade/proposal.md
@@ -22,6 +22,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/proposal.md
   - id: design-2026-11-04-add-agent-permissions
     resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/design.md
+  - id: proposal-add-knowledge-profile
+    resource: ../../openspec/changes/add-knowledge-profile/proposal.md
+  - id: design-add-knowledge-profile
+    resource: ../../openspec/changes/add-knowledge-profile/design.md
 ---
 
 # Why
@@ -43,9 +47,11 @@ A repository installed with `specfold init` or sf-migrate keeps the kit of that 
 - **Permission levels stay the team's.** The settings merge neither adds nor removes a pattern that `permissions sync` owns, in any list; the sync runs as a follow-up after `agents sync` and settles them from `specfold.yaml` ([specfold permissions sync](/capabilities/specfold-permissions.md), change `add-agent-permissions`).
 - **Upgrades find the team.** The session-start reminder and the opt-in weekly workflow bring a new release to people who never run `--check` ([turn on upgrade PRs](/runbooks/turn-on-upgrade-prs.md)). A turned-on workflow is a kit file like any other.
 - **Skill `sf-upgrade`** walks an agent through the check, the plan, the conflicts and the release's manual steps, and leaves the push to the user.
+- **The profile decides the file set.** The plan keeps the installed profile's files and the manifest records the profile; a manifest without one counts as `full`. Setting `profile: full` on a knowledge repository reinstalls the release even at the installed version, adding the OpenSpec parts, and the report names `gate.escape_label` as a value to review. Setting `profile: knowledge` on a full repository exits with 2 and writes nothing ([a knowledge-only profile](/decisions/knowledge-profile.md)).
 
 # Related
 
 - [specfold release](/capabilities/specfold-release.md)
 - [Upgrade the sample app](/runbooks/upgrade-the-sample-app.md)
 - [Versioning](/decisions/versioning.md)
+- [specfold profile](/capabilities/specfold-profile.md)
