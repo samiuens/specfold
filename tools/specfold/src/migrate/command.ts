@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import { register } from "../cli.ts";
 import { UsageError } from "../errors.ts";
 import { plural } from "../findings.ts";
+import { parseProfile } from "../repo.ts";
 import { git } from "../git.ts";
 import { detect } from "./detect.ts";
 import { installKit, parseTools } from "./install.ts";
@@ -31,10 +32,11 @@ register({
   name: "migrate",
   summary: "bring an existing repository into Specfold: own branch, state, inventory, kit install",
   usage:
-    "specfold migrate start [--default-branch <name>] | inventory | install --from <dir> [--tools <list>] [--stack <text>] [--source-glob <glob>]... [--ref <ref>] [--upgrade-workflow] | mark <step> | status  [--json]",
+    "specfold migrate start [--default-branch <name>] | inventory | install --from <dir> [--profile <full|knowledge>] [--tools <list>] [--stack <text>] [--source-glob <glob>]... [--ref <ref>] [--upgrade-workflow] | mark <step> | status  [--json]",
   options: {
     "default-branch": { type: "string" },
     from: { type: "string" },
+    profile: { type: "string" },
     tools: { type: "string" },
     stack: { type: "string" },
     "source-glob": { type: "string", multiple: true },
@@ -50,6 +52,8 @@ register({
       throw new UsageError("missing subcommand: start, inventory, install, mark or status");
     if (!["start", "inventory", "install", "mark", "status"].includes(sub))
       throw new UsageError(`unknown migrate subcommand '${sub}'`);
+    const profile =
+      values.profile === undefined ? undefined : parseProfile(values.profile, "--profile");
     const root = gitRoot(io.cwd);
     const print = (lines: string[], json: Record<string, unknown>) =>
       io.stdout(values.json ? `${JSON.stringify(json, null, 2)}\n` : `${lines.join("\n")}\n`);
@@ -158,6 +162,7 @@ register({
       root,
       from: resolve(io.cwd, from),
       tools: parseTools(values.tools as string | undefined),
+      profile,
       stack: values.stack as string | undefined,
       sourceGlobs: globs,
       ref: values.ref as string | undefined,

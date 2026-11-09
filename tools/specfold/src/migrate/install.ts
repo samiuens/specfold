@@ -18,7 +18,7 @@ import { openspecBinary } from "../openspec.ts";
 import { SETTINGS_FILE } from "../permissions/render.ts";
 import { planLines, syncPermissions } from "../permissions/sync.ts";
 import { profileFiles } from "../profile.ts";
-import { CONFIG_FILE, loadConfig, type Profile } from "../repo.ts";
+import { CONFIG_FILE, loadConfig, type Profile, parseProfile } from "../repo.ts";
 import { applyBlock, blockStyle, type Merged } from "./blocks.ts";
 import { detect } from "./detect.ts";
 import { fillStack, mergeOpenspecConfig, mergeSettings } from "./merge.ts";
@@ -124,6 +124,19 @@ export function readManifest(path: string): Manifest {
   }
 }
 
+/** The profile to install: `--profile`, else the existing settings' value, else full; a differing flag fails. */
+export function installProfile(root: string, flag: Profile | undefined): Profile {
+  const path = join(root, CONFIG_FILE);
+  if (!existsSync(path)) return flag ?? "full";
+  const data = parse(readFileSync(path, "utf8")) as { profile?: unknown } | null;
+  const current = parseProfile(data?.profile);
+  if (flag !== undefined && flag !== current)
+    throw new EnvError(
+      `${CONFIG_FILE} sets profile '${current}' but --profile is '${flag}'; switching profiles at install is not supported`,
+    );
+  return current;
+}
+
 /** Fails before any write when the template folder is incomplete or OpenSpec is needed but missing. */
 function preflight(o: InstallOptions): void {
   const missing = REQUIRED.filter((p) => !existsSync(join(o.from, p)));
@@ -165,9 +178,20 @@ export const setSourceGlobs = (text: string, globs: string[]) =>
 export const clearAgentTargets = (text: string) =>
   text.replace(/^(agents:\n(?:#.*\n)*\s+targets:).*$/m, "$1 []");
 
-/** The template's specfold.yaml with this repository's source globs, and no skill targets without Claude Code. */
-function projectSettings(text: string, globs: string[], tools: Tool[]): string {
-  const out = setSourceGlobs(text, globs);
+/** `profile` set to a value: the existing line replaced, or a line added after `kit_version`. */
+export function setProfile(text: string, profile: Profile): string {
+  if (/^profile:.*$/m.test(text)) return text.replace(/^profile:[^\n#]*/m, `profile: ${profile}`);
+  return text.replace(/^(kit_version:.*\n)/m, `$1profile: ${profile}\n`);
+}
+
+/** `gate.escape_label` set to a value, keeping the line's comment. */
+export const setEscapeLabel = (text: string, label: string) =>
+  text.replace(/^(\s+escape_label:)[ \t]*[^\s#]+/m, `$1 ${label}`);
+
+/** The template's specfold.yaml with this repository's source globs and profile, and no skill targets without Claude Code. */
+function projectSettings(text: string, globs: string[], tools: Tool[], profile: Profile): string {
+  let out = setSourceGlobs(text, globs);
+  if (profile === "knowledge") out = setEscapeLabel(setProfile(out, profile), "no-knowledge");
   return tools.includes("claude") ? out : clearAgentTargets(out);
 }
 
@@ -210,6 +234,7 @@ function importsAgentsOutside(text: string): boolean {
 
 /** Installs the kit into `o.root` without overwriting anything the repository already has. */
 export function installKit(o: InstallOptions): InstallResult {
+  const profile = installProfile(o.root, o.profile);
   preflight(o);
   const result: InstallResult = { actions: [], conflicts: [], notes: [] };
   const act = (path: string, action: string) => result.actions.push({ path, action });
@@ -244,7 +269,6 @@ export function installKit(o: InstallOptions): InstallResult {
     act("openspec/", `run openspec init --tools ${o.tools.join(",")}`);
   }
 
-  const profile = o.profile ?? "full";
   for (const p of kitOwned(o.from, o.tools, profile)) {
     const data = readFileSync(join(o.from, p));
     if (!existsSync(abs(p))) {
@@ -293,7 +317,7 @@ export function installKit(o: InstallOptions): InstallResult {
   }
 
   if (read(CONFIG_FILE) === undefined) {
-    put(CONFIG_FILE, projectSettings(template(CONFIG_FILE), o.sourceGlobs ?? found.sourceGlobs, o.tools));
+    put(CONFIG_FILE, projectSettings(template(CONFIG_FILE), o.sourceGlobs ?? found.sourceGlobs, o.tools, profile));
     act(CONFIG_FILE, "write");
   }
   for (const p of filesUnder(o.from, "knowledge"))
