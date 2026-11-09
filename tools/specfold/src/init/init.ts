@@ -99,6 +99,15 @@ export function planInit(o: InitOptions): InitPlan {
     ? parseProfile((parse(readFileSync(abs(CONFIG_FILE), "utf8")) as { profile?: unknown } | null)?.profile)
     : "full";
   const profile = o.profile ?? configured;
+  // a fresh template also records full; init has set up a full repository once openspec init has run
+  if (
+    configured === "full" &&
+    profile === "knowledge" &&
+    openspecSkills(o.tools).some((p) => existsSync(abs(p)))
+  )
+    throw new EnvError(
+      "this repository is set up with the full profile; switching a full repository to the knowledge profile is not supported",
+    );
   const missing = required(profile).filter((p) => !existsSync(abs(p)));
   if (missing.length > 0)
     throw new EnvError(
