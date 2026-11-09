@@ -59,4 +59,28 @@ describe("specfold init: profile", () => {
     expect(result.code).toBe(2);
     expect(status(root)).toBe("");
   });
+
+  // spec: specfold-init#knowledge-profile-stack
+  it("prints the stack without writing it for the knowledge profile", async () => {
+    const root = templateRepo(TS_PROJECT);
+    const result = await run(["init", "--profile", "knowledge"], root);
+    expect(result.code).toBe(0);
+    expect(result.stdout).toContain(
+      "stack: Node.js, TypeScript (detected; not written in the knowledge profile)",
+    );
+    expect(result.stdout).not.toContain("openspec/config.yaml: fill");
+  });
+
+  // spec: specfold-init#knowledge-profile-skips-openspec
+  it("does not run openspec init for the knowledge profile", async () => {
+    vi.stubEnv("PATH", "/usr/bin:/bin");
+    const root = templateRepo({ "specfold.yaml": settingsWith("knowledge") }, ["openspec"]);
+    const result = await run(["init", "--json"], root);
+    expect(result.code).toBe(0);
+    const out = JSON.parse(result.stdout) as { actions: { path: string; action: string }[] };
+    expect(out.actions.map((a) => a.action).join("\n")).not.toContain("openspec init");
+    expect(existsSync(join(root, "openspec"))).toBe(false);
+    expect(existsSync(join(root, ".specfold/manifest.json"))).toBe(true);
+    expect(git(root, "config", "core.hooksPath").trim()).toBe(".specfold/hooks");
+  });
 });
