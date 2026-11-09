@@ -9,7 +9,7 @@ scenarios: [specfold-profile#missing-key, specfold-profile#unknown-value]
 agent: implementer
 ```
 
-- [ ] 1.1 Read `profile` in `loadConfig` into `Config.profile` (`full` by default) and throw a usage error naming the key, the value and the allowed values for anything else
+- [x] 1.1 Read `profile` in `loadConfig` into `Config.profile` (`full` by default) and throw a usage error naming the key, the value and the allowed values for anything else
   - Done when: `npx vitest run test/profile-setting.test.ts` covers specfold-profile#missing-key and specfold-profile#unknown-value
 - [ ] 1.2 Add `profile.ts` with the knowledge profile's excluded kit-owned paths (`openspec/schemas/specfold`, `sf-plan`, `sf-apply`, `sf-sync`, every `.claude/agents/*` but `scout.md`) and a filter over a path list
   - Done when: a test in `profile-setting.test.ts` filters a full path list for `knowledge` and keeps it unchanged for `full`
