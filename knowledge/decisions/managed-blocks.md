@@ -10,10 +10,10 @@ sources:
   - id: brief
     resource: ../../openspec/changes/archive/2026-10-27-add-specfold-migrate/brief.md
     title: "Brief of add-specfold-migrate, decision Q4"
-  - id: proposal-add-knowledge-profile
-    resource: ../../openspec/changes/add-knowledge-profile/proposal.md
-  - id: design-add-knowledge-profile
-    resource: ../../openspec/changes/add-knowledge-profile/design.md
+  - id: proposal-2026-11-09-add-knowledge-profile
+    resource: ../../openspec/changes/archive/2026-11-09-add-knowledge-profile/proposal.md
+  - id: design-2026-11-09-add-knowledge-profile
+    resource: ../../openspec/changes/archive/2026-11-09-add-knowledge-profile/design.md
 ---
 
 # Decision

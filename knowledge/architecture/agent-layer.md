@@ -9,10 +9,10 @@ sources:
     resource: ../../template/.agents/skills/sf-interview/SKILL.md
   - id: planner
     resource: ../../template/.claude/agents/planner.md
-  - id: proposal-add-knowledge-profile
-    resource: ../../openspec/changes/add-knowledge-profile/proposal.md
-  - id: design-add-knowledge-profile
-    resource: ../../openspec/changes/add-knowledge-profile/design.md
+  - id: proposal-2026-11-09-add-knowledge-profile
+    resource: ../../openspec/changes/archive/2026-11-09-add-knowledge-profile/proposal.md
+  - id: design-2026-11-09-add-knowledge-profile
+    resource: ../../openspec/changes/archive/2026-11-09-add-knowledge-profile/design.md
 ---
 
 # Responsibility

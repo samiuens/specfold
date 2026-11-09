@@ -4,14 +4,15 @@ title: A knowledge-only profile
 description: Specfold supports a knowledge-only profile, chosen by a named profile key, so repositories without behavior to spec can adopt it.
 status: draft
 decision: accepted
+change: 2026-11-09-add-knowledge-profile
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T08:59:49+01:00 }
 sources:
-  - id: brief-add-knowledge-profile
-    resource: ../../openspec/changes/add-knowledge-profile/brief.md
-  - id: proposal-add-knowledge-profile
-    resource: ../../openspec/changes/add-knowledge-profile/proposal.md
-  - id: design-add-knowledge-profile
-    resource: ../../openspec/changes/add-knowledge-profile/design.md
+  - id: brief-2026-11-09-add-knowledge-profile
+    resource: ../../openspec/changes/archive/2026-11-09-add-knowledge-profile/brief.md
+  - id: proposal-2026-11-09-add-knowledge-profile
+    resource: ../../openspec/changes/archive/2026-11-09-add-knowledge-profile/proposal.md
+  - id: design-2026-11-09-add-knowledge-profile
+    resource: ../../openspec/changes/archive/2026-11-09-add-knowledge-profile/design.md
 ---
 
 # Decision
