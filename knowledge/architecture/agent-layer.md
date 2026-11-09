@@ -3,12 +3,16 @@ type: Component
 title: Agent layer
 description: The sf skills, the planner agent, and how skills reach each tool through .agents/skills and specfold agents sync.
 status: draft
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-28T10:45:04+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:00:29+01:00 }
 sources:
   - id: skills
     resource: ../../template/.agents/skills/sf-interview/SKILL.md
   - id: planner
     resource: ../../template/.claude/agents/planner.md
+  - id: proposal-add-knowledge-profile
+    resource: ../../openspec/changes/add-knowledge-profile/proposal.md
+  - id: design-add-knowledge-profile
+    resource: ../../openspec/changes/add-knowledge-profile/design.md
 ---
 
 # Responsibility
@@ -67,6 +71,7 @@ The agent layer tells agents when to call the CLI and what to write around it. I
 - **Found in that run:** the planner first took the user's login for `confirmed_by` from an earlier brief, and Claude Code's safety check refused to write an approval the user had not stated. The planner, `sf-interview` and `sf-plan` now ask the user to state their login when approving ([rather ask than assume](/decisions/rather-ask-than-assume.md)).
 - **Proven on 2026-10-28 (M8):** in the sample app, `add-exports` ran as pattern 2 from one orchestrating session ([run record](/runbooks/sample-app-agent-check.md)). Three implementers worked in parallel worktrees from the change's HEAD and merged without conflict. One returned a split proposal for a task that needed `src/todo.js`, outside its files, and the user approved a new group; the verifier found a real defect the tests missed, and it went back to its group. The run found eight gaps, collected in [Fix the parallel run findings](/backlog/fix-the-parallel-run-findings.md) and fixed by `fix-parallel-run-findings`.
 - **Migration needs judgment at one checkpoint.** `sf-migrate` leaves every mechanical step to `specfold migrate` and makes its own calls only in the plan: what each existing source becomes. The user approves that mapping before anything is installed, and a source that turns out to need another target goes back to the user as a plan edit. Two recorded runs in `examples/migrations/` (ADRs and docs; Cursor rules, lefthook and an existing OpenSpec) showed the M6 rules on real fixtures and found three gaps that are now fixed: ADR statuses must map to the decision values validate allows, a pre-existing spec that already fails strict validation is the user's call, and install must keep a conflicting file's manifest hash and pass on the hook manager's next step.
+- **The knowledge profile ships less.** Six skills (sf-lookup, sf-capture, sf-audit, sf-upgrade, sf-migrate, sf-interview) and only the `scout` subagent. `sf-interview` checks `profile` in `specfold.yaml`; in the knowledge profile it asks the open decisions the same way and records the outcome as concepts through `sf-capture` instead of writing `brief.md` ([a knowledge-only profile](/decisions/knowledge-profile.md)). The kit's own `.agents/skills/sf-*` are byte-identical copies of the template's, and no test enforces it yet.
 
 # Related
 

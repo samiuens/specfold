@@ -6,7 +6,7 @@ status: draft
 spec: openspec/specs/specfold-gate/spec.md
 resource: ../../openspec/specs/specfold-gate/spec.md
 change: 2026-10-29-add-gate-require
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-29T09:12:27+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:00:29+01:00 }
 sources:
   - id: proposal-2026-10-26-add-specfold-gate
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-gate/proposal.md
@@ -44,6 +44,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-10-29-add-gate-require/proposal.md
   - id: design-2026-10-29-add-gate-require
     resource: ../../openspec/changes/archive/2026-10-29-add-gate-require/design.md
+  - id: proposal-add-knowledge-profile
+    resource: ../../openspec/changes/add-knowledge-profile/proposal.md
+  - id: design-add-knowledge-profile
+    resource: ../../openspec/changes/add-knowledge-profile/design.md
 ---
 
 # Why
@@ -66,6 +70,7 @@ The checks that keep knowledge and specs honest exist as separate commands (`val
 - **Existing rules, new ids.** Validate, change, tasks and audit findings keep their own rule id at the start of the message (for example `T5 ...`) under the gate rule that runs them.
 - **Making the check required is part of the gate.** `gate require` writes one ruleset named `specfold-gate`, targeting `~DEFAULT_BRANCH`, requiring the check from GitHub Actions only, with no bypass. It goes through `gh`, so it uses the user's login and admin rights and reads no token from the environment. It finds its own ruleset by name and source, compares only the fields it sets, and writes nothing when they match, so it is safe to run again and puts back a ruleset someone changed. Other rulesets are never read beyond their names. When GitHub refuses (no admin rights, or a private repository on a free plan), GitHub's message and fixed manual steps are printed, with exit 2 ([blocking merge gate](/decisions/blocking-merge-gate.md)).
 - **What must be fixed comes first.** Blocking findings come first, then warnings, each sorted by rule number; JSON `counts` gives totals per effect and per rule for the workflow summary.
+- **The knowledge profile has fewer rules.** G3, G4, G5, G6, G13, G15, G18 and the design part of G17 are skipped before OpenSpec is called, so the gate runs without the openspec binary. G19 takes G4's place: a diff touching `source_globs` needs a change under `knowledge/`, or the escape label (`no-knowledge` by default) and a `No-knowledge reason:` line. It shares G4's glob match, adoption-PR exemption and label check, and warns instead of blocking with `--local` ([a knowledge-only profile](/decisions/knowledge-profile.md)).
 
 # Related
 
@@ -75,3 +80,4 @@ The checks that keep knowledge and specs honest exist as separate commands (`val
 - [specfold trace](/capabilities/specfold-trace.md)
 - [specfold drift](/capabilities/specfold-drift.md)
 - [specfold CLI](/architecture/specfold-cli.md)
+- [specfold profile](/capabilities/specfold-profile.md)

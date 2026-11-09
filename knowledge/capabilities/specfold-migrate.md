@@ -6,7 +6,7 @@ status: draft
 spec: openspec/specs/specfold-migrate/spec.md
 resource: ../../openspec/specs/specfold-migrate/spec.md
 change: 2026-11-04-add-agent-permissions
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:45:11+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:00:29+01:00 }
 sources:
   - id: proposal-2026-10-27-add-specfold-migrate
     resource: ../../openspec/changes/archive/2026-10-27-add-specfold-migrate/proposal.md
@@ -42,6 +42,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/proposal.md
   - id: design-2026-11-04-add-agent-permissions
     resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/design.md
+  - id: proposal-add-knowledge-profile
+    resource: ../../openspec/changes/add-knowledge-profile/proposal.md
+  - id: design-add-knowledge-profile
+    resource: ../../openspec/changes/add-knowledge-profile/design.md
 ---
 
 # Why
@@ -69,6 +73,7 @@ Bringing an existing repository into the kit touches many files at once ([migrat
 - **Upgrade PRs are opt-in here too.** `install --upgrade-workflow` turns on the weekly workflow like init does, and `sf-migrate` asks about it before install. A later install without the flag keeps a workflow that was turned on ([turn on upgrade PRs](/runbooks/turn-on-upgrade-prs.md)).
 - **The skill drives it.** `sf-migrate` calls the subcommands in order and does the judgment between them; the recorded runs in `examples/migrations/` show both on the two fixtures.
 - **State stays out of git.** `migrate start` writes `.specfold/migration/.gitignore` listing `state.json`. The CLAUDE.md managed block leaves out its `@AGENTS.md` import when the text outside the markers already has one.
+- **A profile at install.** `install --profile knowledge` writes the knowledge file set, the knowledge block variants and a `specfold.yaml` with `profile: knowledge` and `gate.escape_label: no-knowledge`, and leaves `openspec/` alone. The manifest records the profile ([specfold profile](/capabilities/specfold-profile.md)).
 
 # Related
 
@@ -76,3 +81,4 @@ Bringing an existing repository into the kit touches many files at once ([migrat
 - [specfold hooks](/capabilities/specfold-hooks.md)
 - [specfold agents sync](/capabilities/specfold-agents-sync.md)
 - [specfold CLI](/architecture/specfold-cli.md)
+- [A knowledge-only profile](/decisions/knowledge-profile.md)

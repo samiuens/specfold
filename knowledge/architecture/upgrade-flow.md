@@ -3,7 +3,7 @@ type: Data Flow
 title: Upgrade flow
 description: "How an upgrade runs: outer stage downloads and checks, the target release's CLI plans, applies, migrates, reports and commits."
 status: draft
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:46:34+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:00:29+01:00 }
 ---
 
 # Flow
@@ -46,6 +46,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:46:34+01:00 }
 - on PRs that leave the kit's payload alone, it ends green without work.
 
 **Version skew:** every other command checks the manifest first. When it was written by a newer kit than the running CLI, write commands stop and point to `specfold upgrade`, and read commands keep working.
+
+**Profile check:** before planning, the inner stage compares the profile in the manifest with the one in `specfold.yaml`. Equal means the usual plan for that profile's file set. `knowledge` to `full` plans the full set at the target version (the installed one when nothing is newer) and adds `openspec init` and the template's `config.yaml` to the follow-ups. `full` to `knowledge` stops with exit 2 ([specfold profile](/capabilities/specfold-profile.md)).
 
 # Related
 

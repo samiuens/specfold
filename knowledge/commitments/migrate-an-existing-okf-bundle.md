@@ -19,6 +19,8 @@ The first real migration (on v0.2.1) brought in a repository whose `knowledge/` 
 - the plan checkpoint asking which Deferred Commitments the user stands behind, so P13 can pass;
 - a "Deviations" section in the report template, and one rule for a team's AGENTS.md rules in `conversion.md` and `plan.md`.
 
+The knowledge profile ([a knowledge-only profile](/decisions/knowledge-profile.md)) gives this path a target: the follow-up migration can install it, as iac will need, since that repository has an OKF bundle and no specs.
+
 # Trigger
 
 Before Specfold migrates another repository that already has an OKF bundle in `knowledge/`.
@@ -26,4 +28,5 @@ Before Specfold migrates another repository that already has an OKF bundle in `k
 # Related
 
 - [specfold migrate](/capabilities/specfold-migrate.md)
+- [specfold profile](/capabilities/specfold-profile.md)
 - [Rewrite old decision references in code](/backlog/rewrite-old-decision-references-in-code.md)
