@@ -64,4 +64,3 @@ empty_reason: ""
 ## Notes
 
 - Rejected alternatives from design.md D1 other than the per-profile payload (a `specs` boolean, folding the name into `profile_version`) and D3/D6 (profile markers in one file, reusing G4) go into the body of `decisions/knowledge-profile.md` as considered options rather than separate concepts; they were never proposed on their own.
-- `confirmed_by` in brief.md was filled from `gh api user` after the user approved the brief in chat; the user should confirm the login.
