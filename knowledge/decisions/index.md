@@ -1,5 +1,6 @@
 # Decision
 
+* [A knowledge-only profile](knowledge-profile.md) - Specfold supports a knowledge-only profile, chosen by a named profile key, so repositories without behavior to spec can adopt it.
 * [A required CI check blocks merges](blocking-merge-gate.md) - The specfold-gate CI check is required and blocks merges; local hooks only give early feedback.
   * Referenced from code: tools/specfold/src/gate/require.ts:2
 * [Agent permissions declared in specfold.yaml](agent-permissions.md) - Outward-facing agent actions are declared once in specfold.yaml and rendered into Claude Code rules; prefix rules are best effort, AGENTS.md is the contract.
@@ -26,6 +27,7 @@
 * [Migration only ever happens on its own branch](migration-on-own-branch.md) - sf-migrate refuses to run on the default branch or an unrelated feature branch and works on specfold/migration.
 * [OKF sample acme_retail is tested as a patched fixture](acme-retail-patched-fixture.md) - The upstream acme_retail sample violates OKF, so the tests use a documented patched copy plus the unpatched copy as a negative fixture.
 * [One product version, small integer versions for formats](versioning.md) - Specfold has one semver product version; the profile, schema and manifest carry their own integer versions.
+* [One template payload per profile](template-payload-per-profile.md) - Rejected: shipping one template payload per profile; it doubles release assets and upgrade fixtures for a small file split.
 * [Only humans verify knowledge](humans-verify-only.md) - Agents write concepts as draft; only a human adds verified entries, and the gate checks that the named human really approved.
 * [Permission rules tracked in the manifest](permission-rules-tracked-in-manifest.md) - Rejected: tracking the rendered permission rules in the install manifest; the sync owns its fixed patterns instead.
 * [Rather ask than assume](rather-ask-than-assume.md) - When a decision is open or something conflicts, agents ask the user through the native question UI instead of guessing.
