@@ -105,7 +105,7 @@ specfold index [--check] [--bundle <dir>] [--json]
 Finish setting up a repository made from the template: settings, OpenSpec skills, links, hooks.
 
 ```sh
-specfold init [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--max-subagents <n>] [--upgrade-workflow] [--require-gate] [--dry-run] [--json]
+specfold init [--profile <full|knowledge>] [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--max-subagents <n>] [--upgrade-workflow] [--require-gate] [--dry-run] [--json]
 ```
 
 ## log
@@ -129,7 +129,7 @@ specfold lookup <query...> [--type <type>] [--limit <n>] [--bundle <dir>] [--jso
 Bring an existing repository into Specfold: own branch, state, inventory, kit install.
 
 ```sh
-specfold migrate start [--default-branch <name>] | inventory | install --from <dir> [--tools <list>] [--stack <text>] [--source-glob <glob>]... [--ref <ref>] [--upgrade-workflow] | mark <step> | status  [--json]
+specfold migrate start [--default-branch <name>] | inventory | install --from <dir> [--profile <full|knowledge>] [--tools <list>] [--stack <text>] [--source-glob <glob>]... [--ref <ref>] [--upgrade-workflow] | mark <step> | status  [--json]
 ```
 
 ## new
