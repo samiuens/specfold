@@ -57,7 +57,8 @@ export interface GateContext {
 export type GateRule = (ctx: GateContext) => GateFinding[];
 
 const LINK_RULES = new Set(["L1", "L2"]);
-const NO_SPEC_REASON = /^No-spec reason:[ \t]*\S/m;
+/** A non-empty `<reason>:` line at the start of a line of the PR body. */
+const reasonLine = (reason: string) => new RegExp(`^${reason}:[ \\t]*\\S`, "m");
 
 /** A bundle-relative path as a repository-relative one. */
 function inRepo(ctx: GateContext, bundleRel: string): string {
@@ -154,29 +155,64 @@ export const g3: GateRule = (ctx) => {
   }));
 };
 
-/** G4: source changes need an active or archived change, or the escape label with a reason; adoption PRs are exempt. */
-export const g4: GateRule = (ctx) => {
-  if (!ctx.config.gate.requireChangeForSourceChanges || ctx.diff.adoption) return [];
+interface SourceRule {
+  rule: string;
+  /** Whether the diff carries what source changes need. */
+  satisfied: boolean;
+  /** The PR body line that goes with the escape label, such as `No-spec reason`. */
+  reason: string;
+  /** What the changed source files lack, such as `an OpenSpec change`. */
+  lacks: string;
+  /** Where the missing part goes, such as `add or update a change under openspec/changes/`. */
+  remedy: string;
+}
+
+/** Shared by G4 and G19: source changes need `r`, or the escape label with a reason line; adoption PRs are exempt. */
+function sourceRule(ctx: GateContext, r: SourceRule): GateFinding[] {
+  if (ctx.diff.adoption) return [];
   const sources = ctx.diff.files.filter((f) => matchesAny(f, ctx.config.sourceGlobs));
-  if (sources.length === 0) return [];
-  if (ctx.diff.activeChanges.length > 0 || ctx.diff.archivedChanges.length > 0) return [];
+  if (sources.length === 0 || r.satisfied) return [];
   const label = ctx.config.gate.escapeLabel;
   const labelled = ctx.labels.includes(label);
-  const reasoned = ctx.prBody !== undefined && NO_SPEC_REASON.test(ctx.prBody);
+  const reasoned = ctx.prBody !== undefined && reasonLine(r.reason).test(ctx.prBody);
   if (labelled && reasoned) return [];
   const count = sources.length === 1 ? "1 source file" : `${sources.length} source files`;
   return [
     {
-      rule: "G4",
+      rule: r.rule,
       effect: ctx.local ? "warn" : "block",
       path: sources[0] as string,
       line: null,
       message: labelled
-        ? `label '${label}' is set but the PR body has no 'No-spec reason:' line`
-        : `${count} changed without an OpenSpec change`,
-      fix: `add or update a change under openspec/changes/, or set the '${label}' label and a 'No-spec reason:' line in the PR body`,
+        ? `label '${label}' is set but the PR body has no '${r.reason}:' line`
+        : `${count} changed without ${r.lacks}`,
+      fix: `${r.remedy}, or set the '${label}' label and a '${r.reason}:' line in the PR body`,
     },
   ];
+}
+
+/** G4: source changes need an active or archived change, or the escape label with a reason; adoption PRs are exempt. */
+export const g4: GateRule = (ctx) =>
+  ctx.config.gate.requireChangeForSourceChanges
+    ? sourceRule(ctx, {
+        rule: "G4",
+        satisfied: ctx.diff.activeChanges.length > 0 || ctx.diff.archivedChanges.length > 0,
+        reason: "No-spec reason",
+        lacks: "an OpenSpec change",
+        remedy: "add or update a change under openspec/changes/",
+      })
+    : [];
+
+/** G19, knowledge profile: source changes need a change under the bundle root, or the escape label with a reason. */
+export const g19: GateRule = (ctx) => {
+  const bundle = `${relative(ctx.config.root, ctx.bundleRoot).split(sep).join("/")}/`;
+  return sourceRule(ctx, {
+    rule: "G19",
+    satisfied: ctx.diff.files.some((f) => f.startsWith(bundle)),
+    reason: "No-knowledge reason",
+    lacks: "a knowledge change",
+    remedy: `update the affected concepts or add a log entry under ${bundle}`,
+  });
 };
 
 /** Touched active changes with a tasks.md; those without one are still being planned. */
@@ -562,6 +598,7 @@ export const RULES: GateRule[] = [
   g16,
   g17,
   g18,
+  g19,
 ];
 
 const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
@@ -581,9 +618,12 @@ export function sortGateFindings(findings: GateFinding[]): GateFinding[] {
 /** Rules about OpenSpec specs and changes; the knowledge profile does not run them. */
 export const OPENSPEC_RULES = new Set<GateRule>([g3, g4, g5, g6, g13, g15, g18]);
 
+/** Rules only the knowledge profile runs. */
+export const KNOWLEDGE_RULES = new Set<GateRule>([g19]);
+
 /** The rules the profile runs. */
 export const profileRules = (config: Config): GateRule[] =>
-  config.profile === "knowledge" ? RULES.filter((r) => !OPENSPEC_RULES.has(r)) : RULES;
+  RULES.filter((r) => (config.profile === "knowledge" ? !OPENSPEC_RULES.has(r) : !KNOWLEDGE_RULES.has(r)));
 
 /** Every gate rule the profile runs over one context, sorted. */
 export const runGate = (ctx: GateContext): GateFinding[] =>
