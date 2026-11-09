@@ -4,10 +4,11 @@ title: A migration rewrites an existing OKF bundle
 description: A migration rewrites an existing OKF bundle into Specfold types and folders, removes the originals and rewrites references to them.
 status: draft
 decision: accepted
+change: 2026-11-09-add-okf-bundle-migration
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:58:22+01:00 }
 sources:
-  - id: brief-add-okf-bundle-migration
-    resource: ../../openspec/changes/add-okf-bundle-migration/brief.md
+  - id: brief-2026-11-09-add-okf-bundle-migration
+    resource: ../../openspec/changes/archive/2026-11-09-add-okf-bundle-migration/brief.md
 ---
 
 # Decision
