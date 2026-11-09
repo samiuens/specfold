@@ -1,6 +1,7 @@
 // see knowledge: /decisions/upgrade-file-classes.md
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { EnvError } from "../errors.ts";
 import { applyBlock, blockStyle } from "../migrate/blocks.ts";
 import {
   BLOCK_FILES,
@@ -102,6 +103,9 @@ export function readInstalled(root: string): InstalledManifest {
   }
 }
 
+export const NO_SWITCH_TO_KNOWLEDGE =
+  "specfold.yaml sets profile 'knowledge' but the repository is set up with the full profile; switching a full repository to the knowledge profile is not supported";
+
 /** How `profile` in specfold.yaml differs from the installed one; undefined when they agree. */
 export function profileChange(root: string, profile: Profile): "to-full" | "to-knowledge" | undefined {
   const current = readInstalled(root).profile ?? "full";
@@ -157,6 +161,7 @@ export function planUpgrade(o: PlanOptions): UpgradePlan {
   const tools = toolsOf(installed);
   const profile = o.profile ?? "full";
   const installedProfile = installed.profile ?? "full";
+  if (installedProfile === "full" && profile === "knowledge") throw new EnvError(NO_SWITCH_TO_KNOWLEDGE);
   const files: FileStep[] = [];
   const blocks: BlockStep[] = [];
   const manifest = { files: {} as Record<string, string>, blocks: {} as Record<string, string> };

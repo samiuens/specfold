@@ -81,7 +81,7 @@ agent: implementer
   - Done when: `npx vitest run test/upgrade-profile.test.ts` covers specfold-upgrade#knowledge-upgrade and specfold-upgrade#old-manifest
 - [x] 5.2 Plan the full set at the installed version when the manifest says `knowledge` and `specfold.yaml` says `full`; add `openspec init` and the template `config.yaml` to the follow-ups, and name `gate.escape_label` in the report
   - Done when: the upgrade-profile tests cover specfold-upgrade#switch-at-the-installed-version
-- [ ] 5.3 Refuse a switch from a full install to `knowledge` with exit 2
+- [x] 5.3 Refuse a switch from a full install to `knowledge` with exit 2
   - Done when: the upgrade-profile tests cover specfold-upgrade#full-repository-refused, and `npx vitest run test/upgrade-plan.test.ts` still passes
 
 ## 6. Doctor

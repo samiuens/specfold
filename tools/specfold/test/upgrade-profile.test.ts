@@ -162,4 +162,17 @@ writeFileSync("handed.json", JSON.stringify(process.argv.slice(2)));
     const argv = JSON.parse(readFileSync(join(root, "handed.json"), "utf8")) as string[];
     expect(argv.slice(-2)).toEqual(["--to", "1.0.0"]);
   });
+
+  // spec: specfold-upgrade#full-repository-refused
+  it("refuses to switch a full repository to the knowledge profile", async () => {
+    const v1 = release("1.0.0", KNOWLEDGE_FILES);
+    const root = installed(v1, "1.0.0");
+    write(root, "specfold.yaml", `${readFileSync(join(root, "specfold.yaml"), "utf8")}profile: knowledge\n`);
+    execFileSync("git", ["commit", "-qam", "switch"], { cwd: root });
+    const result = await run(["upgrade", "--from", v1, "--base-dir", v1, "--yes"], root);
+    expect(result.code).toBe(2);
+    expect(result.stderr).toContain("not supported");
+    expect(gitOut(root, "status", "--porcelain")).toBe("");
+    expect(gitOut(root, "branch", "--show-current")).toBe("main");
+  });
 });
