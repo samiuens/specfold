@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.6.0](https://github.com/samiuens/specfold/compare/v0.5.0...v0.6.0) (2026-11-09)
+
+
+### Features
+
+* **hooks:** ✨ let the stop hook pass while a migration converts ([a6bbca9](https://github.com/samiuens/specfold/commit/a6bbca90452a25f1a6c155e5582abd23ea3a02f8))
+* **hooks:** ✨ tell when a migration's conversion is under way ([516d2d7](https://github.com/samiuens/specfold/commit/516d2d7c264e6a45ded484337b4bd71211c55af0))
+* **hooks:** ✨ warn on expected findings while a migration converts ([38678e4](https://github.com/samiuens/specfold/commit/38678e4c3c1df339521bd085c78918d94c570794))
+* **migrate:** ✨ add the specfold types and the migration type map ([a01040d](https://github.com/samiuens/specfold/commit/a01040df38ee1bcfcb094dcecf82253b9f61885e))
+* **migrate:** ✨ inventory the concepts of an existing okf bundle ([4dd94d8](https://github.com/samiuens/specfold/commit/4dd94d8332acfbb3772aa9b94cfbe9267d446a75))
+* **migrate:** ✨ take an existing bundle's types and folders at install ([08aaebf](https://github.com/samiuens/specfold/commit/08aaebf6a02c8bb6150effa32d2d49770b87f9e7))
+* **skills:** ✨ add the conversion rules for an existing bundle ([cc3cc37](https://github.com/samiuens/specfold/commit/cc3cc373f76429cb5abe3b54150d9de4b69418b0))
+* **skills:** ✨ add the existing bundle path to sf-migrate ([53487c8](https://github.com/samiuens/specfold/commit/53487c8dfc34a7882add57d53b3968c77de8535e))
+* **skills:** ✨ plan the conversion of an existing bundle ([f196f28](https://github.com/samiuens/specfold/commit/f196f2844508aeb499307564db3dfe2f5073a978))
+* **skills:** ✨ report deviations and rewritten references ([d5fee3e](https://github.com/samiuens/specfold/commit/d5fee3ed1fd0dccd62d37f89eec36ae1352fb456))
+
 ## [0.5.0](https://github.com/samiuens/specfold/compare/v0.4.0...v0.5.0) (2026-11-09)
 
 
