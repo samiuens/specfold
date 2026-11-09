@@ -13,7 +13,14 @@ import { openspecBinary } from "../openspec.ts";
 import { CONFIG_FILE, type Config, requireConfig } from "../repo.ts";
 import { applyPlan } from "./apply.ts";
 import { runMigrations } from "./migrations.ts";
-import { planUpgrade, profileChange, readInstalled, toolsOf, type UpgradePlan } from "./plan.ts";
+import {
+  NO_SWITCH_TO_KNOWLEDGE,
+  planUpgrade,
+  profileChange,
+  readInstalled,
+  toolsOf,
+  type UpgradePlan,
+} from "./plan.ts";
 import { type FollowUp, reportText } from "./report.ts";
 import { fetchRelease, ghLoggedIn, openSource } from "./source.ts";
 import { upgradePath } from "./version.ts";
@@ -187,6 +194,8 @@ async function outer(io: Io, config: Config, f: Flags, passThrough: string[]) {
   const source = openSource(config.source, config.root, {
     gh: "github" in config.source ? ghLoggedIn() : false,
   });
+  if (profileChange(config.root, config.profile) === "to-knowledge")
+    throw new EnvError(NO_SWITCH_TO_KNOWLEDGE);
   const installed = installedVersion(config);
   const versions = await source.versions();
   if (f.to !== undefined && !versions.includes(f.to))
