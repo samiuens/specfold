@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { parse } from "yaml";
 import { applyLinks, listSkills, planLinks } from "../agents/sync.ts";
@@ -10,9 +10,13 @@ import { detect } from "../migrate/detect.ts";
 import {
   BLOCK_FILES,
   clearAgentTargets,
+  filesUnder,
   MANIFEST_PATH,
   manifestText,
   openspecInit,
+  profileDir,
+  setEscapeLabel,
+  setProfile,
   setSourceGlobs,
   sha256,
   type Tool,
@@ -23,6 +27,7 @@ import { openspecBinary } from "../openspec.ts";
 import { LOCAL_SETTINGS, readLimit, writeLimit } from "../parallel/limit.ts";
 import { SETTINGS_FILE } from "../permissions/render.ts";
 import { planLines, syncPermissions } from "../permissions/sync.ts";
+import { inProfile } from "../profile.ts";
 import { CONFIG_FILE, loadConfig, type Profile, parseProfile } from "../repo.ts";
 
 export interface InitOptions {
@@ -49,6 +54,8 @@ export interface InitPlan {
   };
   /** Files whose new text is already known: settings and markers. */
   edits: { path: string; action: string; text: string }[];
+  /** Template files outside the profile's file set that still equal the template's copy. */
+  remove: string[];
   /** Whether the OpenSpec skills are missing, so `openspec init` runs. */
   openspec: boolean;
   skipped: { path: string; reason: string }[];
@@ -112,6 +119,7 @@ export function planInit(o: InitOptions): InitPlan {
     profile,
     values: { stack: { value: null, source: "" }, sourceGlobs: { value: [], source: "" } },
     edits: [],
+    remove: [],
     openspec,
     skipped: [],
     manifest: "",
@@ -167,6 +175,10 @@ export function planInit(o: InitOptions): InitPlan {
   plan.values.sourceGlobs = { value, source };
   let nextSettings = source === "kept" ? settings : setSourceGlobs(settings, value);
   if (!o.tools.includes("claude")) nextSettings = clearAgentTargets(nextSettings);
+  if (o.profile !== undefined) nextSettings = setProfile(nextSettings, o.profile);
+  const gate = (parse(settings) as { gate?: { escape_label?: unknown } }).gate;
+  if (profile === "knowledge" && gate?.escape_label === "no-spec")
+    nextSettings = setEscapeLabel(nextSettings, "no-knowledge");
   edit(CONFIG_FILE, settings, nextSettings, "fill");
 
   let shipped: ShippedManifest;
@@ -185,6 +197,21 @@ export function planInit(o: InitOptions): InitPlan {
     }
     const text = read(p);
     const style = blockStyle(p);
+    const variantPath = `${profileDir(profile)}/${p}`;
+    if (profile !== "full" && existsSync(abs(variantPath))) {
+      // the profile's variant replaces the template's full block, or the managed part of an earlier init
+      const variant = read(variantPath);
+      if (hasBlock(text, style) || sha256(text) === hash) {
+        const next = applyBlock(hasBlock(text, style) ? text : undefined, variant, style) as { text: string };
+        edit(p, text, next.text, "block");
+        blocks[p] = sha256(variant);
+      } else
+        plan.skipped.push({
+          path: p,
+          reason: "differs from the template; no markers added, left out of the manifest",
+        });
+      continue;
+    }
     if (hasBlock(text, style)) blocks[p] = hash;
     else if (sha256(text) === hash) {
       edit(p, text, (applyBlock(undefined, text, style) as { text: string }).text, "block");
@@ -195,7 +222,24 @@ export function planInit(o: InitOptions): InitPlan {
         reason: "differs from the template; no markers added, left out of the manifest",
       });
   }
-  const files = { ...(shipped.files ?? {}) };
+  const files: Record<string, string> = {};
+  for (const [p, hash] of Object.entries(shipped.files ?? {})) {
+    if (inProfile(p, profile)) files[p] = hash;
+    else if (!existsSync(abs(p))) continue;
+    else if (sha256(readFileSync(abs(p))) === hash) plan.remove.push(p);
+    else plan.skipped.push({ path: p, reason: "differs from the template; kept" });
+  }
+  // template files that are not kit-owned (openspec/config.yaml) carry their hashes in the profile folder
+  const leftovers = join(profileDir(profile), "leftovers.json");
+  if (profile !== "full" && existsSync(abs(leftovers))) {
+    const hashes = JSON.parse(read(leftovers)) as Record<string, string>;
+    for (const [p, hash] of Object.entries(hashes)) {
+      if (!existsSync(abs(p))) continue;
+      const others = filesUnder(o.root, dirname(p)).filter((f) => f !== p && !plan.remove.includes(f));
+      if (sha256(readFileSync(abs(p))) === hash && others.length === 0) plan.remove.push(p);
+      else plan.skipped.push({ path: p, reason: "differs from the template; kept" });
+    }
+  }
   if (o.upgradeWorkflow) {
     const { shipped: from, active } = UPGRADE_WORKFLOW;
     if (!existsSync(abs(from)))
@@ -207,11 +251,20 @@ export function planInit(o: InitOptions): InitPlan {
       files[active] = sha256(text);
     }
   }
-  plan.manifest = manifestText(shipped.kit_version ?? "", shipped.ref, { files, blocks });
+  plan.manifest = manifestText(shipped.kit_version ?? "", shipped.ref, { files, blocks }, profile);
   return plan;
 }
 
-/** Applies `plan`: settings and markers, the OpenSpec skills, skill links, permissions, git hooks and the manifest. */
+/** Removes `dir` and its parents up to the root while they are empty. */
+function pruneEmpty(root: string, dir: string): void {
+  for (let d = dir; d !== "." && d !== ""; d = dirname(d)) {
+    const abs = join(root, d);
+    if (!existsSync(abs) || readdirSync(abs).length > 0) return;
+    rmdirSync(abs);
+  }
+}
+
+/** Applies `plan`: settings and markers, template leftovers, the OpenSpec skills, skill links, permissions, git hooks and the manifest. */
 export function runInit(o: InitOptions, plan: InitPlan): InitResult {
   const result: InitResult = { actions: [], skipped: [...plan.skipped], notes: [] };
   const act = (path: string, action: string) => result.actions.push({ path, action });
@@ -220,6 +273,11 @@ export function runInit(o: InitOptions, plan: InitPlan): InitResult {
     writeFileSync(join(o.root, e.path), e.text);
     act(e.path, e.action);
     if (e.path === UPGRADE_WORKFLOW.active) result.notes.push(UPGRADE_WORKFLOW_NOTE);
+  }
+  for (const p of plan.remove) {
+    rmSync(join(o.root, p));
+    pruneEmpty(o.root, dirname(p));
+    act(p, "remove");
   }
   if (plan.openspec) {
     // openspec init keeps an existing config.yaml; restoring it guards against a version that does not
