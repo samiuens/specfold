@@ -97,7 +97,14 @@ async function inner(
     ?.kit_version;
   const target = f.to ?? (typeof shipped === "string" ? shipped : undefined);
   if (!target) throw new EnvError(`--from ${from} has no kit_version; pass --to <version>`);
-  const plan = planUpgrade({ root, from, base, installed: installedVersion(config), target });
+  const plan = planUpgrade({
+    root,
+    from,
+    base,
+    installed: installedVersion(config),
+    target,
+    profile: config.profile,
+  });
   const print = (text: string, json: unknown) =>
     io.stdout(f.json ? `${JSON.stringify(json, null, 2)}\n` : text);
   if (!f.yes) {

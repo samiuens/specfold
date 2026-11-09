@@ -27,5 +27,5 @@ export function applyPlan(root: string, plan: UpgradePlan, ref: string | undefin
     if (step.text !== undefined) put(step.path, step.text);
   const settings = join(root, CONFIG_FILE);
   if (existsSync(settings)) put(CONFIG_FILE, setKitVersion(readFileSync(settings, "utf8"), plan.to));
-  put(MANIFEST_PATH, manifestText(plan.to, ref, plan.manifest));
+  put(MANIFEST_PATH, manifestText(plan.to, ref, plan.manifest, plan.profile));
 }
