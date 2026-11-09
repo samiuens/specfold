@@ -123,14 +123,15 @@ export function planInit(o: InitOptions): InitPlan {
   const found = detect(o.root);
 
   const detectedStack = found.stack.length > 0 ? found.stack.join(", ") : undefined;
-  const config = existsSync(abs(OPENSPEC_CONFIG)) ? read(OPENSPEC_CONFIG) : undefined;
+  // the knowledge profile has no config.yaml to hold the stack: it is only printed
+  const config = profile === "full" ? read(OPENSPEC_CONFIG) : undefined;
   const line = config === undefined ? null : STACK_LINE.exec(config);
   if (config === undefined) {
     const [value, source] =
       o.stack !== undefined
-        ? [o.stack, "--stack; not written, no openspec/config.yaml"]
+        ? [o.stack, "--stack; not written in the knowledge profile"]
         : detectedStack
-          ? [detectedStack, "detected; not written, no openspec/config.yaml"]
+          ? [detectedStack, "detected; not written in the knowledge profile"]
           : [null, "not detected"];
     plan.values.stack = { value, source };
   } else if (!line) {
