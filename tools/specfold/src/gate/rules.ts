@@ -328,7 +328,9 @@ export const g17: GateRule = (ctx) => {
   const warn = (path: string, line: number | null, message: string, fix: string) =>
     findings.push({ rule: "G17", effect: "warn", path, line, message, fix });
 
-  for (const change of ctx.diff.activeChanges) {
+  // the knowledge profile has no changes and so no designs
+  const designs = ctx.config.profile === "knowledge" ? [] : ctx.diff.activeChanges;
+  for (const change of designs) {
     const rel = `openspec/changes/${change}/design.md`;
     if (!existsSync(join(root, rel))) continue;
     const entries = commitmentEntries(readFileSync(join(root, rel), "utf8"));
@@ -576,6 +578,13 @@ export function sortGateFindings(findings: GateFinding[]): GateFinding[] {
   );
 }
 
-/** Every gate rule over one context, sorted. */
+/** Rules about OpenSpec specs and changes; the knowledge profile does not run them. */
+export const OPENSPEC_RULES = new Set<GateRule>([g3, g4, g5, g6, g13, g15, g18]);
+
+/** The rules the profile runs. */
+export const profileRules = (config: Config): GateRule[] =>
+  config.profile === "knowledge" ? RULES.filter((r) => !OPENSPEC_RULES.has(r)) : RULES;
+
+/** Every gate rule the profile runs over one context, sorted. */
 export const runGate = (ctx: GateContext): GateFinding[] =>
-  sortGateFindings(RULES.flatMap((rule) => rule(ctx)));
+  sortGateFindings(profileRules(ctx.config).flatMap((rule) => rule(ctx)));

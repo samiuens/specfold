@@ -107,7 +107,7 @@ scenarios: [specfold-gate#knowledge-repository-without-openspec, specfold-gate#k
 agent: implementer
 ```
 
-- [ ] 7.1 Skip G3, G4, G5, G6, G13, G15, G18 and the design part of G17 for the knowledge profile, without spawning OpenSpec
+- [x] 7.1 Skip G3, G4, G5, G6, G13, G15, G18 and the design part of G17 for the knowledge profile, without spawning OpenSpec
   - Done when: `npx vitest run test/gate-profile.test.ts` covers specfold-gate#knowledge-repository-without-openspec and specfold-gate#knowledge-rules-still-run
 - [ ] 7.2 Add G19, sharing G4's source-glob match and label check with the `No-knowledge reason:` line and the bundle root as satisfying paths
   - Done when: the gate-profile tests cover specfold-gate#code-without-knowledge, specfold-gate#code-with-a-log-entry, specfold-gate#knowledge-escape-with-reason and specfold-gate#full-profile
