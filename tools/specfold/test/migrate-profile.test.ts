@@ -1,8 +1,11 @@
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { parse } from "yaml";
 import { filesUnder, type InstallOptions, installKit, kitOwned } from "../src/migrate/install.ts";
+import { git } from "./gate-helpers.ts";
+import { run } from "./helpers.ts";
 import { fixtureRepo, TEMPLATE } from "./migrate-helpers.ts";
 
 const KIT_BIN = fileURLToPath(new URL("../../../node_modules/.bin", import.meta.url));
@@ -71,5 +74,45 @@ describe("migrate install: profile blocks", () => {
     const root = fixtureRepo("adr-docs");
     install(root);
     expect(read(root, "AGENTS.md")).toContain("openspec show");
+  });
+});
+
+describe("migrate install: --profile", () => {
+  // spec: specfold-migrate#unknown-profile
+  it("refuses an unknown profile with exit 2, writing nothing", async () => {
+    const root = fixtureRepo("adr-docs");
+    const result = await run(["migrate", "install", "--from", TEMPLATE, "--profile", "lite"], root);
+    expect(result.code).toBe(2);
+    expect(result.stderr).toContain("full, knowledge");
+    expect(git(root, "status", "--porcelain", "--untracked-files=all")).toBe("");
+  });
+
+  // spec: specfold-migrate#knowledge-install
+  // spec: specfold-profile#fresh-knowledge-settings
+  it("creates knowledge settings and leaves sf-plan out", () => {
+    const root = fixtureRepo("adr-docs");
+    install(root, { profile: "knowledge" });
+    const settings = parse(read(root, "specfold.yaml")) as { profile: string; gate: { escape_label: string } };
+    expect(settings.profile).toBe("knowledge");
+    expect(settings.gate.escape_label).toBe("no-knowledge");
+    expect(existsSync(join(root, ".agents/skills/sf-plan"))).toBe(false);
+    expect(existsSync(join(root, ".agents/skills/sf-lookup/SKILL.md"))).toBe(true);
+  });
+
+  it("takes the profile from existing settings", () => {
+    const root = fixtureRepo("adr-docs");
+    install(root, { profile: "knowledge" });
+    install(root);
+    expect(existsSync(join(root, ".agents/skills/sf-plan"))).toBe(false);
+  });
+
+  // spec: specfold-migrate#conflicting-profile
+  it("refuses a profile that differs from the settings, writing nothing", () => {
+    const root = fixtureRepo("adr-docs");
+    install(root);
+    git(root, "add", "-A");
+    git(root, "commit", "-q", "-m", "installed");
+    expect(() => install(root, { profile: "knowledge" })).toThrow("switching profiles");
+    expect(git(root, "status", "--porcelain", "--untracked-files=all")).toBe("");
   });
 });
