@@ -5,6 +5,7 @@ import { findingLine } from "../findings.ts";
 import { dueDate, listItems } from "../future/items.ts";
 import { localGate, renderGate } from "../gate/command.ts";
 import type { GateFinding } from "../gate/rules.ts";
+import { migrationRelief, relieved } from "../migrate/relief.ts";
 import { resolveBundleRoot } from "../repo.ts";
 import { taskFindingLine } from "../tasks/command.ts";
 import { upgradeReminder } from "../upgrade/reminder.ts";
@@ -95,9 +96,18 @@ export async function postToolUse({ config, io }: HookContext): Promise<number> 
   let errors: string[] = [];
   if (rel.startsWith(`${prefix}/`) && rel.endsWith(".md") && isConcept(rel.slice(prefix.length + 1))) {
     if (!existsSync(join(config.root, rel))) return 0;
-    errors = validate({ bundleRoot, paths: [join(config.root, rel)], okfOnly: false, config })
-      .findings.filter((f) => f.severity === "error")
-      .map((f) => findingLine({ ...f, path: `${prefix}/${f.path}` }));
+    const relief = migrationRelief(config.root);
+    const findings = validate({
+      bundleRoot,
+      paths: [join(config.root, rel)],
+      okfOnly: false,
+      config,
+    }).findings.filter((f) => f.severity === "error");
+    const line = (f: (typeof findings)[number]) => findingLine({ ...f, path: `${prefix}/${f.path}` });
+    const warn = findings.filter((f) => relieved(relief, f, `${prefix}/${f.path}`));
+    if (warn.length > 0)
+      io.stderr(`${warn.map((f) => `${line(f)} (warning: migration in progress)`).join("\n")}\n`);
+    errors = findings.filter((f) => !warn.includes(f)).map(line);
   } else {
     const change = /^openspec\/changes\/([^/]+)\//.exec(rel)?.[1];
     if (!change || change === "archive" || !existsSync(join(config.root, "openspec", "changes", change)))

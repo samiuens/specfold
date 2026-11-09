@@ -7,6 +7,7 @@ import { findingLine } from "../findings.ts";
 import { localGate, renderGate } from "../gate/command.ts";
 import { openspecValidate } from "../gate/openspec.ts";
 import { git } from "../git.ts";
+import { migrationRelief, relieved } from "../migrate/relief.ts";
 import { openspecBinary } from "../openspec.ts";
 import { type Config, resolveBundleRoot } from "../repo.ts";
 import { taskFindingLine } from "../tasks/command.ts";
@@ -35,14 +36,20 @@ function preCommit({ config, io }: HookContext): number {
   const bundleRoot = resolveBundleRoot(config.root, undefined, config);
   const prefix = relative(config.root, bundleRoot).split(sep).join("/");
   const errors: string[] = [];
+  const warnings: string[] = [];
+  const relief = migrationRelief(config.root);
 
   const concepts = staged
     .filter((f) => f.startsWith(`${prefix}/`) && f.endsWith(".md") && isConcept(f.slice(prefix.length + 1)))
     .map((f) => join(config.root, f));
   if (concepts.length > 0) {
     const { findings } = validate({ bundleRoot, paths: concepts, okfOnly: false, config });
-    for (const f of findings.filter((x) => x.severity === "error"))
-      errors.push(findingLine({ ...f, path: `${prefix}/${f.path}` }));
+    for (const f of findings.filter((x) => x.severity === "error")) {
+      const line = findingLine({ ...f, path: `${prefix}/${f.path}` });
+      if (relieved(relief, f, `${prefix}/${f.path}`))
+        warnings.push(`${line} (warning: migration in progress)`);
+      else errors.push(line);
+    }
   }
 
   const changes = new Set(
@@ -60,6 +67,7 @@ function preCommit({ config, io }: HookContext): number {
     for (const issue of openspecValidate(config.root, openspecBinary(config.root)) ?? [])
       errors.push(`${issue.path} openspec ${issue.message}`);
 
+  if (warnings.length > 0) io.stdout(`${warnings.join("\n")}\n`);
   if (errors.length === 0) return 0;
   io.stdout(
     `${[...errors, `pre-commit: ${errors.length} error${errors.length === 1 ? "" : "s"}, commit stopped`].join("\n")}\n`,
