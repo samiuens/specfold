@@ -1,7 +1,8 @@
 import { execFileSync } from "node:child_process";
 import { cpSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { fileURLToPath } from "node:url";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { applyBlock, blockStyle } from "../src/migrate/blocks.ts";
 import {
   BLOCK_FILES,
@@ -15,8 +16,8 @@ import type { Profile } from "../src/repo.ts";
 import { applyPlan } from "../src/upgrade/apply.ts";
 import { planUpgrade } from "../src/upgrade/plan.ts";
 import { write } from "./gate-helpers.ts";
-import { tempDir } from "./helpers.ts";
-import { installed, release } from "./upgrade-helpers.ts";
+import { run, tempDir } from "./helpers.ts";
+import { installed, packInto, release } from "./upgrade-helpers.ts";
 
 const KNOWLEDGE_FILES = {
   ".agents/skills/sf-plan/SKILL.md": "# sf-plan\n\nPlan a change.\n",
@@ -95,5 +96,70 @@ describe("upgrade: profile file set", () => {
     const root = installedKnowledge(v1, "1.0.0");
     applyPlan(root, plan(root, v2, v1, "knowledge"), "v1.1.0");
     expect(JSON.parse(readFileSync(join(root, MANIFEST_PATH), "utf8")).profile).toBe("knowledge");
+  });
+});
+
+const KIT_BIN = fileURLToPath(new URL("../../../node_modules/.bin", import.meta.url));
+const gitOut = (root: string, ...args: string[]) =>
+  execFileSync("git", args, { cwd: root, encoding: "utf8" }).trim();
+
+describe("upgrade: switch to the full profile", () => {
+  beforeEach(() => {
+    vi.stubEnv("PATH", `${KIT_BIN}:${process.env.PATH}`);
+    for (const [k, v] of Object.entries({
+      GIT_AUTHOR_NAME: "t",
+      GIT_AUTHOR_EMAIL: "t@example.com",
+      GIT_COMMITTER_NAME: "t",
+      GIT_COMMITTER_EMAIL: "t@example.com",
+    }))
+      vi.stubEnv(k, v);
+  });
+  afterEach(() => vi.unstubAllEnvs());
+
+  /** A knowledge repository on 1.0.0 whose specfold.yaml now says `profile: full`, committed. */
+  function switching(from: string): string {
+    const root = installedKnowledge(from, "1.0.0");
+    const text = readFileSync(join(root, "specfold.yaml"), "utf8").replace(
+      "profile: knowledge",
+      "profile: full",
+    );
+    write(root, "specfold.yaml", text);
+    execFileSync("git", ["commit", "-qam", "switch"], { cwd: root });
+    return root;
+  }
+
+  // spec: specfold-upgrade#switch-at-the-installed-version
+  it("installs the full file set and sets up OpenSpec at the installed version", async () => {
+    const v1 = release("1.0.0", { ...KNOWLEDGE_FILES, "openspec/config.yaml": "schema: specfold\n" });
+    const root = switching(v1);
+    const result = await run(["upgrade", "--from", v1, "--base-dir", v1, "--yes"], root);
+    expect(result.stderr).toBe("");
+    for (const p of ["openspec/schemas/specfold/schema.yaml", ".agents/skills/sf-plan/SKILL.md"])
+      expect(existsSync(join(root, p)), p).toBe(true);
+    expect(readFileSync(join(root, "openspec/config.yaml"), "utf8")).toBe("schema: specfold\n");
+    expect(JSON.parse(readFileSync(join(root, MANIFEST_PATH), "utf8")).profile).toBe("full");
+    expect(readFileSync(join(root, ".specfold/upgrade-report.md"), "utf8")).toContain("gate.escape_label");
+    expect(gitOut(root, "branch", "--show-current")).toBe("specfold/upgrade-1.0.0");
+  });
+
+  it("hands the installed version to the release CLI when nothing is newer", async () => {
+    const folder = tempDir();
+    const stub = `#!/usr/bin/env node
+import { writeFileSync } from "node:fs";
+writeFileSync("handed.json", JSON.stringify(process.argv.slice(2)));
+`;
+    const v1 = release("1.0.0", { ...KNOWLEDGE_FILES, "scripts/specfold.mjs": stub });
+    packInto(folder, v1, "1.0.0");
+    const root = installedKnowledge(v1, "1.0.0");
+    const text = readFileSync(join(root, "specfold.yaml"), "utf8").replace(
+      "profile: knowledge",
+      "profile: full",
+    );
+    write(root, "specfold.yaml", `${text}source:\n  path: ${folder}\n`);
+    execFileSync("git", ["commit", "-qam", "switch"], { cwd: root });
+    const result = await run(["upgrade"], root);
+    expect(result.code).toBe(0);
+    const argv = JSON.parse(readFileSync(join(root, "handed.json"), "utf8")) as string[];
+    expect(argv.slice(-2)).toEqual(["--to", "1.0.0"]);
   });
 });

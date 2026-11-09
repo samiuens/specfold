@@ -8,11 +8,12 @@ import { type Io, register } from "../cli.ts";
 import { EnvError, UsageError } from "../errors.ts";
 import { plural } from "../findings.ts";
 import { git, gitSucceeds } from "../git.ts";
+import { openspecInit } from "../migrate/install.ts";
 import { openspecBinary } from "../openspec.ts";
 import { CONFIG_FILE, type Config, requireConfig } from "../repo.ts";
 import { applyPlan } from "./apply.ts";
 import { runMigrations } from "./migrations.ts";
-import { planUpgrade, type UpgradePlan } from "./plan.ts";
+import { planUpgrade, profileChange, readInstalled, toolsOf, type UpgradePlan } from "./plan.ts";
 import { type FollowUp, reportText } from "./report.ts";
 import { fetchRelease, ghLoggedIn, openSource } from "./source.ts";
 import { upgradePath } from "./version.ts";
@@ -80,6 +81,21 @@ function followUps(root: string, start: string): FollowUp[] {
   return results;
 }
 
+/**
+ * Sets up OpenSpec after a switch from the knowledge profile: the release's config.yaml when the repository
+ * has none, then openspec init, which keeps that config.
+ */
+function switchToFull(root: string, from: string): void {
+  const config = join(root, "openspec/config.yaml");
+  const text = existsSync(config)
+    ? readFileSync(config, "utf8")
+    : readFileSync(join(from, "openspec/config.yaml"), "utf8");
+  mkdirSync(dirname(config), { recursive: true });
+  writeFileSync(config, text);
+  openspecInit(root, toolsOf(readInstalled(root)));
+  writeFileSync(config, text);
+}
+
 /** The inner stage: plan against the unpacked release in `from`, and with `--yes` apply, commit and open a PR. */
 async function inner(
   io: Io,
@@ -122,6 +138,7 @@ async function inner(
   const start = git(root, ["rev-parse", "HEAD"]).trim();
   git(root, ["switch", "-q", "-c", branch]);
   applyPlan(root, plan, ref);
+  if (plan.switchToFull) switchToFull(root, from);
   const lines: { version: string; line: string }[] = [];
   await runMigrations(root, from, plan.migrations, (version, line) => lines.push({ version, line }));
   const results = followUps(root, start);
@@ -191,7 +208,9 @@ async function outer(io: Io, config: Config, f: Flags, passThrough: string[]) {
     }
     return path.length === 0 ? 0 : 1;
   }
-  const target = path[0];
+  // a switch to the full profile reinstalls the installed release when nothing newer exists
+  const target =
+    path[0] ?? (profileChange(config.root, config.profile) === "to-full" ? installed : undefined);
   if (target === undefined) {
     io.stdout(`up to date: ${installed} is the newest release on channel ${config.channel}\n`);
     return 0;

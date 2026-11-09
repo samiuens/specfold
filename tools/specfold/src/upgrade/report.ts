@@ -30,6 +30,12 @@ export function reportText(plan: UpgradePlan, extras: ReportExtras = {}): string
   const lines = [
     `# Specfold upgrade: ${plan.from} to ${plan.to}`,
     "",
+    ...(plan.switchToFull
+      ? [
+          "Switched from the knowledge profile to full: OpenSpec is set up. Review `gate.escape_label` in specfold.yaml; the full profile's pull request template asks for a `No-spec reason:` line.",
+          "",
+        ]
+      : []),
     `## Conflicts (${conflicts.length})`,
     "",
   ];
