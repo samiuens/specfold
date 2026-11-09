@@ -54,4 +54,26 @@ describe("gate: adoption PR", () => {
     expect(result.stdout).toContain("block G4 src/app.ts");
     expect(result.stdout).not.toContain("adoption PR");
   });
+
+  // spec: specfold-gate#knowledge-migration-pr
+  it("skips G19 when a knowledge adoption PR has no specfold.yaml at the base", async () => {
+    const root = codeOnlyRepo();
+    write(root, "specfold.yaml", `profile: knowledge\n${SETTINGS}`);
+    write(root, "knowledge/domain/a.md", concept("Term", "See [b](/domain/b.md)."));
+    write(root, "knowledge/domain/b.md", concept("Term", "See [a](/domain/a.md)."));
+    writeIndexes(root);
+    commit(root, { "src/app.ts": "export const app = 2;\n" }, "adopt");
+    // the adoption diff must not touch knowledge/, or G19 would pass for that reason alone
+    git(root, "rm", "-q", "-r", "--cached", "knowledge");
+    git(root, "commit", "-q", "-m", "keep the bundle out of the diff");
+    write(root, ".gitignore", "node_modules/\nknowledge/\n");
+    commit(root, {}, "ignore the bundle");
+    const result = await run(["gate", "--base", "main", "--json"], root);
+    const out = JSON.parse(result.stdout) as { findings: { rule: string }[] };
+    expect(out.findings.map((f) => f.rule)).not.toContain("G19");
+    const text = await run(["gate", "--base", "main"], root);
+    expect(text.stdout.startsWith("adoption PR: the base has no specfold.yaml, so G19 is skipped\n")).toBe(
+      true,
+    );
+  });
 });
