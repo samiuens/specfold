@@ -124,3 +124,50 @@ describe("migration types", () => {
     expect(suggestType("Glossary", ["Glossary"])).toBe("Glossary");
   });
 });
+
+describe("migration inventory: existing bundle", () => {
+  const byPath = (root: string) => Object.fromEntries(inventory(root).map((s) => [s.path, s]));
+
+  // spec: specfold-migrate#concepts-by-type
+  it("lists bundle concepts with their type and suggested type", () => {
+    const sources = byPath(fixtureRepo("okf-bundle"));
+    expect(sources["knowledge/architecture/adr-0001-k3s.md"]).toMatchObject({
+      kind: "okf-concept",
+      type: "ADR",
+      suggested: "Decision",
+    });
+    expect(sources["knowledge/apps/argocd.md"]).toMatchObject({
+      kind: "okf-concept",
+      type: "App",
+      suggested: "Component",
+    });
+    expect(sources["knowledge/playbooks/restore.md"]).toMatchObject({ suggested: "Runbook" });
+    expect(sources["knowledge/domain/fleet.md"]).toMatchObject({ suggested: "Term" });
+    expect(sources["knowledge/references/okf.md"]).toMatchObject({ suggested: "Reference" });
+  });
+
+  // spec: specfold-migrate#decisions-folder-in-a-bundle
+  it("takes a bundle's decisions folder for concepts, not ADRs", () => {
+    expect(byPath(fixtureRepo("okf-bundle"))["knowledge/decisions/use-yaml.md"]).toMatchObject({
+      kind: "okf-concept",
+      type: "Decision",
+      suggested: "Decision",
+    });
+  });
+
+  // spec: specfold-migrate#type-without-an-equivalent
+  it("suggests nothing for a type without an equivalent", () => {
+    const overview = byPath(fixtureRepo("okf-bundle"))["knowledge/architecture/overview.md"];
+    expect(overview).toMatchObject({ kind: "okf-concept", type: "Architecture" });
+    expect(overview).not.toHaveProperty("suggested");
+  });
+
+  // spec: specfold-migrate#hand-written-index
+  it("lists hand-written indexes and the log as okf-index", () => {
+    const sources = byPath(fixtureRepo("okf-bundle"));
+    for (const p of ["knowledge/index.md", "knowledge/apps/index.md", "knowledge/log.md"])
+      expect(sources[p]?.kind, p).toBe("okf-index");
+    expect(sources["AGENTS.md"]?.kind).toBe("agent-rules");
+    expect(sources["README.md"]?.kind).toBe("readme");
+  });
+});
