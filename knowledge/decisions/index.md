@@ -1,6 +1,7 @@
 # Decision
 
 * [A knowledge-only profile](knowledge-profile.md) - Specfold supports a knowledge-only profile, chosen by a named profile key, so repositories without behavior to spec can adopt it.
+* [A migration rewrites an existing OKF bundle](existing-bundle-migration.md) - A migration rewrites an existing OKF bundle into Specfold types and folders, removes the originals and rewrites references to them.
 * [A required CI check blocks merges](blocking-merge-gate.md) - The specfold-gate CI check is required and blocks merges; local hooks only give early feedback.
   * Referenced from code: tools/specfold/src/gate/require.ts:2
 * [Agent permissions declared in specfold.yaml](agent-permissions.md) - Outward-facing agent actions are declared once in specfold.yaml and rendered into Claude Code rules; prefix rules are best effort, AGENTS.md is the contract.
@@ -30,6 +31,7 @@
 * [One template payload per profile](template-payload-per-profile.md) - Rejected: shipping one template payload per profile; it doubles release assets and upgrade fixtures for a small file split.
 * [Only humans verify knowledge](humans-verify-only.md) - Agents write concepts as draft; only a human adds verified entries, and the gate checks that the named human really approved.
 * [Permission rules tracked in the manifest](permission-rules-tracked-in-manifest.md) - Rejected: tracking the rendered permission rules in the install manifest; the sync owns its fixed patterns instead.
+* [Plan-aware link relief](plan-aware-link-relief.md) - Rejected: validate reading the migration plan to excuse only links to planned targets; hooks relieve by conversion state instead.
 * [Rather ask than assume](rather-ask-than-assume.md) - When a decision is open or something conflicts, agents ask the user through the native question UI instead of guessing.
 * [Specfold is built with Specfold](self-hosting.md) - Every feature, fix and release of the kit runs through the kit's own workflow, switched on piece by piece as it is built.
 * [Specs are the contract, knowledge is context](specs-vs-knowledge.md) - Specs hold normative behavior, knowledge holds descriptive context, and nothing is written twice.

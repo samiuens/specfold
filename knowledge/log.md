@@ -4,6 +4,7 @@
 
 * **Change**: add-knowledge-profile: created 3, updated 11, deprecated 0 (knowledge profile, drafted before archive)
 * **Change**: 2026-11-09-add-knowledge-profile: created 3, updated 11, deprecated 0
+* **Change**: add-okf-bundle-migration: created 2, updated 5, deprecated 0 (existing bundle migration, drafted before archive)
 
 ## 2026-11-04
 
