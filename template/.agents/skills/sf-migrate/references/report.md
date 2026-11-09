@@ -32,6 +32,18 @@ none
 
 none   <!-- or path:line, one per comment -->
 
+## Existing bundle
+
+none   <!-- or: originals rewritten and removed (<n>), each original -> its new path; where index intro text went; tooling removed; types and folders dropped -->
+
+## References rewritten
+
+none   <!-- or each file outside the bundle whose references to moved concepts were rewritten -->
+
+## Deviations
+
+none   <!-- or every place the migration did something the plan did not say, and why the user agreed -->
+
 ## Left out
 
 <!-- Sources marked ignore or keep, and seed candidates beyond the cap. -->
