@@ -53,7 +53,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 4.1 Add the existing-bundle branch to sf-migrate's SKILL.md: when the inventory lists `okf-concept` sources, follow the plan and conversion rules for an existing bundle, and mark convert only after originals are gone and references rewritten
+- [x] 4.1 Add the existing-bundle branch to sf-migrate's SKILL.md: when the inventory lists `okf-concept` sources, follow the plan and conversion rules for an existing bundle, and mark convert only after originals are gone and references rewritten
   - Done when: `node scripts/check-skills.mjs .agents/skills template/.agents/skills` reports 0 problems and `node scripts/specfold.mjs stats` keeps sf-migrate's description within budget
 - [ ] 4.2 Extend `references/plan.md`: every `specfold.yaml` type in **Becomes**, a type-map table with the default map, tooling and rule-file rows, team AGENTS.md rule rows, an "After conversion" section and a commitments checkpoint
   - Done when: the plan template shows each of these with one example row, and `diff -r template/.agents/skills/sf-migrate .agents/skills/sf-migrate` is empty
