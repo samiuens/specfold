@@ -138,11 +138,11 @@ export function installProfile(root: string, flag: Profile | undefined): Profile
 }
 
 /** Fails before any write when the template folder is incomplete or OpenSpec is needed but missing. */
-function preflight(o: InstallOptions): void {
+function preflight(o: InstallOptions, profile: Profile): void {
   const missing = REQUIRED.filter((p) => !existsSync(join(o.from, p)));
   if (missing.length > 0)
     throw new EnvError(`--from ${o.from} is not a Specfold template folder: missing ${missing.join(", ")}`);
-  if (existsSync(join(o.root, "openspec/config.yaml"))) return;
+  if (profile === "knowledge" || existsSync(join(o.root, "openspec/config.yaml"))) return;
   const bin = openspecBinary(o.root);
   try {
     execFileSync(bin.command, ["--version"], { stdio: "ignore" });
@@ -235,7 +235,7 @@ function importsAgentsOutside(text: string): boolean {
 /** Installs the kit into `o.root` without overwriting anything the repository already has. */
 export function installKit(o: InstallOptions): InstallResult {
   const profile = installProfile(o.root, o.profile);
-  preflight(o);
+  preflight(o, profile);
   const result: InstallResult = { actions: [], conflicts: [], notes: [] };
   const act = (path: string, action: string) => result.actions.push({ path, action });
   const conflict = (path: string, reason: string) => result.conflicts.push({ path, reason });
@@ -262,8 +262,10 @@ export function installKit(o: InstallOptions): InstallResult {
   const found = detect(o.root);
   const stack = o.stack ?? (found.stack.length > 0 ? found.stack.join(", ") : undefined);
 
-  // openspec init runs on a repository without openspec/ before anything else is written there
-  const freshOpenspec = !existsSync(abs("openspec/config.yaml"));
+  // openspec init runs on a repository without openspec/ before anything else is written there;
+  // the knowledge profile leaves openspec/ alone
+  const openspec = profile === "full";
+  const freshOpenspec = openspec && !existsSync(abs("openspec/config.yaml"));
   if (freshOpenspec) {
     openspecInit(o.root, o.tools);
     act("openspec/", `run openspec init --tools ${o.tools.join(",")}`);
@@ -317,7 +319,10 @@ export function installKit(o: InstallOptions): InstallResult {
   }
 
   if (read(CONFIG_FILE) === undefined) {
-    put(CONFIG_FILE, projectSettings(template(CONFIG_FILE), o.sourceGlobs ?? found.sourceGlobs, o.tools, profile));
+    put(
+      CONFIG_FILE,
+      projectSettings(template(CONFIG_FILE), o.sourceGlobs ?? found.sourceGlobs, o.tools, profile),
+    );
     act(CONFIG_FILE, "write");
   }
   for (const p of filesUnder(o.from, "knowledge"))
@@ -330,7 +335,7 @@ export function installKit(o: InstallOptions): InstallResult {
   if (freshOpenspec) {
     put("openspec/config.yaml", fillStack(config, stack));
     act("openspec/config.yaml", "write");
-  } else {
+  } else if (openspec) {
     merged(
       "openspec/config.yaml",
       mergeOpenspecConfig(read("openspec/config.yaml") as string, config, stack),

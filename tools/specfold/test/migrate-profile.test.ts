@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -42,7 +42,9 @@ describe("migrate install: profile file set", () => {
 
   it("leaves the OpenSpec files out of the knowledge set", () => {
     const owned = kitOwned(TEMPLATE, ["agents", "claude"], "knowledge");
-    const skills = [...new Set(owned.filter((p) => p.startsWith(".agents/skills/")).map((p) => p.split("/")[2]))];
+    const skills = [
+      ...new Set(owned.filter((p) => p.startsWith(".agents/skills/")).map((p) => p.split("/")[2])),
+    ];
     expect(skills).toEqual(KNOWLEDGE_SKILLS);
     expect(owned.filter((p) => p.startsWith(".claude/agents/"))).toEqual([".claude/agents/scout.md"]);
     expect(owned.some((p) => p.startsWith("openspec/"))).toBe(false);
@@ -92,7 +94,10 @@ describe("migrate install: --profile", () => {
   it("creates knowledge settings and leaves sf-plan out", () => {
     const root = fixtureRepo("adr-docs");
     install(root, { profile: "knowledge" });
-    const settings = parse(read(root, "specfold.yaml")) as { profile: string; gate: { escape_label: string } };
+    const settings = parse(read(root, "specfold.yaml")) as {
+      profile: string;
+      gate: { escape_label: string };
+    };
     expect(settings.profile).toBe("knowledge");
     expect(settings.gate.escape_label).toBe("no-knowledge");
     expect(existsSync(join(root, ".agents/skills/sf-plan"))).toBe(false);
@@ -114,5 +119,20 @@ describe("migrate install: --profile", () => {
     git(root, "commit", "-q", "-m", "installed");
     expect(() => install(root, { profile: "knowledge" })).toThrow("switching profiles");
     expect(git(root, "status", "--porcelain", "--untracked-files=all")).toBe("");
+  });
+});
+
+describe("migrate install: knowledge profile without OpenSpec", () => {
+  // spec: specfold-migrate#knowledge-profile-without-openspec
+  // spec: specfold-profile#knowledge-install
+  it("installs without OpenSpec and writes nothing under openspec/", () => {
+    vi.stubEnv("PATH", "/usr/bin:/bin");
+    const root = fixtureRepo("adr-docs");
+    const result = install(root, { profile: "knowledge" });
+    expect(result.conflicts.filter((c) => c.path !== "git hooks")).toEqual([]);
+    expect(existsSync(join(root, "openspec"))).toBe(false);
+    const skills = readdirSync(join(root, ".agents/skills")).sort();
+    expect(skills).toEqual(KNOWLEDGE_SKILLS);
+    expect(readdirSync(join(root, ".claude/agents"))).toEqual(["scout.md"]);
   });
 });

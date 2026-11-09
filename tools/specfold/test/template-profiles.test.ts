@@ -25,7 +25,10 @@ describe("knowledge profile variants", () => {
   });
 
   it("keeps every map row of the full AGENTS.md that is not about OpenSpec", () => {
-    const rows = (t: string) => section(t, "Map").split("\n").filter((l) => l.startsWith("| `"));
+    const rows = (t: string) =>
+      section(t, "Map")
+        .split("\n")
+        .filter((l) => l.startsWith("| `"));
     const full = rows(read("AGENTS.md")).filter((r) => !/openspec/i.test(r));
     expect(rows(read(".specfold/profiles/knowledge/AGENTS.md"))).toEqual(full);
   });
