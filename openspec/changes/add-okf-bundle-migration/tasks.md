@@ -9,7 +9,7 @@ scenarios: [specfold-migrate#concepts-by-type, specfold-migrate#decisions-folder
 agent: implementer
 ```
 
-- [ ] 1.1 Add a fixture repository `migrate/okf-bundle` with an OKF bundle in `knowledge/`: ADR, App, Playbook, Domain Concept, Architecture and Reference concepts, a `decisions/` concept, hand-written `index.md` files with intro text, and a `log.md`
+- [x] 1.1 Add a fixture repository `migrate/okf-bundle` with an OKF bundle in `knowledge/`: ADR, App, Playbook, Domain Concept, Architecture and Reference concepts, a `decisions/` concept, hand-written `index.md` files with intro text, and a `log.md`
   - Done when: `node scripts/specfold.mjs validate --okf-only --bundle tools/specfold/test/fixtures/migrate/okf-bundle/knowledge` exits 0
 - [ ] 1.2 Add `types.ts` with the built-in Specfold type list and the suggestion map (ADR, Playbook, Domain Concept, App)
   - Done when: a test in `migrate-inventory.test.ts` checks that the built-in list equals the `types` of `template/specfold.yaml`

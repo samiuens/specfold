@@ -1,0 +1,5 @@
+pre-commit:
+  jobs:
+    - name: validate knowledge base
+      run: pnpm kb:validate
+      glob: "knowledge/**"
