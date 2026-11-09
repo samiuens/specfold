@@ -59,7 +59,7 @@ agent: implementer
   - Done when: the plan template shows each of these with one example row, and `diff -r template/.agents/skills/sf-migrate .agents/skills/sf-migrate` is empty
 - [x] 4.3 Extend `references/conversion.md` with the rewrite rules: new concepts in Specfold's folders with full rationale and permalink `sources`, originals removed, links and outside references rewritten, indexes regenerated with intro text moved, AGENTS.md rules sorted, unused types and folders removed
   - Done when: each rule names the command or check that confirms it, and the kit copy is identical
-- [ ] 4.4 Extend `references/report.md` with "Deviations" and "References rewritten", and refresh the template manifest
+- [x] 4.4 Extend `references/report.md` with "Deviations" and "References rewritten", and refresh the template manifest
   - Done when: `npx vitest run test/template-manifest.test.ts` passes after `npx vitest -u` on it, and the kit copy is identical
 
 ## 5. Bundle and docs
