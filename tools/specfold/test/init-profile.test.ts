@@ -83,4 +83,48 @@ describe("specfold init: profile", () => {
     expect(existsSync(join(root, ".specfold/manifest.json"))).toBe(true);
     expect(git(root, "config", "core.hooksPath").trim()).toBe(".specfold/hooks");
   });
+
+  // spec: specfold-init#fresh-template-as-knowledge-repository
+  it("turns a fresh template repository into a knowledge repository", async () => {
+    const root = templateRepo();
+    const result = await run(["init", "--profile", "knowledge"], root);
+    expect(result.code).toBe(0);
+    const settings = parse(read(root, "specfold.yaml")) as {
+      profile: string;
+      gate: { escape_label: string };
+    };
+    expect(settings.profile).toBe("knowledge");
+    expect(settings.gate.escape_label).toBe("no-knowledge");
+    for (const gone of [
+      "openspec",
+      ".agents/skills/sf-plan",
+      ".claude/agents/planner.md",
+      ".claude/skills/sf-plan",
+    ])
+      expect(existsSync(join(root, gone)), gone).toBe(false);
+    expect(read(root, "AGENTS.md")).not.toMatch(/openspec/i);
+    expect(read(root, ".github/pull_request_template.md")).toMatch(/^No-knowledge reason:/m);
+    const manifest = JSON.parse(read(root, ".specfold/manifest.json"));
+    expect(manifest.profile).toBe("knowledge");
+    expect(Object.keys(manifest.files).some((p) => p.startsWith("openspec/"))).toBe(false);
+    const again = await run(["init"], root);
+    expect(again.stdout).toContain("init: everything is up to date");
+  });
+
+  // spec: specfold-init#changed-template-file-kept
+  it("keeps a changed openspec/config.yaml and reports it", async () => {
+    const config = read(TEMPLATE, "openspec/config.yaml").replace("rules:", "# team note\nrules:");
+    const root = templateRepo({ "openspec/config.yaml": config });
+    const result = await run(["init", "--profile", "knowledge"], root);
+    expect(result.code).toBe(0);
+    expect(read(root, "openspec/config.yaml")).toBe(config);
+    expect(result.stdout).toContain("openspec/config.yaml: skipped: differs from the template; kept");
+  });
+
+  it("lists the removals in a dry run and writes nothing", async () => {
+    const root = templateRepo();
+    const result = await run(["init", "--profile", "knowledge", "--dry-run"], root);
+    expect(result.stdout).toContain(".agents/skills/sf-plan/SKILL.md: would remove");
+    expect(status(root)).toBe("");
+  });
 });

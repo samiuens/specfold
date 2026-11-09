@@ -63,7 +63,7 @@ agent: implementer
   - Done when: `npx vitest run test/init-profile.test.ts` covers specfold-init#knowledge-repository-without-openspec
 - [x] 4.2 Skip `openspec init` and the `Stack:` write for the knowledge profile while still printing the detected stack
   - Done when: the init-profile tests cover specfold-init#knowledge-profile-stack and specfold-init#knowledge-profile-skips-openspec
-- [ ] 4.3 Remove template files outside the knowledge set whose hash matches the template manifest, report differing ones as kept, swap in the knowledge blocks and set a `no-spec` escape label to `no-knowledge`
+- [x] 4.3 Remove template files outside the knowledge set whose hash matches the template manifest, report differing ones as kept, swap in the knowledge blocks and set a `no-spec` escape label to `no-knowledge`
   - Done when: the init-profile tests cover specfold-init#fresh-template-as-knowledge-repository and specfold-init#changed-template-file-kept
 - [ ] 4.4 Refuse `--profile knowledge` on a repository whose manifest records a full install
   - Done when: the init-profile tests cover specfold-init#full-repository-refused, and `npx vitest run test/init.test.ts` still passes

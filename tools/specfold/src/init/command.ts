@@ -68,6 +68,7 @@ register({
         !existsSync(manifestPath) || readFileSync(manifestPath, "utf8") !== plan.manifest;
       const actions = [
         ...plan.edits.map((e) => ({ path: e.path, action: e.action })),
+        ...plan.remove.map((path) => ({ path, action: "remove" })),
         ...(plan.openspec
           ? [{ path: "openspec/", action: `run openspec init --tools ${options.tools.join(",")}` }]
           : []),

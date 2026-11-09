@@ -30,6 +30,7 @@
     ".specfold/profiles/knowledge/.github/pull_request_template.md": "sha256:20dac29e2d181ccce2d441281a5a397ddc5e238792b027c78b14c98c7698e1f5",
     ".specfold/profiles/knowledge/AGENTS.md": "sha256:cbde2661403a8664b79e1190bf9e3706bf2d6d9d2023294ef7445adce83e272a",
     ".specfold/profiles/knowledge/CLAUDE.md": "sha256:9e069b5f89fe28c8c4b37a904590e73073550ef59de1b1987e6a8e73344979a3",
+    ".specfold/profiles/knowledge/leftovers.json": "sha256:6ae2a792e9180a5ef7ee69ba17180b1f0f29a8bf9a3215fe143b7bc062eefa70",
     ".specfold/workflows/specfold-upgrade.yml": "sha256:f42b96127b5611af6db14395e395dee9d4eb4d653503229a39960149729120d6",
     "openspec/schemas/specfold/schema.yaml": "sha256:1e125cb0ebebadf1e1447e3b35a38cc2e587bd410fd873853c268969d0dc269b",
     "openspec/schemas/specfold/templates/brief.md": "sha256:49c6b6e984a81d4237f981e0661c62936cea140f5bf3ee0149ed611c3cc95d9b",

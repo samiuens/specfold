@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { sha256 } from "../src/migrate/install.ts";
 import { TEMPLATE } from "./migrate-helpers.ts";
 
 const read = (p: string) => readFileSync(`${TEMPLATE}/${p}`, "utf8");
@@ -37,5 +38,17 @@ describe("knowledge profile variants", () => {
     const text = read(".specfold/profiles/knowledge/.github/pull_request_template.md");
     expect(text).toMatch(/^No-knowledge reason:/m);
     expect(text).not.toMatch(/^Change:/m);
+  });
+});
+
+describe("knowledge profile leftovers", () => {
+  // `npx vitest -u` rewrites leftovers.json after a change to the template's openspec/config.yaml
+  it("records the hash of every template file the knowledge profile removes", async () => {
+    const hashes = Object.fromEntries(
+      ["openspec/config.yaml"].map((p) => [p, sha256(readFileSync(`${TEMPLATE}/${p}`))]),
+    );
+    await expect(`${JSON.stringify(hashes, null, 2)}\n`).toMatchFileSnapshot(
+      `${TEMPLATE}/.specfold/profiles/knowledge/leftovers.json`,
+    );
   });
 });
