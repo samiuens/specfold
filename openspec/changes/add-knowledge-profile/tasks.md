@@ -125,7 +125,7 @@ agent: implementer
 
 - [x] 8.1 Add a fixture repository with `profile: knowledge` and no `openspec/`, and run validate, index, lookup, stats, hooks (pre-commit, claude-session-start) and the local gate on it with OpenSpec off the PATH
   - Done when: `npx vitest run test/knowledge-profile.test.ts` passes; any command that fails comes back as a split proposal for its own files
-- [ ] 8.2 Rebuild the bundle into `scripts/specfold.mjs` and `template/scripts/specfold.mjs`
+- [x] 8.2 Rebuild the bundle into `scripts/specfold.mjs` and `template/scripts/specfold.mjs`
   - Done when: `npm run build` leaves both files identical, and `npm test`, `npm run lint` and `npm run typecheck` pass
 
 ## 9. Knowledge
