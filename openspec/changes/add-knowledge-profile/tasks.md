@@ -139,7 +139,7 @@ agent: knowledge-curator
 
 - [x] 9.1 Write the concepts listed in knowledge.md
   - Done when: `node scripts/specfold.mjs validate` exits 0 and `node scripts/specfold.mjs change check add-knowledge-profile` reports no K-rule errors
-- [ ] 9.2 Regenerate the indexes and add the log entry
+- [x] 9.2 Regenerate the indexes and add the log entry
   - Done when: `node scripts/specfold.mjs index --check` exits 0
 
 ## Workflow follow-up
