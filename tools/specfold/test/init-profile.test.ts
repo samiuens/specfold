@@ -127,4 +127,16 @@ describe("specfold init: profile", () => {
     expect(result.stdout).toContain(".agents/skills/sf-plan/SKILL.md: would remove");
     expect(status(root)).toBe("");
   });
+
+  // spec: specfold-init#full-repository-refused
+  it("refuses to switch a full repository to the knowledge profile", async () => {
+    const root = templateRepo();
+    expect((await run(["init"], root)).code).toBe(0);
+    git(root, "add", "-A");
+    git(root, "commit", "-q", "-m", "init");
+    const result = await run(["init", "--profile", "knowledge"], root);
+    expect(result.code).toBe(2);
+    expect(result.stderr).toContain("not supported");
+    expect(status(root)).toBe("");
+  });
 });
