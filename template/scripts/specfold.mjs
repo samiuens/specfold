@@ -8050,6 +8050,12 @@ var import_yaml4 = __toESM(require_dist(), 1);
 import { existsSync as existsSync4, readFileSync as readFileSync2, statSync as statSync2 } from "node:fs";
 import { dirname, join as join4, resolve as resolve2 } from "node:path";
 var CONFIG_FILE = "specfold.yaml";
+var PROFILES = ["full", "knowledge"];
+function parseProfile(value, source = `${CONFIG_FILE}: 'profile'`) {
+  if (value === void 0) return "full";
+  if (typeof value === "string" && PROFILES.includes(value)) return value;
+  throw new EnvError(`${source} is '${String(value)}'; allowed values: ${PROFILES.join(", ")}`);
+}
 var DEFAULT_UPGRADE_MESSAGE = "chore: upgrade Specfold to v{version}";
 function findRepoRoot(cwd) {
   let dir = resolve2(cwd);
@@ -8155,6 +8161,7 @@ function loadConfig(root) {
   }
   return {
     root,
+    profile: parseProfile(data.profile),
     types: stringList(data.types, "types"),
     sourceGlobs: stringList(data.source_globs, "source_globs"),
     blockOnBrokenLinks: gate.block_on_broken_links !== false,
@@ -8234,6 +8241,23 @@ function planLines(plan) {
     ...plan.problems.map((p) => `${p.action}: ${p.message}`),
     ...plan.changes.map((c) => `${c.pattern}: ${c.from} -> ${c.to}`)
   ];
+}
+
+// src/profile.ts
+var KNOWLEDGE_EXCLUDED = [
+  "openspec/",
+  ".agents/skills/sf-plan/",
+  ".agents/skills/sf-apply/",
+  ".agents/skills/sf-sync/"
+];
+function inProfile(path, profile) {
+  if (profile === "full") return true;
+  if (KNOWLEDGE_EXCLUDED.some((prefix) => path.startsWith(prefix))) return false;
+  if (path.startsWith(".claude/agents/")) return path === ".claude/agents/scout.md";
+  return true;
+}
+function profileFiles(paths, profile) {
+  return paths.filter((p) => inProfile(p, profile));
 }
 
 // src/migrate/blocks.ts
@@ -8463,30 +8487,47 @@ function filesUnder(base, dir) {
     (d) => d.isDirectory() ? filesUnder(base, `${dir}/${d.name}`) : d.isFile() ? [`${dir}/${d.name}`] : []
   ).sort();
 }
-function kitOwned(from, tools) {
-  return [
+function kitOwned(from, tools, profile = "full") {
+  const paths = [
     "scripts/specfold.mjs",
     "openspec/schemas/specfold",
     ".agents/skills",
     ".specfold/workflows",
+    ".specfold/profiles",
     ".github/workflows/specfold-gate.yml",
     ".github/workflows/specfold-gate-comment.yml",
     ...tools.includes("claude") ? [".claude/agents"] : []
   ].flatMap((p) => filesUnder(from, p));
+  return profileFiles(paths, profile);
 }
 function readManifest(path) {
   try {
     const data = JSON.parse(readFileSync5(path, "utf8"));
-    return { files: data.files ?? {}, blocks: data.blocks ?? {} };
+    return {
+      files: data.files ?? {},
+      blocks: data.blocks ?? {},
+      ...data.profile === "knowledge" || data.profile === "full" ? { profile: data.profile } : {}
+    };
   } catch {
     return { files: {}, blocks: {} };
   }
 }
-function preflight(o) {
+function installProfile(root, flag) {
+  const path = join7(root, CONFIG_FILE);
+  if (!existsSync7(path)) return flag ?? "full";
+  const data = (0, import_yaml9.parse)(readFileSync5(path, "utf8"));
+  const current = parseProfile(data?.profile);
+  if (flag !== void 0 && flag !== current)
+    throw new EnvError(
+      `${CONFIG_FILE} sets profile '${current}' but --profile is '${flag}'; switching profiles at install is not supported`
+    );
+  return current;
+}
+function preflight(o, profile) {
   const missing = REQUIRED.filter((p) => !existsSync7(join7(o.from, p)));
   if (missing.length > 0)
     throw new EnvError(`--from ${o.from} is not a Specfold template folder: missing ${missing.join(", ")}`);
-  if (existsSync7(join7(o.root, "openspec/config.yaml"))) return;
+  if (profile === "knowledge" || existsSync7(join7(o.root, "openspec/config.yaml"))) return;
   const bin = openspecBinary(o.root);
   try {
     execFileSync2(bin.command, ["--version"], { stdio: "ignore" });
@@ -8511,16 +8552,24 @@ function openspecInit(root, tools) {
 }
 var setSourceGlobs = (text3, globs) => text3.replace(/^source_globs:.*$/m, `source_globs: ${JSON.stringify(globs)}`);
 var clearAgentTargets = (text3) => text3.replace(/^(agents:\n(?:#.*\n)*\s+targets:).*$/m, "$1 []");
-function projectSettings(text3, globs, tools) {
-  const out = setSourceGlobs(text3, globs);
+function setProfile(text3, profile) {
+  if (/^profile:.*$/m.test(text3)) return text3.replace(/^profile:[^\n#]*/m, `profile: ${profile}`);
+  return text3.replace(/^(kit_version:.*\n)/m, `$1profile: ${profile}
+`);
+}
+var setEscapeLabel = (text3, label2) => text3.replace(/^(\s+escape_label:)[ \t]*[^\s#]+/m, `$1 ${label2}`);
+function projectSettings(text3, globs, tools, profile) {
+  let out = setSourceGlobs(text3, globs);
+  if (profile === "knowledge") out = setEscapeLabel(setProfile(out, profile), "no-knowledge");
   return tools.includes("claude") ? out : clearAgentTargets(out);
 }
-function manifestText(kitVersion, ref, m) {
+function manifestText(kitVersion, ref, m, profile = "full") {
   const sorted = (r) => Object.fromEntries(Object.entries(r).sort(([a], [b]) => a < b ? -1 : 1));
   return `${JSON.stringify(
     {
       manifest_version: 1,
       kit_version: kitVersion,
+      profile,
       ...ref ? { ref } : {},
       files: sorted(m.files),
       blocks: sorted(m.blocks)
@@ -8529,6 +8578,11 @@ function manifestText(kitVersion, ref, m) {
     2
   )}
 `;
+}
+var profileDir = (profile) => `.specfold/profiles/${profile}`;
+function blockContent(from, path, profile) {
+  const variant = join7(from, profileDir(profile), path);
+  return readFileSync5(profile !== "full" && existsSync7(variant) ? variant : join7(from, path), "utf8");
 }
 function importsAgentsOutside(text3) {
   let inside = false;
@@ -8540,7 +8594,8 @@ function importsAgentsOutside(text3) {
   return false;
 }
 function installKit(o) {
-  preflight(o);
+  const profile = installProfile(o.root, o.profile);
+  preflight(o, profile);
   const result = { actions: [], conflicts: [], notes: [] };
   const act = (path, action) => result.actions.push({ path, action });
   const conflict = (path, reason) => result.conflicts.push({ path, reason });
@@ -8565,12 +8620,13 @@ function installKit(o) {
   const claude = o.tools.includes("claude");
   const found = detect(o.root);
   const stack = o.stack ?? (found.stack.length > 0 ? found.stack.join(", ") : void 0);
-  const freshOpenspec = !existsSync7(abs("openspec/config.yaml"));
+  const openspec = profile === "full";
+  const freshOpenspec = openspec && !existsSync7(abs("openspec/config.yaml"));
   if (freshOpenspec) {
     openspecInit(o.root, o.tools);
     act("openspec/", `run openspec init --tools ${o.tools.join(",")}`);
   }
-  for (const p of kitOwned(o.from, o.tools)) {
+  for (const p of kitOwned(o.from, o.tools, profile)) {
     const data = readFileSync5(join7(o.from, p));
     if (!existsSync7(abs(p))) {
       put(p, data, statSync3(join7(o.from, p)).mode & 511);
@@ -8598,7 +8654,7 @@ function installKit(o) {
   }
   for (const p of BLOCK_FILES) {
     if (p === "CLAUDE.md" && !claude) continue;
-    const content = template(p);
+    const content = blockContent(o.from, p, profile);
     const existing = read(p);
     const body = p === "CLAUDE.md" && existing !== void 0 && importsAgentsOutside(existing) ? content.replace(/^@AGENTS\.md\n+/m, "") : content;
     if (merged(p, applyBlock(existing, body, blockStyle(p)), "block")) manifest.blocks[p] = sha256(content);
@@ -8610,7 +8666,10 @@ function installKit(o) {
     merged(".claude/settings.json", settings2, current === void 0 ? "write" : "merge");
   }
   if (read(CONFIG_FILE) === void 0) {
-    put(CONFIG_FILE, projectSettings(template(CONFIG_FILE), o.sourceGlobs ?? found.sourceGlobs, o.tools));
+    put(
+      CONFIG_FILE,
+      projectSettings(template(CONFIG_FILE), o.sourceGlobs ?? found.sourceGlobs, o.tools, profile)
+    );
     act(CONFIG_FILE, "write");
   }
   for (const p of filesUnder(o.from, "knowledge"))
@@ -8622,7 +8681,7 @@ function installKit(o) {
   if (freshOpenspec) {
     put("openspec/config.yaml", fillStack(config, stack));
     act("openspec/config.yaml", "write");
-  } else {
+  } else if (openspec) {
     merged(
       "openspec/config.yaml",
       mergeOpenspecConfig(read("openspec/config.yaml"), config, stack),
@@ -8652,7 +8711,7 @@ function installKit(o) {
     conflict("git hooks", error.message);
   }
   const kitVersion = String((0, import_yaml9.parse)(template(CONFIG_FILE)).kit_version ?? "");
-  const text3 = manifestText(kitVersion, o.ref, manifest);
+  const text3 = manifestText(kitVersion, o.ref, manifest, profile);
   if (writeIfChanged(abs(MANIFEST_PATH), text3)) act(MANIFEST_PATH, "write");
   return result;
 }
@@ -11818,7 +11877,7 @@ register({
       if (args.length !== 1) throw new UsageError(`expected one commitment: ${what}`);
       return findItem(config.root, bundleRoot, "commitments", args[0]);
     };
-    const required = (key, hint) => {
+    const required2 = (key, hint) => {
       const value = (values[key] ?? "").trim();
       if (!value) throw new UsageError(`missing --${key}: ${hint}`);
       return value;
@@ -11859,7 +11918,7 @@ register({
         return 0;
       }
       case "fulfill": {
-        const change = required("change", "name the change that kept the commitment");
+        const change = required2("change", "name the change that kept the commitment");
         if (!CHANGE_NAME3.test(change)) throw new UsageError(`'${change}' is not a change name (kebab-case)`);
         const item = one("specfold commitments fulfill <commitment> --change <name>");
         if (item.data.state !== "open")
@@ -11873,7 +11932,7 @@ register({
         return 0;
       }
       case "withdraw": {
-        const reason = required("reason", "say why the commitment is withdrawn");
+        const reason = required2("reason", "say why the commitment is withdrawn");
         const item = one("specfold commitments withdraw <commitment> --reason <text>");
         const agent = agentReason();
         if (agent)
@@ -11954,6 +12013,30 @@ function hookManagerMentions(root) {
     (f) => existsSync26(f) && statSync6(f).isFile() && /specfold(\.mjs)? hook/.test(readFileSync23(f, "utf8"))
   );
 }
+function openspecCheck(env, root, config) {
+  const range = config?.requires.openspec ?? DEFAULT_OPENSPEC_RANGE;
+  const binary = openspecBinary(root ?? env.cwd);
+  const useLocal = binary.source === "node_modules/.bin";
+  const source = binary.source;
+  const openspec = firstVersion(env.exec(binary.command, ["--version"], env.cwd));
+  if (!openspec) {
+    return {
+      id: "D3",
+      status: "fail",
+      message: useLocal ? "node_modules/.bin/openspec does not run" : "openspec is not on the PATH",
+      fix: "install OpenSpec so that `openspec` is on the PATH or in node_modules/.bin: https://github.com/Fission-AI/OpenSpec"
+    };
+  } else if (!satisfies(openspec, range)) {
+    return {
+      id: "D3",
+      status: "fail",
+      message: `openspec ${openspec} from ${source} does not satisfy ${range}`,
+      fix: `install an OpenSpec version matching ${range}`
+    };
+  } else {
+    return ok("D3", `openspec ${openspec} from ${source} (${range})`);
+  }
+}
 function runChecks(env) {
   const checks = [];
   checks.push(
@@ -11986,28 +12069,9 @@ function runChecks(env) {
       });
     }
   }
-  const range = config?.requires.openspec ?? DEFAULT_OPENSPEC_RANGE;
-  const binary = openspecBinary(root ?? env.cwd);
-  const useLocal = binary.source === "node_modules/.bin";
-  const source = binary.source;
-  const openspec = firstVersion(env.exec(binary.command, ["--version"], env.cwd));
-  if (!openspec) {
-    checks.push({
-      id: "D3",
-      status: "fail",
-      message: useLocal ? "node_modules/.bin/openspec does not run" : "openspec is not on the PATH",
-      fix: "install OpenSpec so that `openspec` is on the PATH or in node_modules/.bin: https://github.com/Fission-AI/OpenSpec"
-    });
-  } else if (!satisfies(openspec, range)) {
-    checks.push({
-      id: "D3",
-      status: "fail",
-      message: `openspec ${openspec} from ${source} does not satisfy ${range}`,
-      fix: `install an OpenSpec version matching ${range}`
-    });
-  } else {
-    checks.push(ok("D3", `openspec ${openspec} from ${source} (${range})`));
-  }
+  checks.push(
+    config?.profile === "knowledge" ? ok("D3", "the knowledge profile does not use OpenSpec") : openspecCheck(env, root, config)
+  );
   const base = root ?? env.cwd;
   const inGit = env.exec("git", ["rev-parse", "--is-inside-work-tree"], base)?.trim() === "true";
   const hooksPath = inGit ? env.exec("git", ["config", "--get", "core.hooksPath"], base)?.trim() : void 0;
@@ -12073,10 +12137,10 @@ function requiredGate(env) {
   } catch {
   }
   if (!Array.isArray(rules)) return skipped(`the rules of ${branch} could not be read`);
-  const required = rules.some(
+  const required2 = rules.some(
     (r) => r.type === "required_status_checks" && (r.parameters?.required_status_checks ?? []).some((c) => c.context === "specfold-gate")
   );
-  return required ? ok("D7", `specfold-gate is a required check on ${branch}`) : {
+  return required2 ? ok("D7", `specfold-gate is a required check on ${branch}`) : {
     id: "D7",
     status: "warn",
     message: `specfold-gate is not a required check on ${branch}`,
@@ -13308,7 +13372,7 @@ ${result.stdout}`.trim().split("\n")[0] || `exit code ${result.status}`;
 
 // src/gate/rules.ts
 var LINK_RULES = /* @__PURE__ */ new Set(["L1", "L2"]);
-var NO_SPEC_REASON = /^No-spec reason:[ \t]*\S/m;
+var reasonLine = (reason) => new RegExp(`^${reason}:[ \\t]*\\S`, "m");
 function inRepo(ctx, bundleRel) {
   const prefix = relative19(ctx.config.root, ctx.bundleRoot).split(sep19).join("/");
   return prefix ? `${prefix}/${bundleRel}` : bundleRel;
@@ -13385,26 +13449,42 @@ var g3 = (ctx) => {
     fix: "run openspec validate --all --strict and fix the reported items"
   }));
 };
-var g4 = (ctx) => {
-  if (!ctx.config.gate.requireChangeForSourceChanges || ctx.diff.adoption) return [];
+function sourceRule(ctx, r) {
+  if (ctx.diff.adoption) return [];
   const sources = ctx.diff.files.filter((f) => matchesAny(f, ctx.config.sourceGlobs));
-  if (sources.length === 0) return [];
-  if (ctx.diff.activeChanges.length > 0 || ctx.diff.archivedChanges.length > 0) return [];
+  if (sources.length === 0 || r.satisfied) return [];
   const label2 = ctx.config.gate.escapeLabel;
   const labelled = ctx.labels.includes(label2);
-  const reasoned = ctx.prBody !== void 0 && NO_SPEC_REASON.test(ctx.prBody);
+  const reasoned = ctx.prBody !== void 0 && reasonLine(r.reason).test(ctx.prBody);
   if (labelled && reasoned) return [];
   const count = sources.length === 1 ? "1 source file" : `${sources.length} source files`;
   return [
     {
-      rule: "G4",
+      rule: r.rule,
       effect: ctx.local ? "warn" : "block",
       path: sources[0],
       line: null,
-      message: labelled ? `label '${label2}' is set but the PR body has no 'No-spec reason:' line` : `${count} changed without an OpenSpec change`,
-      fix: `add or update a change under openspec/changes/, or set the '${label2}' label and a 'No-spec reason:' line in the PR body`
+      message: labelled ? `label '${label2}' is set but the PR body has no '${r.reason}:' line` : `${count} changed without ${r.lacks}`,
+      fix: `${r.remedy}, or set the '${label2}' label and a '${r.reason}:' line in the PR body`
     }
   ];
+}
+var g4 = (ctx) => ctx.config.gate.requireChangeForSourceChanges ? sourceRule(ctx, {
+  rule: "G4",
+  satisfied: ctx.diff.activeChanges.length > 0 || ctx.diff.archivedChanges.length > 0,
+  reason: "No-spec reason",
+  lacks: "an OpenSpec change",
+  remedy: "add or update a change under openspec/changes/"
+}) : [];
+var g19 = (ctx) => {
+  const bundle = `${relative19(ctx.config.root, ctx.bundleRoot).split(sep19).join("/")}/`;
+  return sourceRule(ctx, {
+    rule: "G19",
+    satisfied: ctx.diff.files.some((f) => f.startsWith(bundle)),
+    reason: "No-knowledge reason",
+    lacks: "a knowledge change",
+    remedy: `update the affected concepts or add a log entry under ${bundle}`
+  });
 };
 var plannedChanges = (ctx) => ctx.diff.activeChanges.filter(
   (change) => existsSync39(join44(ctx.config.root, "openspec", "changes", change, "tasks.md"))
@@ -13516,7 +13596,8 @@ var g17 = (ctx) => {
   const open = listItems(ctx.bundleRoot, "commitments").filter((c) => c.data.state === "open");
   const findings = [];
   const warn = (path, line, message, fix) => findings.push({ rule: "G17", effect: "warn", path, line, message, fix });
-  for (const change of ctx.diff.activeChanges) {
+  const designs = ctx.config.profile === "knowledge" ? [] : ctx.diff.activeChanges;
+  for (const change of designs) {
     const rel = `openspec/changes/${change}/design.md`;
     if (!existsSync39(join44(root, rel))) continue;
     const entries = commitmentEntries(readFileSync33(join44(root, rel), "utf8"));
@@ -13714,7 +13795,8 @@ var RULES = [
   g15,
   g16,
   g17,
-  g18
+  g18,
+  g19
 ];
 var compare3 = (a, b) => a < b ? -1 : a > b ? 1 : 0;
 var ruleNumber = (rule) => Number.parseInt(rule.slice(1), 10);
@@ -13723,7 +13805,10 @@ function sortGateFindings(findings) {
     (a, b) => (a.effect === b.effect ? 0 : a.effect === "block" ? -1 : 1) || ruleNumber(a.rule) - ruleNumber(b.rule) || compare3(a.path ?? "", b.path ?? "") || (a.line ?? 0) - (b.line ?? 0)
   );
 }
-var runGate = (ctx) => sortGateFindings(RULES.flatMap((rule) => rule(ctx)));
+var OPENSPEC_RULES = /* @__PURE__ */ new Set([g3, g4, g5, g6, g13, g15, g18]);
+var KNOWLEDGE_RULES = /* @__PURE__ */ new Set([g19]);
+var profileRules2 = (config) => RULES.filter((r) => config.profile === "knowledge" ? !OPENSPEC_RULES.has(r) : !KNOWLEDGE_RULES.has(r));
+var runGate = (ctx) => sortGateFindings(profileRules2(ctx.config).flatMap((rule) => rule(ctx)));
 
 // src/gate/summary.ts
 var cell = (text3) => text3.replace(/\r?\n/g, " ").replace(/\|/g, "\\|");
@@ -13840,7 +13925,8 @@ register({
     });
     const findings = runGate(ctx);
     const adoption = ctx.diff.adoption;
-    const notes = adoption ? ["adoption PR: the base has no specfold.yaml, so G4 is skipped"] : [];
+    const skipped = config.profile === "knowledge" ? "G19" : "G4";
+    const notes = adoption ? [`adoption PR: the base has no specfold.yaml, so ${skipped} is skipped`] : [];
     const summary = values.summary;
     if (summary !== void 0)
       writeFileSync15(resolve8(io.cwd, summary), renderSummary(findings, verdict(findings), notes));
@@ -14099,11 +14185,11 @@ function writeLimit(root, n) {
 // src/init/init.ts
 var import_yaml19 = __toESM(require_dist(), 1);
 import { execFileSync as execFileSync9 } from "node:child_process";
-import { existsSync as existsSync43, mkdirSync as mkdirSync11, readFileSync as readFileSync36, writeFileSync as writeFileSync17 } from "node:fs";
+import { existsSync as existsSync43, mkdirSync as mkdirSync11, readdirSync as readdirSync10, readFileSync as readFileSync36, rmdirSync, rmSync, writeFileSync as writeFileSync17 } from "node:fs";
 import { dirname as dirname13, join as join47 } from "node:path";
 var OPENSPEC_CONFIG2 = "openspec/config.yaml";
 var DEFAULT_LIMIT = 3;
-var REQUIRED2 = [CONFIG_FILE, OPENSPEC_CONFIG2, MANIFEST_PATH];
+var required = (profile) => profile === "full" ? [CONFIG_FILE, OPENSPEC_CONFIG2, MANIFEST_PATH] : [CONFIG_FILE, MANIFEST_PATH];
 var PLACEHOLDER = "<filled by specfold init or sf-migrate>";
 var STACK_LINE = /^(\s*)Stack: (.*)$/m;
 var TEMPLATE_GLOBS = JSON.stringify(["src/**"]);
@@ -14113,13 +14199,19 @@ var openspecSkills = (tools) => [
 ];
 function planInit(o) {
   const abs = (p) => join47(o.root, p);
-  const missing = REQUIRED2.filter((p) => !existsSync43(abs(p)));
+  const configured = existsSync43(abs(CONFIG_FILE)) ? parseProfile((0, import_yaml19.parse)(readFileSync36(abs(CONFIG_FILE), "utf8"))?.profile) : "full";
+  const profile = o.profile ?? configured;
+  if (configured === "full" && profile === "knowledge" && openspecSkills(o.tools).some((p) => existsSync43(abs(p))))
+    throw new EnvError(
+      "this repository is set up with the full profile; switching a full repository to the knowledge profile is not supported"
+    );
+  const missing = required(profile).filter((p) => !existsSync43(abs(p)));
   if (missing.length > 0)
     throw new EnvError(
       `not a Specfold template repository (missing ${missing.join(", ")}): copy the template files, or use sf-migrate for a repository with its own files`
     );
   const read = (p) => readFileSync36(abs(p), "utf8");
-  const openspec = openspecSkills(o.tools).some((p) => !existsSync43(abs(p)));
+  const openspec = profile === "full" && openspecSkills(o.tools).some((p) => !existsSync43(abs(p)));
   if (openspec) {
     const bin = openspecBinary(o.root);
     try {
@@ -14129,8 +14221,10 @@ function planInit(o) {
     }
   }
   const plan = {
+    profile,
     values: { stack: { value: null, source: "" }, sourceGlobs: { value: [], source: "" } },
     edits: [],
+    remove: [],
     openspec,
     skipped: [],
     manifest: "",
@@ -14140,14 +14234,18 @@ function planInit(o) {
     if (after !== before) plan.edits.push({ path, action, text: after });
   };
   const found = detect(o.root);
-  const config = read(OPENSPEC_CONFIG2);
-  const line = STACK_LINE.exec(config);
-  if (!line) {
+  const detectedStack = found.stack.length > 0 ? found.stack.join(", ") : void 0;
+  const config = profile === "full" ? read(OPENSPEC_CONFIG2) : void 0;
+  const line = config === void 0 ? null : STACK_LINE.exec(config);
+  if (config === void 0) {
+    const [value2, source2] = o.stack !== void 0 ? [o.stack, "--stack; not written in the knowledge profile"] : detectedStack ? [detectedStack, "detected; not written in the knowledge profile"] : [null, "not detected"];
+    plan.values.stack = { value: value2, source: source2 };
+  } else if (!line) {
     plan.skipped.push({ path: OPENSPEC_CONFIG2, reason: "has no 'Stack:' line in its context" });
     plan.values.stack = { value: o.stack ?? null, source: "no Stack: line" };
   } else {
     const current2 = line[2].trim();
-    const detected = found.stack.length > 0 ? found.stack.join(", ") : void 0;
+    const detected = detectedStack;
     const [value2, source2] = o.stack !== void 0 ? [o.stack, "--stack"] : current2 !== PLACEHOLDER ? [current2, "kept"] : detected ? [detected, "detected"] : [null, "not detected; placeholder kept"];
     plan.values.stack = { value: value2, source: source2 };
     if (value2 !== null)
@@ -14160,6 +14258,10 @@ function planInit(o) {
   plan.values.sourceGlobs = { value, source };
   let nextSettings = source === "kept" ? settings : setSourceGlobs(settings, value);
   if (!o.tools.includes("claude")) nextSettings = clearAgentTargets(nextSettings);
+  if (o.profile !== void 0) nextSettings = setProfile(nextSettings, o.profile);
+  const gate = (0, import_yaml19.parse)(settings).gate;
+  if (profile === "knowledge" && gate?.escape_label === "no-spec")
+    nextSettings = setEscapeLabel(nextSettings, "no-knowledge");
   edit(CONFIG_FILE, settings, nextSettings, "fill");
   let shipped;
   try {
@@ -14177,6 +14279,20 @@ function planInit(o) {
     }
     const text3 = read(p);
     const style = blockStyle(p);
+    const variantPath = `${profileDir(profile)}/${p}`;
+    if (profile !== "full" && existsSync43(abs(variantPath))) {
+      const variant = read(variantPath);
+      if (hasBlock(text3, style) || sha256(text3) === hash) {
+        const next = applyBlock(hasBlock(text3, style) ? text3 : void 0, variant, style);
+        edit(p, text3, next.text, "block");
+        blocks[p] = sha256(variant);
+      } else
+        plan.skipped.push({
+          path: p,
+          reason: "differs from the template; no markers added, left out of the manifest"
+        });
+      continue;
+    }
     if (hasBlock(text3, style)) blocks[p] = hash;
     else if (sha256(text3) === hash) {
       edit(p, text3, applyBlock(void 0, text3, style).text, "block");
@@ -14187,7 +14303,23 @@ function planInit(o) {
         reason: "differs from the template; no markers added, left out of the manifest"
       });
   }
-  const files = { ...shipped.files ?? {} };
+  const files = {};
+  for (const [p, hash] of Object.entries(shipped.files ?? {})) {
+    if (inProfile(p, profile)) files[p] = hash;
+    else if (!existsSync43(abs(p))) continue;
+    else if (sha256(readFileSync36(abs(p))) === hash) plan.remove.push(p);
+    else plan.skipped.push({ path: p, reason: "differs from the template; kept" });
+  }
+  const leftovers = join47(profileDir(profile), "leftovers.json");
+  if (profile !== "full" && existsSync43(abs(leftovers))) {
+    const hashes = JSON.parse(read(leftovers));
+    for (const [p, hash] of Object.entries(hashes)) {
+      if (!existsSync43(abs(p))) continue;
+      const others = filesUnder(o.root, dirname13(p)).filter((f) => f !== p && !plan.remove.includes(f));
+      if (sha256(readFileSync36(abs(p))) === hash && others.length === 0) plan.remove.push(p);
+      else plan.skipped.push({ path: p, reason: "differs from the template; kept" });
+    }
+  }
   if (o.upgradeWorkflow) {
     const { shipped: from, active } = UPGRADE_WORKFLOW;
     if (!existsSync43(abs(from)))
@@ -14199,8 +14331,15 @@ function planInit(o) {
       files[active] = sha256(text3);
     }
   }
-  plan.manifest = manifestText(shipped.kit_version ?? "", shipped.ref, { files, blocks });
+  plan.manifest = manifestText(shipped.kit_version ?? "", shipped.ref, { files, blocks }, profile);
   return plan;
+}
+function pruneEmpty(root, dir) {
+  for (let d = dir; d !== "." && d !== ""; d = dirname13(d)) {
+    const abs = join47(root, d);
+    if (!existsSync43(abs) || readdirSync10(abs).length > 0) return;
+    rmdirSync(abs);
+  }
 }
 function runInit(o, plan) {
   const result = { actions: [], skipped: [...plan.skipped], notes: [] };
@@ -14210,6 +14349,11 @@ function runInit(o, plan) {
     writeFileSync17(join47(o.root, e.path), e.text);
     act(e.path, e.action);
     if (e.path === UPGRADE_WORKFLOW.active) result.notes.push(UPGRADE_WORKFLOW_NOTE);
+  }
+  for (const p of plan.remove) {
+    rmSync(join47(o.root, p));
+    pruneEmpty(o.root, dirname13(p));
+    act(p, "remove");
   }
   if (plan.openspec) {
     const config = readFileSync36(join47(o.root, OPENSPEC_CONFIG2), "utf8");
@@ -14256,8 +14400,9 @@ var GATE_STEP = `ruleset ${RULESET_NAME}`;
 register({
   name: "init",
   summary: "finish setting up a repository made from the template: settings, OpenSpec skills, links, hooks",
-  usage: "specfold init [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--max-subagents <n>] [--upgrade-workflow] [--require-gate] [--dry-run] [--json]",
+  usage: "specfold init [--profile <full|knowledge>] [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--max-subagents <n>] [--upgrade-workflow] [--require-gate] [--dry-run] [--json]",
   options: {
+    profile: { type: "string" },
     stack: { type: "string" },
     "source-glob": { type: "string", multiple: true },
     tools: { type: "string" },
@@ -14276,6 +14421,7 @@ register({
     const options = {
       root,
       tools: parseTools(values.tools),
+      profile: values.profile === void 0 ? void 0 : parseProfile(values.profile, "--profile"),
       stack: values.stack,
       sourceGlobs: values["source-glob"],
       maxSubagents: max === void 0 ? void 0 : Number(max),
@@ -14296,6 +14442,7 @@ register({
       const manifestChanges = !existsSync44(manifestPath) || readFileSync37(manifestPath, "utf8") !== plan.manifest;
       const actions = [
         ...plan.edits.map((e) => ({ path: e.path, action: e.action })),
+        ...plan.remove.map((path) => ({ path, action: "remove" })),
         ...plan.openspec ? [{ path: "openspec/", action: `run openspec init --tools ${options.tools.join(",")}` }] : [],
         { path: ".agents/skills", action: "run agents sync" },
         { path: ".claude/settings.json", action: "run permissions sync" },
@@ -14448,10 +14595,11 @@ var head = (root) => {
 register({
   name: "migrate",
   summary: "bring an existing repository into Specfold: own branch, state, inventory, kit install",
-  usage: "specfold migrate start [--default-branch <name>] | inventory | install --from <dir> [--tools <list>] [--stack <text>] [--source-glob <glob>]... [--ref <ref>] [--upgrade-workflow] | mark <step> | status  [--json]",
+  usage: "specfold migrate start [--default-branch <name>] | inventory | install --from <dir> [--profile <full|knowledge>] [--tools <list>] [--stack <text>] [--source-glob <glob>]... [--ref <ref>] [--upgrade-workflow] | mark <step> | status  [--json]",
   options: {
     "default-branch": { type: "string" },
     from: { type: "string" },
+    profile: { type: "string" },
     tools: { type: "string" },
     stack: { type: "string" },
     "source-glob": { type: "string", multiple: true },
@@ -14467,6 +14615,7 @@ register({
       throw new UsageError("missing subcommand: start, inventory, install, mark or status");
     if (!["start", "inventory", "install", "mark", "status"].includes(sub))
       throw new UsageError(`unknown migrate subcommand '${sub}'`);
+    const profile = values.profile === void 0 ? void 0 : parseProfile(values.profile, "--profile");
     const root = gitRoot(io.cwd);
     const print = (lines3, json2) => io.stdout(values.json ? `${JSON.stringify(json2, null, 2)}
 ` : `${lines3.join("\n")}
@@ -14571,6 +14720,7 @@ register({
       root,
       from: resolve9(io.cwd, from),
       tools: parseTools(values.tools),
+      profile,
       stack: values.stack,
       sourceGlobs: globs,
       ref: values.ref,
@@ -14911,7 +15061,7 @@ register({
 });
 
 // src/sync/command.ts
-import { existsSync as existsSync47, readdirSync as readdirSync10, writeFileSync as writeFileSync19 } from "node:fs";
+import { existsSync as existsSync47, readdirSync as readdirSync11, writeFileSync as writeFileSync19 } from "node:fs";
 import { join as join51 } from "node:path";
 var NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 var ARCHIVED2 = /^(\d{4}-\d{2}-\d{2})-([a-z0-9]+(?:-[a-z0-9]+)*)$/;
@@ -14920,7 +15070,7 @@ function resolveArchived(config, arg) {
   const archive = join51(config.root, "openspec", "changes", "archive");
   if (ARCHIVED2.test(arg) && existsSync47(join51(archive, arg))) return arg;
   if (!NAME.test(arg)) throw new UsageError(`'${arg}' is not a change name or archived change id`);
-  const ids = existsSync47(archive) ? readdirSync10(archive).filter((d) => ARCHIVED2.exec(d)?.[2] === arg).sort() : [];
+  const ids = existsSync47(archive) ? readdirSync11(archive).filter((d) => ARCHIVED2.exec(d)?.[2] === arg).sort() : [];
   const newest = ids.at(-1);
   if (newest) return newest;
   if (existsSync47(join51(config.root, "openspec", "changes", arg)))
@@ -14980,7 +15130,7 @@ register({
 });
 
 // src/tasks/progress-command.ts
-import { existsSync as existsSync48, readdirSync as readdirSync11, readFileSync as readFileSync40 } from "node:fs";
+import { existsSync as existsSync48, readdirSync as readdirSync12, readFileSync as readFileSync40 } from "node:fs";
 import { join as join52 } from "node:path";
 
 // src/tasks/progress.ts
@@ -15011,7 +15161,7 @@ function readTasks(config, change) {
 function activeChanges2(config) {
   const dir = join52(config.root, "openspec", "changes");
   if (!existsSync48(dir)) return [];
-  return readdirSync11(dir, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort();
+  return readdirSync12(dir, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== "archive" && !d.name.startsWith(".")).map((d) => d.name).sort();
 }
 function commitsByTask(config, change) {
   const out = /* @__PURE__ */ new Map();
@@ -15218,12 +15368,12 @@ register({
 // src/upgrade/command.ts
 var import_yaml22 = __toESM(require_dist(), 1);
 import { spawnSync as spawnSync3 } from "node:child_process";
-import { existsSync as existsSync51, mkdirSync as mkdirSync14, mkdtempSync as mkdtempSync2, readFileSync as readFileSync43, rmSync as rmSync3, writeFileSync as writeFileSync22 } from "node:fs";
+import { existsSync as existsSync51, mkdirSync as mkdirSync14, mkdtempSync as mkdtempSync2, readFileSync as readFileSync43, rmSync as rmSync4, writeFileSync as writeFileSync22 } from "node:fs";
 import { tmpdir as tmpdir2 } from "node:os";
 import { dirname as dirname16, join as join57, resolve as resolve11 } from "node:path";
 
 // src/upgrade/apply.ts
-import { chmodSync as chmodSync3, existsSync as existsSync49, mkdirSync as mkdirSync13, readFileSync as readFileSync41, rmSync, writeFileSync as writeFileSync20 } from "node:fs";
+import { chmodSync as chmodSync3, existsSync as existsSync49, mkdirSync as mkdirSync13, readFileSync as readFileSync41, rmSync as rmSync2, writeFileSync as writeFileSync20 } from "node:fs";
 import { dirname as dirname15, join as join53 } from "node:path";
 var setKitVersion = (text3, version) => text3.replace(/^(kit_version:\s*)("?)[^"\s#]+("?)/m, `$1$2${version}$3`);
 function applyPlan(root, plan, ref) {
@@ -15233,14 +15383,14 @@ function applyPlan(root, plan, ref) {
     if (mode !== void 0) chmodSync3(join53(root, p), mode);
   };
   for (const f of plan.files) {
-    if (f.action === "remove") rmSync(join53(root, f.path), { force: true });
+    if (f.action === "remove") rmSync2(join53(root, f.path), { force: true });
     else if (f.data !== void 0) put(f.path, f.data, f.mode);
   }
   for (const step of [...plan.blocks, ...plan.configs])
     if (step.text !== void 0) put(step.path, step.text);
   const settings = join53(root, CONFIG_FILE);
   if (existsSync49(settings)) put(CONFIG_FILE, setKitVersion(readFileSync41(settings, "utf8"), plan.to));
-  put(MANIFEST_PATH, manifestText(plan.to, ref, plan.manifest));
+  put(MANIFEST_PATH, manifestText(plan.to, ref, plan.manifest, plan.profile));
 }
 
 // src/upgrade/migrations.ts
@@ -15260,7 +15410,7 @@ async function runMigrations(root, from, versions, report) {
 }
 
 // src/upgrade/plan.ts
-import { existsSync as existsSync50, readdirSync as readdirSync12, readFileSync as readFileSync42, statSync as statSync13 } from "node:fs";
+import { existsSync as existsSync50, readdirSync as readdirSync13, readFileSync as readFileSync42, statSync as statSync13 } from "node:fs";
 import { join as join56 } from "node:path";
 
 // src/upgrade/config.ts
@@ -15387,7 +15537,7 @@ function upgradeOpenspecConfig(local, base, next) {
 
 // src/upgrade/merge.ts
 import { execFileSync as execFileSync10 } from "node:child_process";
-import { mkdtempSync, rmSync as rmSync2, writeFileSync as writeFileSync21 } from "node:fs";
+import { mkdtempSync, rmSync as rmSync3, writeFileSync as writeFileSync21 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join as join55 } from "node:path";
 function mergeThreeWay(local, base, next) {
@@ -15422,7 +15572,7 @@ function mergeThreeWay(local, base, next) {
       throw new Error(`git merge-file failed: ${String(e.stderr ?? "").trim()}`);
     }
   } finally {
-    rmSync2(dir, { recursive: true, force: true });
+    rmSync3(dir, { recursive: true, force: true });
   }
 }
 
@@ -15435,12 +15585,18 @@ function readInstalled(root) {
     return { files: {}, blocks: {} };
   }
 }
+var NO_SWITCH_TO_KNOWLEDGE = "specfold.yaml sets profile 'knowledge' but the repository is set up with the full profile; switching a full repository to the knowledge profile is not supported";
+function profileChange(root, profile) {
+  const current = readInstalled(root).profile ?? "full";
+  if (current === profile) return void 0;
+  return profile === "full" ? "to-full" : "to-knowledge";
+}
 var toolsOf = (m) => Object.keys(m.files).some((p) => p.startsWith(".claude/")) || "CLAUDE.md" in m.blocks ? ["agents", "claude"] : ["agents"];
 var MARKERS2 = {
   markdown: ["<!-- specfold:start -->", "<!-- specfold:end -->"],
   hash: ["# specfold:start", "# specfold:end"]
 };
-function blockContent(text3, path) {
+function blockContent2(text3, path) {
   const [start, end] = MARKERS2[blockStyle(path)];
   const lines3 = text3.split("\n");
   const from = lines3.findIndex((l) => l.trim() === start);
@@ -15451,7 +15607,7 @@ var sameBlock = (content, hash) => hash !== void 0 && [content, `${content}
 `].some((c) => sha256(c) === hash);
 function versionsIn(dir, ext, installed, target) {
   if (!existsSync50(dir)) return [];
-  return readdirSync12(dir).filter((f) => f.endsWith(ext)).map((f) => f.slice(0, -ext.length)).filter(
+  return readdirSync13(dir).filter((f) => f.endsWith(ext)).map((f) => f.slice(0, -ext.length)).filter(
     (v) => isVersion(v) && (!isVersion(installed) || compareVersions(v, installed) > 0) && compareVersions(v, target) <= 0
   ).sort(compareVersions);
 }
@@ -15459,6 +15615,9 @@ var copyOf = (p) => p === UPGRADE_WORKFLOW.active ? UPGRADE_WORKFLOW.shipped : p
 function planUpgrade(o) {
   const installed = readInstalled(o.root);
   const tools = toolsOf(installed);
+  const profile = o.profile ?? "full";
+  const installedProfile = installed.profile ?? "full";
+  if (installedProfile === "full" && profile === "knowledge") throw new EnvError(NO_SWITCH_TO_KNOWLEDGE);
   const files = [];
   const blocks = [];
   const manifest = { files: {}, blocks: {} };
@@ -15468,7 +15627,7 @@ function planUpgrade(o) {
     const data = readFileSync42(join56(o.base, copyOf(p)));
     return sha256(data) === hash ? data : void 0;
   };
-  const shipped = new Set(kitOwned(o.from, tools));
+  const shipped = new Set(kitOwned(o.from, tools, profile));
   if (installed.files[UPGRADE_WORKFLOW.active] && existsSync50(join56(o.from, UPGRADE_WORKFLOW.shipped)))
     shipped.add(UPGRADE_WORKFLOW.active);
   const paths = [.../* @__PURE__ */ new Set([...shipped, ...Object.keys(installed.files)])].sort();
@@ -15524,7 +15683,7 @@ function planUpgrade(o) {
   for (const p of BLOCK_FILES) {
     if (p === "CLAUDE.md" && !tools.includes("claude")) continue;
     if (!existsSync50(join56(o.from, p))) continue;
-    const next = readFileSync42(join56(o.from, p), "utf8");
+    const next = blockContent(o.from, p, profile);
     const recorded = installed.blocks[p];
     const text3 = existsSync50(local(p)) ? readFileSync42(local(p), "utf8") : void 0;
     if (recorded === void 0) {
@@ -15532,7 +15691,7 @@ function planUpgrade(o) {
         blocks.push({ path: p, action: "unmanaged", reason: "not in the manifest; left as it is" });
       continue;
     }
-    const content = text3 === void 0 ? void 0 : blockContent(text3, p);
+    const content = text3 === void 0 ? void 0 : blockContent2(text3, p);
     if (text3 === void 0 || content === void 0) {
       blocks.push({
         path: p,
@@ -15550,7 +15709,7 @@ function planUpgrade(o) {
       const applied = applyBlock(text3, next, style);
       blocks.push({ path: p, action: "replace", text: "text" in applied ? applied.text : text3 });
     } else {
-      const base = o.base && existsSync50(join56(o.base, p)) ? readFileSync42(join56(o.base, p), "utf8") : void 0;
+      const base = o.base && existsSync50(join56(o.base, p)) ? blockContent(o.base, p, installedProfile) : void 0;
       if (base === void 0 || sha256(base) !== recorded) {
         blocks.push({
           path: p,
@@ -15595,6 +15754,8 @@ function planUpgrade(o) {
   return {
     from: o.installed,
     to: o.target,
+    profile,
+    switchToFull: installedProfile === "knowledge" && profile === "full",
     files,
     blocks,
     configs,
@@ -15618,6 +15779,10 @@ function reportText(plan, extras = {}) {
   const lines3 = [
     `# Specfold upgrade: ${plan.from} to ${plan.to}`,
     "",
+    ...plan.switchToFull ? [
+      "Switched from the knowledge profile to full: OpenSpec is set up. Review `gate.escape_label` in specfold.yaml; the full profile's pull request template asks for a `No-spec reason:` line.",
+      ""
+    ] : [],
     `## Conflicts (${conflicts.length})`,
     ""
   ];
@@ -15700,6 +15865,14 @@ function followUps(root, start) {
     results.push(cli(...args));
   return results;
 }
+function switchToFull(root, from) {
+  const config = join57(root, "openspec/config.yaml");
+  const text3 = existsSync51(config) ? readFileSync43(config, "utf8") : readFileSync43(join57(from, "openspec/config.yaml"), "utf8");
+  mkdirSync14(dirname16(config), { recursive: true });
+  writeFileSync22(config, text3);
+  openspecInit(root, toolsOf(readInstalled(root)));
+  writeFileSync22(config, text3);
+}
 async function inner(io, config, f, from, base, ref) {
   const root = config.root;
   for (const p of [CONFIG_FILE, "scripts/specfold.mjs"])
@@ -15708,7 +15881,14 @@ async function inner(io, config, f, from, base, ref) {
   const shipped = (0, import_yaml22.parse)(readFileSync43(join57(from, CONFIG_FILE), "utf8"))?.kit_version;
   const target = f.to ?? (typeof shipped === "string" ? shipped : void 0);
   if (!target) throw new EnvError(`--from ${from} has no kit_version; pass --to <version>`);
-  const plan = planUpgrade({ root, from, base, installed: installedVersion(config), target });
+  const plan = planUpgrade({
+    root,
+    from,
+    base,
+    installed: installedVersion(config),
+    target,
+    profile: config.profile
+  });
   const print = (text3, json2) => io.stdout(f.json ? `${JSON.stringify(json2, null, 2)}
 ` : text3);
   if (!f.yes) {
@@ -15725,6 +15905,7 @@ async function inner(io, config, f, from, base, ref) {
   const start = git(root, ["rev-parse", "HEAD"]).trim();
   git(root, ["switch", "-q", "-c", branch]);
   applyPlan(root, plan, ref);
+  if (plan.switchToFull) switchToFull(root, from);
   const lines3 = [];
   await runMigrations(root, from, plan.migrations, (version, line) => lines3.push({ version, line }));
   const results = followUps(root, start);
@@ -15771,6 +15952,8 @@ async function outer(io, config, f, passThrough) {
   const source = openSource(config.source, config.root, {
     gh: "github" in config.source ? ghLoggedIn() : false
   });
+  if (profileChange(config.root, config.profile) === "to-knowledge")
+    throw new EnvError(NO_SWITCH_TO_KNOWLEDGE);
   const installed = installedVersion(config);
   const versions = await source.versions();
   if (f.to !== void 0 && !versions.includes(f.to))
@@ -15795,7 +15978,7 @@ async function outer(io, config, f, passThrough) {
     }
     return path.length === 0 ? 0 : 1;
   }
-  const target = path[0];
+  const target = path[0] ?? (profileChange(config.root, config.profile) === "to-full" ? installed : void 0);
   if (target === void 0) {
     io.stdout(`up to date: ${installed} is the newest release on channel ${config.channel}
 `);
@@ -15831,7 +16014,7 @@ async function outer(io, config, f, passThrough) {
     io.stderr(r.stderr);
     return r.status ?? 2;
   } finally {
-    rmSync3(work, { recursive: true, force: true });
+    rmSync4(work, { recursive: true, force: true });
   }
 }
 register({
@@ -15945,10 +16128,10 @@ register({
 });
 
 // src/wt/plan.ts
-import { existsSync as existsSync53, readdirSync as readdirSync13, readFileSync as readFileSync45, statSync as statSync15 } from "node:fs";
+import { existsSync as existsSync53, readdirSync as readdirSync14, readFileSync as readFileSync45, statSync as statSync15 } from "node:fs";
 import { join as join59 } from "node:path";
 var CHANGES2 = "openspec/changes";
-var dirs = (path) => existsSync53(path) ? readdirSync13(path).filter((d) => !d.startsWith(".") && statSync15(join59(path, d)).isDirectory()).sort() : [];
+var dirs = (path) => existsSync53(path) ? readdirSync14(path).filter((d) => !d.startsWith(".") && statSync15(join59(path, d)).isDirectory()).sort() : [];
 function activeChanges3(root) {
   return dirs(join59(root, CHANGES2)).filter((d) => d !== "archive").map((name) => {
     const tasks = join59(root, CHANGES2, name, "tasks.md");
