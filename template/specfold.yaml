@@ -1,5 +1,5 @@
 # Specfold settings for this repository. Upgrades keep your values; see the kit docs for every key.
-kit_version: 0.5.0          # set by `specfold upgrade` x-release-please-version
+kit_version: 0.6.0          # set by `specfold upgrade` x-release-please-version
 # full: knowledge bundle plus OpenSpec specs and changes. knowledge: the bundle only, no openspec/
 # (set by `specfold init --profile` or `specfold migrate install --profile`; see the kit docs to switch).
 profile: full
