@@ -112,13 +112,19 @@ export function kitOwned(from: string, tools: Tool[], profile: Profile = "full")
 export interface Manifest {
   files: Record<string, string>;
   blocks: Record<string, string>;
+  /** The installed profile; a manifest without one is a full install. */
+  profile?: Profile;
 }
 
 /** The file and block hashes of an earlier install; empty when there is none or it cannot be read. */
 export function readManifest(path: string): Manifest {
   try {
     const data = JSON.parse(readFileSync(path, "utf8")) as Partial<Manifest>;
-    return { files: data.files ?? {}, blocks: data.blocks ?? {} };
+    return {
+      files: data.files ?? {},
+      blocks: data.blocks ?? {},
+      ...(data.profile === "knowledge" || data.profile === "full" ? { profile: data.profile } : {}),
+    };
   } catch {
     return { files: {}, blocks: {} };
   }
@@ -196,13 +202,19 @@ function projectSettings(text: string, globs: string[], tools: Tool[], profile: 
 }
 
 /** The manifest's text: sorted keys and no time, so an unchanged install writes the same bytes. */
-export function manifestText(kitVersion: string, ref: string | undefined, m: Manifest): string {
+export function manifestText(
+  kitVersion: string,
+  ref: string | undefined,
+  m: Manifest,
+  profile: Profile = "full",
+): string {
   const sorted = (r: Record<string, string>) =>
     Object.fromEntries(Object.entries(r).sort(([a], [b]) => (a < b ? -1 : 1)));
   return `${JSON.stringify(
     {
       manifest_version: 1,
       kit_version: kitVersion,
+      profile,
       ...(ref ? { ref } : {}),
       files: sorted(m.files),
       blocks: sorted(m.blocks),
@@ -368,7 +380,7 @@ export function installKit(o: InstallOptions): InstallResult {
   }
 
   const kitVersion = String((parse(template(CONFIG_FILE)) as { kit_version?: unknown }).kit_version ?? "");
-  const text = manifestText(kitVersion, o.ref, manifest);
+  const text = manifestText(kitVersion, o.ref, manifest, profile);
   if (writeIfChanged(abs(MANIFEST_PATH), text)) act(MANIFEST_PATH, "write");
   return result;
 }

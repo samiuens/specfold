@@ -47,7 +47,7 @@ agent: implementer
   - Done when: the migrate-profile tests cover specfold-migrate#unknown-profile, specfold-migrate#knowledge-install, specfold-migrate#conflicting-profile and specfold-profile#fresh-knowledge-settings
 - [x] 3.4 Skip the OpenSpec preflight, `openspec init` and the `config.yaml` merge for the knowledge profile
   - Done when: the migrate-profile tests cover specfold-migrate#knowledge-profile-without-openspec with OpenSpec removed from the PATH
-- [ ] 3.5 Record `profile` in the manifest and refresh the template's manifest
+- [x] 3.5 Record `profile` in the manifest and refresh the template's manifest
   - Done when: the migrate-profile tests cover specfold-migrate#profile-recorded, and `npx vitest run test/template-manifest.test.ts` passes after `npx vitest -u` on it
 
 ## 4. Init

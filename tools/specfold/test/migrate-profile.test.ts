@@ -136,3 +136,15 @@ describe("migrate install: knowledge profile without OpenSpec", () => {
     expect(readdirSync(join(root, ".claude/agents"))).toEqual(["scout.md"]);
   });
 });
+
+describe("migrate install: manifest profile", () => {
+  // spec: specfold-migrate#profile-recorded
+  it("records the installed profile", () => {
+    const knowledge = fixtureRepo("adr-docs");
+    install(knowledge, { profile: "knowledge" });
+    expect(JSON.parse(read(knowledge, ".specfold/manifest.json")).profile).toBe("knowledge");
+    const full = fixtureRepo("adr-docs");
+    install(full);
+    expect(JSON.parse(read(full, ".specfold/manifest.json")).profile).toBe("full");
+  });
+});
