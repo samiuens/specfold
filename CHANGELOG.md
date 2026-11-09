@@ -1,5 +1,32 @@
 # Changelog
 
+## [0.5.0](https://github.com/samiuens/specfold/compare/v0.4.0...v0.5.0) (2026-11-09)
+
+
+### Features
+
+* **cli:** ✨ add `--profile` to specfold init ([e449799](https://github.com/samiuens/specfold/commit/e4497992fe0fa08928b63c602b71e3925363e34a))
+* **cli:** ✨ add the knowledge profile file filter ([1a6ef44](https://github.com/samiuens/specfold/commit/1a6ef44fdc8f703a13c98d5db135d661568612e3))
+* **cli:** ✨ read the `profile` setting from specfold.yaml ([3254ddc](https://github.com/samiuens/specfold/commit/3254ddcca6fe21d1bad4b5feb85640523ec05249))
+* **cli:** ✨ refuse a knowledge init on a full repository ([88a630d](https://github.com/samiuens/specfold/commit/88a630db335756991029e10e94c6f71b3fc4d627))
+* **cli:** ✨ remove unchanged openspec files in a knowledge init ([3c41ca6](https://github.com/samiuens/specfold/commit/3c41ca61f7120c1e62bd88db1d11bab69ae9a86d))
+* **cli:** ✨ skip openspec setup in a knowledge profile init ([3a05870](https://github.com/samiuens/specfold/commit/3a0587058552791b31578c77c0e9acabc4d4d4a7))
+* **cli:** ✨ skip the openspec check in the knowledge profile ([0edaa6b](https://github.com/samiuens/specfold/commit/0edaa6b546cb64b349c7746fec871c72e7736749))
+* **gate:** ✨ add `G19` for source changes without knowledge ([eab116f](https://github.com/samiuens/specfold/commit/eab116f9597f83cf2f05229a2e383677ec8b30cd))
+* **gate:** ✨ exempt knowledge adoption prs from `G19` ([33255d6](https://github.com/samiuens/specfold/commit/33255d66064fdd6e583b39afe867ce6cf9a91001))
+* **gate:** ✨ skip the openspec rules in the knowledge profile ([0348312](https://github.com/samiuens/specfold/commit/03483122e3516c77d2f65d4987f98d288cb30dbf))
+* **migrate:** ✨ add `--profile` to migrate install ([996a77b](https://github.com/samiuens/specfold/commit/996a77beecee2af51fdd1ab0727aa24381b661ce))
+* **migrate:** ✨ install the kit-owned files of the chosen profile ([9725744](https://github.com/samiuens/specfold/commit/9725744ee4de5c74bc39ca5903ec4a32b79d7c8c))
+* **migrate:** ✨ install the knowledge profile without openspec ([70e9d59](https://github.com/samiuens/specfold/commit/70e9d591d8c980a737c56428bc2f21102ad9be6c))
+* **migrate:** ✨ record the installed profile in the manifest ([9a49efa](https://github.com/samiuens/specfold/commit/9a49efa8d0e52ec202945d0d6308ed6f94432eb8))
+* **migrate:** ✨ write the knowledge profile block variants ([df992ac](https://github.com/samiuens/specfold/commit/df992acd26e9e50a3a3ad65d594cb937dd91c47e))
+* **skills:** ✨ give sf-interview a knowledge profile path ([26e35b6](https://github.com/samiuens/specfold/commit/26e35b6a7e9b2613adbcd4d245985492ddf95231))
+* **template:** ✨ add the knowledge profile block variants ([1d9831a](https://github.com/samiuens/specfold/commit/1d9831a325aba4299533347b73173d2b19c05bde))
+* **template:** ✨ document the `profile` setting ([9cbb761](https://github.com/samiuens/specfold/commit/9cbb7616dbd4cc2acfc9fc7149d3dda14b2bdb38))
+* **upgrade:** ✨ refuse a switch to the knowledge profile ([e764399](https://github.com/samiuens/specfold/commit/e7643997a4ac3488e17b18038181084cc637ddff))
+* **upgrade:** ✨ switch a knowledge install to the full profile ([9fbb21e](https://github.com/samiuens/specfold/commit/9fbb21e123b369e344701c9564d7a169eacd944b))
+* **upgrade:** ✨ upgrade the file set of the configured profile ([4ce9296](https://github.com/samiuens/specfold/commit/4ce9296e46e416c251e78ce6ba0f98386d8ad08b))
+
 ## [0.4.0](https://github.com/samiuens/specfold/compare/v0.3.1...v0.4.0) (2026-11-04)
 
 
