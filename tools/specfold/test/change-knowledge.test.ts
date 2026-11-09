@@ -39,6 +39,7 @@ function setup(knowledge: string | undefined) {
   if (knowledge !== undefined) write(dir, "knowledge.md", knowledge);
   const config: Config = {
     root,
+    profile: "full",
     types: ["Capability", "Decision"],
     sourceGlobs: [],
     blockOnBrokenLinks: true,

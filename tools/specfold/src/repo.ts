@@ -10,9 +10,22 @@ export interface FolderInfo {
   description?: string;
 }
 
+/** `profile`: the full workflow, or knowledge only without OpenSpec. */
+export type Profile = "full" | "knowledge";
+export const PROFILES: readonly Profile[] = ["full", "knowledge"];
+
+/** A `profile` value, or a usage error naming the allowed values. */
+export function parseProfile(value: unknown, source = `${CONFIG_FILE}: 'profile'`): Profile {
+  if (value === undefined) return "full";
+  if (typeof value === "string" && (PROFILES as readonly string[]).includes(value)) return value as Profile;
+  throw new EnvError(`${source} is '${String(value)}'; allowed values: ${PROFILES.join(", ")}`);
+}
+
 export interface Config {
   /** Repository root: the directory holding specfold.yaml. */
   root: string;
+  /** `profile`, `full` when unset. */
+  profile: Profile;
   types: string[];
   sourceGlobs: string[];
   blockOnBrokenLinks: boolean;
@@ -172,6 +185,7 @@ export function loadConfig(root: string): Config {
   }
   return {
     root,
+    profile: parseProfile(data.profile),
     types: stringList(data.types, "types"),
     sourceGlobs: stringList(data.source_globs, "source_globs"),
     blockOnBrokenLinks: gate.block_on_broken_links !== false,
