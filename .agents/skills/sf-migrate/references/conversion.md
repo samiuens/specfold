@@ -25,6 +25,21 @@ Summarize; do not copy. A concept says what was decided or agreed and why, in a 
 - **README and CONTRIBUTING** usually stay (`keep`). Contribution rules that agents must follow become a `Convention`.
 - **Another spec tool** (`openspec/specs/`, `.specify/`, `.kiro/specs/`): one `Capability` card per spec or feature folder, with `resource` pointing at it. No bulk conversion: list each one in the report as a migration candidate. An existing `openspec/` stays as it is; install only made `specfold` the default schema for new changes.
 
+## Existing bundle
+
+When the inventory lists `okf-concept` sources, `knowledge/` already holds a bundle. Work through the mapping rows:
+
+- **One new concept per original**, created with `specfold new` in the folder of its target type (`decisions/`, `runbooks/`, `domain/`, `architecture/` ...), with the type from the type map. Keep the full rationale: rewrite the frontmatter and headings for the target type, but do not shorten the body. An ADR's status maps to `decision:` as above.
+- **`sources` point at the original at the migration's base commit.** With a GitHub `origin` (`git remote get-url origin`), use `https://github.com/<owner>/<repo>/blob/<base>/<path>`, where `<base>` is the base commit `migrate status` shows; otherwise use the original path and name the base commit in the report.
+- **Remove the original** once its rewrite exists (`git rm`). The hooks only warn about broken links and unchanged originals until `migrate mark convert`, so commit as you go.
+- **Rewrite links and references.** For every moved concept, `git grep -n "<old path>"` (and the bundle-absolute form `/<old path without knowledge/>`) and replace each hit, inside and outside the bundle: concept links, `see knowledge:` comments, AGENTS.md, READMEs, scripts. List every file you touched in the report.
+- **Indexes.** Run `node scripts/specfold.mjs index`; it replaces every hand-written `index.md`. Before that, move intro text that holds knowledge into a concept (for example an architecture overview), and a one-line folder summary into that folder's `description` in `specfold.yaml`. The report says where each piece went. `log.md` keeps its entries; add the migration entry with `log add`.
+- **Team rules.** Apply the plan's team-rules rows: delete the `remove` rules from the team's text, write each `Convention` with `specfold new`, and leave the `keep` rules below the Specfold block.
+- **Tooling.** Remove what the plan marks `remove` (an OKF skill folder, a validator script, a hook manager step running it), and nothing else.
+- **Settings.** Drop types and folders from `specfold.yaml` that no concept uses any more.
+
+The conversion is done when every "After conversion" item is, `git grep` finds no old path, and `node scripts/specfold.mjs validate` passes. Then run `migrate mark convert`.
+
 ## Seed from code
 
 Up to the cap in the plan (default 30), across all three kinds:

@@ -57,7 +57,7 @@ agent: implementer
   - Done when: `node scripts/check-skills.mjs .agents/skills template/.agents/skills` reports 0 problems and `node scripts/specfold.mjs stats` keeps sf-migrate's description within budget
 - [x] 4.2 Extend `references/plan.md`: every `specfold.yaml` type in **Becomes**, a type-map table with the default map, tooling and rule-file rows, team AGENTS.md rule rows, an "After conversion" section and a commitments checkpoint
   - Done when: the plan template shows each of these with one example row, and `diff -r template/.agents/skills/sf-migrate .agents/skills/sf-migrate` is empty
-- [ ] 4.3 Extend `references/conversion.md` with the rewrite rules: new concepts in Specfold's folders with full rationale and permalink `sources`, originals removed, links and outside references rewritten, indexes regenerated with intro text moved, AGENTS.md rules sorted, unused types and folders removed
+- [x] 4.3 Extend `references/conversion.md` with the rewrite rules: new concepts in Specfold's folders with full rationale and permalink `sources`, originals removed, links and outside references rewritten, indexes regenerated with intro text moved, AGENTS.md rules sorted, unused types and folders removed
   - Done when: each rule names the command or check that confirms it, and the kit copy is identical
 - [ ] 4.4 Extend `references/report.md` with "Deviations" and "References rewritten", and refresh the template manifest
   - Done when: `npx vitest run test/template-manifest.test.ts` passes after `npx vitest -u` on it, and the kit copy is identical
