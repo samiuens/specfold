@@ -61,6 +61,8 @@ export interface UpgradePlan {
   to: string;
   /** The profile the plan installs, recorded in the manifest. */
   profile: Profile;
+  /** Whether the plan switches a knowledge install to full: openspec init and its config follow. */
+  switchToFull: boolean;
   files: FileStep[];
   blocks: BlockStep[];
   /** `.claude/settings.json` and `openspec/config.yaml`. */
@@ -98,6 +100,13 @@ export function readInstalled(root: string): InstalledManifest {
   } catch {
     return { files: {}, blocks: {} };
   }
+}
+
+/** How `profile` in specfold.yaml differs from the installed one; undefined when they agree. */
+export function profileChange(root: string, profile: Profile): "to-full" | "to-knowledge" | undefined {
+  const current = readInstalled(root).profile ?? "full";
+  if (current === profile) return undefined;
+  return profile === "full" ? "to-full" : "to-knowledge";
 }
 
 /** Claude Code is set up when the manifest lists `.claude/` files or the `CLAUDE.md` block. */
@@ -294,6 +303,7 @@ export function planUpgrade(o: PlanOptions): UpgradePlan {
     from: o.installed,
     to: o.target,
     profile,
+    switchToFull: installedProfile === "knowledge" && profile === "full",
     files,
     blocks,
     configs,
