@@ -46,3 +46,30 @@ describe("migrate install: profile file set", () => {
     expect(owned).toContain(".specfold/profiles/knowledge/AGENTS.md");
   });
 });
+
+describe("migrate install: profile blocks", () => {
+  // spec: specfold-profile#knowledge-agents-md
+  it("writes the knowledge AGENTS.md block", () => {
+    const root = fixtureRepo("adr-docs");
+    install(root, { profile: "knowledge" });
+    const agents = read(root, "AGENTS.md");
+    expect(agents).toContain(read(TEMPLATE, ".specfold/profiles/knowledge/AGENTS.md").trim());
+    expect(agents).not.toMatch(/openspec/i);
+    expect(agents).toContain("update the affected concepts");
+  });
+
+  // spec: specfold-profile#knowledge-pull-request-template
+  it("writes the knowledge pull request template", () => {
+    const root = fixtureRepo("adr-docs");
+    install(root, { profile: "knowledge" });
+    const text = read(root, ".github/pull_request_template.md");
+    expect(text).toMatch(/^No-knowledge reason:/m);
+    expect(text).not.toMatch(/^Change:/m);
+  });
+
+  it("keeps the full blocks for full", () => {
+    const root = fixtureRepo("adr-docs");
+    install(root);
+    expect(read(root, "AGENTS.md")).toContain("openspec show");
+  });
+});
