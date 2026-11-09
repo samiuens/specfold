@@ -25,7 +25,7 @@ scenarios: [specfold-migrate#bundle-types-and-folders, specfold-migrate#no-bundl
 agent: implementer
 ```
 
-- [ ] 2.1 Append the bundle's extra types and top-level folders (without descriptions) to a `specfold.yaml` that install creates, by line edits that keep the template's comments
+- [x] 2.1 Append the bundle's extra types and top-level folders (without descriptions) to a `specfold.yaml` that install creates, by line edits that keep the template's comments
   - Done when: `npx vitest run test/migrate-bundle.test.ts` covers specfold-migrate#bundle-types-and-folders and specfold-migrate#no-bundle on the `okf-bundle` fixture
 
 ## 3. Hook relief during a migration

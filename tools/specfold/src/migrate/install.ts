@@ -12,6 +12,7 @@ import {
 import { dirname, join } from "node:path";
 import { parse } from "yaml";
 import { applyLinks, listSkills, planLinks } from "../agents/sync.ts";
+import { parseText } from "../bundle.ts";
 import { EnvError, UsageError } from "../errors.ts";
 import { installHooks, writeIfChanged } from "../hooks/install.ts";
 import { openspecBinary } from "../openspec.ts";
@@ -194,6 +195,59 @@ export function setProfile(text: string, profile: Profile): string {
 export const setEscapeLabel = (text: string, label: string) =>
   text.replace(/^(\s+escape_label:)[ \t]*[^\s#]+/m, `$1 ${label}`);
 
+/** Types and top-level folders of an existing bundle's concepts, in order of first appearance by path. */
+export function bundleSettings(root: string): { types: string[]; folders: string[] } {
+  const types: string[] = [];
+  const folders: string[] = [];
+  for (const p of filesUnder(root, "knowledge")) {
+    const name = p.split("/").at(-1) as string;
+    if (!p.endsWith(".md") || name === "index.md" || name === "log.md") continue;
+    const data = parseText(p, readFileSync(join(root, p), "utf8")).frontmatter?.data as
+      | { type?: unknown }
+      | undefined;
+    if (typeof data?.type !== "string" || data.type.trim() === "") continue;
+    if (!types.includes(data.type)) types.push(data.type);
+    const parts = p.split("/");
+    const folder = parts.length > 2 ? (parts[1] as string) : undefined;
+    if (folder !== undefined && !folders.includes(folder)) folders.push(folder);
+  }
+  return { types, folders };
+}
+
+/** `types` and `folders` with an existing bundle's extra entries appended by line edits, keeping comments. */
+export function addBundleSettings(text: string, bundle: { types: string[]; folders: string[] }): string {
+  const data = parse(text) as { types?: unknown; folders?: unknown } | null;
+  const types = Array.isArray(data?.types) ? data.types.map(String) : [];
+  const folders = data?.folders && typeof data.folders === "object" ? Object.keys(data.folders) : [];
+  const extraTypes = bundle.types.filter((t) => !types.includes(t));
+  const extraFolders = bundle.folders.filter((f) => !folders.includes(f));
+  const lines = text.split("\n");
+  /** The index after the last indented line of the top-level block `key:`. */
+  const blockEnd = (key: string) => {
+    const start = lines.findIndex((l) => l === `${key}:`);
+    if (start === -1) return -1;
+    let end = start + 1;
+    while (end < lines.length && /^\s+\S/.test(lines[end] as string)) end++;
+    return end;
+  };
+  const insert = (key: string, added: string[]) => {
+    if (added.length === 0) return;
+    const at = blockEnd(key);
+    if (at === -1) lines.push(`${key}:`, ...added);
+    else lines.splice(at, 0, ...added);
+  };
+  const scalar = (t: string) => (/^[\w][\w .-]*$/.test(t) ? t : JSON.stringify(t));
+  insert(
+    "types",
+    extraTypes.map((t) => `  - ${scalar(t)}`),
+  );
+  insert(
+    "folders",
+    extraFolders.map((f) => `  ${f}: {}`),
+  );
+  return lines.join("\n");
+}
+
 /** The template's specfold.yaml with this repository's source globs and profile, and no skill targets without Claude Code. */
 function projectSettings(text: string, globs: string[], tools: Tool[], profile: Profile): string {
   let out = setSourceGlobs(text, globs);
@@ -333,7 +387,10 @@ export function installKit(o: InstallOptions): InstallResult {
   if (read(CONFIG_FILE) === undefined) {
     put(
       CONFIG_FILE,
-      projectSettings(template(CONFIG_FILE), o.sourceGlobs ?? found.sourceGlobs, o.tools, profile),
+      addBundleSettings(
+        projectSettings(template(CONFIG_FILE), o.sourceGlobs ?? found.sourceGlobs, o.tools, profile),
+        bundleSettings(o.root),
+      ),
     );
     act(CONFIG_FILE, "write");
   }
