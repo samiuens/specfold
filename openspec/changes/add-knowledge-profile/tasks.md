@@ -39,7 +39,7 @@ scenarios: [specfold-profile#knowledge-install, specfold-profile#full-install-un
 agent: implementer
 ```
 
-- [ ] 3.1 Pass the profile to `kitOwned` and filter it with `profile.ts`; make `.specfold/profiles` kit-owned in both profiles
+- [x] 3.1 Pass the profile to `kitOwned` and filter it with `profile.ts`; make `.specfold/profiles` kit-owned in both profiles
   - Done when: `npx vitest run test/migrate-profile.test.ts` covers specfold-profile#knowledge-install and specfold-profile#full-install-unchanged
 - [ ] 3.2 Write the knowledge block variants for the knowledge profile, falling back to the full content when a variant is missing
   - Done when: the migrate-profile tests cover specfold-profile#knowledge-agents-md and specfold-profile#knowledge-pull-request-template
