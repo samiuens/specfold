@@ -76,6 +76,32 @@ function hookManagerMentions(root: string): boolean {
   );
 }
 
+/** D3: the openspec binary runs and its version is in `requires.openspec`. */
+function openspecCheck(env: DoctorEnv, root: string | undefined, config: Config | undefined): Check {
+  const range = config?.requires.openspec ?? DEFAULT_OPENSPEC_RANGE;
+  const binary = openspecBinary(root ?? env.cwd);
+  const useLocal = binary.source === "node_modules/.bin";
+  const source = binary.source;
+  const openspec = firstVersion(env.exec(binary.command, ["--version"], env.cwd));
+  if (!openspec) {
+    return {
+      id: "D3",
+      status: "fail",
+      message: useLocal ? "node_modules/.bin/openspec does not run" : "openspec is not on the PATH",
+      fix: "install OpenSpec so that `openspec` is on the PATH or in node_modules/.bin: https://github.com/Fission-AI/OpenSpec",
+    };
+  } else if (!satisfies(openspec, range)) {
+    return {
+      id: "D3",
+      status: "fail",
+      message: `openspec ${openspec} from ${source} does not satisfy ${range}`,
+      fix: `install an OpenSpec version matching ${range}`,
+    };
+  } else {
+    return ok("D3", `openspec ${openspec} from ${source} (${range})`);
+  }
+}
+
 export function runChecks(env: DoctorEnv): Check[] {
   const checks: Check[] = [];
 
@@ -113,28 +139,11 @@ export function runChecks(env: DoctorEnv): Check[] {
     }
   }
 
-  const range = config?.requires.openspec ?? DEFAULT_OPENSPEC_RANGE;
-  const binary = openspecBinary(root ?? env.cwd);
-  const useLocal = binary.source === "node_modules/.bin";
-  const source = binary.source;
-  const openspec = firstVersion(env.exec(binary.command, ["--version"], env.cwd));
-  if (!openspec) {
-    checks.push({
-      id: "D3",
-      status: "fail",
-      message: useLocal ? "node_modules/.bin/openspec does not run" : "openspec is not on the PATH",
-      fix: "install OpenSpec so that `openspec` is on the PATH or in node_modules/.bin: https://github.com/Fission-AI/OpenSpec",
-    });
-  } else if (!satisfies(openspec, range)) {
-    checks.push({
-      id: "D3",
-      status: "fail",
-      message: `openspec ${openspec} from ${source} does not satisfy ${range}`,
-      fix: `install an OpenSpec version matching ${range}`,
-    });
-  } else {
-    checks.push(ok("D3", `openspec ${openspec} from ${source} (${range})`));
-  }
+  checks.push(
+    config?.profile === "knowledge"
+      ? ok("D3", "the knowledge profile does not use OpenSpec")
+      : openspecCheck(env, root, config),
+  );
 
   const base = root ?? env.cwd;
   const inGit = env.exec("git", ["rev-parse", "--is-inside-work-tree"], base)?.trim() === "true";
