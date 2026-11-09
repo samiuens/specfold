@@ -1,11 +1,15 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { parse } from "yaml";
 import { detect } from "../src/migrate/detect.ts";
 import { classify, estimateTokens, inventory } from "../src/migrate/inventory.ts";
 import { currentBranch, defaultBranch, dirtyPaths, gitRoot } from "../src/migrate/repo.ts";
 import { markStep, nextStep, readState, writeState } from "../src/migrate/state.ts";
+import { SPECFOLD_TYPES, suggestType } from "../src/migrate/types.ts";
 import { git, write } from "./gate-helpers.ts";
 import { tempDir } from "./helpers.ts";
-import { fixtureRepo } from "./migrate-helpers.ts";
+import { fixtureRepo, TEMPLATE } from "./migrate-helpers.ts";
 
 describe("migration repository", () => {
   it("finds the default branch from origin/HEAD, then main or master, then the flag", () => {
@@ -101,5 +105,22 @@ describe("migration inventory", () => {
       sourceGlobs: ["packages/*/src/**"],
     });
     expect(detect(tempDir())).toMatchObject({ stack: [], sourceGlobs: ["src/**"], globsFallback: true });
+  });
+});
+
+describe("migration types", () => {
+  it("lists the template's types", () => {
+    const template = parse(readFileSync(join(TEMPLATE, "specfold.yaml"), "utf8")) as { types: string[] };
+    expect([...SPECFOLD_TYPES]).toEqual(template.types);
+  });
+
+  it("suggests equivalents and keeps known types", () => {
+    expect(suggestType("ADR")).toBe("Decision");
+    expect(suggestType("Playbook")).toBe("Runbook");
+    expect(suggestType("Domain Concept")).toBe("Term");
+    expect(suggestType("App")).toBe("Component");
+    expect(suggestType("Reference")).toBe("Reference");
+    expect(suggestType("Architecture")).toBeUndefined();
+    expect(suggestType("Glossary", ["Glossary"])).toBe("Glossary");
   });
 });

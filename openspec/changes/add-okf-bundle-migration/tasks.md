@@ -11,7 +11,7 @@ agent: implementer
 
 - [x] 1.1 Add a fixture repository `migrate/okf-bundle` with an OKF bundle in `knowledge/`: ADR, App, Playbook, Domain Concept, Architecture and Reference concepts, a `decisions/` concept, hand-written `index.md` files with intro text, and a `log.md`
   - Done when: `node scripts/specfold.mjs validate --okf-only --bundle tools/specfold/test/fixtures/migrate/okf-bundle/knowledge` exits 0
-- [ ] 1.2 Add `types.ts` with the built-in Specfold type list and the suggestion map (ADR, Playbook, Domain Concept, App)
+- [x] 1.2 Add `types.ts` with the built-in Specfold type list and the suggestion map (ADR, Playbook, Domain Concept, App)
   - Done when: a test in `migrate-inventory.test.ts` checks that the built-in list equals the `types` of `template/specfold.yaml`
 - [ ] 1.3 Classify Markdown under `knowledge/` by frontmatter as `okf-concept` (with `type` and suggested type) or `okf-index`, before the path rules
   - Done when: `npx vitest run test/migrate-inventory.test.ts` covers specfold-migrate#concepts-by-type, specfold-migrate#decisions-folder-in-a-bundle, specfold-migrate#type-without-an-equivalent and specfold-migrate#hand-written-index
