@@ -77,6 +77,30 @@ describe("doctor: checks", () => {
     for (const word of ["lite", "full", "knowledge"]) expect(d2?.message).toContain(word);
   });
 
+  // spec: specfold-doctor#knowledge-repository-without-openspec
+  it("D3 is ok without running OpenSpec in the knowledge profile", () => {
+    const repo = tempDir("valid");
+    writeFileSync(
+      join(repo, "specfold.yaml"),
+      `profile: knowledge\n${readFileSync(join(repo, "specfold.yaml"), "utf8")}`,
+    );
+    const calls: string[] = [];
+    const { "openspec --version": _, ...rest } = healthy;
+    const fake = env(repo, rest);
+    const checks = runChecks({
+      ...fake,
+      exec: (cmd, args, cwd) => {
+        calls.push(cmd);
+        return fake.exec(cmd, args, cwd);
+      },
+    });
+    expect(check(checks, "D3")).toMatchObject({
+      status: "ok",
+      message: expect.stringContaining("knowledge profile"),
+    });
+    expect(calls.some((c) => c.endsWith("openspec"))).toBe(false);
+  });
+
   // spec: specfold-doctor#openspec-missing
   it("D3 fails when openspec is missing", () => {
     const { "openspec --version": _, ...rest } = healthy;
