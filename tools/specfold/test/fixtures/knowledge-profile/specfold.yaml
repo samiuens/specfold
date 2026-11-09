@@ -1,0 +1,6 @@
+profile: knowledge
+types: [Term, Decision, Capability, Runbook, Reference]
+source_globs: ["src/**"]
+gate:
+  escape_label: no-knowledge
+  block_on_broken_links: true
