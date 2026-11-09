@@ -23,12 +23,14 @@ import { openspecBinary } from "../openspec.ts";
 import { LOCAL_SETTINGS, readLimit, writeLimit } from "../parallel/limit.ts";
 import { SETTINGS_FILE } from "../permissions/render.ts";
 import { planLines, syncPermissions } from "../permissions/sync.ts";
-import { CONFIG_FILE, loadConfig } from "../repo.ts";
+import { CONFIG_FILE, loadConfig, type Profile, parseProfile } from "../repo.ts";
 
 export interface InitOptions {
   /** Git root of a repository holding the template's files. */
   root: string;
   tools: Tool[];
+  /** `--profile`; without it, the value in specfold.yaml. */
+  profile?: Profile | undefined;
   stack?: string | undefined;
   sourceGlobs?: string[] | undefined;
   /** `--max-subagents`; without it, 3 is set only when no limit exists yet. */
@@ -38,6 +40,8 @@ export interface InitOptions {
 }
 
 export interface InitPlan {
+  /** The profile init sets up. */
+  profile: Profile;
   values: {
     /** null while the placeholder stays. */
     stack: { value: string | null; source: string };
@@ -63,7 +67,8 @@ export interface InitResult {
 const OPENSPEC_CONFIG = "openspec/config.yaml";
 /** The subagent limit init sets when none exists; each person changes it with `specfold parallel set`. */
 export const DEFAULT_LIMIT = 3;
-const REQUIRED = [CONFIG_FILE, OPENSPEC_CONFIG, MANIFEST_PATH];
+const required = (profile: Profile) =>
+  profile === "full" ? [CONFIG_FILE, OPENSPEC_CONFIG, MANIFEST_PATH] : [CONFIG_FILE, MANIFEST_PATH];
 const PLACEHOLDER = "<filled by specfold init or sf-migrate>";
 const STACK_LINE = /^(\s*)Stack: (.*)$/m;
 const TEMPLATE_GLOBS = JSON.stringify(["src/**"]);
@@ -83,13 +88,18 @@ interface ShippedManifest {
 /** What init would change, without writing; refuses a repository without the template's files. */
 export function planInit(o: InitOptions): InitPlan {
   const abs = (p: string) => join(o.root, p);
-  const missing = REQUIRED.filter((p) => !existsSync(abs(p)));
+  const configured = existsSync(abs(CONFIG_FILE))
+    ? parseProfile((parse(readFileSync(abs(CONFIG_FILE), "utf8")) as { profile?: unknown } | null)?.profile)
+    : "full";
+  const profile = o.profile ?? configured;
+  const missing = required(profile).filter((p) => !existsSync(abs(p)));
   if (missing.length > 0)
     throw new EnvError(
       `not a Specfold template repository (missing ${missing.join(", ")}): copy the template files, or use sf-migrate for a repository with its own files`,
     );
   const read = (p: string) => readFileSync(abs(p), "utf8");
-  const openspec = openspecSkills(o.tools).some((p) => !existsSync(abs(p)));
+  // the knowledge profile never runs openspec init
+  const openspec = profile === "full" && openspecSkills(o.tools).some((p) => !existsSync(abs(p)));
   if (openspec) {
     const bin = openspecBinary(o.root);
     try {
@@ -99,6 +109,7 @@ export function planInit(o: InitOptions): InitPlan {
     }
   }
   const plan: InitPlan = {
+    profile,
     values: { stack: { value: null, source: "" }, sourceGlobs: { value: [], source: "" } },
     edits: [],
     openspec,
@@ -111,14 +122,23 @@ export function planInit(o: InitOptions): InitPlan {
   };
   const found = detect(o.root);
 
-  const config = read(OPENSPEC_CONFIG);
-  const line = STACK_LINE.exec(config);
-  if (!line) {
+  const detectedStack = found.stack.length > 0 ? found.stack.join(", ") : undefined;
+  const config = existsSync(abs(OPENSPEC_CONFIG)) ? read(OPENSPEC_CONFIG) : undefined;
+  const line = config === undefined ? null : STACK_LINE.exec(config);
+  if (config === undefined) {
+    const [value, source] =
+      o.stack !== undefined
+        ? [o.stack, "--stack; not written, no openspec/config.yaml"]
+        : detectedStack
+          ? [detectedStack, "detected; not written, no openspec/config.yaml"]
+          : [null, "not detected"];
+    plan.values.stack = { value, source };
+  } else if (!line) {
     plan.skipped.push({ path: OPENSPEC_CONFIG, reason: "has no 'Stack:' line in its context" });
     plan.values.stack = { value: o.stack ?? null, source: "no Stack: line" };
   } else {
     const current = (line[2] as string).trim();
-    const detected = found.stack.length > 0 ? found.stack.join(", ") : undefined;
+    const detected = detectedStack;
     const [value, source] =
       o.stack !== undefined
         ? [o.stack, "--stack"]
