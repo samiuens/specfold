@@ -131,7 +131,10 @@ register({
       const tokens = sources.reduce((sum, s) => sum + s.tokens, 0);
       print(
         [
-          ...sources.map((s) => `${s.kind.padEnd(width)}  ${String(s.tokens).padStart(6)}  ${s.path}`),
+          ...sources.map(
+            (s) =>
+              `${s.kind.padEnd(width)}  ${String(s.tokens).padStart(6)}  ${s.path}${s.type ? `  (${s.type} -> ${s.suggested ?? "?"})` : ""}`,
+          ),
           `stack: ${found.stack.join(", ") || "unknown"}`,
           `layout: ${found.layout}`,
           `ci: ${found.ci.join(", ") || "none"}`,
