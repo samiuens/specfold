@@ -24,11 +24,15 @@ D1 SHALL fail when the running Node.js version is lower than 20.19.
 - **THEN** D1 is `ok` and names the version
 
 ### Requirement: D2 configuration
-D2 SHALL fail when no `specfold.yaml` is found from the current directory upward, or when it cannot be parsed, naming the parse error.
+D2 SHALL fail when no `specfold.yaml` is found from the current directory upward, when it cannot be parsed, naming the parse error, or when its `profile` is neither `full` nor `knowledge`, naming the value.
 
 #### Scenario: Broken configuration
 - **WHEN** `specfold.yaml` contains invalid YAML
 - **THEN** D2 fails with the parse error in its message
+
+#### Scenario: Unknown profile
+- **WHEN** `specfold.yaml` sets `profile: lite`
+- **THEN** D2 fails naming `lite` and the allowed values
 
 ### Requirement: D3 OpenSpec
 D3 SHALL run `<repository root>/node_modules/.bin/openspec --version` when that file exists, else `openspec --version` from the PATH, and fail when neither is available or the version does not satisfy `requires.openspec` in `specfold.yaml` (space-separated comparators such as `>=1.15 <2`, defaulting to `>=1.15 <2`). Without a `specfold.yaml`, the current directory SHALL stand in for the repository root. The message SHALL say which binary was used.
@@ -106,3 +110,10 @@ D8 SHALL compare the `permissions` setting with the rules in `.claude/settings.j
 #### Scenario: Not a Claude Code repository
 - **WHEN** `agents.targets` does not include `.claude/skills`
 - **THEN** D8 is `ok` with a note that no tool needs rendered rules
+
+### Requirement: D3 in the knowledge profile
+When `specfold.yaml` sets `profile: knowledge`, D3 SHALL be `ok` without running any `openspec` binary, and its message SHALL say that the knowledge profile does not use OpenSpec.
+
+#### Scenario: Knowledge repository without OpenSpec
+- **WHEN** doctor runs in a knowledge-profile repository where OpenSpec is not installed
+- **THEN** D3 is `ok` and doctor does not exit with 1 because of it
