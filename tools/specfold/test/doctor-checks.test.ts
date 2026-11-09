@@ -1,4 +1,4 @@
-import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { type DoctorEnv, runChecks, satisfies } from "../src/doctor/checks.ts";
@@ -63,6 +63,18 @@ describe("doctor: checks", () => {
     const d2 = check(runChecks(env(repo, healthy)), "D2");
     expect(d2?.status).toBe("fail");
     expect(d2?.message).toContain("specfold.yaml");
+  });
+
+  // spec: specfold-doctor#unknown-profile
+  it("D2 fails on an unknown profile, naming the value and the allowed values", () => {
+    const repo = tempDir("valid");
+    writeFileSync(
+      join(repo, "specfold.yaml"),
+      `profile: lite\n${readFileSync(join(repo, "specfold.yaml"), "utf8")}`,
+    );
+    const d2 = check(runChecks(env(repo, healthy)), "D2");
+    expect(d2?.status).toBe("fail");
+    for (const word of ["lite", "full", "knowledge"]) expect(d2?.message).toContain(word);
   });
 
   // spec: specfold-doctor#openspec-missing

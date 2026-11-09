@@ -93,7 +93,7 @@ scenarios: [specfold-doctor#unknown-profile, specfold-doctor#knowledge-repositor
 agent: implementer
 ```
 
-- [ ] 6.1 Fail D2 on an unknown `profile`, naming the value and the allowed values
+- [x] 6.1 Fail D2 on an unknown `profile`, naming the value and the allowed values
   - Done when: `npx vitest run test/doctor-checks.test.ts` covers specfold-doctor#unknown-profile
 - [ ] 6.2 Return `ok` from D3 without spawning OpenSpec for the knowledge profile
   - Done when: the doctor-checks tests cover specfold-doctor#knowledge-repository-without-openspec
