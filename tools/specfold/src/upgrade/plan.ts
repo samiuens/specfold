@@ -6,10 +6,12 @@ import {
   BLOCK_FILES,
   kitOwned,
   MANIFEST_PATH,
+  blockContent as profileBlock,
   sha256,
   type Tool,
   UPGRADE_WORKFLOW,
 } from "../migrate/install.ts";
+import type { Profile } from "../repo.ts";
 import { type ConfigMerge, upgradeOpenspecConfig, upgradeSettings } from "./config.ts";
 import { mergeThreeWay } from "./merge.ts";
 import { compareVersions, isVersion } from "./version.ts";
@@ -47,6 +49,8 @@ export interface ConfigStep {
 
 export interface InstalledManifest {
   kit_version?: string;
+  /** The installed profile; a manifest without one is a full install. */
+  profile?: Profile;
   ref?: string;
   files: Record<string, string>;
   blocks: Record<string, string>;
@@ -55,6 +59,8 @@ export interface InstalledManifest {
 export interface UpgradePlan {
   from: string;
   to: string;
+  /** The profile the plan installs, recorded in the manifest. */
+  profile: Profile;
   files: FileStep[];
   blocks: BlockStep[];
   /** `.claude/settings.json` and `openspec/config.yaml`. */
@@ -80,6 +86,8 @@ export interface PlanOptions {
   installed: string;
   /** The target version. */
   target: string;
+  /** `profile` in specfold.yaml; full by default. */
+  profile?: Profile | undefined;
 }
 
 /** The manifest of the repository being upgraded; empty lists when there is none. */
@@ -138,6 +146,8 @@ const copyOf = (p: string) => (p === UPGRADE_WORKFLOW.active ? UPGRADE_WORKFLOW.
 export function planUpgrade(o: PlanOptions): UpgradePlan {
   const installed = readInstalled(o.root);
   const tools = toolsOf(installed);
+  const profile = o.profile ?? "full";
+  const installedProfile = installed.profile ?? "full";
   const files: FileStep[] = [];
   const blocks: BlockStep[] = [];
   const manifest = { files: {} as Record<string, string>, blocks: {} as Record<string, string> };
@@ -148,7 +158,7 @@ export function planUpgrade(o: PlanOptions): UpgradePlan {
     return sha256(data) === hash ? data : undefined;
   };
 
-  const shipped = new Set(kitOwned(o.from, tools));
+  const shipped = new Set(kitOwned(o.from, tools, profile));
   // a turned-on upgrade workflow is kit-owned; its copy in a release is the inactive one
   if (installed.files[UPGRADE_WORKFLOW.active] && existsSync(join(o.from, UPGRADE_WORKFLOW.shipped)))
     shipped.add(UPGRADE_WORKFLOW.active);
@@ -208,7 +218,7 @@ export function planUpgrade(o: PlanOptions): UpgradePlan {
   for (const p of BLOCK_FILES) {
     if (p === "CLAUDE.md" && !tools.includes("claude")) continue;
     if (!existsSync(join(o.from, p))) continue;
-    const next = readFileSync(join(o.from, p), "utf8");
+    const next = profileBlock(o.from, p, profile);
     const recorded = installed.blocks[p];
     const text = existsSync(local(p)) ? readFileSync(local(p), "utf8") : undefined;
     if (recorded === undefined) {
@@ -234,7 +244,8 @@ export function planUpgrade(o: PlanOptions): UpgradePlan {
       const applied = applyBlock(text, next, style);
       blocks.push({ path: p, action: "replace", text: "text" in applied ? applied.text : text });
     } else {
-      const base = o.base && existsSync(join(o.base, p)) ? readFileSync(join(o.base, p), "utf8") : undefined;
+      const base =
+        o.base && existsSync(join(o.base, p)) ? profileBlock(o.base, p, installedProfile) : undefined;
       if (base === undefined || sha256(base) !== recorded) {
         blocks.push({
           path: p,
@@ -282,6 +293,7 @@ export function planUpgrade(o: PlanOptions): UpgradePlan {
   return {
     from: o.installed,
     to: o.target,
+    profile,
     files,
     blocks,
     configs,
