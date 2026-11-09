@@ -41,7 +41,7 @@ agent: implementer
 
 - [x] 3.1 Pass the profile to `kitOwned` and filter it with `profile.ts`; make `.specfold/profiles` kit-owned in both profiles
   - Done when: `npx vitest run test/migrate-profile.test.ts` covers specfold-profile#knowledge-install and specfold-profile#full-install-unchanged
-- [ ] 3.2 Write the knowledge block variants for the knowledge profile, falling back to the full content when a variant is missing
+- [x] 3.2 Write the knowledge block variants for the knowledge profile, falling back to the full content when a variant is missing
   - Done when: the migrate-profile tests cover specfold-profile#knowledge-agents-md and specfold-profile#knowledge-pull-request-template
 - [ ] 3.3 Add `--profile` to `migrate install`: default from an existing `specfold.yaml`, refuse a conflicting value, set `profile` and `gate.escape_label: no-knowledge` in a created `specfold.yaml`
   - Done when: the migrate-profile tests cover specfold-migrate#unknown-profile, specfold-migrate#knowledge-install, specfold-migrate#conflicting-profile and specfold-profile#fresh-knowledge-settings

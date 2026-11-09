@@ -188,6 +188,15 @@ export function manifestText(kitVersion: string, ref: string | undefined, m: Man
   )}\n`;
 }
 
+/** Folder of the template holding a profile's block variants. */
+export const profileDir = (profile: Profile) => `.specfold/profiles/${profile}`;
+
+/** The template's block content for a profile: its variant when the template ships one, else the full file. */
+export function blockContent(from: string, path: string, profile: Profile): string {
+  const variant = join(from, profileDir(profile), path);
+  return readFileSync(profile !== "full" && existsSync(variant) ? variant : join(from, path), "utf8");
+}
+
 /** Whether a line `@AGENTS.md` stands outside Specfold's managed block. */
 function importsAgentsOutside(text: string): boolean {
   let inside = false;
@@ -267,7 +276,7 @@ export function installKit(o: InstallOptions): InstallResult {
 
   for (const p of BLOCK_FILES) {
     if (p === "CLAUDE.md" && !claude) continue;
-    const content = template(p);
+    const content = blockContent(o.from, p, profile);
     const existing = read(p);
     // a bare import outside the block already does the block's job; text outside the markers stays untouched
     const body =
