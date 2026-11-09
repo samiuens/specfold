@@ -3,14 +3,17 @@ type: Capability
 title: specfold profile
 description: Why a repository can choose a full or a knowledge-only Specfold setup, and where the profile contract lives.
 status: draft
+spec: openspec/specs/specfold-profile/spec.md
+resource: ../../openspec/specs/specfold-profile/spec.md
+change: 2026-11-09-add-knowledge-profile
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T08:59:48+01:00 }
 sources:
-  - id: brief-add-knowledge-profile
-    resource: ../../openspec/changes/add-knowledge-profile/brief.md
-  - id: proposal-add-knowledge-profile
-    resource: ../../openspec/changes/add-knowledge-profile/proposal.md
-  - id: design-add-knowledge-profile
-    resource: ../../openspec/changes/add-knowledge-profile/design.md
+  - id: brief-2026-11-09-add-knowledge-profile
+    resource: ../../openspec/changes/archive/2026-11-09-add-knowledge-profile/brief.md
+  - id: proposal-2026-11-09-add-knowledge-profile
+    resource: ../../openspec/changes/archive/2026-11-09-add-knowledge-profile/proposal.md
+  - id: design-2026-11-09-add-knowledge-profile
+    resource: ../../openspec/changes/archive/2026-11-09-add-knowledge-profile/design.md
 ---
 
 # Why

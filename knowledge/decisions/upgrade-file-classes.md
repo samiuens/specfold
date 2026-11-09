@@ -10,10 +10,10 @@ sources:
   - id: design
     resource: ../../openspec/changes/archive/2026-10-28-add-specfold-upgrade/design.md
     title: "Design of add-specfold-upgrade, decisions 1, 5 and 12"
-  - id: proposal-add-knowledge-profile
-    resource: ../../openspec/changes/add-knowledge-profile/proposal.md
-  - id: design-add-knowledge-profile
-    resource: ../../openspec/changes/add-knowledge-profile/design.md
+  - id: proposal-2026-11-09-add-knowledge-profile
+    resource: ../../openspec/changes/archive/2026-11-09-add-knowledge-profile/proposal.md
+  - id: design-2026-11-09-add-knowledge-profile
+    resource: ../../openspec/changes/archive/2026-11-09-add-knowledge-profile/design.md
 ---
 
 # Decision
