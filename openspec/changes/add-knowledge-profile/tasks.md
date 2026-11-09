@@ -27,7 +27,7 @@ agent: implementer
   - Done when: `npx vitest run test/template-profiles.test.ts` checks that no variant names `openspec`, and that the AGENTS.md variant keeps the map rows and the knowledge rules section of the full one apart from OpenSpec rows (its core rule differs on purpose)
 - [x] 2.2 Document `profile` in `template/specfold.yaml`
   - Done when: `template/specfold.yaml` has a commented `profile: full` line explaining `knowledge`, and `node scripts/specfold.mjs validate` exits 0
-- [ ] 2.3 Give sf-interview its knowledge-profile path: ask the open decisions the same way, then record them through sf-capture instead of writing `brief.md`
+- [x] 2.3 Give sf-interview its knowledge-profile path: ask the open decisions the same way, then record them through sf-capture instead of writing `brief.md`
   - Done when: `node scripts/specfold.mjs stats` reports the sf-interview description within its 60-token budget and the skill names the knowledge-profile path
 
 ## 3. Migrate install
