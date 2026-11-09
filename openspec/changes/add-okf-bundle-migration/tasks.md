@@ -41,7 +41,7 @@ agent: implementer
   - Done when: `npx vitest run test/hooks-relief.test.ts` covers specfold-hooks#convert-marked
 - [x] 3.2 Make pre-commit and claude-post-tool-use print link findings and findings in unchanged originals as warnings during a conversion
   - Done when: the hooks-relief tests cover specfold-hooks#link-to-a-concept-not-written-yet, specfold-hooks#new-concept-still-strict and specfold-hooks#conversion-done
-- [ ] 3.3 Make claude-stop leave G1 and G10 link and original findings out of its blocking set during a conversion, still printing them
+- [x] 3.3 Make claude-stop leave G1 and G10 link and original findings out of its blocking set during a conversion, still printing them
   - Done when: the hooks-relief tests cover specfold-hooks#half-converted-bundle and specfold-hooks#gate-unchanged, and `npx vitest run test/hooks-run.test.ts test/hooks-claude.test.ts` still passes
 
 ## 4. sf-migrate existing-bundle path

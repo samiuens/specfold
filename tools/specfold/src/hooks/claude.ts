@@ -5,7 +5,7 @@ import { findingLine } from "../findings.ts";
 import { dueDate, listItems } from "../future/items.ts";
 import { localGate, renderGate } from "../gate/command.ts";
 import type { GateFinding } from "../gate/rules.ts";
-import { migrationRelief, relieved } from "../migrate/relief.ts";
+import { migrationRelief, relieved as reliefFor } from "../migrate/relief.ts";
 import { resolveBundleRoot } from "../repo.ts";
 import { taskFindingLine } from "../tasks/command.ts";
 import { upgradeReminder } from "../upgrade/reminder.ts";
@@ -104,7 +104,7 @@ export async function postToolUse({ config, io }: HookContext): Promise<number> 
       config,
     }).findings.filter((f) => f.severity === "error");
     const line = (f: (typeof findings)[number]) => findingLine({ ...f, path: `${prefix}/${f.path}` });
-    const warn = findings.filter((f) => relieved(relief, f, `${prefix}/${f.path}`));
+    const warn = findings.filter((f) => reliefFor(relief, f, `${prefix}/${f.path}`));
     if (warn.length > 0)
       io.stderr(`${warn.map((f) => `${line(f)} (warning: migration in progress)`).join("\n")}\n`);
     errors = findings.filter((f) => !warn.includes(f)).map(line);
@@ -132,9 +132,23 @@ const pendingTest = (f: GateFinding) =>
 export function stop({ config, io }: HookContext): number {
   const base = localBase(config.root);
   if (!base) return 0;
+  const relief = migrationRelief(config.root);
+  // during a migration's conversion, links and unchanged originals do not block; the gate itself stays strict
+  const converting = (f: GateFinding) =>
+    relief.active && (f.rule === "G10" || (f.rule === "G1" && f.path !== null && relief.isOriginal(f.path)));
   const findings = localGate(config, config.root, base).filter((f) => f.effect === "block");
-  const pending = findings.filter(pendingTest);
-  const blocking = findings.filter((f) => !pendingTest(f));
+  const relieved = findings.filter(converting);
+  const pending = findings.filter((f) => !converting(f) && pendingTest(f));
+  const blocking = findings.filter((f) => !converting(f) && !pendingTest(f));
+  if (relieved.length > 0)
+    io.stderr(
+      relieved
+        .map(
+          (f) =>
+            `${f.rule} ${f.path}${f.line === null ? "" : `:${f.line}`} ${f.message} (not blocking: migration in progress)\n`,
+        )
+        .join(""),
+    );
   if (pending.length > 0)
     io.stderr(
       pending
