@@ -37,7 +37,7 @@ scenarios: [specfold-hooks#convert-marked, specfold-hooks#link-to-a-concept-not-
 agent: implementer
 ```
 
-- [ ] 3.1 Add `relief.ts`: whether a conversion is under way, and whether a bundle file is an unchanged original at the state's base commit
+- [x] 3.1 Add `relief.ts`: whether a conversion is under way, and whether a bundle file is an unchanged original at the state's base commit
   - Done when: `npx vitest run test/hooks-relief.test.ts` covers specfold-hooks#convert-marked
 - [ ] 3.2 Make pre-commit and claude-post-tool-use print link findings and findings in unchanged originals as warnings during a conversion
   - Done when: the hooks-relief tests cover specfold-hooks#link-to-a-concept-not-written-yet, specfold-hooks#new-concept-still-strict and specfold-hooks#conversion-done
