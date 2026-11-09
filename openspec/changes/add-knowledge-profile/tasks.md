@@ -111,7 +111,7 @@ agent: implementer
   - Done when: `npx vitest run test/gate-profile.test.ts` covers specfold-gate#knowledge-repository-without-openspec and specfold-gate#knowledge-rules-still-run
 - [x] 7.2 Add G19, sharing G4's source-glob match and label check with the `No-knowledge reason:` line and the bundle root as satisfying paths
   - Done when: the gate-profile tests cover specfold-gate#code-without-knowledge, specfold-gate#code-with-a-log-entry, specfold-gate#knowledge-escape-with-reason and specfold-gate#full-profile
-- [ ] 7.3 Exempt adoption PRs from G19 as from G4
+- [x] 7.3 Exempt adoption PRs from G19 as from G4
   - Done when: `npx vitest run test/gate-adoption.test.ts` covers specfold-gate#knowledge-migration-pr
 
 ## 8. Knowledge-profile smoke test and bundle

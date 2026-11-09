@@ -121,7 +121,8 @@ register({
     });
     const findings = runGate(ctx);
     const adoption = ctx.diff.adoption;
-    const notes = adoption ? ["adoption PR: the base has no specfold.yaml, so G4 is skipped"] : [];
+    const skipped = config.profile === "knowledge" ? "G19" : "G4";
+    const notes = adoption ? [`adoption PR: the base has no specfold.yaml, so ${skipped} is skipped`] : [];
     const summary = values.summary as string | undefined;
     if (summary !== undefined)
       writeFileSync(resolve(io.cwd, summary), renderSummary(findings, verdict(findings), notes));
