@@ -33,6 +33,10 @@ Then run `node scripts/specfold.mjs change check <change>`. Only the brief rules
 
 After approval, also write what step 6 decided: `node scripts/specfold.mjs backlog add "<title>" --origin interview` for each backlog item, and `node scripts/specfold.mjs new "Deferred Commitment" commitments/<name>.md` for each commitment, with its `trigger`. Leave `committed_by` out; the person who commits adds it, and the gate checks it.
 
+## Knowledge profile
+
+When `specfold.yaml` sets `profile: knowledge`, there are no specs, changes or `brief.md`. Ground with `sf-lookup` only, then run steps 2-7 the same way; present the plan in step 7 as text or through plan approval. After approval, record each decision that will outlast the task as a concept with `sf-capture` (a Decision, Business Rule or Convention, `status: draft`), and write the step 6 backlog items and commitments as above. Answers that only matter for this task stay in the conversation.
+
 ## Rules
 
 - Questions are never a numbered list for the user to answer in prose when a native question UI exists.
