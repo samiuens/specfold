@@ -14,6 +14,7 @@ import {
 import { MANIFEST_PATH, parseTools } from "../migrate/install.ts";
 import { gitRoot } from "../migrate/repo.ts";
 import { LOCAL_SETTINGS } from "../parallel/limit.ts";
+import { parseProfile } from "../repo.ts";
 import { planInit, runInit } from "./init.ts";
 
 const GATE_STEP = `ruleset ${RULESET_NAME}`;
@@ -22,8 +23,9 @@ register({
   name: "init",
   summary: "finish setting up a repository made from the template: settings, OpenSpec skills, links, hooks",
   usage:
-    "specfold init [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--max-subagents <n>] [--upgrade-workflow] [--require-gate] [--dry-run] [--json]",
+    "specfold init [--profile <full|knowledge>] [--stack <text>] [--source-glob <glob>]... [--tools <list>] [--max-subagents <n>] [--upgrade-workflow] [--require-gate] [--dry-run] [--json]",
   options: {
+    profile: { type: "string" },
     stack: { type: "string" },
     "source-glob": { type: "string", multiple: true },
     tools: { type: "string" },
@@ -42,6 +44,7 @@ register({
     const options = {
       root,
       tools: parseTools(values.tools as string | undefined),
+      profile: values.profile === undefined ? undefined : parseProfile(values.profile, "--profile"),
       stack: values.stack as string | undefined,
       sourceGlobs: values["source-glob"] as unknown as string[] | undefined,
       maxSubagents: max === undefined ? undefined : Number(max),

@@ -59,7 +59,7 @@ scenarios: [specfold-init#knowledge-repository-without-openspec, specfold-init#k
 agent: implementer
 ```
 
-- [ ] 4.1 Add `--profile` to init, defaulting to `specfold.yaml`, and require `openspec/config.yaml` only for the full profile
+- [x] 4.1 Add `--profile` to init, defaulting to `specfold.yaml`, and require `openspec/config.yaml` only for the full profile
   - Done when: `npx vitest run test/init-profile.test.ts` covers specfold-init#knowledge-repository-without-openspec
 - [ ] 4.2 Skip `openspec init` and the `Stack:` write for the knowledge profile while still printing the detected stack
   - Done when: the init-profile tests cover specfold-init#knowledge-profile-stack and specfold-init#knowledge-profile-skips-openspec
