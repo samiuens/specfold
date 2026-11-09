@@ -23,8 +23,8 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 2.1 Write the knowledge variants of the managed-block content of `AGENTS.md`, `CLAUDE.md` and `.github/pull_request_template.md` in `template/.specfold/profiles/knowledge/`, with no OpenSpec lines and a `No-knowledge reason:` line in the PR template
-  - Done when: `npx vitest run test/template-profiles.test.ts` checks that no variant names `openspec`, and that the AGENTS.md variant keeps the map, core rule and knowledge rules sections of the full one apart from OpenSpec rows
+- [x] 2.1 Write the knowledge variants of the managed-block content of `AGENTS.md`, `CLAUDE.md` and `.github/pull_request_template.md` in `template/.specfold/profiles/knowledge/`, with no OpenSpec lines and a `No-knowledge reason:` line in the PR template
+  - Done when: `npx vitest run test/template-profiles.test.ts` checks that no variant names `openspec`, and that the AGENTS.md variant keeps the map rows and the knowledge rules section of the full one apart from OpenSpec rows (its core rule differs on purpose)
 - [ ] 2.2 Document `profile` in `template/specfold.yaml`
   - Done when: `template/specfold.yaml` has a commented `profile: full` line explaining `knowledge`, and `node scripts/specfold.mjs validate` exits 0
 - [ ] 2.3 Give sf-interview its knowledge-profile path: ask the open decisions the same way, then record them through sf-capture instead of writing `brief.md`
