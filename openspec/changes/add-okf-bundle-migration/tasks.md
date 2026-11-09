@@ -73,7 +73,7 @@ agent: implementer
 
 - [x] 5.1 Rebuild the bundle into both copies, refresh the template manifest and regenerate the command reference
   - Done when: `npm run build -w specfold` leaves both copies identical, `node tools/specfold/docs.mjs --check` passes, and `npm test` and `npm run check` in `tools/specfold` pass
-- [ ] 5.2 Run every step of `.github/workflows/cli.yml` locally, each in its working directory
+- [x] 5.2 Run every step of `.github/workflows/cli.yml` locally, each in its working directory
   - Done when: every step exits 0
 
 ## 6. Knowledge
