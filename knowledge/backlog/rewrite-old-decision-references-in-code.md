@@ -6,7 +6,7 @@ status: draft
 state: open
 priority: medium
 origin: interview
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T13:41:33+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:58:22+01:00 }
 ---
 
 # Idea
@@ -17,7 +17,7 @@ Pitfalls from that run, worth keeping as test fixtures: section lists (`§8, §9
 
 # Why it waits
 
-Only repositories with numbered decision references need it, and the existing-bundle migration path it belongs to is a [deferred commitment](/commitments/migrate-an-existing-okf-bundle.md). Moved here in the `fix-migration-findings` interview (2026-11-02).
+Only repositories with numbered decision references need it, and the existing-bundle migration path it belongs to is a [deferred commitment](/commitments/migrate-an-existing-okf-bundle.md). Moved here in the `fix-migration-findings` interview (2026-11-02). Since change `add-okf-bundle-migration`, a migration of an existing bundle rewrites references to the concepts it moves itself (by exact old path, guided by `sf-migrate`); this item stays for numbered decision references and for renames outside a migration.
 
 # Related
 

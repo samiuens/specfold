@@ -85,7 +85,7 @@ scenarios: []
 agent: knowledge-curator
 ```
 
-- [ ] 6.1 Write the concepts listed in knowledge.md, and set the commitment to `state: fulfilled`
+- [x] 6.1 Write the concepts listed in knowledge.md, and set the commitment to `state: fulfilled`
   - Done when: `node scripts/specfold.mjs validate` exits 0 and `node scripts/specfold.mjs change check add-okf-bundle-migration` reports no K-rule errors
 - [ ] 6.2 Regenerate the indexes and add one log entry
   - Done when: `node scripts/specfold.mjs index --check` exits 0

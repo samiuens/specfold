@@ -6,7 +6,7 @@ status: draft
 spec: openspec/specs/specfold-migrate/spec.md
 resource: ../../openspec/specs/specfold-migrate/spec.md
 change: 2026-11-09-add-knowledge-profile
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:00:29+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:58:22+01:00 }
 sources:
   - id: proposal-2026-10-27-add-specfold-migrate
     resource: ../../openspec/changes/archive/2026-10-27-add-specfold-migrate/proposal.md
@@ -74,6 +74,7 @@ Bringing an existing repository into the kit touches many files at once ([migrat
 - **The skill drives it.** `sf-migrate` calls the subcommands in order and does the judgment between them; the recorded runs in `examples/migrations/` show both on the two fixtures.
 - **State stays out of git.** `migrate start` writes `.specfold/migration/.gitignore` listing `state.json`. The CLAUDE.md managed block leaves out its `@AGENTS.md` import when the text outside the markers already has one.
 - **A profile at install.** `install --profile knowledge` writes the knowledge file set, the knowledge block variants and a `specfold.yaml` with `profile: knowledge` and `gate.escape_label: no-knowledge`, and leaves `openspec/` alone. The manifest records the profile ([specfold profile](/capabilities/specfold-profile.md)).
+- **An existing bundle is inventoried by type.** Markdown under `knowledge/` with a frontmatter `type` is an `okf-concept`, listed with its type and a suggested Specfold type from a fixed map (ADR, Playbook, Domain Concept, App) or the known types; the bundle's `index.md` and `log.md` are `okf-index`. Both come before the path rules, so a bundle's `decisions/` folder is no longer taken for ADRs. A `specfold.yaml` that install creates gets the bundle's extra types and top-level folders appended by line edits, so validate passes right after install; detected folders have no description, because OKF forbids frontmatter in folder indexes ([a migration rewrites an existing OKF bundle](/decisions/existing-bundle-migration.md)).
 
 # Related
 
@@ -82,3 +83,4 @@ Bringing an existing repository into the kit touches many files at once ([migrat
 - [specfold agents sync](/capabilities/specfold-agents-sync.md)
 - [specfold CLI](/architecture/specfold-cli.md)
 - [A knowledge-only profile](/decisions/knowledge-profile.md)
+- [A migration rewrites an existing OKF bundle](/decisions/existing-bundle-migration.md)
