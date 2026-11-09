@@ -21,6 +21,7 @@ describe("repo", () => {
     );
     expect(requireConfig(root)).toEqual({
       root,
+      profile: "full",
       types: ["Decision", "Reference"],
       sourceGlobs: ["src/**"],
       blockOnBrokenLinks: false,
