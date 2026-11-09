@@ -2,8 +2,8 @@ import { resolve } from "node:path";
 import { register } from "../cli.ts";
 import { UsageError } from "../errors.ts";
 import { plural } from "../findings.ts";
-import { parseProfile } from "../repo.ts";
 import { git } from "../git.ts";
+import { parseProfile } from "../repo.ts";
 import { detect } from "./detect.ts";
 import { installKit, parseTools } from "./install.ts";
 import { inventory } from "./inventory.ts";
@@ -52,8 +52,7 @@ register({
       throw new UsageError("missing subcommand: start, inventory, install, mark or status");
     if (!["start", "inventory", "install", "mark", "status"].includes(sub))
       throw new UsageError(`unknown migrate subcommand '${sub}'`);
-    const profile =
-      values.profile === undefined ? undefined : parseProfile(values.profile, "--profile");
+    const profile = values.profile === undefined ? undefined : parseProfile(values.profile, "--profile");
     const root = gitRoot(io.cwd);
     const print = (lines: string[], json: Record<string, unknown>) =>
       io.stdout(values.json ? `${JSON.stringify(json, null, 2)}\n` : `${lines.join("\n")}\n`);
