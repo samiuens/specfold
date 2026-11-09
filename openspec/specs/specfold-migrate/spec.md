@@ -6,11 +6,15 @@ Defines `specfold migrate`, the deterministic steps of bringing an existing repo
 ## Requirements
 
 ### Requirement: Migrate command
-The CLI SHALL provide `specfold migrate start [--default-branch <name>]`, `migrate inventory`, `migrate install --from <dir> [--tools <list>] [--stack <text>] [--source-glob <glob>]... [--ref <ref>]`, `migrate mark <step>` and `migrate status`, each with `--json`, runnable from the git root without `specfold.yaml`. Each SHALL exit with 0 on success, 1 when refused, and 2 on usage or environment errors.
+The CLI SHALL provide `specfold migrate start [--default-branch <name>]`, `migrate inventory`, `migrate install --from <dir> [--profile <full|knowledge>] [--tools <list>] [--stack <text>] [--source-glob <glob>]... [--ref <ref>]`, `migrate mark <step>` and `migrate status`, each with `--json`, runnable from the git root without `specfold.yaml`. Each SHALL exit with 0 on success, 1 when refused, and 2 on usage or environment errors.
 
 #### Scenario: No git repository
 - **WHEN** `specfold migrate start` runs in a folder that is not a git working tree
 - **THEN** the command exits with 2 and says a git repository is required
+
+#### Scenario: Unknown profile
+- **WHEN** `specfold migrate install --profile lite` runs
+- **THEN** the command exits with 2, writing nothing, and names `full` and `knowledge`
 
 ### Requirement: Own branch
 `migrate start` SHALL refuse when the working tree has changes other than an untracked `.specfold/migration/state.json`. On the default branch it SHALL create and switch to `specfold/migration`, or switch to it when it exists; on `specfold/migration` it SHALL resume; on any other branch it SHALL refuse.
@@ -104,11 +108,15 @@ With the `claude` tool, `migrate install` SHALL add each Specfold hook from the 
 - **THEN** after install it still says `"fresh"`, and a repository without a `worktree` key gets the template's `"head"`
 
 ### Requirement: Existing OpenSpec setup
-When `openspec/config.yaml` exists, `migrate install` SHALL add the `specfold` schema, set `schema: specfold`, keep `context`, every existing rules key, specs and changes, and add a Specfold rules key only where it is missing. Without `openspec/`, it SHALL run `openspec init --tools <tools>` and then write the template's `config.yaml`.
+For the full profile, when `openspec/config.yaml` exists, `migrate install` SHALL add the `specfold` schema, set `schema: specfold`, keep `context`, every existing rules key, specs and changes, and add a Specfold rules key only where it is missing. Without `openspec/`, it SHALL run `openspec init --tools <tools>` and then write the template's `config.yaml`. For the knowledge profile it SHALL neither create nor change anything under `openspec/` and SHALL not need OpenSpec installed.
 
 #### Scenario: Active change on another schema
 - **WHEN** the repository has `openspec/changes/add-login/` on the `spec-driven` schema
 - **THEN** after install `config.yaml` names `schema: specfold`, its old `context` is kept, and `add-login/.openspec.yaml` is unchanged
+
+#### Scenario: Knowledge profile without OpenSpec
+- **WHEN** `migrate install --profile knowledge` runs in a repository without `openspec/` and OpenSpec is not installed
+- **THEN** the install succeeds and no `openspec/` folder exists afterwards
 
 ### Requirement: Project files
 `migrate install` SHALL create `specfold.yaml` from the template with `--source-glob` values (or the globs detected as `specfold init` detects them) and the knowledge skeleton only where they are missing, put `--stack` (or the detected stack) into the config context, and then run `specfold agents sync` and `specfold hooks install`.
@@ -129,11 +137,15 @@ When `openspec/config.yaml` exists, `migrate install` SHALL add the `specfold` s
 - **THEN** `.agents/skills/sf-lookup/SKILL.md` exists and no `.claude/` folder is created
 
 ### Requirement: Install manifest
-`migrate install` SHALL write `.specfold/manifest.json` with `manifest_version: 1`, the template's `kit_version`, the `--ref` value when given, and a SHA-256 hash for every kit-owned file and managed block it installed.
+`migrate install` SHALL write `.specfold/manifest.json` with `manifest_version: 1`, the template's `kit_version`, the installed `profile`, the `--ref` value when given, and a SHA-256 hash for every kit-owned file and managed block it installed.
 
 #### Scenario: Manifest entry
 - **WHEN** install writes `scripts/specfold.mjs`
 - **THEN** the manifest lists `scripts/specfold.mjs` with the SHA-256 of its content
+
+#### Scenario: Profile recorded
+- **WHEN** install runs with `--profile knowledge`
+- **THEN** the manifest records `profile: knowledge`
 
 ### Requirement: Idempotent install
 A second `migrate install` with the same template folder and flags SHALL change no file and SHALL report that everything is up to date.
@@ -166,3 +178,14 @@ With the `claude` tool, `migrate install` SHALL run `specfold permissions sync` 
 #### Scenario: Agents only skips the rules
 - **WHEN** install runs with `--tools agents`
 - **THEN** no `.claude/` folder is created
+
+### Requirement: Profile at install
+`migrate install` SHALL install the file set and managed-block variants of `--profile`, defaulting to the `profile` of an existing `specfold.yaml`, else `full`. It SHALL set `profile` in a `specfold.yaml` it creates and keep the value of an existing one unless `--profile` differs, in which case it SHALL exit with 2, writing nothing.
+
+#### Scenario: Knowledge install
+- **WHEN** `migrate install --from template --profile knowledge` runs in a repository without `specfold.yaml`
+- **THEN** `specfold.yaml` sets `profile: knowledge` and `.agents/skills/sf-plan/` is not written
+
+#### Scenario: Conflicting profile
+- **WHEN** `specfold.yaml` sets `profile: full` and `migrate install --profile knowledge` runs
+- **THEN** the command exits with 2 and no file changes
