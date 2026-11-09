@@ -6,7 +6,7 @@ status: draft
 spec: openspec/specs/specfold-hooks/spec.md
 resource: ../../openspec/specs/specfold-hooks/spec.md
 change: 2026-11-02-fix-migration-findings
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-30T13:56:51+01:00 }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:58:22+01:00 }
 sources:
   - id: proposal-2026-10-26-add-specfold-hooks
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-hooks/proposal.md
@@ -50,7 +50,9 @@ The gate in CI is the enforcement, but its feedback comes late. Hooks run the sa
 - **A waiting release shows at session start.** Once a day at most, within 2 seconds and silently when offline, the session-start hook checks the repository's channel and names a newer release ([upgrade flow](/architecture/upgrade-flow.md)). The check is cached in the gitignored `.specfold/local-state.json`, and `upgrade.reminder: false` turns it off.
 - **The graph is refreshed, never built.** post-checkout and post-merge run `graphify update .` only when graphify is installed and `graphify-out/graph.json` exists ([graphify](/references/graphify.md)).
 - **Manager files keep their text.** `hooks install` inserts its entries as text at parsed offsets, so flow lists, folded scalars and long lines elsewhere stay unchanged ([splice hook manager YAML](/decisions/splice-hook-manager-yaml.md)). The Claude stop hook still blocks; above 20 blocking findings it prints counts per rule and the first 10 findings instead of repeating all of them.
+- **A migration's conversion is relieved, the gate is not.** While `.specfold/migration/state.json` exists without `convert`, pre-commit and the Claude post-edit hook print broken links and findings in files still equal to the base commit as warnings, and the Claude stop hook does not block on such G1 and G10 findings but lists them. pre-push and the gate are unchanged ([a migration rewrites an existing OKF bundle](/decisions/existing-bundle-migration.md), [plan-aware link relief](/decisions/plan-aware-link-relief.md)).
 
 # Related
 
 - [specfold CLI](/architecture/specfold-cli.md)
+- [A migration rewrites an existing OKF bundle](/decisions/existing-bundle-migration.md)
