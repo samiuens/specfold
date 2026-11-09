@@ -65,3 +65,4 @@ empty_reason: ""
 
 - Rejected alternatives from design.md D1 other than the per-profile payload (a `specs` boolean, folding the name into `profile_version`) and D3/D6 (profile markers in one file, reusing G4) go into the body of `decisions/knowledge-profile.md` as considered options rather than separate concepts; they were never proposed on their own.
 - Implementation finding: the kit's own `.agents/skills/sf-*` are byte-identical copies of `template/.agents/skills/sf-*`, with no test enforcing it; task 2.3 updated both. Worth a convention or a test.
+- Implementation finding: `.specfold/profiles/` is kit-owned in both profiles (design D3), so a full install gains those three files; specfold-profile#full-install-unchanged is read as "the profile filter drops nothing for full".

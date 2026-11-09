@@ -17,7 +17,8 @@ import { installHooks, writeIfChanged } from "../hooks/install.ts";
 import { openspecBinary } from "../openspec.ts";
 import { SETTINGS_FILE } from "../permissions/render.ts";
 import { planLines, syncPermissions } from "../permissions/sync.ts";
-import { CONFIG_FILE, loadConfig } from "../repo.ts";
+import { profileFiles } from "../profile.ts";
+import { CONFIG_FILE, loadConfig, type Profile } from "../repo.ts";
 import { applyBlock, blockStyle, type Merged } from "./blocks.ts";
 import { detect } from "./detect.ts";
 import { fillStack, mergeOpenspecConfig, mergeSettings } from "./merge.ts";
@@ -50,6 +51,8 @@ export interface InstallOptions {
   /** Unpacked template folder. */
   from: string;
   tools: Tool[];
+  /** `--profile`; the file set and block variants to install. Defaults to full. */
+  profile?: Profile | undefined;
   stack?: string | undefined;
   sourceGlobs?: string[] | undefined;
   ref?: string | undefined;
@@ -90,18 +93,20 @@ export function filesUnder(base: string, dir: string): string[] {
 
 /**
  * The files only the kit changes: the CLI, the schema, the skills, the gate workflows, the inactive
- * upgrade workflow and the planner.
+ * upgrade workflow, the profile block variants and the subagents, limited to the profile's file set.
  */
-export function kitOwned(from: string, tools: Tool[]): string[] {
-  return [
+export function kitOwned(from: string, tools: Tool[], profile: Profile = "full"): string[] {
+  const paths = [
     "scripts/specfold.mjs",
     "openspec/schemas/specfold",
     ".agents/skills",
     ".specfold/workflows",
+    ".specfold/profiles",
     ".github/workflows/specfold-gate.yml",
     ".github/workflows/specfold-gate-comment.yml",
     ...(tools.includes("claude") ? [".claude/agents"] : []),
   ].flatMap((p) => filesUnder(from, p));
+  return profileFiles(paths, profile);
 }
 
 export interface Manifest {
@@ -230,7 +235,8 @@ export function installKit(o: InstallOptions): InstallResult {
     act("openspec/", `run openspec init --tools ${o.tools.join(",")}`);
   }
 
-  for (const p of kitOwned(o.from, o.tools)) {
+  const profile = o.profile ?? "full";
+  for (const p of kitOwned(o.from, o.tools, profile)) {
     const data = readFileSync(join(o.from, p));
     if (!existsSync(abs(p))) {
       put(p, data, statSync(join(o.from, p)).mode & 0o777);
