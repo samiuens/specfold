@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parse } from "yaml";
+import { OMP_VARIABLES } from "../actor.ts";
 import { EnvError } from "../errors.ts";
 
 export const LOCAL_FILE = ".specfold/local.yaml";
@@ -28,7 +29,7 @@ export const system = {
   },
 };
 
-const AGENT_VARIABLES = ["CLAUDECODE", "SPECFOLD_MODEL"];
+const AGENT_VARIABLES = ["CLAUDECODE", ...OMP_VARIABLES, "SPECFOLD_MODEL"];
 
 /** Why an agent seems to be running the command, or undefined for a person at a terminal. */
 export function agentReason(): string | undefined {
