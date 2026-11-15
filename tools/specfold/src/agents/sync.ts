@@ -3,13 +3,26 @@ import {
   lstatSync,
   mkdirSync,
   readdirSync,
+  readFileSync,
   readlinkSync,
+  rmSync,
   statSync,
   symlinkSync,
   unlinkSync,
+  writeFileSync,
 } from "node:fs";
-import { join, relative, resolve, sep } from "node:path";
+import { dirname, join, relative, resolve, sep } from "node:path";
 import { EnvError } from "../errors.ts";
+import { OMP_CONFIG, ompConfigText, readOmpConfig } from "../omp/config.ts";
+import type { Config } from "../repo.ts";
+import {
+  CLAUDE_AGENTS,
+  OMP_AGENTS,
+  type PlannedRole,
+  type PlannedSetting,
+  planRoles,
+  setTaskSettings,
+} from "./omp.ts";
 
 export const SKILLS_DIR = ".agents/skills";
 
@@ -95,5 +108,59 @@ export function applyLinks(repoRoot: string, plan: PlannedLink[]): void {
         `cannot ${step.action} ${step.path} (${code}): symlinks must be allowed in this repository`,
       );
     }
+  }
+}
+
+/** The `*.md` files of a repository folder by name without the extension; empty when the folder is missing. */
+function readRoleFolder(repoRoot: string, folder: string): Record<string, string> {
+  const dir = join(repoRoot, folder);
+  const out: Record<string, string> = {};
+  if (!existsSync(dir)) return out;
+  for (const file of readdirSync(dir).sort()) {
+    const path = join(dir, file);
+    if (file.endsWith(".md") && statSync(path).isFile())
+      out[file.slice(0, -".md".length)] = readFileSync(path, "utf8");
+  }
+  return out;
+}
+
+export interface OmpPlan {
+  roles: PlannedRole[];
+  settings: PlannedSetting[];
+  /** The new `.omp/config.yml` text when a setting changes. */
+  configText: string | undefined;
+}
+
+/**
+ * The omp roles and task settings to bring in line. Without `omp` in `tools`, own roles are removed and
+ * `.omp/config.yml` is not read. see knowledge: /references/omp.md
+ */
+export function planOmp(config: Config): OmpPlan {
+  const listed = config.tools.includes("omp");
+  const roles = planRoles(
+    readRoleFolder(config.root, CLAUDE_AGENTS),
+    readRoleFolder(config.root, OMP_AGENTS),
+    listed,
+  );
+  if (!listed) return { roles, settings: [], configText: undefined };
+  const doc = readOmpConfig(config.root);
+  const settings = setTaskSettings(doc);
+  return { roles, settings, configText: settings.length > 0 ? ompConfigText(doc) : undefined };
+}
+
+/** Writes, rewrites and removes the planned role files and writes `.omp/config.yml` when a setting changed. */
+export function applyOmp(repoRoot: string, plan: OmpPlan): void {
+  for (const step of plan.roles) {
+    const path = join(repoRoot, step.path);
+    if (step.action === "remove") rmSync(path);
+    else if (step.text !== undefined) {
+      mkdirSync(dirname(path), { recursive: true });
+      writeFileSync(path, step.text);
+    }
+  }
+  if (plan.configText !== undefined) {
+    const path = join(repoRoot, OMP_CONFIG);
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, plan.configText);
   }
 }
