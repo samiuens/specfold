@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
+import { agentBy } from "../actor.ts";
 import { register } from "../cli.ts";
 import { UsageError } from "../errors.ts";
 import { requireConfig, resolveBundleRoot } from "../repo.ts";
@@ -139,8 +140,7 @@ register({
     }
     const rel = bundlePath(pathArg);
     const model = process.env.SPECFOLD_MODEL;
-    const by =
-      (values.by as string | undefined) ?? (model ? `${config.agentPrefix}${model}` : "process:specfold-new");
+    const by = (values.by as string | undefined) ?? (model ? agentBy(config, model) : "process:specfold-new");
     if (by.startsWith("human:"))
       throw new UsageError("human actors are added by 'specfold verify', never by 'new'");
     if (!ACTOR.test(by))

@@ -8,5 +8,7 @@ export default defineConfig({
   test: {
     include: ["test/**/*.test.ts"],
     passWithNoTests: true,
+    // tests may run inside omp, whose markers would sign agent writes as omp/ (src/actor.ts)
+    env: { OMPCODE: "", PI_SESSION_ID: "" },
   },
 });

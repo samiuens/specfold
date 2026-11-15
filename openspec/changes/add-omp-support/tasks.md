@@ -23,7 +23,7 @@ agent: implementer
 
 - [x] 2.1 Read and validate `tools` in `src/repo.ts`, defaulting from `agents.targets`
   - Done when: `repo.test.ts` passes the scenarios `specfold-tools#omp-listed`, `#unknown-tool` and `#repository-from-an-earlier-release`
-- [ ] 2.2 Add `agentBy` in `src/actor.ts` and use it in `new`, `backlog` and `sync`
+- [x] 2.2 Add `agentBy` in `src/actor.ts` and use it in `new`, `backlog` and `sync`
   - Done when: `actor.test.ts` passes `specfold-tools#new-concept-from-omp` and `#new-concept-from-claude-code`
 - [ ] 2.3 Refuse `verify` when `OMPCODE` or `PI_SESSION_ID` is set
   - Done when: `verify-login.test.ts` passes `specfold-verify#run-by-omp` and `#run-by-claude-code`

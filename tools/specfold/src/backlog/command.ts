@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
+import { agentBy } from "../actor.ts";
 import { register } from "../cli.ts";
 import { EnvError, UsageError } from "../errors.ts";
 import { findItem, type Item, listItems, setKeys } from "../future/items.ts";
@@ -102,7 +103,7 @@ register({
           return 1;
         }
         const model = process.env.SPECFOLD_MODEL;
-        const by = model ? `${config.agentPrefix}${model}` : "process:specfold-backlog";
+        const by = model ? agentBy(config, model) : "process:specfold-backlog";
         const origin = values.origin as string | undefined;
         mkdirSync(dirname(abs), { recursive: true });
         writeFileSync(
