@@ -65,6 +65,9 @@ types:
 actors:
   agent_prefix: "claude-code/"
 
+# Agent tools the kit repo is set up for; omp gets generated roles, rules and the hook adapter (dogfooding).
+tools: [agents, claude, omp]
+
 # Folders that get one symlink per skill in .agents/skills/ (specfold agents sync).
 agents:
   targets: [".claude/skills"]

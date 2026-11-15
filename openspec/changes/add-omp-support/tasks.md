@@ -115,7 +115,7 @@ agent: implementer
   - Done when: `node scripts/specfold.mjs stats` reports both files under their budgets
 - [x] 7.3 Build the bundle and copy it to the template
   - Done when: `npm test --workspace tools/specfold` and `npm run check --workspace tools/specfold` exit 0, and both `specfold.mjs` copies are equal
-- [ ] 7.4 List `omp` in the kit's `specfold.yaml`, then run `agents sync`, `permissions sync` and copy the adapter to `.omp/hooks/pre/`
+- [x] 7.4 List `omp` in the kit's `specfold.yaml`, then run `agents sync`, `permissions sync` and copy the adapter to `.omp/hooks/pre/`
   - Done when: `agents sync --check` and `permissions sync --check` exit 0 in the kit
 
 ## 8. omp proof run
