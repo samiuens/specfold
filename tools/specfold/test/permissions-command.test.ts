@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { parse } from "yaml";
 import { run, tempDir } from "./helpers.ts";
 
 function repo(yaml = "types: [Decision]\n", settings?: string): string {
@@ -14,6 +15,7 @@ function repo(yaml = "types: [Decision]\n", settings?: string): string {
 }
 
 const read = (root: string) => JSON.parse(readFileSync(join(root, ".claude/settings.json"), "utf8"));
+const ompText = (root: string) => readFileSync(join(root, ".omp/config.yml"), "utf8");
 
 describe("permissions sync: command", () => {
   // spec: specfold-permissions#rules-written
@@ -47,6 +49,7 @@ describe("permissions sync: command", () => {
       stdout: expect.stringContaining("no tool needs rendered rules"),
     });
     expect(existsSync(join(root, ".claude"))).toBe(false);
+    expect(existsSync(join(root, ".omp"))).toBe(false);
   });
 
   it("still validates the setting when Claude Code is not a target", async () => {
@@ -99,7 +102,13 @@ describe("permissions sync: command", () => {
     const yaml =
       "types: []\npermissions:\n  push: ask\n  force-push: deny\n  delete-remote-branch: deny\n  push-tags: deny\n  open-pr: deny\n  merge-pr: deny\n  close-pr: deny\n";
     const out = JSON.parse((await run(["permissions", "sync", "--json"], repo(yaml, "{}\n"))).stdout);
-    expect(out).toMatchObject({ ok: true, check: false, target: ".claude/settings.json", problems: [] });
+    expect(out).toMatchObject({
+      ok: true,
+      check: false,
+      target: ".claude/settings.json",
+      omp_target: null,
+      problems: [],
+    });
     expect(out.changes.filter((c: { to: string }) => c.to === "ask")).toEqual([
       { pattern: "Bash(git push *)", from: "none", to: "ask" },
     ]);
@@ -109,5 +118,79 @@ describe("permissions sync: command", () => {
     expect((await run(["permissions"], repo())).code).toBe(2);
     expect((await run(["permissions", "list"], repo())).code).toBe(2);
     expect((await run(["permissions", "sync", "x"], repo())).code).toBe(2);
+  });
+
+  // spec: specfold-permissions#omp-only
+  it("writes only the omp rules when omp is the only tool", async () => {
+    const root = repo("types: []\nagents:\n  targets: []\ntools: [agents, omp]\n");
+    const result = await run(["permissions", "sync"], root);
+    expect(result.code).toBe(0);
+    expect(result.stdout).toContain(".omp/config.yml git push *: none -> prompt");
+    expect(existsSync(join(root, ".claude"))).toBe(false);
+    expect(parse(ompText(root)).bash.patterns).toContainEqual({ match: "git push *", approval: "prompt" });
+    expect((await run(["permissions", "sync"], root)).stdout).toBe(
+      "permissions sync: rules are up to date\n",
+    );
+  });
+
+  // spec: specfold-permissions#omp-not-listed
+  it("creates no .omp folder when tools does not list omp", async () => {
+    const root = repo("types: []\ntools: [agents, claude]\n");
+    expect((await run(["permissions", "sync"], root)).code).toBe(0);
+    expect(read(root).permissions.ask).toContain("Bash(git push *)");
+    expect(existsSync(join(root, ".omp"))).toBe(false);
+  });
+
+  // spec: specfold-permissions#broken-omp-settings
+  it("exits with 2 and writes nothing when .omp/config.yml is a list", async () => {
+    const root = repo("types: []\ntools: [agents, claude, omp]\n");
+    mkdirSync(join(root, ".omp"));
+    writeFileSync(join(root, ".omp/config.yml"), "- a\n- b\n");
+    const result = await run(["permissions", "sync"], root);
+    expect(result.code).toBe(2);
+    expect(result.stderr).toContain(".omp/config.yml");
+    expect(ompText(root)).toBe("- a\n- b\n");
+    expect(existsSync(join(root, ".claude"))).toBe(false);
+  });
+
+  it("exits with 2 when bash.patterns is not a list", async () => {
+    const root = repo("types: []\ntools: [agents, omp]\n");
+    mkdirSync(join(root, ".omp"));
+    writeFileSync(join(root, ".omp/config.yml"), "bash:\n  patterns: x\n");
+    const result = await run(["permissions", "sync"], root);
+    expect(result.code).toBe(2);
+    expect(result.stderr).toContain(".omp/config.yml");
+    expect(ompText(root)).toBe("bash:\n  patterns: x\n");
+  });
+
+  // spec: specfold-permissions#omp-out-of-date
+  it("reports an omp move in check mode without writing", async () => {
+    const root = repo("types: []\ntools: [agents, claude, omp]\n");
+    await run(["permissions", "sync"], root);
+    expect(ompText(root)).toContain("approval: prompt");
+    writeFileSync(
+      join(root, "specfold.yaml"),
+      "types: []\ntools: [agents, claude, omp]\npermissions:\n  open-pr: allow\n",
+    );
+    const before = ompText(root);
+    const result = await run(["permissions", "sync", "--check"], root);
+    expect(result.code).toBe(1);
+    expect(result.stdout).toContain(".omp/config.yml gh pr create *: prompt -> allow");
+    expect(ompText(root)).toBe(before);
+  });
+
+  it("prints the omp target and omp changes as JSON", async () => {
+    const root = repo(
+      "types: []\nagents:\n  targets: []\ntools: [agents, omp]\npermissions:\n  push: allow\n",
+    );
+    const out = JSON.parse((await run(["permissions", "sync", "--json"], root)).stdout);
+    expect(out).toMatchObject({ ok: true, target: null, omp_target: ".omp/config.yml" });
+    expect(out.changes).toContainEqual({
+      pattern: "git push *",
+      from: "none",
+      to: "allow",
+      target: ".omp/config.yml",
+    });
+    expect(out.changes.some((c: { to: string }) => c.to === "ask")).toBe(false);
   });
 });
