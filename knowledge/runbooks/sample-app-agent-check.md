@@ -14,12 +14,12 @@ sources:
 
 # When to use
 
-After a change to the skills, the planner, `AGENTS.md`, `CLAUDE.md` or the schema templates, and before a release. It is the M3 proof that the agent layer works in a clean repository in Claude Code and in a second tool. The interactive part needs a human at the keyboard.
+After a change to the skills, the planner, `AGENTS.md`, `CLAUDE.md`, the schema templates or the omp files, and before a release. It is the M3 proof that the agent layer works in a clean repository in Claude Code and in a second tool. The interactive part needs a human at the keyboard; the omp part runs headless.
 
 # Steps
 
 For the parallel layer (M8), repeat the recorded pattern-2 run in `examples/runs/pattern-2/README.md`: plan a change with three groups on disjoint files, run `sf-apply`, and compare the timeline, merges and final messages with the record.
-
+For omp, repeat the recorded run in `examples/runs/omp/README.md`: init with `--tools agents,omp`, then the five headless prompts of the README's omp section.
 
 The exact commands are in the sample app's README (section "Agent check"), linked as the source, so they live in one place. In short:
 
@@ -28,7 +28,8 @@ The exact commands are in the sample app's README (section "Agent check"), linke
 3. Run `claude --agent planner --permission-mode plan`, ask for a small change, and answer its questions.
 4. Run `opencode` in the same copy, list the skills and do a lookup through `sf-lookup`.
 5. Copy the new change folder back into `examples/sample-app/openspec/changes/`.
-6. After a change to trace, drift, the backlog or the retro, run the README's "Quality loops check" in `examples/sample-app`.
+6. For omp, run the README's section "omp: hooks, rules and an isolated implementer" in a fresh copy.
+7. After a change to trace, drift, the backlog or the retro, run the README's "Quality loops check" in `examples/sample-app`.
 
 # Verify
 
@@ -38,6 +39,7 @@ The exact commands are in the sample app's README (section "Agent check"), linke
 - **Your login:** the planner asks you to state it for `confirmed_by`; it never copies one from earlier files.
 - **The new change** passes `change check` (only the T7 warning for `knowledge-curator` until M8) and `openspec validate --strict`.
 - **opencode** lists the six sf skills and answers the lookup from the right concept.
+- **omp** quotes the session-start context, has its stop blocked by an unconfirmed brief, merges an isolated implementer's `omp/task/<id>` branch, gets a subagent's push refused, and signs a new concept `omp/`.
 - **Quality loops:** trace has no dangling reference and covers every main-spec scenario; drift names the decision whose code `add-rename` touched; the backlog shows the promoted and the open item; `log.md` has the `Retro` entry.
 
 # Related

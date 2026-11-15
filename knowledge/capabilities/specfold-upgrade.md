@@ -48,6 +48,7 @@ A repository installed with `specfold init` or sf-migrate keeps the kit of that 
 - **Upgrades find the team.** The session-start reminder and the opt-in weekly workflow bring a new release to people who never run `--check` ([turn on upgrade PRs](/runbooks/turn-on-upgrade-prs.md)). A turned-on workflow is a kit file like any other.
 - **Skill `sf-upgrade`** walks an agent through the check, the plan, the conflicts and the release's manual steps, and leaves the push to the user.
 - **The profile decides the file set.** The plan keeps the installed profile's files and the manifest records the profile; a manifest without one counts as `full`. Setting `profile: full` on a knowledge repository reinstalls the release even at the installed version, adding the OpenSpec parts, and the report names `gate.escape_label` as a value to review. Setting `profile: knowledge` on a full repository exits with 2 and writes nothing ([a knowledge-only profile](/decisions/knowledge-profile.md)).
+- **Tools from the setting.** The plan covers the files of the tools in `tools`; without the key it keeps the manifest rule, so older repositories plan as before. With `omp`, `.omp/hooks/pre/specfold.ts` is a kit-owned file whose release copy is `.specfold/tools/omp/hooks/pre/specfold.ts`. Adding `omp` and upgrading at the installed version writes it, and the follow-up `agents sync` writes the roles ([omp tools from the manifest](/decisions/omp-tools-from-manifest.md), change `add-omp-support`).
 
 # Related
 

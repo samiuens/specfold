@@ -18,6 +18,7 @@
 * [Every install and upgrade path works from a private kit repo](private-kit-repo.md) - Release downloads authenticate through gh or a token, so the kit works while its repo is private.
 * [Everything that must be correct is deterministic code](deterministic-cli.md) - Validation, indexing and gate checks live in the specfold CLI; skills call it and never re-implement its checks.
 * [First specs are OpenSpec changes, not baseline specs](specs-start-as-changes.md) - Specs for not-yet-built commands are written as OpenSpec changes and only reach openspec/specs/ when implemented and archived.
+* [Generated omp roles marked in frontmatter](omp-role-marker-in-frontmatter.md) - Rejected: marking generated omp roles with a frontmatter key; omp's handling of unknown keys is undocumented, so a body comment marks them.
 * [graphify is optional, code-only, and writes no instruction blocks](graphify-code-only.md) - The kit recommends graphify for code navigation, in code-only mode, installed as a skill plus a Claude Code guard and never as an instruction block.
   * Referenced from code: tools/specfold/src/graphify/setup.ts:9
 * [Kit content in repo-owned files lives in managed blocks](managed-blocks.md) - Specfold writes its part of AGENTS.md, CLAUDE.md and similar files between specfold markers, the only part upgrades rewrite.
@@ -27,6 +28,8 @@
 * [Knowledge lives in its own OKF bundle](separate-knowledge-bundle.md) - Project knowledge is an OKF v0.2 bundle in knowledge/, separate from openspec/, so both stay readable by their own tools.
 * [Migration only ever happens on its own branch](migration-on-own-branch.md) - sf-migrate refuses to run on the default branch or an unrelated feature branch and works on specfold/migration.
 * [OKF sample acme_retail is tested as a patched fixture](acme-retail-patched-fixture.md) - The upstream acme_retail sample violates OKF, so the tests use a documented patched copy plus the unpatched copy as a negative fixture.
+* [omp roles generated from the Claude Code agents](omp-roles-generated-from-claude-agents.md) - omp roles are generated from .claude/agents by agents sync, not hand-written, so each role keeps one source; planner is left out.
+* [omp support derived from the manifest](omp-tools-from-manifest.md) - Rejected: deriving omp support from the install manifest; an explicit tools setting is what init and migrate write.
 * [One product version, small integer versions for formats](versioning.md) - Specfold has one semver product version; the profile, schema and manifest carry their own integer versions.
 * [One template payload per profile](template-payload-per-profile.md) - Rejected: shipping one template payload per profile; it doubles release assets and upgrade fixtures for a small file split.
 * [Only humans verify knowledge](humans-verify-only.md) - Agents write concepts as draft; only a human adds verified entries, and the gate checks that the named human really approved.
@@ -34,6 +37,7 @@
 * [Plan-aware link relief](plan-aware-link-relief.md) - Rejected: validate reading the migration plan to excuse only links to planned targets; hooks relieve by conversion state instead.
 * [Rather ask than assume](rather-ask-than-assume.md) - When a decision is open or something conflicts, agents ask the user through the native question UI instead of guessing.
 * [Specfold is built with Specfold](self-hosting.md) - Every feature, fix and release of the kit runs through the kit's own workflow, switched on piece by piece as it is built.
+* [Specfold's omp bash rules appended](omp-rules-appended.md) - Rejected: appending Specfold's omp bash rules; omp applies the first match, so the owned block goes first, strictest level first.
 * [Specs are the contract, knowledge is context](specs-vs-knowledge.md) - Specs hold normative behavior, knowledge holds descriptive context, and nothing is written twice.
 * [Splice entries into hook manager YAML](splice-hook-manager-yaml.md) - hooks install inserts its entries as text at parsed offsets, so unrelated lines of lefthook.yml and pre-commit config stay as they were.
   * Referenced from code: tools/specfold/src/hooks/install.ts:123

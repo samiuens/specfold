@@ -49,6 +49,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:00:29+01:00 }
 
 **Profile check:** before planning, the inner stage compares the profile in the manifest with the one in `specfold.yaml`. Equal means the usual plan for that profile's file set. `knowledge` to `full` plans the full set at the target version (the installed one when nothing is newer) and adds `openspec init` and the template's `config.yaml` to the follow-ups. `full` to `knowledge` stops with exit 2 ([specfold profile](/capabilities/specfold-profile.md)).
 
+**Tools check:** the plan covers the files of the tools in `tools` in `specfold.yaml`, and the manifest's `.claude/` files decide only without that key. With `omp`, the active `.omp/hooks/pre/specfold.ts` is kit-owned with the release copy `.specfold/tools/omp/hooks/pre/specfold.ts`, like the turned-on upgrade workflow. The follow-up `agents sync` keeps the generated omp roles current ([specfold tools setting](/capabilities/specfold-tools.md)).
+
 # Related
 
 - [specfold upgrade](/capabilities/specfold-upgrade.md)
