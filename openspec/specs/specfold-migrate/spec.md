@@ -130,11 +130,15 @@ For the full profile, when `openspec/config.yaml` exists, `migrate install` SHAL
 - **THEN** `specfold.yaml` has `source_globs: ["apps/*/src/**", "packages/*/src/**"]`
 
 ### Requirement: Agent tools
-`migrate install` SHALL set up the tools named by `--tools` (default `agents,claude`); with `--tools agents` it SHALL write nothing under `.claude/` and leave `CLAUDE.md` alone.
+`migrate install` SHALL set up the tools named by `--tools` (default `agents,claude`), which takes the same lists as `specfold init --tools`, and write them as `tools` in `specfold.yaml`; with `--tools agents` it SHALL write nothing under `.claude/` and leave `CLAUDE.md` alone. With `omp` it SHALL set up the omp files as init does, and it SHALL never pass `omp` to `openspec init`.
 
 #### Scenario: Agents only
 - **WHEN** install runs with `--tools agents`
 - **THEN** `.agents/skills/sf-lookup/SKILL.md` exists and no `.claude/` folder is created
+
+#### Scenario: omp at install
+- **WHEN** install runs with `--tools agents,claude,omp` in a repository without `openspec/`
+- **THEN** `specfold.yaml` sets `tools: [agents, claude, omp]`, `.omp/hooks/pre/specfold.ts` exists, and `openspec init` ran with `--tools agents,claude`
 
 ### Requirement: Install manifest
 `migrate install` SHALL write `.specfold/manifest.json` with `manifest_version: 1`, the template's `kit_version`, the installed `profile`, the `--ref` value when given, and a SHA-256 hash for every kit-owned file and managed block it installed.
