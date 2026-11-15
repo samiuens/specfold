@@ -127,7 +127,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 8.1 Add the omp steps to the sample app's agent check
+- [x] 8.1 Add the omp steps to the sample app's agent check
   - Done when: the README's "Agent check" section lists the omp steps
 - [ ] 8.2 Run the check under omp on a copy outside the kit: init with `--tools agents,omp`, plan a small change with `sf-plan`, apply it with one isolated implementer, and record the run in `examples/runs/omp/README.md`
   - Done when: the record shows the session-start context, a blocked or a clean stop, a refused subagent push, the merged implementer branch, and `generated.by: omp/<model>` on a concept

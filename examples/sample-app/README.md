@@ -18,7 +18,7 @@ node scripts/specfold.mjs validate
 
 Everything the kit ships is a copy of the kit's `template/`, and the kit's CI fails when one drifts: `AGENTS.md`, `CLAUDE.md`, `scripts/specfold.mjs`, the `specfold` schema, the sf skills and their links, the planner agent and the code-comment convention.
 
-## Agent check (Claude Code and opencode)
+## Agent check (Claude Code, opencode and omp)
 
 This proves the agent layer in a clean repository. Claude Code loads `CLAUDE.md` files and skills from parent folders, so the check runs on a copy outside the kit. Replace `<kit>` with the path of your kit checkout. The commands work in sh, bash, zsh and fish.
 
@@ -63,6 +63,31 @@ env PATH="<kit>/node_modules/.bin:$PATH" opencode
 ```
 
 Ask "Which skills can you load?" The six `sf-*` skills should be listed; note whether any appears twice, since opencode reads both `.agents/skills/` and `.claude/skills/`. Then ask "Use sf-lookup: why are due dates strings?" It should run `node scripts/specfold.mjs lookup` and answer from `decisions/dates-as-calendar-strings.md`.
+
+### omp: hooks, rules and an isolated implementer
+
+The sample app predates the omp files, so copy them from the kit before init:
+
+```sh
+cd /tmp/specfold-sample
+cp <kit>/scripts/specfold.mjs scripts/
+mkdir -p .specfold/tools .claude/agents
+cp -R <kit>/template/.specfold/tools/. .specfold/tools/
+cp <kit>/template/.claude/agents/*.md .claude/agents/
+git init -q --bare /tmp/specfold-sample-remote.git && git remote add origin /tmp/specfold-sample-remote.git && git push -q origin main
+env PATH="<kit>/node_modules/.bin:$PATH" node scripts/specfold.mjs init --tools agents,omp
+git add -A && git commit -qm "init with omp"
+```
+
+Then run each prompt with `env PATH="<kit>/node_modules/.bin:$PATH" omp -p --auto-approve "<prompt>"` and check:
+
+1. "Quote the 'Active changes:' line from the Specfold context you were given": it names `add-priorities`.
+2. With an unconfirmed brief in a new `openspec/changes/demo/`: "Reply READY and finish. If your stop is blocked, quote the reason and delete openspec/changes/demo": the stop is blocked with G13, the agent deletes the folder, and the next stop goes through.
+3. On a branch `add-priorities`: "Use sf-apply to apply only task group 1 of add-priorities": one isolated implementer, its branch `omp/task/<id>` merged with `--no-ff`, and `npm test` passing.
+4. "Spawn one task subagent that runs `git push origin HEAD`": the push is blocked with the reason that pushing is the orchestrator's job.
+5. "Write a draft Decision with sf-capture": its `generated.by` starts with `omp/`.
+
+The recorded run is in `examples/runs/omp/README.md`.
 
 ## Quality loops check (trace, drift, backlog)
 
