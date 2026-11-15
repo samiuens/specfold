@@ -109,7 +109,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 7.1 Add the omp dispatch section to `sf-apply` in the template and the kit copy, naming the branch from task 1.1
+- [x] 7.1 Add the omp dispatch section to `sf-apply` in the template and the kit copy, naming the branch from task 1.1
   - Done when: `node scripts/check-skills.mjs` exits 0 and the kit copy equals the template's
 - [ ] 7.2 Name the omp entry points in `template/AGENTS.md`, and write `<tool>/<model>` in the kit's `AGENTS.md`
   - Done when: `node scripts/specfold.mjs stats` reports both files under their budgets

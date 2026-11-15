@@ -33,6 +33,14 @@ Use this in the main session once a change is planned: its brief is confirmed an
 
 Agent teams stay off: they do not isolate teammates in worktrees.
 
+## In omp
+
+omp runs the same loop with its `task` tool. `specfold agents sync` generates the roles in `.omp/agents/` and the task settings in `.omp/config.yml` once `tools` in `specfold.yaml` lists `omp`.
+
+- **Dispatch:** one task item per group, with `agent: implementer`, `isolated: true` and the packet verbatim as its task. Put at most the `parallel show` limit into one batch; Specfold does not set omp's own concurrency limit.
+- **Merge:** omp commits each isolated task's work to `omp/task/<agent id>` and leaves it unapplied. Merge the branch omp reports in the task result with `git merge --no-ff`, not the branch the implementer names from inside its workspace, then delete it with `git branch -d`. There are no worktrees to clean.
+- **Verify and sync:** `verifier` and `knowledge-curator` run without `isolated`.
+
 ## Rules
 
 - Only the main session spawns subagents; the template's settings enforce it.
