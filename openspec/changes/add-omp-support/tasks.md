@@ -9,7 +9,7 @@ scenarios: []
 agent: implementer
 ```
 
-- [ ] 1.1 Check every omp fact design.md relies on against the installed omp and record them, with sources, in `knowledge/references/omp.md`: the hook-context field that marks a task subagent, the branch name omp reports for an isolated task with `merge: branch` and `apply: false`, whether `bash.patterns` `git push *` matches a bare `git push`, `PI_SESSION_ID` and `OMPCODE` in bash calls, and the role frontmatter keys
+- [x] 1.1 Check every omp fact design.md relies on against the installed omp and record them, with sources, in `knowledge/references/omp.md`: the hook-context field that marks a task subagent, the branch name omp reports for an isolated task with `merge: branch` and `apply: false`, whether `bash.patterns` `git push *` matches a bare `git push`, `PI_SESSION_ID` and `OMPCODE` in bash calls, and the role frontmatter keys
   - Done when: `node scripts/specfold.mjs validate` exits 0 and the reference names the subagent marker and the branch name
 
 ## 2. Tools setting and signature
