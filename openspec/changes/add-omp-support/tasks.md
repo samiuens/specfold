@@ -25,7 +25,7 @@ agent: implementer
   - Done when: `repo.test.ts` passes the scenarios `specfold-tools#omp-listed`, `#unknown-tool` and `#repository-from-an-earlier-release`
 - [x] 2.2 Add `agentBy` in `src/actor.ts` and use it in `new`, `backlog` and `sync`
   - Done when: `actor.test.ts` passes `specfold-tools#new-concept-from-omp` and `#new-concept-from-claude-code`
-- [ ] 2.3 Refuse `verify` when `OMPCODE` or `PI_SESSION_ID` is set
+- [x] 2.3 Refuse `verify` when `OMPCODE` or `PI_SESSION_ID` is set
   - Done when: `verify-login.test.ts` passes `specfold-verify#run-by-omp` and `#run-by-claude-code`
 - [ ] 2.4 Add `src/omp/config.ts`: read `.omp/config.yml` as a YAML Document, refuse a non-mapping, write it back keeping comments and long lines
   - Done when: `omp-config.test.ts` covers a missing file, a kept comment, a 120-character line and a top-level list
