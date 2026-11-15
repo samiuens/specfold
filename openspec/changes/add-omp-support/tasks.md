@@ -61,7 +61,7 @@ agent: implementer
   - Done when: `permissions-omp.test.ts` checks one matching and one non-matching command per action with a matcher following omp's documented `*` semantics
 - [x] 4.2 Render the owned block first (deny, prompt, allow) and keep every other entry and key
   - Done when: `permissions-omp.test.ts` passes `#omp-rules-written`, `#stricter-force-push-wins` and `#team-rule-kept`
-- [ ] 4.3 Wire the omp target into the sync, its errors, `--check` and `--json`
+- [x] 4.3 Wire the omp target into the sync, its errors, `--check` and `--json`
   - Done when: `permissions-command.test.ts` passes `#agents-only`, `#omp-only`, `#omp-not-listed`, `#broken-omp-settings` and `#omp-out-of-date`
 
 ## 5. omp hook adapter

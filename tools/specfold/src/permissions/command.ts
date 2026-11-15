@@ -21,11 +21,13 @@ register({
     const check = values.check === true;
     const plan = syncPermissions(config, check);
     if (plan.conflict) throw new EnvError(`${SETTINGS_FILE} ${plan.conflict}; nothing was written`);
-    const ok = plan.problems.length === 0 && (!check || plan.changes.length === 0);
+    const changes = [...plan.changes, ...(plan.omp?.changes ?? [])];
+    const ok = plan.problems.length === 0 && (!check || changes.length === 0);
 
     if (values.json) {
-      const { target, changes, problems } = plan;
-      io.stdout(`${JSON.stringify({ ok, check, target, changes, problems }, null, 2)}\n`);
+      const { target, problems } = plan;
+      const omp_target = plan.omp?.target ?? null;
+      io.stdout(`${JSON.stringify({ ok, check, target, omp_target, changes, problems }, null, 2)}\n`);
     } else {
       const lines = planLines(plan);
       const name = `permissions sync${check ? " --check" : ""}`;
@@ -33,11 +35,13 @@ register({
         lines.push(
           `${name}: ${plural(plan.problems.length, "problem")} in 'permissions', nothing was written`,
         );
-      else if (plan.target === null)
-        lines.push(`${name}: no tool needs rendered rules (agents.targets has no .claude/skills)`);
+      else if (plan.target === null && plan.omp === undefined)
+        lines.push(
+          `${name}: no tool needs rendered rules (agents.targets has no .claude/skills and tools has no omp)`,
+        );
       else
         lines.push(
-          `${name}: ${plan.changes.length === 0 ? "rules are up to date" : plural(plan.changes.length, "change")}`,
+          `${name}: ${changes.length === 0 ? "rules are up to date" : plural(changes.length, "change")}`,
         );
       io.stdout(`${lines.join("\n")}\n`);
     }
