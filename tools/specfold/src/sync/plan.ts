@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
+import { agentBy } from "../actor.ts";
 import { checkKnowledge, type DeltaOp } from "../change/knowledge.ts";
 import type { Config } from "../repo.ts";
 import type { TaskFinding } from "../tasks/rules.ts";
@@ -33,7 +34,7 @@ export function planSync(config: Config, bundleRoot: string, id: string, now = n
     return { findings, ops, plan: undefined, logPath, logRel, logText, needsLog: false };
 
   const model = process.env.SPECFOLD_MODEL;
-  const by = model ? `${config.agentPrefix}${model}` : "process:specfold-sync";
+  const by = model ? agentBy(config, model) : "process:specfold-sync";
   const plan = planOps(ops, { repoRoot: config.root, bundleRoot, archivedId: id, by, now });
   return { findings, ops, plan, logPath, logRel, logText, needsLog: !logText?.includes(id) };
 }
