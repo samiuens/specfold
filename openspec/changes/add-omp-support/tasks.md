@@ -73,9 +73,9 @@ scenarios: [specfold-hooks#cli-missing, specfold-hooks#context-at-start, specfol
 agent: implementer
 ```
 
-- [ ] 5.1 Write the adapter with session start and the post-edit check, importing only types from omp
+- [x] 5.1 Write the adapter with session start and the post-edit check, importing only types from omp
   - Done when: `hooks-omp.test.ts`, with a fake `pi` and a temporary repository, passes `#cli-missing`, `#context-at-start` and `#agent-writes-a-broken-concept-in-omp`
-- [ ] 5.2 Add the `session_stop` block and the subagent push guard, using the subagent marker from task 1.1
+- [x] 5.2 Add the `session_stop` block and the subagent push guard, using the subagent marker from task 1.1
   - Done when: `hooks-omp.test.ts` passes `#unfinished-work-in-omp`, `#clean-stop`, `#subagent-push-refused` and `#main-session-push-left-to-permissions`
 
 ## 6. Init, migrate and upgrade
