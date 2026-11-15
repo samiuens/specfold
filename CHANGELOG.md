@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.7.0](https://github.com/samiuens/specfold/compare/v0.6.0...v0.7.0) (2026-11-15)
+
+
+### Features
+
+* **agents:** ✨ generate the omp roles and task settings ([7c7be53](https://github.com/samiuens/specfold/commit/7c7be53118462a4c170833eaedab5108f5863d90))
+* **cli:** ✨ read and write the omp settings file ([165c6d6](https://github.com/samiuens/specfold/commit/165c6d660563d63da0d34990ad67e17393c19aee))
+* **cli:** ✨ read the agent tools from specfold.yaml ([2baac21](https://github.com/samiuens/specfold/commit/2baac215754f81292f01f02ad3f89be541b1b91b))
+* **cli:** ✨ refuse verify under omp ([2462b1e](https://github.com/samiuens/specfold/commit/2462b1e5bea071a194cc1855545330deb096499a))
+* **cli:** ✨ render the permission levels as omp bash rules ([558ac38](https://github.com/samiuens/specfold/commit/558ac3821d370a1f4d46a6d0f33e35a0068ebf63))
+* **cli:** ✨ set up omp in init, migrate install and upgrade ([6090651](https://github.com/samiuens/specfold/commit/6090651d651e6d94d621cafe7472e06c91141991))
+* **cli:** ✨ sign agent writes made under omp ([f27404b](https://github.com/samiuens/specfold/commit/f27404bc8c5d07b277a0fda8620339878b027fa3))
+* **cli:** ✨ write the omp bash rules in permissions sync ([db494a3](https://github.com/samiuens/specfold/commit/db494a3e70d27701090738befd9e92f5be281c5f))
+* **hooks:** ✨ add the omp hook adapter ([90b551f](https://github.com/samiuens/specfold/commit/90b551f3ead6b076bd7c99a95c073ade9e6924ed))
+* **skills:** ✨ dispatch isolated omp tasks in sf-apply ([155458b](https://github.com/samiuens/specfold/commit/155458b706501a792f2ecae029d21dd03eb083bc))
+
 ## [0.6.0](https://github.com/samiuens/specfold/compare/v0.5.0...v0.6.0) (2026-11-09)
 
 
