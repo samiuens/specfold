@@ -10,30 +10,36 @@ import { detect } from "../migrate/detect.ts";
 import {
   BLOCK_FILES,
   clearAgentTargets,
+  DEFAULT_TOOLS,
   filesUnder,
   MANIFEST_PATH,
   manifestText,
+  OMP_ADAPTER,
   openspecInit,
+  openspecTools,
   profileDir,
   setEscapeLabel,
   setProfile,
   setSourceGlobs,
+  setTools,
   sha256,
-  type Tool,
+  syncOmp,
   UPGRADE_WORKFLOW,
   UPGRADE_WORKFLOW_NOTE,
 } from "../migrate/install.ts";
+import { OMP_CONFIG } from "../omp/config.ts";
 import { openspecBinary } from "../openspec.ts";
 import { LOCAL_SETTINGS, readLimit, writeLimit } from "../parallel/limit.ts";
 import { SETTINGS_FILE } from "../permissions/render.ts";
 import { planLines, syncPermissions } from "../permissions/sync.ts";
 import { inProfile } from "../profile.ts";
-import { CONFIG_FILE, loadConfig, type Profile, parseProfile } from "../repo.ts";
+import { CONFIG_FILE, loadConfig, type Profile, parseProfile, type Tool } from "../repo.ts";
 
 export interface InitOptions {
   /** Git root of a repository holding the template's files. */
   root: string;
-  tools: Tool[];
+  /** `--tools`; without it, the value in specfold.yaml. */
+  tools?: Tool[] | undefined;
   /** `--profile`; without it, the value in specfold.yaml. */
   profile?: Profile | undefined;
   stack?: string | undefined;
@@ -47,6 +53,8 @@ export interface InitOptions {
 export interface InitPlan {
   /** The profile init sets up. */
   profile: Profile;
+  /** The tools init sets up: `--tools`, else the `tools` setting. */
+  tools: Tool[];
   values: {
     /** null while the placeholder stays. */
     stack: { value: string | null; source: string };
@@ -99,11 +107,12 @@ export function planInit(o: InitOptions): InitPlan {
     ? parseProfile((parse(readFileSync(abs(CONFIG_FILE), "utf8")) as { profile?: unknown } | null)?.profile)
     : "full";
   const profile = o.profile ?? configured;
+  const tools = o.tools ?? (existsSync(abs(CONFIG_FILE)) ? loadConfig(o.root).tools : DEFAULT_TOOLS);
   // a fresh template also records full; init has set up a full repository once openspec init has run
   if (
     configured === "full" &&
     profile === "knowledge" &&
-    openspecSkills(o.tools).some((p) => existsSync(abs(p)))
+    openspecSkills(tools).some((p) => existsSync(abs(p)))
   )
     throw new EnvError(
       "this repository is set up with the full profile; switching a full repository to the knowledge profile is not supported",
@@ -115,7 +124,7 @@ export function planInit(o: InitOptions): InitPlan {
     );
   const read = (p: string) => readFileSync(abs(p), "utf8");
   // the knowledge profile never runs openspec init
-  const openspec = profile === "full" && openspecSkills(o.tools).some((p) => !existsSync(abs(p)));
+  const openspec = profile === "full" && openspecSkills(tools).some((p) => !existsSync(abs(p)));
   if (openspec) {
     const bin = openspecBinary(o.root);
     try {
@@ -126,6 +135,7 @@ export function planInit(o: InitOptions): InitPlan {
   }
   const plan: InitPlan = {
     profile,
+    tools,
     values: { stack: { value: null, source: "" }, sourceGlobs: { value: [], source: "" } },
     edits: [],
     remove: [],
@@ -183,7 +193,8 @@ export function planInit(o: InitOptions): InitPlan {
           : [found.sourceGlobs, "detected"];
   plan.values.sourceGlobs = { value, source };
   let nextSettings = source === "kept" ? settings : setSourceGlobs(settings, value);
-  if (!o.tools.includes("claude")) nextSettings = clearAgentTargets(nextSettings);
+  if (o.tools !== undefined) nextSettings = setTools(nextSettings, tools);
+  if (!tools.includes("claude")) nextSettings = clearAgentTargets(nextSettings);
   if (o.profile !== undefined) nextSettings = setProfile(nextSettings, o.profile);
   const gate = (parse(settings) as { gate?: { escape_label?: unknown } }).gate;
   if (profile === "knowledge" && gate?.escape_label === "no-spec")
@@ -199,7 +210,7 @@ export function planInit(o: InitOptions): InitPlan {
   const blocks: Record<string, string> = {};
   for (const p of BLOCK_FILES) {
     const hash = shipped.blocks?.[p];
-    if (hash === undefined || (p === "CLAUDE.md" && !o.tools.includes("claude"))) continue;
+    if (hash === undefined || (p === "CLAUDE.md" && !tools.includes("claude"))) continue;
     if (!existsSync(abs(p))) {
       plan.skipped.push({ path: p, reason: "missing; left out of the manifest" });
       continue;
@@ -249,17 +260,19 @@ export function planInit(o: InitOptions): InitPlan {
       else plan.skipped.push({ path: p, reason: "differs from the template; kept" });
     }
   }
-  if (o.upgradeWorkflow) {
-    const { shipped: from, active } = UPGRADE_WORKFLOW;
-    if (!existsSync(abs(from)))
+  // shipped inactive files copied to their active paths: the upgrade workflow and the omp adapter
+  const activate = (from: string, active: string) => {
+    if (!existsSync(abs(from))) {
       plan.skipped.push({ path: active, reason: `${from} is missing; copy it from the template` });
-    else {
-      const text = read(from);
-      if (!existsSync(abs(active)) || read(active) !== text)
-        plan.edits.push({ path: active, action: "write", text });
-      files[active] = sha256(text);
+      return;
     }
-  }
+    const text = read(from);
+    if (!existsSync(abs(active)) || read(active) !== text)
+      plan.edits.push({ path: active, action: "write", text });
+    files[active] = sha256(text);
+  };
+  if (o.upgradeWorkflow) activate(UPGRADE_WORKFLOW.shipped, UPGRADE_WORKFLOW.active);
+  if (tools.includes("omp")) activate(OMP_ADAPTER.shipped, OMP_ADAPTER.active);
   plan.manifest = manifestText(shipped.kit_version ?? "", shipped.ref, { files, blocks }, profile);
   return plan;
 }
@@ -291,9 +304,9 @@ export function runInit(o: InitOptions, plan: InitPlan): InitResult {
   if (plan.openspec) {
     // openspec init keeps an existing config.yaml; restoring it guards against a version that does not
     const config = readFileSync(join(o.root, OPENSPEC_CONFIG), "utf8");
-    openspecInit(o.root, o.tools);
+    openspecInit(o.root, plan.tools);
     writeIfChanged(join(o.root, OPENSPEC_CONFIG), config);
-    act("openspec/", `run openspec init --tools ${o.tools.join(",")}`);
+    act("openspec/", `run openspec init --tools ${openspecTools(plan.tools).join(",")}`);
   }
   const settings = loadConfig(o.root);
   const skills = listSkills(o.root);
@@ -302,6 +315,7 @@ export function runInit(o: InitOptions, plan: InitPlan): InitResult {
     applyLinks(o.root, links);
     for (const l of links) act(l.path, l.action);
   }
+  for (const a of syncOmp(settings)) act(a.path, a.action);
   const permissions = syncPermissions(settings, false);
   if (permissions.conflict)
     result.skipped.push({
@@ -310,11 +324,15 @@ export function runInit(o: InitOptions, plan: InitPlan): InitResult {
     });
   else if (permissions.problems.length > 0)
     result.skipped.push({
-      path: SETTINGS_FILE,
+      path: permissions.target ?? OMP_CONFIG,
       reason: `permissions sync: ${planLines(permissions).join("; ")}`,
     });
-  else if (permissions.text !== undefined)
-    act(SETTINGS_FILE, `run permissions sync (${permissions.changes.length} rule changes)`);
+  else {
+    if (permissions.text !== undefined)
+      act(SETTINGS_FILE, `run permissions sync (${permissions.changes.length} rule changes)`);
+    if (permissions.omp?.text !== undefined)
+      act(OMP_CONFIG, `run permissions sync (${permissions.omp.changes.length} rule changes)`);
+  }
   try {
     const hooks = installHooks(settings);
     for (const a of hooks.actions) act(a.path, a.action);

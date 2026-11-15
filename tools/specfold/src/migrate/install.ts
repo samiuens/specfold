@@ -11,22 +11,31 @@ import {
 } from "node:fs";
 import { dirname, join } from "node:path";
 import { parse } from "yaml";
-import { applyLinks, listSkills, planLinks } from "../agents/sync.ts";
+import { applyLinks, applyOmp, listSkills, planLinks, planOmp } from "../agents/sync.ts";
 import { parseText } from "../bundle.ts";
 import { EnvError, UsageError } from "../errors.ts";
 import { installHooks, writeIfChanged } from "../hooks/install.ts";
+import { OMP_CONFIG } from "../omp/config.ts";
 import { openspecBinary } from "../openspec.ts";
 import { SETTINGS_FILE } from "../permissions/render.ts";
 import { planLines, syncPermissions } from "../permissions/sync.ts";
 import { profileFiles } from "../profile.ts";
-import { CONFIG_FILE, loadConfig, type Profile, parseProfile } from "../repo.ts";
+import {
+  CONFIG_FILE,
+  type Config,
+  loadConfig,
+  type Profile,
+  parseProfile,
+  TOOLS,
+  type Tool,
+} from "../repo.ts";
 import { applyBlock, blockStyle, type Merged } from "./blocks.ts";
 import { detect } from "./detect.ts";
 import { fillStack, mergeOpenspecConfig, mergeSettings } from "./merge.ts";
 
-export const TOOLS = ["agents", "claude"] as const;
-export type Tool = (typeof TOOLS)[number];
 export const MANIFEST_PATH = ".specfold/manifest.json";
+/** `--tools` without the flag: Claude Code and every tool that reads `.agents/skills/`. */
+export const DEFAULT_TOOLS: Tool[] = ["agents", "claude"];
 
 /** The weekly upgrade workflow: shipped inactive, turned on by copying it to `active`. */
 export const UPGRADE_WORKFLOW = {
@@ -36,14 +45,45 @@ export const UPGRADE_WORKFLOW = {
 export const UPGRADE_WORKFLOW_NOTE =
   "add the SPECFOLD_TOKEN secret (Settings > Secrets and variables > Actions): a token that can read the Specfold kit's releases and write contents, pull requests and workflows in this repository; a fine-grained token works when both repositories have the same owner, otherwise use a classic token with repo and workflow";
 
-/** The `--tools` value of migrate install and init; `agents` is always set up. */
+/** The omp hook adapter: shipped inactive, installed as `active` when `tools` lists omp. see knowledge: /references/omp.md */
+export const OMP_ADAPTER = {
+  shipped: ".specfold/tools/omp/hooks/pre/specfold.ts",
+  active: ".omp/hooks/pre/specfold.ts",
+} as const;
+
+/** The `--tools` value of migrate install and init: a comma-separated list of `TOOLS` that includes `agents`. */
 export function parseTools(value: string | undefined): Tool[] {
-  if (value === undefined) return [...TOOLS];
+  if (value === undefined) return [...DEFAULT_TOOLS];
   const tools = value.split(",").map((t) => t.trim());
   const unknown = tools.filter((t) => !(TOOLS as readonly string[]).includes(t));
   if (unknown.length > 0 || !tools.includes("agents"))
-    throw new UsageError(`--tools takes 'agents' or 'agents,claude', got '${value}'`);
-  return tools as Tool[];
+    throw new UsageError(
+      `--tools takes a comma-separated list of ${TOOLS.join(", ")} that includes 'agents', got '${value}'`,
+    );
+  return TOOLS.filter((t) => tools.includes(t));
+}
+
+/** The tools `openspec init` knows; omp reads `.agents/skills/` and has no OpenSpec tool id. */
+export const openspecTools = (tools: Tool[]) => tools.filter((t) => t !== "omp");
+
+/** The omp part of agents sync, for init and install: role files and task settings, as actions. */
+export function syncOmp(config: Config): { path: string; action: string }[] {
+  const plan = planOmp(config);
+  applyOmp(config.root, plan);
+  return [
+    ...plan.roles.filter((r) => r.action !== "kept").map((r) => ({ path: r.path, action: r.action })),
+    ...(plan.configText === undefined
+      ? []
+      : [{ path: OMP_CONFIG, action: `set ${plan.settings.map((s) => s.target).join(", ")}` }]),
+  ];
+}
+
+/** `tools` in specfold.yaml set by a line edit, keeping comments: the existing line replaced, else added before `agents:`. */
+export function setTools(text: string, tools: Tool[]): string {
+  const line = `tools: [${tools.join(", ")}]`;
+  if (/^tools:.*$/m.test(text)) return text.replace(/^tools:.*?(?=[ \t]+#|$)/m, line);
+  if (/^agents:/m.test(text)) return text.replace(/^((?:#.*\n)*)agents:/m, `${line}\n\n$1agents:`);
+  return `${text.endsWith("\n") ? text : `${text}\n`}${line}\n`;
 }
 
 export interface InstallOptions {
@@ -94,7 +134,8 @@ export function filesUnder(base: string, dir: string): string[] {
 
 /**
  * The files only the kit changes: the CLI, the schema, the skills, the gate workflows, the inactive
- * upgrade workflow, the profile block variants and the subagents, limited to the profile's file set.
+ * upgrade workflow and omp adapter, the profile block variants and the subagents (the source of the
+ * omp roles too), limited to the profile's file set.
  */
 export function kitOwned(from: string, tools: Tool[], profile: Profile = "full"): string[] {
   const paths = [
@@ -103,9 +144,10 @@ export function kitOwned(from: string, tools: Tool[], profile: Profile = "full")
     ".agents/skills",
     ".specfold/workflows",
     ".specfold/profiles",
+    ".specfold/tools",
     ".github/workflows/specfold-gate.yml",
     ".github/workflows/specfold-gate-comment.yml",
-    ...(tools.includes("claude") ? [".claude/agents"] : []),
+    ...(tools.includes("claude") || tools.includes("omp") ? [".claude/agents"] : []),
   ].flatMap((p) => filesUnder(from, p));
   return profileFiles(paths, profile);
 }
@@ -160,10 +202,11 @@ function preflight(o: InstallOptions, profile: Profile): void {
   }
 }
 
+/** Runs `openspec init` with the tools OpenSpec knows (`openspecTools`). */
 export function openspecInit(root: string, tools: Tool[]): void {
   const bin = openspecBinary(root);
   try {
-    execFileSync(bin.command, ["init", "--tools", tools.join(",")], {
+    execFileSync(bin.command, ["init", "--tools", openspecTools(tools).join(",")], {
       cwd: root,
       stdio: ["ignore", "pipe", "pipe"],
       env: { ...process.env, NO_COLOR: "1" },
@@ -248,9 +291,9 @@ export function addBundleSettings(text: string, bundle: { types: string[]; folde
   return lines.join("\n");
 }
 
-/** The template's specfold.yaml with this repository's source globs and profile, and no skill targets without Claude Code. */
+/** The template's specfold.yaml with this repository's source globs, tools and profile, and no skill targets without Claude Code. */
 function projectSettings(text: string, globs: string[], tools: Tool[], profile: Profile): string {
-  let out = setSourceGlobs(text, globs);
+  let out = setTools(setSourceGlobs(text, globs), tools);
   if (profile === "knowledge") out = setEscapeLabel(setProfile(out, profile), "no-knowledge");
   return tools.includes("claude") ? out : clearAgentTargets(out);
 }
@@ -334,7 +377,7 @@ export function installKit(o: InstallOptions): InstallResult {
   const freshOpenspec = openspec && !existsSync(abs("openspec/config.yaml"));
   if (freshOpenspec) {
     openspecInit(o.root, o.tools);
-    act("openspec/", `run openspec init --tools ${o.tools.join(",")}`);
+    act("openspec/", `run openspec init --tools ${openspecTools(o.tools).join(",")}`);
   }
 
   for (const p of kitOwned(o.from, o.tools, profile)) {
@@ -350,21 +393,27 @@ export function installKit(o: InstallOptions): InstallResult {
     manifest.files[p] = sha256(data);
   }
 
-  // the upgrade workflow is on with the flag, or when an earlier install turned it on
-  const workflow = join(o.from, UPGRADE_WORKFLOW.shipped);
-  if ((o.upgradeWorkflow || previous.files[UPGRADE_WORKFLOW.active]) && existsSync(workflow)) {
-    const p = UPGRADE_WORKFLOW.active;
-    const data = readFileSync(workflow);
+  /** A shipped inactive file copied to its active path; a differing local copy keeps its earlier hash. */
+  const activate = (shipped: string, p: string, note?: string) => {
+    const data = readFileSync(join(o.from, shipped));
     if (!existsSync(abs(p))) {
       put(p, data);
       act(p, "write");
-      result.notes.push(UPGRADE_WORKFLOW_NOTE);
+      if (note) result.notes.push(note);
       manifest.files[p] = sha256(data);
     } else if (!readFileSync(abs(p)).equals(data)) {
       conflict(p, "differs from the kit's copy; left unchanged");
       if (previous.files[p]) manifest.files[p] = previous.files[p];
     } else manifest.files[p] = sha256(data);
-  }
+  };
+  // the upgrade workflow is on with the flag, or when an earlier install turned it on
+  if (
+    (o.upgradeWorkflow || previous.files[UPGRADE_WORKFLOW.active]) &&
+    existsSync(join(o.from, UPGRADE_WORKFLOW.shipped))
+  )
+    activate(UPGRADE_WORKFLOW.shipped, UPGRADE_WORKFLOW.active, UPGRADE_WORKFLOW_NOTE);
+  if (o.tools.includes("omp") && existsSync(join(o.from, OMP_ADAPTER.shipped)))
+    activate(OMP_ADAPTER.shipped, OMP_ADAPTER.active);
 
   for (const p of BLOCK_FILES) {
     if (p === "CLAUDE.md" && !claude) continue;
@@ -419,13 +468,18 @@ export function installKit(o: InstallOptions): InstallResult {
     applyLinks(o.root, links);
     for (const l of links) act(l.path, l.action);
   }
+  for (const a of syncOmp(settings)) act(a.path, a.action);
   // the sync settles the rules it owns after the merge; an invalid setting leaves the file as merged
-  if (claude) {
+  if (claude || o.tools.includes("omp")) {
     const permissions = syncPermissions(settings, false);
+    const target = claude ? SETTINGS_FILE : OMP_CONFIG;
     if (permissions.conflict) conflict(SETTINGS_FILE, `permissions sync: ${permissions.conflict}`);
     else if (permissions.problems.length > 0)
-      conflict(SETTINGS_FILE, `permissions sync: ${planLines(permissions).join("; ")}`);
-    else if (permissions.text !== undefined) act(SETTINGS_FILE, "run permissions sync");
+      conflict(target, `permissions sync: ${planLines(permissions).join("; ")}`);
+    else {
+      if (permissions.text !== undefined) act(SETTINGS_FILE, "run permissions sync");
+      if (permissions.omp?.text !== undefined) act(OMP_CONFIG, "run permissions sync");
+    }
   }
   try {
     const hooks = installHooks(settings);

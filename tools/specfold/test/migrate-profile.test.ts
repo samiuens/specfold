@@ -31,6 +31,7 @@ describe("migrate install: profile file set", () => {
       ".agents/skills",
       ".specfold/workflows",
       ".specfold/profiles",
+      ".specfold/tools",
       ".github/workflows/specfold-gate.yml",
       ".github/workflows/specfold-gate-comment.yml",
       ".claude/agents",

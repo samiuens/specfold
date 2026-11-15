@@ -81,21 +81,21 @@ agent: implementer
 ## 6. Init, migrate and upgrade
 
 ```yaml
-files: [tools/specfold/src/init/**, tools/specfold/src/migrate/install.ts, tools/specfold/src/upgrade/**, tools/specfold/test/init.test.ts, tools/specfold/test/migrate-install.test.ts, tools/specfold/test/upgrade-plan.test.ts, tools/specfold/test/upgrade-apply.test.ts, tools/specfold/test/template-manifest.test.ts, tools/specfold/test/fixtures/**, template/specfold.yaml, template/.specfold/manifest.json]
+files: [tools/specfold/src/init/**, tools/specfold/src/migrate/install.ts, tools/specfold/src/upgrade/**, tools/specfold/test/init.test.ts, tools/specfold/test/migrate-install.test.ts, tools/specfold/test/migrate-profile.test.ts, tools/specfold/test/upgrade-plan.test.ts, tools/specfold/test/upgrade-apply.test.ts, tools/specfold/test/template-manifest.test.ts, tools/specfold/test/fixtures/**, template/specfold.yaml, template/.specfold/manifest.json]
 depends: [3, 4, 5]
 scenarios: [specfold-init#omp-not-passed-to-openspec, specfold-init#omp-chosen, specfold-init#rerun-keeps-tools, specfold-init#unknown-tool-at-init, specfold-init#omp-set-up, specfold-init#omp-left-out, specfold-migrate#omp-at-install, specfold-migrate#agents-only, specfold-upgrade#old-repository-without-the-key, specfold-upgrade#adapter-replaced, specfold-upgrade#omp-added-before-an-upgrade]
 agent: implementer
 ```
 
-- [ ] 6.1 Accept `omp` in `parseTools`, keep it out of `openspec init`, and list `.claude/agents` and `.specfold/tools` in `kitOwned` for `omp`
+- [x] 6.1 Accept `omp` in `parseTools`, keep it out of `openspec init`, and list `.claude/agents` and `.specfold/tools` in `kitOwned` for `omp`
   - Done when: `init.test.ts` passes `#omp-not-passed-to-openspec` and `#unknown-tool-at-init`
-- [ ] 6.2 Write `tools` at init and keep it on a rerun; set `tools: [agents, claude]` in `template/specfold.yaml`
+- [x] 6.2 Write `tools` at init and keep it on a rerun; set `tools: [agents, claude]` in `template/specfold.yaml`
   - Done when: `init.test.ts` passes `#omp-chosen` and `#rerun-keeps-tools`
-- [ ] 6.3 Install the active adapter copy at init and record it in the manifest
+- [x] 6.3 Install the active adapter copy at init and record it in the manifest
   - Done when: `init.test.ts` passes `#omp-set-up` and `#omp-left-out`
-- [ ] 6.4 Do the same in `migrate install`
+- [x] 6.4 Do the same in `migrate install`
   - Done when: `migrate-install.test.ts` passes `specfold-migrate#omp-at-install` and `#agents-only`
-- [ ] 6.5 Read `tools` in the upgrader with the manifest fallback, and treat the active adapter as kit-owned
+- [x] 6.5 Read `tools` in the upgrader with the manifest fallback, and treat the active adapter as kit-owned
   - Done when: `upgrade-plan.test.ts` and `upgrade-apply.test.ts` pass the three `specfold-upgrade` scenarios
 - [ ] 6.6 Regenerate `template/.specfold/manifest.json`
   - Done when: `template-manifest.test.ts` passes

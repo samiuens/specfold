@@ -99,7 +99,7 @@ function switchToFull(root: string, from: string): void {
     : readFileSync(join(from, "openspec/config.yaml"), "utf8");
   mkdirSync(dirname(config), { recursive: true });
   writeFileSync(config, text);
-  openspecInit(root, toolsOf(readInstalled(root)));
+  openspecInit(root, toolsOf(root, readInstalled(root)));
   writeFileSync(config, text);
 }
 

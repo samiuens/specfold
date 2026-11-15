@@ -160,6 +160,24 @@ describe("migrate install: files", () => {
     expect(existsSync(join(root, "CLAUDE.md"))).toBe(false);
     expect(parse(read(root, "specfold.yaml")).agents.targets).toEqual([]);
   });
+
+  // spec: specfold-migrate#omp-at-install
+  it("sets up omp with --tools agents,claude,omp and keeps omp out of openspec init", () => {
+    const root = fixtureRepo("adr-docs");
+    const result = install(root, { tools: ["agents", "claude", "omp"] });
+    expect(parse(read(root, "specfold.yaml")).tools).toEqual(["agents", "claude", "omp"]);
+    expect(read(root, ".omp/hooks/pre/specfold.ts")).toBe(
+      read(TEMPLATE, ".specfold/tools/omp/hooks/pre/specfold.ts"),
+    );
+    expect(result.actions).toContainEqual({
+      path: "openspec/",
+      action: "run openspec init --tools agents,claude",
+    });
+    expect(existsSync(join(root, ".omp/agents/verifier.md"))).toBe(true);
+    expect(JSON.parse(read(root, ".specfold/manifest.json")).files).toHaveProperty([
+      ".omp/hooks/pre/specfold.ts",
+    ]);
+  });
 });
 
 describe("migrate install: OpenSpec, hooks and manifest", () => {
