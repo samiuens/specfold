@@ -113,7 +113,7 @@ agent: implementer
   - Done when: `node scripts/check-skills.mjs` exits 0 and the kit copy equals the template's
 - [x] 7.2 Name the omp entry points in `template/AGENTS.md`, and write `<tool>/<model>` in the kit's `AGENTS.md`
   - Done when: `node scripts/specfold.mjs stats` reports both files under their budgets
-- [ ] 7.3 Build the bundle and copy it to the template
+- [x] 7.3 Build the bundle and copy it to the template
   - Done when: `npm test --workspace tools/specfold` and `npm run check --workspace tools/specfold` exit 0, and both `specfold.mjs` copies are equal
 - [ ] 7.4 List `omp` in the kit's `specfold.yaml`, then run `agents sync`, `permissions sync` and copy the adapter to `.omp/hooks/pre/`
   - Done when: `agents sync --check` and `permissions sync --check` exit 0 in the kit
