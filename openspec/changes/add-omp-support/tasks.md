@@ -141,7 +141,7 @@ scenarios: []
 agent: knowledge-curator
 ```
 
-- [ ] 9.1 Write the concepts listed in knowledge.md except `references/omp.md`, and add the omp steps to the sample-app runbook
+- [x] 9.1 Write the concepts listed in knowledge.md except `references/omp.md`, and add the omp steps to the sample-app runbook
   - Done when: `node scripts/specfold.mjs validate` exits 0
 
 ## Workflow follow-up

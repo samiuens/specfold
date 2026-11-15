@@ -21,7 +21,7 @@ Trust in the bundle rests on humans checking what agents drafted ([humans verify
 # Choices made while specifying and building
 
 - **Where the login comes from.** `gh api user` first, then `actors.github_login` in `.specfold/local.yaml`, a personal file that the template's `.gitignore` excludes. With neither, the command stops and names both options.
-- **A guard, not a lock.** The command refuses when `CLAUDECODE` or `SPECFOLD_MODEL` is set or stdin is not a terminal. That prevents accidents; G7 in CI is the real check.
+- **A guard, not a lock.** The command refuses when `CLAUDECODE`, `OMPCODE`, `PI_SESSION_ID` or `SPECFOLD_MODEL` is set or stdin is not a terminal. That prevents accidents; G7 in CI is the real check.
 - **All or nothing.** Every path is checked before anything is written: it must be a concept in the bundle (not `index.md` or `log.md`) and not deprecated. One bad path means nothing is written.
 - **Several reviewers.** A second reviewer turns `verified` into a list; verifying again with the same login replaces that person's entry. Edits are line-level, so the rest of the frontmatter keeps its exact text.
 
