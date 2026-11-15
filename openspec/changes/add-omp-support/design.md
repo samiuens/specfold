@@ -66,7 +66,7 @@ In the CLI, `parseTools` and `TOOLS` live in `src/migrate/install.ts` (`agents`,
 
 6. **Hook adapter.** It ships as `template/.specfold/tools/omp/hooks/pre/specfold.ts`, an inactive copy installed only with `omp`. This is the same shipped/active pattern as `UPGRADE_WORKFLOW` (`.specfold/workflows` → `.github/workflows`).
    - It imports only types from omp, so it loads in omp and in vitest alike.
-   - It runs the CLI with `spawnSync(process.execPath, ["scripts/specfold.mjs", "hook", name], {cwd: repo root, input, timeout: 60s})` and swallows every failure.
+   - It runs the CLI with `spawnSync(process.execPath, ["scripts/specfold.mjs", "hook", name], {cwd: repo root, input, timeout: 60s})` and swallows every failure. Inside omp, a compiled Bun binary, `process.execPath` is omp itself, so the adapter sets `BUN_BE_BUN=1` to make it run the script as Bun; node ignores the variable (found in task 5.1).
 
    | omp event | Condition | Subcommand | Effect |
    | --- | --- | --- | --- |
