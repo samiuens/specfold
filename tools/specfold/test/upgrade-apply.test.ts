@@ -2,7 +2,9 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { planOmp } from "../src/agents/sync.ts";
 import { EnvError } from "../src/errors.ts";
+import { loadConfig } from "../src/repo.ts";
 import { applyPlan, setKitVersion } from "../src/upgrade/apply.ts";
 import { runMigrations } from "../src/upgrade/migrations.ts";
 import { planUpgrade } from "../src/upgrade/plan.ts";
@@ -102,5 +104,34 @@ describe("apply an upgrade plan", () => {
     expect(text).toContain("| `scripts/specfold.mjs` | replace |");
     expect(text).toContain("| `specfold validate` | 0 | 0 errors |");
     expect(text).toContain("## Upgrade notes\n\n### 0.1.0-rc.2\n\nRun the rc.2 CLI once.\n");
+  });
+});
+
+describe("apply an upgrade plan: omp", () => {
+  // spec: specfold-upgrade#omp-added-before-an-upgrade
+  it("writes the omp adapter at the installed version once omp is listed, ready for agents sync", () => {
+    const SCOUT =
+      "---\nname: scout\ndescription: Answers one question.\nmodel: haiku\n---\n\nAnswer briefly.\n";
+    const rel = release("0.1.0-rc.1", {
+      ".specfold/tools/omp/hooks/pre/specfold.ts": "export default () => {};\n",
+      ".claude/agents/verifier.md": null,
+      ".claude/agents/scout.md": SCOUT,
+    });
+    const root = installed(rel, "0.1.0-rc.1");
+    write(
+      root,
+      "specfold.yaml",
+      `${readFileSync(join(root, "specfold.yaml"), "utf8")}tools: [agents, omp]\n`,
+    );
+    const plan = planUpgrade({ root, from: rel, base: rel, installed: "0.1.0-rc.1", target: "0.1.0-rc.1" });
+    applyPlan(root, plan, "v0.1.0-rc.1");
+    expect(readFileSync(join(root, ".omp/hooks/pre/specfold.ts"), "utf8")).toBe("export default () => {};\n");
+    expect(JSON.parse(readFileSync(join(root, ".specfold/manifest.json"), "utf8")).files).toHaveProperty([
+      ".omp/hooks/pre/specfold.ts",
+    ]);
+    // the follow-up `specfold agents sync` then writes the roles
+    expect(planOmp(loadConfig(root)).roles).toContainEqual(
+      expect.objectContaining({ path: ".omp/agents/scout.md", action: "write" }),
+    );
   });
 });

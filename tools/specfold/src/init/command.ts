@@ -11,7 +11,7 @@ import {
   realGh,
   requireGate,
 } from "../gate/require.ts";
-import { MANIFEST_PATH, parseTools } from "../migrate/install.ts";
+import { MANIFEST_PATH, openspecTools, parseTools } from "../migrate/install.ts";
 import { gitRoot } from "../migrate/repo.ts";
 import { LOCAL_SETTINGS } from "../parallel/limit.ts";
 import { parseProfile } from "../repo.ts";
@@ -43,7 +43,7 @@ register({
       throw new UsageError(`--max-subagents takes a positive whole number, got '${max}'`);
     const options = {
       root,
-      tools: parseTools(values.tools as string | undefined),
+      tools: values.tools === undefined ? undefined : parseTools(values.tools as string),
       profile: values.profile === undefined ? undefined : parseProfile(values.profile, "--profile"),
       stack: values.stack as string | undefined,
       sourceGlobs: values["source-glob"] as unknown as string[] | undefined,
@@ -70,7 +70,12 @@ register({
         ...plan.edits.map((e) => ({ path: e.path, action: e.action })),
         ...plan.remove.map((path) => ({ path, action: "remove" })),
         ...(plan.openspec
-          ? [{ path: "openspec/", action: `run openspec init --tools ${options.tools.join(",")}` }]
+          ? [
+              {
+                path: "openspec/",
+                action: `run openspec init --tools ${openspecTools(plan.tools).join(",")}`,
+              },
+            ]
           : []),
         { path: ".agents/skills", action: "run agents sync" },
         { path: ".claude/settings.json", action: "run permissions sync" },

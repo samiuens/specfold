@@ -68,7 +68,11 @@ types:
   - Backlog Item
 
 actors:
-  agent_prefix: "claude-code/"   # change for another agent, e.g. "codex/"
+  agent_prefix: "claude-code/"   # fallback; agents writing from omp sign with "omp/"
+
+# Agent tools this repository is set up for: agents (any tool reading AGENTS.md and .agents/skills/,
+# always listed), claude (Claude Code) and omp. Set by `specfold init --tools` or `specfold migrate install --tools`.
+tools: [agents, claude]
 
 # Folders that get one symlink per skill in .agents/skills/ (specfold agents sync).
 agents:

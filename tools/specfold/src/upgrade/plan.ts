@@ -1,18 +1,19 @@
 // see knowledge: /decisions/upgrade-file-classes.md
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { parse } from "yaml";
 import { EnvError } from "../errors.ts";
 import { applyBlock, blockStyle } from "../migrate/blocks.ts";
 import {
   BLOCK_FILES,
   kitOwned,
   MANIFEST_PATH,
+  OMP_ADAPTER,
   blockContent as profileBlock,
   sha256,
-  type Tool,
   UPGRADE_WORKFLOW,
 } from "../migrate/install.ts";
-import type { Profile } from "../repo.ts";
+import { CONFIG_FILE, loadConfig, type Profile, type Tool } from "../repo.ts";
 import { type ConfigMerge, upgradeOpenspecConfig, upgradeSettings } from "./config.ts";
 import { mergeThreeWay } from "./merge.ts";
 import { compareVersions, isVersion } from "./version.ts";
@@ -113,11 +114,18 @@ export function profileChange(root: string, profile: Profile): "to-full" | "to-k
   return profile === "full" ? "to-full" : "to-knowledge";
 }
 
-/** Claude Code is set up when the manifest lists `.claude/` files or the `CLAUDE.md` block. */
-export const toolsOf = (m: InstalledManifest): Tool[] =>
-  Object.keys(m.files).some((p) => p.startsWith(".claude/")) || "CLAUDE.md" in m.blocks
+/**
+ * The tools to upgrade: the `tools` setting when specfold.yaml has the key; otherwise Claude Code is set up
+ * when the manifest lists `.claude/` files or the `CLAUDE.md` block.
+ */
+export function toolsOf(root: string, m: InstalledManifest): Tool[] {
+  const path = join(root, CONFIG_FILE);
+  const data = existsSync(path) ? (parse(readFileSync(path, "utf8")) as { tools?: unknown } | null) : null;
+  if (data?.tools !== undefined) return loadConfig(root).tools;
+  return Object.keys(m.files).some((p) => p.startsWith(".claude/")) || "CLAUDE.md" in m.blocks
     ? ["agents", "claude"]
     : ["agents"];
+}
 
 const MARKERS = {
   markdown: ["<!-- specfold:start -->", "<!-- specfold:end -->"],
@@ -152,13 +160,18 @@ function versionsIn(dir: string, ext: string, installed: string, target: string)
     .sort(compareVersions);
 }
 
-/** Where a release holds the copy of kit file `p`. */
-const copyOf = (p: string) => (p === UPGRADE_WORKFLOW.active ? UPGRADE_WORKFLOW.shipped : p);
+/** Where a release holds the copy of kit file `p`: activated files come from their inactive copies. */
+const copyOf = (p: string) =>
+  p === UPGRADE_WORKFLOW.active
+    ? UPGRADE_WORKFLOW.shipped
+    : p === OMP_ADAPTER.active
+      ? OMP_ADAPTER.shipped
+      : p;
 
 /** What an upgrade from `o.base` to `o.from` changes in `o.root`, without writing anything. */
 export function planUpgrade(o: PlanOptions): UpgradePlan {
   const installed = readInstalled(o.root);
-  const tools = toolsOf(installed);
+  const tools = toolsOf(o.root, installed);
   const profile = o.profile ?? "full";
   const installedProfile = installed.profile ?? "full";
   if (installedProfile === "full" && profile === "knowledge") throw new EnvError(NO_SWITCH_TO_KNOWLEDGE);
@@ -176,6 +189,7 @@ export function planUpgrade(o: PlanOptions): UpgradePlan {
   // a turned-on upgrade workflow is kit-owned; its copy in a release is the inactive one
   if (installed.files[UPGRADE_WORKFLOW.active] && existsSync(join(o.from, UPGRADE_WORKFLOW.shipped)))
     shipped.add(UPGRADE_WORKFLOW.active);
+  if (tools.includes("omp") && existsSync(join(o.from, OMP_ADAPTER.shipped))) shipped.add(OMP_ADAPTER.active);
   const paths = [...new Set([...shipped, ...Object.keys(installed.files)])].sort();
   for (const p of paths) {
     const recorded = installed.files[p];

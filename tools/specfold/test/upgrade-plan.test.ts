@@ -1,4 +1,4 @@
-import { readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { planUpgrade } from "../src/upgrade/plan.ts";
@@ -175,5 +175,36 @@ describe("upgrade plan", () => {
     });
     expect(plan.migrations).toEqual(["0.1.0-rc.2"]);
     expect(plan.notes).toEqual([{ version: "0.1.0-rc.2", text: "Run the rc.2 CLI once." }]);
+  });
+});
+
+describe("upgrade plan: tools", () => {
+  const SHIPPED = ".specfold/tools/omp/hooks/pre/specfold.ts";
+  const ACTIVE = ".omp/hooks/pre/specfold.ts";
+
+  // spec: specfold-upgrade#old-repository-without-the-key
+  it("takes the tools from the manifest when specfold.yaml has no tools key", () => {
+    const { root, plan } = setup({ [SHIPPED]: "export default () => {};\n" });
+    expect(readFileSync(join(root, "specfold.yaml"), "utf8")).not.toContain("tools:");
+    expect(plan.files.find((f) => f.path === VERIFIER)).toMatchObject({ action: "unchanged" });
+    expect(plan.files.map((f) => f.path)).not.toContain(ACTIVE);
+  });
+
+  // spec: specfold-upgrade#adapter-replaced
+  it("replaces an unchanged omp adapter with the release's inactive copy", () => {
+    const base = release("0.1.0-rc.1", { [SHIPPED]: "export default () => {};\n" });
+    const next = release("0.1.0-rc.2", { [SHIPPED]: "export default () => { /* v2 */ };\n" });
+    const root = installed(base, "0.1.0-rc.1");
+    mkdirSync(join(root, ".omp/hooks/pre"), { recursive: true });
+    writeFileSync(join(root, ACTIVE), "export default () => {};\n");
+    append(root, "specfold.yaml", "tools: [agents, claude, omp]\n");
+    const manifest = JSON.parse(readFileSync(join(root, ".specfold/manifest.json"), "utf8"));
+    manifest.files[ACTIVE] = manifest.files[SHIPPED];
+    writeFileSync(join(root, ".specfold/manifest.json"), JSON.stringify(manifest));
+    const plan = planUpgrade({ root, from: next, base, installed: "0.1.0-rc.1", target: "0.1.0-rc.2" });
+    expect(plan.files.find((f) => f.path === ACTIVE)).toMatchObject({
+      action: "replace",
+      data: Buffer.from("export default () => { /* v2 */ };\n"),
+    });
   });
 });
