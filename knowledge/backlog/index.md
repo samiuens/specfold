@@ -4,12 +4,14 @@
 * [Check the Specfold name before publishing](name-and-trademark-check.md) - Check GitHub and trademark registers for Specfold before the kit repo or npm package goes public.
 * [Cost per change in stats](cost-per-change-in-stats.md) - specfold stats reports the tokens a change cost, so each person can tune their subagent limit; needs the agent tool's local transcripts.
 * [Council mode for review](council-mode-for-review.md) - At verify or plan approval, several reviewers on different models check a change independently; their findings are merged and deduplicated.
+* [Delete merged omp task branches in sf-apply](delete-merged-omp-task-branches-in-sf-apply.md) - sf-apply in omp merged an isolated task's omp/task/<id> branch but left it behind, though its In omp section says to delete it.
 * [Duplicate openspec skills in two folders](duplicate-openspec-skills-in-two-folders.md) - openspec init writes differing real copies of the openspec-* skills into .agents/skills and .claude/skills, so omp lists each twice.
 * [Escaped pipes in brief tables](escaped-pipes-in-brief-tables.md) - The brief and knowledge table parser splits cells on an escaped pipe, which GFM allows inside a table cell.
 * [Evals for the framework itself](framework-evals.md) - Decide whether and how to evaluate Specfold's skills and agent roles with repeatable evals.
 * [Fix the parallel run findings](fix-the-parallel-run-findings.md) - Eight kit gaps found by the pattern-2 run: packets, branch names, the gate in a nested root, the verifier's base and sf-apply wording.
 * [General code conventions](general-code-conventions.md) - Style, naming and pattern conventions in knowledge/conventions/, with linters as enforcement wherever a tool can check them.
 * [Init sets the gate as a required check](init-sets-the-gate-as-a-required-check.md) - init and migrate install offer to make specfold-gate a required check on the default branch through a GitHub ruleset.
+* [Init without Claude Code in older settings files](init-without-claude-code-in-older-settings-files.md) - init --tools without claude still sets up .claude/ files when specfold.yaml predates the agents: key, since there is no targets line to clear.
 * [Integrator subagent role](integrator-subagent-role.md) - A cheap subagent that merges implementer branches in order, resolves only generated-file conflicts and escalates real ones.
 * [Let agents verify confident decisions](let-agents-verify-confident-decisions.md) - A per-repository setting for whether an agent may verify a decision it is confident about, told apart from a human verify.
 * [Measure a task run with and without graphify](measure-a-task-run-with-and-without-graphify.md) - One recorded agent task run with and without graphify, preferably on a repository much larger than the sample app, to complete M7's before/after numbers.
