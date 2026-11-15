@@ -21,11 +21,31 @@ export function parseProfile(value: unknown, source = `${CONFIG_FILE}: 'profile'
   throw new EnvError(`${source} is '${String(value)}'; allowed values: ${PROFILES.join(", ")}`);
 }
 
+/** `tools`: the agent tools a repository is set up for; `agents` is always listed. */
+export const TOOLS = ["agents", "claude", "omp"] as const;
+export type Tool = (typeof TOOLS)[number];
+
+/** A `tools` value in the order of `TOOLS`, or an environment error naming the key and the allowed entries. */
+function parseToolsSetting(value: unknown, targets: string[]): Tool[] {
+  if (value === undefined) return targets.includes(".claude/skills") ? ["agents", "claude"] : ["agents"];
+  const allowed = `allowed entries: ${TOOLS.join(", ")}, with 'agents' always listed`;
+  if (!Array.isArray(value) || !value.every((t) => typeof t === "string"))
+    throw new EnvError(`${CONFIG_FILE}: 'tools' must be a list; ${allowed}`);
+  const unknown = value.filter((t) => !(TOOLS as readonly string[]).includes(t));
+  if (unknown.length > 0)
+    throw new EnvError(`${CONFIG_FILE}: 'tools' has unknown entries '${unknown.join("', '")}'; ${allowed}`);
+  if (!value.includes("agents"))
+    throw new EnvError(`${CONFIG_FILE}: 'tools' does not list 'agents'; ${allowed}`);
+  return TOOLS.filter((t) => value.includes(t));
+}
+
 export interface Config {
   /** Repository root: the directory holding specfold.yaml. */
   root: string;
   /** `profile`, `full` when unset. */
   profile: Profile;
+  /** `tools`; without the key, `[agents, claude]` when `agents.targets` has `.claude/skills`, else `[agents]`. */
+  tools: Tool[];
   types: string[];
   sourceGlobs: string[];
   blockOnBrokenLinks: boolean;
@@ -183,9 +203,14 @@ export function loadConfig(root: string): Config {
       };
     }
   }
+  const agentTargets =
+    agents.targets === undefined
+      ? [".claude/skills"]
+      : stringList(agents.targets, "agents.targets").map((t) => repoFolder(t, "agents.targets"));
   return {
     root,
     profile: parseProfile(data.profile),
+    tools: parseToolsSetting(data.tools, agentTargets),
     types: stringList(data.types, "types"),
     sourceGlobs: stringList(data.source_globs, "source_globs"),
     blockOnBrokenLinks: gate.block_on_broken_links !== false,
@@ -200,10 +225,7 @@ export function loadConfig(root: string): Config {
       maxFilesPerTask: positiveInt(tasks.max_files_per_task, "tasks.max_files_per_task", 5),
       maxTasksPerGroup: positiveInt(tasks.max_tasks_per_group, "tasks.max_tasks_per_group", 8),
     },
-    agentTargets:
-      agents.targets === undefined
-        ? [".claude/skills"]
-        : stringList(agents.targets, "agents.targets").map((t) => repoFolder(t, "agents.targets")),
+    agentTargets,
     unverifiedAfterDays: positiveInt(audit.unverified_after_days, "audit.unverified_after_days", 30),
     backlogUntouchedDays: positiveInt(audit.backlog_untouched_days, "audit.backlog_untouched_days", 180),
     gate: {

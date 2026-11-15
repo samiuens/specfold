@@ -15,13 +15,13 @@ agent: implementer
 ## 2. Tools setting and signature
 
 ```yaml
-files: [tools/specfold/src/repo.ts, tools/specfold/src/actor.ts, tools/specfold/src/omp/config.ts, tools/specfold/src/new/command.ts, tools/specfold/src/backlog/command.ts, tools/specfold/src/sync/plan.ts, tools/specfold/src/verify/login.ts, tools/specfold/test/repo.test.ts, tools/specfold/test/actor.test.ts, tools/specfold/test/omp-config.test.ts, tools/specfold/test/verify-login.test.ts]
+files: [tools/specfold/src/repo.ts, tools/specfold/src/actor.ts, tools/specfold/src/omp/config.ts, tools/specfold/src/new/command.ts, tools/specfold/src/backlog/command.ts, tools/specfold/src/sync/plan.ts, tools/specfold/src/verify/login.ts, tools/specfold/test/repo.test.ts, tools/specfold/test/actor.test.ts, tools/specfold/test/omp-config.test.ts, tools/specfold/test/verify-login.test.ts, tools/specfold/test/change-knowledge.test.ts, tools/specfold/vitest.config.ts]
 depends: [1]
 scenarios: [specfold-tools#omp-listed, specfold-tools#unknown-tool, specfold-tools#repository-from-an-earlier-release, specfold-tools#new-concept-from-omp, specfold-tools#new-concept-from-claude-code, specfold-verify#run-by-omp, specfold-verify#run-by-claude-code]
 agent: implementer
 ```
 
-- [ ] 2.1 Read and validate `tools` in `src/repo.ts`, defaulting from `agents.targets`
+- [x] 2.1 Read and validate `tools` in `src/repo.ts`, defaulting from `agents.targets`
   - Done when: `repo.test.ts` passes the scenarios `specfold-tools#omp-listed`, `#unknown-tool` and `#repository-from-an-earlier-release`
 - [ ] 2.2 Add `agentBy` in `src/actor.ts` and use it in `new`, `backlog` and `sync`
   - Done when: `actor.test.ts` passes `specfold-tools#new-concept-from-omp` and `#new-concept-from-claude-code`
