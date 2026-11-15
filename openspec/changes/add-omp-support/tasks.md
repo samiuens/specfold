@@ -97,7 +97,7 @@ agent: implementer
   - Done when: `migrate-install.test.ts` passes `specfold-migrate#omp-at-install` and `#agents-only`
 - [x] 6.5 Read `tools` in the upgrader with the manifest fallback, and treat the active adapter as kit-owned
   - Done when: `upgrade-plan.test.ts` and `upgrade-apply.test.ts` pass the three `specfold-upgrade` scenarios
-- [ ] 6.6 Regenerate `template/.specfold/manifest.json`
+- [x] 6.6 Regenerate `template/.specfold/manifest.json`
   - Done when: `template-manifest.test.ts` passes
 
 ## 7. Skills, instructions and kit dogfooding
