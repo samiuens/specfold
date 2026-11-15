@@ -1,4 +1,4 @@
-import { chmodSync, existsSync, mkdirSync, readlinkSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, readFileSync, readlinkSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { run, tempDir } from "./helpers.ts";
@@ -71,6 +71,41 @@ describe("agents sync: command", () => {
     const root = repo();
     for (const argv of [["agents"], ["agents", "link"], ["agents", "sync", "x"]])
       expect((await run(argv, root)).code, argv.join(" ")).toBe(2);
+  });
+
+  // spec: specfold-agents-sync#role-out-of-date
+  it("reports an out-of-date omp role without writing and exits with 1 (role out of date)", async () => {
+    const root = repo();
+    writeFileSync(join(root, "specfold.yaml"), "types: [Decision]\ntools: [agents, claude, omp]\n");
+    mkdirSync(join(root, ".claude/agents"), { recursive: true });
+    const scout = (text: string) => `---\nname: scout\ndescription: Answers one question.\n---\n\n${text}\n`;
+    writeFileSync(join(root, ".claude/agents/scout.md"), scout("You are the scout."));
+    const first = await run(["agents", "sync"], root);
+    expect(first.stdout).toContain(".omp/agents/scout.md: write from .claude/agents/scout.md\n");
+    expect(first.stdout).toContain(".omp/config.yml: set task.maxRecursionDepth: 1\n");
+    const before = readFileSync(join(root, ".omp/agents/scout.md"), "utf8");
+    writeFileSync(join(root, ".claude/agents/scout.md"), scout("You are the new scout."));
+
+    const result = await run(["agents", "sync", "--check", "--json"], root);
+    expect(result.code).toBe(1);
+    expect(JSON.parse(result.stdout)).toEqual({
+      ok: false,
+      check: true,
+      actions: [{ path: ".omp/agents/scout.md", action: "rewrite", target: ".claude/agents/scout.md" }],
+    });
+    expect(readFileSync(join(root, ".omp/agents/scout.md"), "utf8")).toBe(before);
+
+    const text = await run(["agents", "sync", "--check"], root);
+    expect(text).toMatchObject({
+      code: 1,
+      stdout:
+        ".omp/agents/scout.md: rewrite from .claude/agents/scout.md\nagents sync --check: 1 change, 0 kept\n",
+    });
+    await run(["agents", "sync"], root);
+    expect(readFileSync(join(root, ".omp/agents/scout.md"), "utf8")).toContain("You are the new scout.");
+    expect((await run(["agents", "sync", "--check"], root)).stdout).toBe(
+      "agents sync --check: links and roles are up to date, 0 kept\n",
+    );
   });
 
   // spec: specfold-agents-sync#permission-denied

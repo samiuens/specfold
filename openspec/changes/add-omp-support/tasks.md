@@ -39,13 +39,13 @@ scenarios: [specfold-agents-sync#roles-written, specfold-agents-sync#not-listed,
 agent: implementer
 ```
 
-- [ ] 3.1 Render one omp role from a Claude agent file in `src/agents/omp.ts` with the mapping table of design.md
+- [x] 3.1 Render one omp role from a Claude agent file in `src/agents/omp.ts` with the mapping table of design.md
   - Done when: `agents-omp.test.ts` passes `#implementer-mapped` and `#read-only-tools-mapped`
-- [ ] 3.2 Plan write, rewrite, remove and kept actions for `.omp/agents/`, skipping `planner`
+- [x] 3.2 Plan write, rewrite, remove and kept actions for `.omp/agents/`, skipping `planner`
   - Done when: `agents-omp.test.ts` passes `#roles-written`, `#not-listed`, `#source-removed` and `#hand-written-role-kept`
-- [ ] 3.3 Set the four omp task settings through `src/omp/config.ts`
+- [x] 3.3 Set the four omp task settings through `src/omp/config.ts`
   - Done when: `agents-omp.test.ts` passes `#team-settings-kept`
-- [ ] 3.4 Report the new actions in text, `--json` and `--check`
+- [x] 3.4 Report the new actions in text, `--json` and `--check`
   - Done when: `agents-command.test.ts` passes `#role-out-of-date` and the existing agents sync tests still pass
 
 ## 4. omp permission rules
