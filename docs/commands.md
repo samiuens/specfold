@@ -6,7 +6,7 @@ Run every command from the repository root as `node scripts/specfold.mjs <comman
 
 ## agents
 
-Link .agents/skills into the skill folders of agent tools.
+Link .agents/skills into the skill folders of agent tools and generate omp roles.
 
 ```sh
 specfold agents sync [--check] [--json]
