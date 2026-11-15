@@ -1,0 +1,50 @@
+task:
+  maxRecursionDepth: 1
+  isolation:
+    enabled: true
+    merge: branch
+    apply: false
+bash:
+  patterns:
+    - match: git push *
+      approval: prompt
+    - match: git push
+      approval: prompt
+    - match: git push *--force*
+      approval: prompt
+    - match: git push -f*
+      approval: prompt
+    - match: git push * -f*
+      approval: prompt
+    - match: git push * +*
+      approval: prompt
+    - match: git push *--delete*
+      approval: prompt
+    - match: git push -d *
+      approval: prompt
+    - match: git push -d
+      approval: prompt
+    - match: git push * -d *
+      approval: prompt
+    - match: git push * -d
+      approval: prompt
+    - match: git push *--tags*
+      approval: prompt
+    - match: git push *--follow-tags*
+      approval: prompt
+    - match: gh pr create *
+      approval: prompt
+    - match: gh pr create
+      approval: prompt
+    - match: gh pr merge *
+      approval: prompt
+    - match: gh pr merge
+      approval: prompt
+    - match: gh api *pulls/*/merge*
+      approval: prompt
+    - match: gh pr close *
+      approval: prompt
+    - match: gh pr close
+      approval: prompt
+    - match: gh api *pulls/*state=closed*
+      approval: prompt
