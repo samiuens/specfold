@@ -75,7 +75,7 @@ agent: implementer
 
 - [ ] 5.1 Write the adapter with session start and the post-edit check, importing only types from omp
   - Done when: `hooks-omp.test.ts`, with a fake `pi` and a temporary repository, passes `#cli-missing`, `#context-at-start` and `#agent-writes-a-broken-concept-in-omp`
-- [ ] 5.2 Add the stop follow-up and the subagent push guard, using the subagent marker from task 1.1
+- [ ] 5.2 Add the `session_stop` block and the subagent push guard, using the subagent marker from task 1.1
   - Done when: `hooks-omp.test.ts` passes `#unfinished-work-in-omp`, `#clean-stop`, `#subagent-push-refused` and `#main-session-push-left-to-permissions`
 
 ## 6. Init, migrate and upgrade
@@ -130,7 +130,7 @@ agent: implementer
 - [ ] 8.1 Add the omp steps to the sample app's agent check
   - Done when: the README's "Agent check" section lists the omp steps
 - [ ] 8.2 Run the check under omp on a copy outside the kit: init with `--tools agents,omp`, plan a small change with `sf-plan`, apply it with one isolated implementer, and record the run in `examples/runs/omp/README.md`
-  - Done when: the record shows the session-start context, a stop follow-up or a clean stop, a refused subagent push, the merged implementer branch, and `generated.by: omp/<model>` on a concept
+  - Done when: the record shows the session-start context, a blocked or a clean stop, a refused subagent push, the merged implementer branch, and `generated.by: omp/<model>` on a concept
 
 ## 9. Knowledge
 
