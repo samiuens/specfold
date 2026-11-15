@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { EnvError } from "../src/errors.ts";
 import { DEFAULT_TEST_GLOBS, findRepoRoot, requireConfig } from "../src/repo.ts";
-import { tempDir } from "./helpers.ts";
+import { run, tempDir } from "./helpers.ts";
 
 describe("repo", () => {
   it("finds specfold.yaml in a parent directory", () => {
@@ -22,6 +22,7 @@ describe("repo", () => {
     expect(requireConfig(root)).toEqual({
       root,
       profile: "full",
+      tools: ["agents", "claude"],
       types: ["Decision", "Reference"],
       sourceGlobs: ["src/**"],
       blockOnBrokenLinks: false,
@@ -188,5 +189,46 @@ describe("repo", () => {
       writeFileSync(join(root, "specfold.yaml"), bad);
       expect(() => requireConfig(root)).toThrow(EnvError);
     }
+  });
+
+  // spec: specfold-tools#omp-listed
+  it("omp listed: reads the tools setting", () => {
+    const root = tempDir();
+    writeFileSync(join(root, "specfold.yaml"), "types: []\ntools: [agents, claude, omp]\n");
+    const { tools } = requireConfig(root);
+    expect(tools).toEqual(["agents", "claude", "omp"]);
+    expect(tools.includes("claude") && tools.includes("omp")).toBe(true);
+  });
+
+  // spec: specfold-tools#unknown-tool
+  it("unknown tool: validate fails with an environment error", async () => {
+    const root = tempDir();
+    mkdirSync(join(root, "knowledge"));
+    writeFileSync(join(root, "specfold.yaml"), "types: []\ntools: [agents, cursor]\n");
+    const result = await run(["validate"], root);
+    expect(result.code).toBe(2);
+    expect(result.stderr).toContain("'tools'");
+    expect(result.stderr).toContain("cursor");
+    expect(result.stderr).toContain("allowed entries: agents, claude, omp");
+    writeFileSync(join(root, "specfold.yaml"), "types: []\ntools: [claude, omp]\n");
+    expect(() => requireConfig(root)).toThrow(/'tools' does not list 'agents'; allowed entries/);
+    writeFileSync(join(root, "specfold.yaml"), "types: []\ntools: omp\n");
+    expect(() => requireConfig(root)).toThrow(EnvError);
+  });
+
+  // spec: specfold-tools#repository-from-an-earlier-release
+  it("repository from an earlier release: derives the tools from agents.targets", () => {
+    const root = tempDir();
+    writeFileSync(join(root, "specfold.yaml"), "types: []\n");
+    const { tools } = requireConfig(root);
+    expect(tools).toEqual(["agents", "claude"]);
+    expect(tools).not.toContain("omp");
+    writeFileSync(
+      join(root, "specfold.yaml"),
+      "agents:\n  targets: [.claude/skills/, .config/tool/skills]\n",
+    );
+    expect(requireConfig(root).tools).toEqual(["agents", "claude"]);
+    writeFileSync(join(root, "specfold.yaml"), "agents:\n  targets: [.config/tool/skills]\n");
+    expect(requireConfig(root).tools).toEqual(["agents"]);
   });
 });

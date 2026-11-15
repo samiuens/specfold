@@ -40,6 +40,7 @@ function setup(knowledge: string | undefined) {
   const config: Config = {
     root,
     profile: "full",
+    tools: ["agents", "claude"],
     types: ["Capability", "Decision"],
     sourceGlobs: [],
     blockOnBrokenLinks: true,
