@@ -42,7 +42,7 @@ Work on a branch, never on the default branch. Each milestone or feature ends wi
 ## 6. Knowledge rules
 
 - One concept per file, kebab-case names, bundle-absolute links (`/decisions/x.md`).
-- Frontmatter: `type`, `title`, one-line `description` (max 160 chars), `status`, and `generated: { by: claude-code/<model>, at: <ISO 8601 with offset> }` for agent writes.
+- Frontmatter: `type`, `title`, one-line `description` (max 160 chars), `status`, and `generated: { by: <tool>/<model>, at: <ISO 8601 with offset> }` for agent writes (`claude-code/` or `omp/`).
 - Agents write `status: draft` and never write `human:` actors; only humans verify.
 - `index.md` files are generated: run `node scripts/specfold.mjs index` after adding, renaming or retitling a concept, and never edit them by hand. Add `log.md` entries with `node scripts/specfold.mjs log add [--kind <Kind>] <message>`, never by hand.
 - Code comments stay short and point to knowledge with `see knowledge: /<path>.md` (`/conventions/code-comments.md`).

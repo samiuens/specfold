@@ -12,7 +12,7 @@ When the request or the knowledge leave a decision open, or something conflicts 
 | --- | --- |
 | `knowledge/` | OKF v0.2 bundle: why and what. Start at `knowledge/index.md` |
 | `specfold.yaml` | Specfold settings; `source_globs` says where the code lives |
-| `.agents/skills/` | the `sf-*` skills (linked into `.claude/skills/` by `specfold agents sync`) |
+| `.agents/skills/` | the `sf-*` skills (omp reads them here; `specfold agents sync` links them into `.claude/skills/`) |
 | `scripts/specfold.mjs` | the Specfold CLI; run it with `node scripts/specfold.mjs <command>` |
 
 ## 3. Core rule
