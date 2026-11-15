@@ -24,15 +24,15 @@ After a successful omp `edit` or `write` call, the adapter SHALL run `claude-pos
 - **THEN** the agent's next step carries the validate error for that file
 
 ### Requirement: omp stop check
-When an omp agent run in a main session ends, the adapter SHALL run `claude-stop`. On exit 2 it SHALL send the command's stderr to the session as a follow-up message, so the agent works on the blocking findings; on exit 0 it SHALL send nothing.
+On omp's `session_stop` event of a main session, the adapter SHALL run `claude-stop`. On exit 2 it SHALL block the stop with the command's stderr as the reason, so the agent works on the blocking findings; on exit 0 it SHALL let the session stop.
 
 #### Scenario: Unfinished work in omp
-- **WHEN** an omp run ends while a touched change has an unconfirmed brief
-- **THEN** the session receives a follow-up message with the G13 finding
+- **WHEN** an omp main session tries to stop while a touched change has an unconfirmed brief
+- **THEN** the stop is blocked with the G13 finding as the reason
 
 #### Scenario: Clean stop
-- **WHEN** an omp run ends and the local gate has no blocking finding
-- **THEN** no follow-up message is sent
+- **WHEN** an omp main session tries to stop and the local gate has no blocking finding
+- **THEN** the session stops
 
 ### Requirement: omp subagent push guard
 In an omp task subagent session, before a `bash` call the adapter SHALL run `claude-no-push` with `{"tool_input": {"command": <command>}}` on stdin and block the call with the command's stderr as the reason when it exits with 2. Main sessions SHALL not run this guard.

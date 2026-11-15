@@ -7,7 +7,7 @@ See proposal.md (Why). Facts about omp, taken from its bundled docs (`omp://skil
 - **Instructions and skills.** omp loads `AGENTS.md`. It reads skills from `.agents/skills/` and `.claude/skills/` and drops a symlinked copy by realpath, so the sf skills appear once.
 - **Roles.** Task agents come only from `.omp/agents/*.md`; `.claude/agents/` is skipped on purpose. The frontmatter fields are `name`, `description`, `tools`, `spawns`, `model` (a selector or a role alias such as `@smol`), `thinking-level` and `autoload-skills`. A project agent named `scout` overrides omp's bundled `scout`.
 - **Subagents.** They run headless. Any call that resolves to a prompt is rejected there, and `task.maxRecursionDepth` caps nesting. Isolation is per task (`isolated: true`) and needs `task.isolation.enabled`; `task.isolation.merge: branch` commits a task's work to a branch, and `task.isolation.apply: false` keeps it from being applied to the parent.
-- **Hooks.** Hooks are TS factories in `.omp/hooks/pre|post/*.ts` that call `pi.on(event, handler)`. Useful events: `before_agent_start` (inject a message), `tool_call` (block), `tool_result` (`additionalContext`) and `agent_end`, which cannot block.
+- **Hooks.** Hooks are TS factories in `.omp/hooks/pre|post/*.ts` that call `pi.on(event, handler)`. They load in every session, subagents included. Useful events: `before_agent_start` (inject a message), `tool_call` (block), `tool_result` (`additionalContext`) and `session_stop`, which fires for main sessions only and can block with `{decision: "block", reason}` (spike, task 1.1).
 - **Bash rules.** `bash.patterns` in `.omp/config.yml` is an ordered list of `{match, approval}` with `allow | prompt | deny`. The first match wins, and `*` is the only wildcard. Project rules are prepended to global ones and can tighten but never loosen the operator's rules.
 - **Environment.** omp's bash tool sets `PI_SESSION_ID` on every agent command (documented) and `OMPCODE=1` (observed). It also sets `CLAUDECODE=1`, so `CLAUDECODE` alone does not mean Claude Code. User `!` commands get neither.
 
@@ -72,20 +72,20 @@ In the CLI, `parseTools` and `TOOLS` live in `src/migrate/install.ts` (`agents`,
    | --- | --- | --- | --- |
    | `before_agent_start` | main session, first run | `claude-session-start` | stdout as injected message |
    | `tool_result` | `edit`/`write`, not `isError`, per path in `input.path`/`input.paths` | `claude-post-tool-use` with a Claude-shaped event | exit 2 → stderr as `additionalContext` |
-   | `agent_end` | main session | `claude-stop` | exit 2 → `pi.sendMessage` follow-up with stderr |
+   | `session_stop` | main session (omp fires it only there) | `claude-stop` | exit 2 → `{decision: "block", reason: stderr}` |
    | `tool_call` | subagent session, `bash` | `claude-no-push` with `{tool_input:{command}}` | exit 2 → `{block: true, reason: stderr}` |
 
-   - **Subagent detection** is the adapter's one omp-specific judgment. Task 1.1 settles it against the installed omp: candidates are a task-depth or parent-session field in the hook context or session manager. `ctx.hasUI` is a fallback only, because print-mode main sessions lack a UI too. The spec states only "task subagent session", so the choice doesn't change it.
+   - **Subagent detection.** A subagent session's header carries `parentSession` (`ctx.sessionManager.getHeader().parentSession`), seen in the task 1.1 spike. `ctx.hasUI` cannot be used, because print-mode main sessions lack a UI too. Session start runs once per main session, since `before_agent_start` fires again after every blocked stop.
    - **Pushes in subagents.** With `push: ask`, a subagent's push already resolves to `prompt` and is rejected headless. The guard covers `push: allow` and the forms the patterns miss (brief open question 2).
-   - **Stop loop.** Claude Code's Stop hook also reruns until the gate is clean, so the follow-up loop is the intended behavior. The adapter sends at most one follow-up per `agent_end`.
+   - **Stop loop.** A blocked stop keeps the main session working until `claude-stop` exits 0 or the user interrupts, as Claude Code's Stop hook does (brief Q4, revised after the spike).
 
 7. **sf-apply on omp.** A new section in `template/.agents/skills/sf-apply/SKILL.md` covers dispatch in omp:
    - implementers through the `task` tool with `agent: implementer` and `isolated: true`;
    - at most `specfold parallel show` tasks per batch;
-   - merging the branch omp reports for each task;
+   - merging the branch omp reports for each task: `omp/task/<agent id>`, which keeps the implementer's own commits;
    - `verifier` and `knowledge-curator` without isolation.
 
-   Task 1.1 records the actual branch name omp reports, and the section names it. `sf-plan` needs no change.
+   `sf-plan` needs no change.
 
 8. **Template and kit.**
    - **Settings.** `template/specfold.yaml` gets `tools: [agents, claude]` with a comment naming `omp`.
@@ -109,7 +109,7 @@ Nothing changes until a repository adds `omp` to `tools` (or runs `init`/`migrat
 
 ## Open Questions
 
-- Which hook-context field marks a task subagent, and which branch name omp reports for an isolated task. Task 1.1 settles both against the installed omp; neither changes a spec.
+- none; task 1.1 settled the subagent marker (`parentSession`) and the branch name (`omp/task/<agent id>`).
 
 ## Commitments
 
