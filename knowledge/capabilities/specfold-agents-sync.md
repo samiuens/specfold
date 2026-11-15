@@ -5,13 +5,17 @@ description: Why skills live once in .agents/skills and are linked into tool fol
 status: draft
 spec: openspec/specs/specfold-agents-sync/spec.md
 resource: ../../openspec/specs/specfold-agents-sync/spec.md
-change: 2026-10-26-add-specfold-agents-sync
+change: 2026-11-15-add-omp-support
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T15:09:57+01:00 }
 sources:
   - id: proposal-2026-10-26-add-specfold-agents-sync
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-agents-sync/proposal.md
   - id: design-2026-10-26-add-specfold-agents-sync
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-agents-sync/design.md
+  - id: proposal-2026-11-15-add-omp-support
+    resource: ../../openspec/changes/archive/2026-11-15-add-omp-support/proposal.md
+  - id: design-2026-11-15-add-omp-support
+    resource: ../../openspec/changes/archive/2026-11-15-add-omp-support/design.md
 ---
 
 # Why

@@ -4,10 +4,11 @@ title: Specfold's omp bash rules appended
 description: "Rejected: appending Specfold's omp bash rules; omp applies the first match, so the owned block goes first, strictest level first."
 status: draft
 decision: rejected
+change: 2026-11-15-add-omp-support
 generated: { by: omp/claude-opus-5-5, at: 2026-11-15T22:04:00+01:00 }
 sources:
   - id: design-add-omp-support
-    resource: ../../openspec/changes/add-omp-support/design.md
+    resource: ../../openspec/changes/archive/2026-11-15-add-omp-support/design.md
 ---
 
 # Decision

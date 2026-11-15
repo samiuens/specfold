@@ -1,5 +1,10 @@
 # Log
 
+## 2026-11-15
+
+* **Change**: 2026-11-15-add-omp-support: created 6, updated 10, deprecated 0
+* **Retro**: add-omp-support: 0 answers (nothing came too late, no guesses)
+
 ## 2026-11-09
 
 * **Change**: add-knowledge-profile: created 3, updated 11, deprecated 0 (knowledge profile, drafted before archive)

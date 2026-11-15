@@ -3,14 +3,17 @@ type: Capability
 title: specfold tools setting
 description: Why repositories list their agent tools in specfold.yaml, and how the CLI signs agent writes made under omp; links the new spec.
 status: draft
+spec: openspec/specs/specfold-tools/spec.md
+resource: ../../openspec/specs/specfold-tools/spec.md
+change: 2026-11-15-add-omp-support
 generated: { by: omp/claude-opus-5-5, at: 2026-11-15T22:04:00+01:00 }
 sources:
   - id: brief-add-omp-support
-    resource: ../../openspec/changes/add-omp-support/brief.md
-  - id: proposal-add-omp-support
-    resource: ../../openspec/changes/add-omp-support/proposal.md
-  - id: design-add-omp-support
-    resource: ../../openspec/changes/add-omp-support/design.md
+    resource: ../../openspec/changes/archive/2026-11-15-add-omp-support/brief.md
+  - id: proposal-2026-11-15-add-omp-support
+    resource: ../../openspec/changes/archive/2026-11-15-add-omp-support/proposal.md
+  - id: design-2026-11-15-add-omp-support
+    resource: ../../openspec/changes/archive/2026-11-15-add-omp-support/design.md
 ---
 
 # Why

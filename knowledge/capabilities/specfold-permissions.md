@@ -5,7 +5,7 @@ description: Why permissions sync exists, its owned patterns per action, the pus
 status: draft
 spec: openspec/specs/specfold-permissions/spec.md
 resource: ../../openspec/specs/specfold-permissions/spec.md
-change: 2026-11-04-add-agent-permissions
+change: 2026-11-15-add-omp-support
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T08:44:28+01:00 }
 sources:
   - id: brief-add-agent-permissions
@@ -14,6 +14,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/proposal.md
   - id: design-2026-11-04-add-agent-permissions
     resource: ../../openspec/changes/archive/2026-11-04-add-agent-permissions/design.md
+  - id: proposal-2026-11-15-add-omp-support
+    resource: ../../openspec/changes/archive/2026-11-15-add-omp-support/proposal.md
+  - id: design-2026-11-15-add-omp-support
+    resource: ../../openspec/changes/archive/2026-11-15-add-omp-support/design.md
 ---
 
 # Why

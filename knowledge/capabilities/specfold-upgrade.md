@@ -5,7 +5,7 @@ description: Why upgrades run in two stages with the target release's own CLI, m
 status: draft
 spec: openspec/specs/specfold-upgrade/spec.md
 resource: ../../openspec/specs/specfold-upgrade/spec.md
-change: 2026-11-09-add-knowledge-profile
+change: 2026-11-15-add-omp-support
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:00:29+01:00 }
 sources:
   - id: proposal-2026-10-28-add-specfold-upgrade
@@ -26,6 +26,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-11-09-add-knowledge-profile/proposal.md
   - id: design-2026-11-09-add-knowledge-profile
     resource: ../../openspec/changes/archive/2026-11-09-add-knowledge-profile/design.md
+  - id: proposal-2026-11-15-add-omp-support
+    resource: ../../openspec/changes/archive/2026-11-15-add-omp-support/proposal.md
+  - id: design-2026-11-15-add-omp-support
+    resource: ../../openspec/changes/archive/2026-11-15-add-omp-support/design.md
 ---
 
 # Why

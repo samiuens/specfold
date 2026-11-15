@@ -4,10 +4,11 @@ title: Generated omp roles marked in frontmatter
 description: "Rejected: marking generated omp roles with a frontmatter key; omp's handling of unknown keys is undocumented, so a body comment marks them."
 status: draft
 decision: rejected
+change: 2026-11-15-add-omp-support
 generated: { by: omp/claude-opus-5-5, at: 2026-11-15T22:04:00+01:00 }
 sources:
   - id: design-add-omp-support
-    resource: ../../openspec/changes/add-omp-support/design.md
+    resource: ../../openspec/changes/archive/2026-11-15-add-omp-support/design.md
 ---
 
 # Decision
