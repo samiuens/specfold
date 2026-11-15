@@ -4,12 +4,13 @@ title: omp support derived from the manifest
 description: "Rejected: deriving omp support from the install manifest; an explicit tools setting is what init and migrate write."
 status: draft
 decision: rejected
+change: 2026-11-15-add-omp-support
 generated: { by: omp/claude-opus-5-5, at: 2026-11-15T22:04:00+01:00 }
 sources:
   - id: brief-add-omp-support
-    resource: ../../openspec/changes/add-omp-support/brief.md
+    resource: ../../openspec/changes/archive/2026-11-15-add-omp-support/brief.md
   - id: design-add-omp-support
-    resource: ../../openspec/changes/add-omp-support/design.md
+    resource: ../../openspec/changes/archive/2026-11-15-add-omp-support/design.md
 ---
 
 # Decision

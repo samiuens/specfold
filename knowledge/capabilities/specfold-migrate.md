@@ -5,7 +5,7 @@ description: Why the mechanical steps of a migration are CLI code, and how insta
 status: draft
 spec: openspec/specs/specfold-migrate/spec.md
 resource: ../../openspec/specs/specfold-migrate/spec.md
-change: 2026-11-09-add-okf-bundle-migration
+change: 2026-11-15-add-omp-support
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T09:58:22+01:00 }
 sources:
   - id: proposal-2026-10-27-add-specfold-migrate
@@ -50,6 +50,10 @@ sources:
     resource: ../../openspec/changes/archive/2026-11-09-add-okf-bundle-migration/proposal.md
   - id: design-2026-11-09-add-okf-bundle-migration
     resource: ../../openspec/changes/archive/2026-11-09-add-okf-bundle-migration/design.md
+  - id: proposal-2026-11-15-add-omp-support
+    resource: ../../openspec/changes/archive/2026-11-15-add-omp-support/proposal.md
+  - id: design-2026-11-15-add-omp-support
+    resource: ../../openspec/changes/archive/2026-11-15-add-omp-support/design.md
 ---
 
 # Why

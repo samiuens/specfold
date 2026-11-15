@@ -5,13 +5,17 @@ description: Why specfold verify writes human verification for the person at the
 status: draft
 spec: openspec/specs/specfold-verify/spec.md
 resource: ../../openspec/specs/specfold-verify/spec.md
-change: 2026-10-26-add-specfold-verify
+change: 2026-11-15-add-omp-support
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T16:52:58+01:00 }
 sources:
   - id: proposal-2026-10-26-add-specfold-verify
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-verify/proposal.md
   - id: design-2026-10-26-add-specfold-verify
     resource: ../../openspec/changes/archive/2026-10-26-add-specfold-verify/design.md
+  - id: proposal-2026-11-15-add-omp-support
+    resource: ../../openspec/changes/archive/2026-11-15-add-omp-support/proposal.md
+  - id: design-2026-11-15-add-omp-support
+    resource: ../../openspec/changes/archive/2026-11-15-add-omp-support/design.md
 ---
 
 # Why
